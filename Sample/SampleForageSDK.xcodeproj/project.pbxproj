@@ -23,6 +23,7 @@
 		4928DEB72908E0880085B156 /* FundingType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4928DEB62908E0880085B156 /* FundingType.swift */; };
 		4928DEB92908E0C30085B156 /* Address.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4928DEB82908E0C30085B156 /* Address.swift */; };
 		4928DEBB2908E33D0085B156 /* CreatePaymentService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4928DEBA2908E33D0085B156 /* CreatePaymentService.swift */; };
+		492BDFB429095ABD00B623EE /* ForageSDK in Frameworks */ = {isa = PBXBuildFile; productRef = 492BDFB329095ABD00B623EE /* ForageSDK */; };
 		49475BEF28FCD93B00190846 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49475BEE28FCD93B00190846 /* AppDelegate.swift */; };
 		49475BF128FCD93B00190846 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49475BF028FCD93B00190846 /* SceneDelegate.swift */; };
 		49475BF328FCD93B00190846 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49475BF228FCD93B00190846 /* ViewController.swift */; };
@@ -73,6 +74,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				49475C1C28FCDE0600190846 /* ForageSDK in Frameworks */,
+				492BDFB429095ABD00B623EE /* ForageSDK in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -235,6 +237,7 @@
 			name = SampleForageSDK;
 			packageProductDependencies = (
 				49475C1B28FCDE0600190846 /* ForageSDK */,
+				492BDFB329095ABD00B623EE /* ForageSDK */,
 			);
 			productName = SampleForageSDK;
 			productReference = 49475BEB28FCD93B00190846 /* SampleForageSDK.app */;
@@ -264,6 +267,9 @@
 				Base,
 			);
 			mainGroup = 49475BE228FCD93B00190846;
+			packageReferences = (
+				492BDFB229095ABD00B623EE /* XCRemoteSwiftPackageReference "forage-ios-sdk" */,
+			);
 			productRefGroup = 49475BEC28FCD93B00190846 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -532,7 +538,23 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		492BDFB229095ABD00B623EE /* XCRemoteSwiftPackageReference "forage-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/teamforage/forage-ios-sdk";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
+		492BDFB329095ABD00B623EE /* ForageSDK */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 492BDFB229095ABD00B623EE /* XCRemoteSwiftPackageReference "forage-ios-sdk" */;
+			productName = ForageSDK;
+		};
 		49475C1B28FCDE0600190846 /* ForageSDK */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = ForageSDK;

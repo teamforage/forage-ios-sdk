@@ -20,6 +20,15 @@
         }
       },
       {
+        "package": "ForageSDK",
+        "repositoryURL": "https://github.com/teamforage/forage-ios-sdk",
+        "state": {
+          "branch": "main",
+          "revision": "c512cce4a9a68d4e5418283019fa5091ab4622a9",
+          "version": null
+        }
+      },
+      {
         "package": "VGSCollectSDK",
         "repositoryURL": "https://github.com/verygoodsecurity/vgs-collect-ios.git",
         "state": {
