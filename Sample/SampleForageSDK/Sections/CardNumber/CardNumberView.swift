@@ -124,7 +124,7 @@ class CardNumberView: UIView {
                 card.last4: \(response.card.last4)\n
                 """
                 ClientSharedData.shared.cardNumberToken = response.card.token
-                ClientSharedData.shared.paymentReference = response.paymentMethodIdentifier
+                ClientSharedData.shared.paymentMethodReference = response.paymentMethodIdentifier
                 self.updateButtonState(isEnabled: true, button: self.nextButton)
             case .failure(let error):
                 self.resultLabel.text = "Error: \n\(error.localizedDescription)"

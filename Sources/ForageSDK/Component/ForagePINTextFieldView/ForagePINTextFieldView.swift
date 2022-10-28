@@ -8,6 +8,11 @@
 import UIKit
 import VGSCollectSDK
 
+public enum PINType {
+    case balance(paymentMethodReference: String, cardNumberToken: String)
+    case ebtCapture(paymentReference: String, cardNumberToken: String)
+}
+
 public class ForagePINTextFieldView: UIView, Identifiable {
     
     // MARK: Private Properties
@@ -147,16 +152,36 @@ public class ForagePINTextFieldView: UIView, Identifiable {
     
     // MARK: Public Methods
     
-    public func requestBalance(
-        paymentReference: String,
-        cardNumberToken: String,
-        completion: @escaping (Result<ForageBalanceModel, Error>) -> Void)
-    -> Void {
+    public func performRequest(forPIN type: PINType) {
+        switch type {
+        case .balance(let paymentMethodReference, let cardNumberToken):
+            requestBalance(paymentMethodReference: paymentMethodReference, cardNumberToken: cardNumberToken)
+        case .ebtCapture(let paymentReference, let cardNumberToken):
+            capturePayment(paymentReference: paymentReference, cardNumberToken: cardNumberToken)
+        }
+    }
+    
+    private func requestBalance(
+        paymentMethodReference: String,
+        cardNumberToken: String) -> Void {
         controller.requestBalance(
-            paymentReference: paymentReference,
-            cardNumberToken: cardNumberToken,
-            completion: completion
-        )
+            paymentMethodReference: paymentMethodReference,
+            cardNumberToken: cardNumberToken) { result in
+                self.delegate?.balanceCallback(self, result: result)
+            }
+    }
+    
+    private func capturePayment(
+        paymentReference: String,
+        cardNumberToken: String
+    ) -> Void {
+            controller.capturePayment(
+                paymentReference: paymentReference,
+                cardNumberToken: cardNumberToken,
+                merchantID: ForageSDK.shared.merchantID
+            ) { result in
+                self.delegate?.capturePaymentCallback(self, result: result)
+            }
     }
 }
 

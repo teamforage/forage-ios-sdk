@@ -30,6 +30,7 @@ class CreatePaymentViewController: BaseViewCodeViewController<CreatePaymentView>
 
 extension CreatePaymentViewController: CreatePaymentViewDelegate {
     func goToCapture(_ view: CreatePaymentView) {
-        // TODO: Implement capture VC and View
+        let capturePaymentViewController = CapturePaymentViewController()
+        navigationController?.pushViewController(capturePaymentViewController, animated: true)
     }
 }

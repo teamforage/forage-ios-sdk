@@ -83,9 +83,6 @@ class CreatePaymentView: UIView {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(goToCapture(_:)), for: .touchUpInside)
         button.backgroundColor = .systemBlue
-        button.isEnabled = false
-        button.isUserInteractionEnabled = false
-        button.alpha = 0.5
         return button
     }()
     
@@ -141,7 +138,7 @@ class CreatePaymentView: UIView {
         let request = CreatePaymentRequest(
             amount: paymentAmount,
             fundingType: isEbtSnap ? "ebt_snap" : "ebt_cash",
-            paymentMethodIdentifier: ClientSharedData.shared.paymentReference,
+            paymentMethodIdentifier: ClientSharedData.shared.paymentMethodReference,
             merchantAccount: ClientSharedData.shared.merchantID,
             description: "desc",
             metadata: [:],
@@ -167,9 +164,11 @@ class CreatePaymentView: UIView {
             case .success(let response):
                 self.resultLabel.text = """
                 Success:\n
-                PaymentRef: \(response.paymentMethodIdentifier)\n
+                PaymentRef: \(response.paymentIdentifier)\n
                 Funding Type: \(response.fundingType.rawValue)\n
                 """
+                ClientSharedData.shared.paymentReference = [response.fundingType : response.paymentIdentifier]
+                
             case .failure(let error):
                 self.resultLabel.text = "Error: \n\(error.localizedDescription)"
             }
