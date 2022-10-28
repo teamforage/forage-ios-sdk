@@ -1,24 +1,19 @@
 //
-//  RequestBalanceView.swift
+//  CapturePaymentView.swift
 //  SampleForageSDK
 //
-//  Created by Symphony on 24/10/22.
+//  Created by Symphony on 26/10/22.
 //
 
 import Foundation
 import UIKit
 import ForageSDK
 
-protocol RequestBalanceViewDelegate: AnyObject {
-    func goToCreatePayment(_ view: RequestBalanceView)
-}
-
-class RequestBalanceView: UIView {
+class CapturePaymentView: UIView {
     
     // MARK: Public Properties
     
     var isPINValid: Bool = false
-    weak var delegate: RequestBalanceViewDelegate?
     
     // MARK: Private Components
     
@@ -31,53 +26,48 @@ class RequestBalanceView: UIView {
     
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "Request Balance"
+        label.text = "Capture Payment"
         label.font = UIFont.systemFont(ofSize: 28, weight: .bold)
         return label
     }()
     
-    private let pinNumberTextField: ForagePINTextFieldView = {
+    private let snapTextField: ForagePINTextFieldView = {
         let tf = ForagePINTextFieldView()
-        tf.placeholder = "PIN Field"
+        tf.placeholder = "PIN Snap Field"
         tf.isSecureTextEntry = true
         tf.layer.borderColor = UIColor.red.cgColor
         tf.translatesAutoresizingMaskIntoConstraints = false
         return tf
     }()
     
-    private let statusLabel: UILabel = {
-        let label = UILabel()
-        label.text = "PIN status"
-        label.textColor = .red
-        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        return label
+    private let nonSnapTextField: ForagePINTextFieldView = {
+        let tf = ForagePINTextFieldView()
+        tf.placeholder = "PIN Snap Field"
+        tf.isSecureTextEntry = true
+        tf.layer.borderColor = UIColor.red.cgColor
+        tf.translatesAutoresizingMaskIntoConstraints = false
+        return tf
     }()
     
-    private let requestBalanceButton: UIButton = {
+    private let captureSnapPaymentButton: UIButton = {
         let button = UIButton()
-        button.setTitle("Get Balance", for: .normal)
+        button.setTitle("Capture Snap Payment", for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         button.tintColor = .white
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.addTarget(self, action: #selector(getBalanceInfo(_:)), for: .touchUpInside)
+        button.addTarget(self, action: #selector(performCaptureSnapPayment(_:)), for: .touchUpInside)
         button.backgroundColor = .systemBlue
-        button.isEnabled = false
-        button.isUserInteractionEnabled = false
-        button.alpha = 0.5
         return button
     }()
     
-    private let nextButton: UIButton = {
+    private let captureNonSnapPaymentButton: UIButton = {
         let button = UIButton()
-        button.setTitle("Go To Next", for: .normal)
+        button.setTitle("Capture Non Snap Payment", for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         button.tintColor = .white
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.addTarget(self, action: #selector(goToCreatePayment(_:)), for: .touchUpInside)
+        button.addTarget(self, action: #selector(performCaptureNonSnapPayment(_:)), for: .touchUpInside)
         button.backgroundColor = .systemBlue
-        button.isEnabled = false
-        button.isUserInteractionEnabled = false
-        button.alpha = 0.5
         return button
     }()
     
@@ -92,43 +82,51 @@ class RequestBalanceView: UIView {
     
     // MARK: Fileprivate Methods
     
-    @objc fileprivate func getBalanceInfo(_ gesture: UIGestureRecognizer) {
-        pinNumberTextField.performRequest(
-            forPIN:
-                    .balance(
-                        paymentMethodReference: ClientSharedData.shared.paymentMethodReference,
-                        cardNumberToken: ClientSharedData.shared.cardNumberToken
-                    )
-        )
+    @objc fileprivate func performCaptureSnapPayment(_ gesture: UIGestureRecognizer) {
+        capturePayment(isEbtSnap: true)
     }
     
-    @objc fileprivate func goToCreatePayment(_ gesture: UIGestureRecognizer) {
-        delegate?.goToCreatePayment(self)
+    @objc fileprivate func performCaptureNonSnapPayment(_ gesture: UIGestureRecognizer) {
+        capturePayment(isEbtSnap: false)
     }
     
     // MARK: Public Methods
     
     public func render() {
-        pinNumberTextField.delegate = self
+        snapTextField.delegate = self
+        nonSnapTextField.delegate = self
         setupView()
         setupConstraints()
     }
     
     // MARK: Private Methods
     
-    private func printPINResult(result: Result<ForageBalanceModel, Error>) {
+    private func capturePayment(isEbtSnap: Bool) {
+        let paymentReference =
+            isEbtSnap
+                ? ClientSharedData.shared.paymentReference[FundingType.ebtSnap] ?? ""
+                : ClientSharedData.shared.paymentReference[FundingType.ebtCash] ?? ""
+        snapTextField.performRequest(
+            forPIN:
+                    .ebtCapture(
+                        paymentReference: paymentReference,
+                        cardNumberToken: ClientSharedData.shared.cardNumberToken
+                    )
+        )
+    }
+    
+    private func printResult(result: Result<ForageCaptureModel, Error>) {
         DispatchQueue.main.async {
             switch result {
             case .success(let response):
                 self.resultLabel.text = """
                 Success:\n
-                SNAP: \(response.snap)\n
-                NON SNAP: \(response.nonSnap)\n
+                PaymentRef: \(response.paymentIdentifier)\n
+                Funding Type: \(response.fundingType)\n
+                Amount: \(response.amount)\n
                 """
-                self.updateButtonState(isEnabled: true, button: self.nextButton)
             case .failure(let error):
                 self.resultLabel.text = "Error: \n\(error.localizedDescription)"
-                self.updateButtonState(isEnabled: false, button: self.nextButton)
             }
             
             self.layoutIfNeeded()
@@ -139,11 +137,11 @@ class RequestBalanceView: UIView {
     private func setupView() {
         self.addSubview(contentView)
         contentView.addSubview(titleLabel)
-        contentView.addSubview(pinNumberTextField)
-        contentView.addSubview(statusLabel)
+        contentView.addSubview(snapTextField)
+        contentView.addSubview(captureSnapPaymentButton)
+        contentView.addSubview(nonSnapTextField)
+        contentView.addSubview(captureNonSnapPaymentButton)
         contentView.addSubview(resultLabel)
-        contentView.addSubview(requestBalanceButton)
-        contentView.addSubview(nextButton)
     }
     
     private func setupConstraints() {
@@ -166,82 +164,68 @@ class RequestBalanceView: UIView {
             bottom: nil,
             trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
             centerXAnchor: contentView.centerXAnchor,
-            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
+            padding: UIEdgeInsets(top: 24, left: 24, bottom: 12, right: 24)
         )
         
-        pinNumberTextField.anchor(
+        snapTextField.anchor(
             top: titleLabel.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
             bottom: nil,
             trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
             centerXAnchor: contentView.centerXAnchor,
-            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24),
+            padding: UIEdgeInsets(top: 24, left: 24, bottom: 12, right: 24),
             size: .init(width: 0, height: 42)
         )
         
-        statusLabel.anchor(
-            top: pinNumberTextField.safeAreaLayoutGuide.bottomAnchor,
+        captureSnapPaymentButton.anchor(
+            top: snapTextField.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
             bottom: nil,
             trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
             centerXAnchor: contentView.centerXAnchor,
-            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
+            padding: .init(top: 12, left: 24, bottom: 0, right: 24),
+            size: .init(width: 0, height: 48)
+        )
+        
+        nonSnapTextField.anchor(
+            top: captureSnapPaymentButton.safeAreaLayoutGuide.bottomAnchor,
+            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
+            bottom: nil,
+            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
+            centerXAnchor: contentView.centerXAnchor,
+            padding: UIEdgeInsets(top: 24, left: 24, bottom: 12, right: 24),
+            size: .init(width: 0, height: 42)
+        )
+        
+        captureNonSnapPaymentButton.anchor(
+            top: nonSnapTextField.safeAreaLayoutGuide.bottomAnchor,
+            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
+            bottom: nil,
+            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
+            centerXAnchor: contentView.centerXAnchor,
+            padding: .init(top: 12, left: 24, bottom: 0, right: 24),
+            size: .init(width: 0, height: 48)
         )
         
         resultLabel.anchor(
-            top: statusLabel.safeAreaLayoutGuide.bottomAnchor,
+            top: captureNonSnapPaymentButton.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
             bottom: nil,
             trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
             centerXAnchor: contentView.centerXAnchor,
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
         )
-        
-        requestBalanceButton.anchor(
-            top: nil,
-            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
-            bottom: nextButton.safeAreaLayoutGuide.topAnchor,
-            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
-            centerXAnchor: contentView.centerXAnchor,
-            padding: .init(top: 0, left: 24, bottom: 8, right: 24),
-            size: .init(width: 0, height: 48)
-        )
-        
-        nextButton.anchor(
-            top: nil,
-            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
-            bottom: contentView.safeAreaLayoutGuide.bottomAnchor,
-            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
-            centerXAnchor: contentView.centerXAnchor,
-            padding: .init(top: 0, left: 24, bottom: 0, right: 24),
-            size: .init(width: 0, height: 48)
-        )
-    }
-    
-    private func updateButtonState(isEnabled: Bool, button: UIButton) {
-        button.isEnabled = isEnabled
-        button.isUserInteractionEnabled = isEnabled
-        button.alpha = isEnabled ? 1.0 : 0.5
     }
 }
 
 // MARK: - ForagePINTextFieldDelegate
 
-extension RequestBalanceView: ForagePINTextFieldDelegate {
-    
+extension CapturePaymentView: ForagePINTextFieldDelegate {
     func pinStatus(_ view: UIView, isValid: Bool) {
-        if isValid {
-            statusLabel.text = "It is a VALID pin"
-            statusLabel.textColor = .green
-        } else {
-            statusLabel.text = "It is a NON VALID pin"
-            statusLabel.textColor = .red
-        }
-        updateButtonState(isEnabled: isValid, button: requestBalanceButton)
-        isPINValid = isValid
+        debugPrint("")
     }
     
-    func balanceCallback(_ view: UIView, result: (Result<ForageBalanceModel, Error>)) {
-        printPINResult(result: result)
+    func capturePaymentCallback(_ view: UIView, result: (Result<ForageCaptureModel, Error>)) {
+        printResult(result: result)
     }
 }

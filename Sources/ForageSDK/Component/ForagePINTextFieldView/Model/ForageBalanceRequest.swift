@@ -9,7 +9,7 @@ import Foundation
 
 internal struct ForageBalanceRequest {
     let authorization: String
-    let paymentReference: String
+    let paymentMethodReference: String
     let cardNumberToken: String
     let merchantID: String
     let xKey: String

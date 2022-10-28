@@ -12,5 +12,12 @@ import UIKit
 /// Protocol to comunicate `ForagePINTextFieldView` to the client application
 public protocol ForagePINTextFieldDelegate: AnyObject {
     func pinStatus(_ view: UIView, isValid: Bool)
-    func pinFailure(_ view: UIView, error: Error)
+    func balanceCallback(_ view: UIView, result: (Result<ForageBalanceModel, Error>))
+    func capturePaymentCallback(_ view: UIView, result: (Result<ForageCaptureModel, Error>))
+}
+
+public extension ForagePINTextFieldDelegate {
+    func pinStatus(_ view: UIView, isValid: Bool) { }
+    func balanceCallback(_ view: UIView, result: (Result<ForageBalanceModel, Error>)) { }
+    func capturePaymentCallback(_ view: UIView, result: (Result<ForageCaptureModel, Error>)) { }
 }

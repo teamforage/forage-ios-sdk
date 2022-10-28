@@ -10,9 +10,17 @@ import Foundation
 struct CreatePaymentResponse: Codable {
     let fundingType: FundingType
     let paymentMethodIdentifier: String
+    let paymentIdentifier: String
     let merchantAccount: String
+    let amount: String
     let description: String
-    let metadata: [String: String]
-    let deliveryAddress: Address
-    let isDelivery: Bool
+    
+    private enum CodingKeys : String, CodingKey {
+        case fundingType = "funding_type"
+        case paymentMethodIdentifier = "payment_method"
+        case paymentIdentifier = "ref"
+        case merchantAccount = "merchant"
+        case amount
+        case description
+    }
 }

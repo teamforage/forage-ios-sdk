@@ -42,7 +42,8 @@ extension SampleAPI: ServiceProtocol {
             
             let httpHeaders: HTTPHeaders = [
                 "Merchant-Account": model.merchantAccount,
-                "IDEMPOTENCY-KEY": model.paymentMethodIdentifier
+                "IDEMPOTENCY-KEY": UUID.init().uuidString,
+                "authorization": "Bearer \(ClientSharedData.shared.bearerToken)"
             ]
             
             return .requestParametersAndHeaders(

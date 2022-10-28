@@ -6,12 +6,14 @@
 //
 
 import Foundation
+import ForageSDK
 
 class ClientSharedData {
     static let shared = ClientSharedData()
     
-    var paymentReference: String = ""
+    var paymentMethodReference: String = ""
     var cardNumberToken: String = ""
     var merchantID: String = ""
     var bearerToken: String = ""
+    var paymentReference: [FundingType : String] = [:]
 }
