@@ -222,7 +222,7 @@ class CapturePaymentView: UIView {
 
 extension CapturePaymentView: ForagePINTextFieldDelegate {
     func pinStatus(_ view: UIView, isValid: Bool) {
-        debugPrint("")
+        debugPrint("Status: \(isValid)")
     }
     
     func capturePaymentCallback(_ view: UIView, result: (Result<ForageCaptureModel, Error>)) {

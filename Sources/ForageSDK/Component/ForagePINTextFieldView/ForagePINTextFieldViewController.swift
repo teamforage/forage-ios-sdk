@@ -9,6 +9,11 @@ import Foundation
 import VGSCollectSDK
 
 protocol ForagePINTextFieldViewController: AnyObject {
+    
+    var collector: VGSCollect { get }
+    
+    var service: ForageService { get }
+        
     func requestBalance(
         paymentMethodReference: String,
         cardNumberToken: String,
@@ -20,7 +25,7 @@ protocol ForagePINTextFieldViewController: AnyObject {
         merchantID: String,
         completion: @escaping (Result<ForageCaptureModel, Error>) -> Void) -> Void
     
-    var collector: VGSCollect { get }
+    func cancelRequest()
 }
 
 internal class LiveForagePINTextFieldViewController: ForagePINTextFieldViewController {
@@ -34,6 +39,8 @@ internal class LiveForagePINTextFieldViewController: ForagePINTextFieldViewContr
     ///
     var collector = VGSCollect(id: "tntagcot4b1", environment: .sandbox)
     
+    let service: ForageService = LiveForageService()
+    
     // MARK: Methods
     
     internal func requestBalance(
@@ -44,7 +51,6 @@ internal class LiveForagePINTextFieldViewController: ForagePINTextFieldViewContr
         getXKey { result in
             switch result {
             case .success(let model):
-                debugPrint(model)
                 let request = ForageBalanceRequest(
                     authorization: ForageSDK.shared.bearerToken,
                     paymentMethodReference: paymentMethodReference,
@@ -56,15 +62,13 @@ internal class LiveForagePINTextFieldViewController: ForagePINTextFieldViewContr
                 self.getBalance(request: request) { result in
                     switch result {
                     case .success(let model):
-                        debugPrint(model)
                         completion(.success(model))
                     case .failure(let error):
-                        debugPrint(error)
                         completion(.failure(error))
                     }
                 }
             case .failure(let error):
-                debugPrint(error)
+                completion(.failure(error))
             }
         }
     }
@@ -97,10 +101,13 @@ internal class LiveForagePINTextFieldViewController: ForagePINTextFieldViewContr
         }
     }
     
+    internal func cancelRequest() {
+        service.cancelRequest()
+    }
+    
     private func getXKey(
         completion: @escaping (Result<ForageXKeyModel, Error>) -> Void)
     -> Void {
-        let service = ForagePINTextFieldViewService()
         service.getXKey(bearerToken: ForageSDK.shared.bearerToken) { result in
             completion(result)
         }
@@ -137,17 +144,16 @@ internal class LiveForagePINTextFieldViewController: ForagePINTextFieldViewContr
                     ) { end in
                         switch end {
                         case .success(let model):
-                            debugPrint(model)
                             completion(.success(model))
                         case .failure(let error):
-                            debugPrint(error)
                             completion(.failure(error))
                         }
                     }
-                case .failure(let code, _, _, _):
-                    debugPrint("""
-                    code: \(code)\n
-                    """)
+                case .failure(_, _, _, let error):
+                    guard let error = error else {
+                        return completion(.failure(ServiceError.emptyError))
+                    }
+                    completion(.failure(error))
                 }
             }
     }
@@ -179,15 +185,16 @@ internal class LiveForagePINTextFieldViewController: ForagePINTextFieldViewContr
                         ) { end in
                             switch end {
                             case .success(let model):
-                                debugPrint(model)
                                 completion(.success(model))
                             case .failure(let error):
-                                debugPrint(error)
                                 completion(.failure(error))
                             }
                         }
-                    case .failure:
-                        debugPrint("Error")
+                    case .failure(_, _, _, let error):
+                        guard let error = error else {
+                            return completion(.failure(ServiceError.emptyError))
+                        }
+                        completion(.failure(error))
                     }
                 }
         }
