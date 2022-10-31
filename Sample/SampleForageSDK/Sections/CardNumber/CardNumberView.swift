@@ -92,9 +92,7 @@ class CardNumberView: UIView {
     
     @objc fileprivate func sendInfo(_ gesture: UIGestureRecognizer) {
         if isCardValid {
-            self.panNumberTextField.sendPanCardNumber() { result in
-                self.printResult(result: result)
-            }
+            self.panNumberTextField.sendPanCardNumber()
         }
     }
     
@@ -265,5 +263,9 @@ extension CardNumberView: ForagePANTextFieldDelegate {
         
         updateButtonState(isEnabled: isValid, button: sendPanButton)
         isCardValid = isValid
+    }
+    
+    func panNumberCallback(_ view: UIView, result: (Result<ForagePANModel, Error>)) {
+        printResult(result: result)
     }
 }

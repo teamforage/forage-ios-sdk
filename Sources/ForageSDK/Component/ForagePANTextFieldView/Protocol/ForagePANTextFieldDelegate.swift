@@ -12,6 +12,7 @@ import UIKit
 /// Protocol to comunicate `ForagePANTextFieldView` to the client application
 public protocol ForagePANTextFieldDelegate: AnyObject {
     func panNumberStatus(_ view: UIView, cardStatus: CardStatus)
+    func panNumberCallback(_ view: UIView, result: (Result<ForagePANModel, Error>))
 }
 
 public enum CardStatus: String {

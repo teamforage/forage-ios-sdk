@@ -151,7 +151,7 @@ public class ForagePANTextFieldView: UIView, Identifiable {
     
     // MARK: Public Methods
     
-    public func sendPanCardNumber(completion: @escaping (Result<ForagePANModel, Error>) -> Void) -> Void {
+    public func sendPanCardNumber() {
         let foragePANRequest = ForagePANRequest(
             authorization: ForageSDK.shared.bearerToken,
             merchantAccount: ForageSDK.shared.merchantID,
@@ -160,10 +160,9 @@ public class ForagePANTextFieldView: UIView, Identifiable {
             reusable: true
         )
         
-        controller.sendPanCardNumber(
-            request: foragePANRequest,
-            completion: completion
-        )
+        controller.sendPanCardNumber(request: foragePANRequest) { result in
+            self.delegate?.panNumberCallback(self, result: result)
+        }
     }
     
     public func cancelRequest() {
