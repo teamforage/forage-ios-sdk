@@ -246,19 +246,24 @@ class CardNumberView: UIView {
 // MARK: - ForagePANTextFieldDelegate
 
 extension CardNumberView: ForagePANTextFieldDelegate {
-    func panNumberStatus(_ view: UIView, isValid: Bool) {
-        if isValid {
+    func panNumberStatus(_ view: UIView, cardStatus: CardStatus) {
+        var isValid = false
+        switch cardStatus {
+        case .valid:
             statusLabel.text = "It is an VALID card number"
             statusLabel.textColor = .green
-        } else {
+            isValid = true
+        case .invalid:
             statusLabel.text = "It is a NON VALID card number"
             statusLabel.textColor = .red
+            isValid = false
+        case .identifying:
+            statusLabel.text = "It is IDENTIFYING card number"
+            statusLabel.textColor = .gray
+            isValid = false
         }
+        
         updateButtonState(isEnabled: isValid, button: sendPanButton)
         isCardValid = isValid
-    }
-    
-    func panNumberFailure(_ view: UIView, error: Error) {
-        debugPrint("failure")
     }
 }

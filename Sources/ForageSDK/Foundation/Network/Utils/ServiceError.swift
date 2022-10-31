@@ -13,4 +13,5 @@ internal enum ServiceError: String, Error {
     case missingURL = "URL is nil."
     case notPossibleRetrieve = "Could not retrieve data."
     case parseError = "Parse error."
+    case emptyError = "Empty error model."
 }
