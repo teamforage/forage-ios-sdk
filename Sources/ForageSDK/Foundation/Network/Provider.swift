@@ -18,11 +18,13 @@ internal class Provider {
             let request = try endpoint.urlRequest()
             task = urlSession.dataTask(with: request) { (data, response, error) in
                 self.middleware(model: model, data: data, response: response, error: error) { (result) in
-                    switch result {
-                    case .success(let data):
-                        completion(.success(data))
-                    case .failure(let error):
-                        completion(.failure(error))
+                    DispatchQueue.main.async {
+                        switch result {
+                        case .success(let data):
+                            completion(.success(data))
+                        case .failure(let error):
+                            completion(.failure(error))
+                        }
                     }
                 }
             }

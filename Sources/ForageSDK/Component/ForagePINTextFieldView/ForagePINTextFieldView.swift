@@ -15,25 +15,16 @@ public enum PINType {
 
 public class ForagePINTextFieldView: UIView, Identifiable {
     
-    // MARK: Private Properties
-    
-    private var controller: ForagePINTextFieldViewController!
-    
     // MARK: Public Delegate
     
     /// Delegate that updates client's side about state of the entered pin
     public weak var delegate: ForagePINTextFieldDelegate?
     
-    // MARK: Public Properties
+    // MARK: Private Properties
     
-    /// Init VGS Collector
-    ///
-    /// - Parameters:
-    ///
-    ///  - id: client vaultid
-    ///  - environment: client environment
-    ///
-    var collector = VGSCollect(id: "tntagcot4b1", environment: .sandbox)
+    private var controller: ForagePINTextFieldViewController!
+    
+    // MARK: Public Properties
     
     /// Placeholder for the text field
     @IBInspectable public var placeholder: String? {
@@ -87,6 +78,9 @@ public class ForagePINTextFieldView: UIView, Identifiable {
         tf.textColor = UIColor.black
         tf.font = UIFont.systemFont(ofSize: 14, weight: .regular)
         tf.autocorrectionType = .no
+        tf.borderWidth = 0.25
+        tf.borderColor = UIColor.lightGray
+        tf.padding = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 0)
         return tf
     }()
     
@@ -161,6 +155,10 @@ public class ForagePINTextFieldView: UIView, Identifiable {
         }
     }
     
+    public func cancelRequest() {
+        controller.cancelRequest()
+    }
+    
     private func requestBalance(
         paymentMethodReference: String,
         cardNumberToken: String) -> Void {
@@ -190,8 +188,6 @@ extension ForagePINTextFieldView: VGSTextFieldDelegate {
     public func vgsTextFieldDidChange(_ textField: VGSTextField) {
         let isValid = textField.state.inputLength == 4
         delegate?.pinStatus(self, isValid: isValid)
-//        textField.borderColor = .white
-        print(textField.state.description)
     }
 }
 

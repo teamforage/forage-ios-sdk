@@ -69,6 +69,7 @@
 		4985C745290A0AD9000568BF /* CapturePaymentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapturePaymentView.swift; sourceTree = "<group>"; };
 		4985C747290A0AE1000568BF /* CapturePaymentViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapturePaymentViewController.swift; sourceTree = "<group>"; };
 		49AA74FB2905615F00802CAC /* UIView+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Extension.swift"; sourceTree = "<group>"; };
+		49E0C13F290FF91700300CA5 /* forage-ios-sdk */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "forage-ios-sdk"; path = ..; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -157,6 +158,7 @@
 		49475BE228FCD93B00190846 = {
 			isa = PBXGroup;
 			children = (
+				49E0C13E290FF91700300CA5 /* Packages */,
 				49475BED28FCD93B00190846 /* SampleForageSDK */,
 				49475BEC28FCD93B00190846 /* Products */,
 				49475C1A28FCDE0600190846 /* Frameworks */,
@@ -229,6 +231,14 @@
 				49AA74FB2905615F00802CAC /* UIView+Extension.swift */,
 			);
 			path = Extension;
+			sourceTree = "<group>";
+		};
+		49E0C13E290FF91700300CA5 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				49E0C13F290FF91700300CA5 /* forage-ios-sdk */,
+			);
+			name = Packages;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
