@@ -93,6 +93,13 @@ panNumberTextField.delegate = self
 ```swift
 public protocol ForagePANTextFieldDelegate: AnyObject {
     func panNumberStatus(_ view: UIView, cardStatus: CardStatus)
+    func panNumberCallback(_ view: UIView, result: (Result<ForagePANModel, Error>))
+}
+
+public enum CardStatus: String {
+    case valid
+    case invalid
+    case identifying
 }
 ```
 
