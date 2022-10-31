@@ -18,6 +18,7 @@ public class ForagePANTextFieldView: UIView, Identifiable {
     
     private var controller: ForagePANTextFieldViewController!
     private var panNumber = ""
+    private var stateIIN: StateIIN?
     
     // MARK: Public Delegate
     
@@ -142,8 +143,6 @@ public class ForagePANTextFieldView: UIView, Identifiable {
             action: #selector(requestFocus(_:))
         )
         addGestureRecognizer(tapGesture)
-        
-        textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
     }
     
     @objc fileprivate func requestFocus(_ gesture: UIGestureRecognizer) {
@@ -166,23 +165,45 @@ public class ForagePANTextFieldView: UIView, Identifiable {
             completion: completion
         )
     }
+    
+    public func cancelRequest() {
+        controller.cancelRequest()
+    }
 }
 
 // MARK: - UITextFieldDelegate
 
 extension ForagePANTextFieldView: UITextFieldDelegate {
-    @objc private func textFieldDidChange(_ textField: UITextField) {
+    public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        guard let panNumber = textField.text else { return true }
         
-        guard let panNumber = textField.text else { return }
-        self.panNumber = panNumber
+        let currentString = (textField.text ?? "") as NSString
+        let newString = currentString.replacingCharacters(in: range, with: string)
         
-        // TODO: Add rules
-        
-        if panNumber.count > 5 {
-            delegate?.panNumberStatus(self, isValid: true)
-        } else {
-            delegate?.panNumberStatus(self, isValid: false)
+        /// While entering first 6 digits continue typing allowed
+        if newString.count < 6 {
+            delegate?.panNumberStatus(self, cardStatus: .identifying)
+            return true
         }
+        
+        /// Check if 6 first entered number are valid
+        if let stateIIN = ForagePANValidations.checkPANLength(newString) {
+            /// Check max length allowed is fulfill
+            if newString.count <= stateIIN.panLength {
+                delegate?.panNumberStatus(self, cardStatus: .identifying)
+                return true
+            } else {
+                self.panNumber = panNumber
+                delegate?.panNumberStatus(self, cardStatus: .valid)
+                return false
+            }
+            /// A pan number is invalid in case it has more than 6 digits and is not in the allowed list
+        } else if newString.count >= 6 {
+            delegate?.panNumberStatus(self, cardStatus: .invalid)
+        }
+        
+        /// Default text field allowed digits
+        return newString.count <= 16
     }
 }
 
