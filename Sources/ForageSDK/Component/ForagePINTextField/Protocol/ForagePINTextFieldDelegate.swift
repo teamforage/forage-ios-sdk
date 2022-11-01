@@ -19,7 +19,3 @@ public enum PinType: String {
 public protocol ForagePINTextFieldDelegate: AnyObject {
     func pinStatus(_ view: UIView, isValid: Bool, pinType: PinType)
 }
-
-public extension ForagePINTextFieldDelegate {
-    func pinStatus(_ view: UIView, isValid: Bool) { }
-}

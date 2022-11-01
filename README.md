@@ -9,10 +9,9 @@ Table of contents
    * [Integration](#integration)
       * [Swift Package Manager](#swift-package-manager) 
    * [Usage](#usage)
-      * [Create ForageSDK instance](#create-foragesdk-instance)
       * [Forage UI Elements](#forage-ui-elements)
-      * [ForagePANTextFieldView](#foragepantextfieldview)
-      * [ForagePINTextFieldView](#foragepintextfieldview)
+      * [ForagePANTextField](#foragepantextfield)
+      * [ForagePINTextField](#foragepintextfield)
       * [Demo Application](#demo-application)
    * [Dependencies](#dependencies)
 <!--te-->
@@ -52,24 +51,12 @@ Click on `Add Package` button. And, on the next screen, select the package `Fora
 ```swift
 import ForageSDK
 ```
-### Create ForageSDK instance
-
-Initializing a ForageSDK instance, you need to setup ForageSDK providing the merchantID and a valid bearerToken.
-
-```swift
-ForageSDK.setup(
-  ForageSDK.Config(
-    merchantID: merchantID,
-    bearerToken: bearerToken
-  )
-)
-```
 
 ## Forage UI Elements
 
 ForageSDK provides two UI Elements to work as proxy between your application and Forage service using compliance comunication.
 
-### ForagePANTextFieldView
+### ForagePANTextField
 
 It is a component to handle PAN number. This field valids the pan number based on the [StateIIN lists](https://www.nacha.org/sites/default/files/2019-05/State-IINs-04-10-19.pdf)
 
@@ -77,15 +64,14 @@ It is a component to handle PAN number. This field valids the pan number based o
 
 
 ```swift
-private let panNumberTextField: ForagePANTextFieldView = {
-    let tf = ForagePANTextFieldView()
+private let panNumberTextField: ForagePANTextField = {
+    let tf = ForagePANTextField()
     tf.placeholder = "PAN Number"
-    tf.translatesAutoresizingMaskIntoConstraints = false
     return tf
 }()
 ```
 
-ForagePANTextFieldView uses a delegate `ForagePANTextFieldDelegate` to communicate the updates to the client side.
+ForagePANTextField uses a delegate `ForagePANTextFieldDelegate` to communicate the updates to the client side.
 
 ```swift
 panNumberTextField.delegate = self
@@ -93,7 +79,6 @@ panNumberTextField.delegate = self
 ```swift
 public protocol ForagePANTextFieldDelegate: AnyObject {
     func panNumberStatus(_ view: UIView, cardStatus: CardStatus)
-    func panNumberCallback(_ view: UIView, result: (Result<ForagePANModel, Error>))
 }
 
 public enum CardStatus: String {
@@ -103,67 +88,115 @@ public enum CardStatus: String {
 }
 ```
 
-To send the PAN number, we can use the component to perform the request.
+To send the PAN number, we can use ForageSDK to perform the request.
+
+### Tokenize card number
+
 ```swift
-panNumberTextField.sendPanCardNumber()
+// Signature
+
+func tokenizeEBTCard(
+    merchantAccount: String,
+    bearerToken: String,
+    completion: @escaping (Result<Data?, Error>) -> Void)
 ```
 
-### ForagePINTextFieldView
+```swift
+// Usage
+
+ForageSDK.shared.tokenizeEBTCard(
+    merchantAccount: merchantID,
+    bearerToken: bearerToken) { result in
+        // handle callback here
+    }
+```
+
+### ForagePINTextField
 
 It is a component to handle PIN number for balance and payment capture. It accepts only number entry and check for 4 digits to be valid.
 
 ![Screen Shot 2022-10-31 at 10 21 32](https://user-images.githubusercontent.com/115553362/199017609-33b2094c-339c-4117-8124-00b5ce130dac.png)
 
 ```swift
-private let pinNumberTextField: ForagePINTextFieldView = {
-    let tf = ForagePINTextFieldView()
+private let pinNumberTextField: ForagePINTextField = {
+    let tf = ForagePINTextField()
     tf.placeholder = "PIN Field"
     tf.isSecureTextEntry = true
-    tf.translatesAutoresizingMaskIntoConstraints = false
+    tf.pinType = .balance
     return tf
 }()
 ```
 
-ForagePINTextFieldView uses a delegate `ForagePINTextFieldDelegate` to communicate the updates to the client side.
+To identify the type of pin we are handling on the component, you can use the `pinType` property to set, we have support for these types:
+```swift
+public enum PinType: String {
+    case snap
+    case nonSnap
+    case balance
+}
+```
+
+ForagePINTextField uses a delegate `ForagePINTextFieldDelegate` to communicate the updates to the client side.
 
 ```swift
 pinNumberTextField.delegate = self
 ```
 ```swift
 public protocol ForagePINTextFieldDelegate: AnyObject {
-    func pinStatus(_ view: UIView, isValid: Bool)
-    func balanceCallback(_ view: UIView, result: (Result<ForageBalanceModel, Error>))
-    func capturePaymentCallback(_ view: UIView, result: (Result<ForageCaptureModel, Error>))
-}
-
-public extension ForagePINTextFieldDelegate {
-    func pinStatus(_ view: UIView, isValid: Bool) { }
-    func balanceCallback(_ view: UIView, result: (Result<ForageBalanceModel, Error>)) { }
-    func capturePaymentCallback(_ view: UIView, result: (Result<ForageCaptureModel, Error>)) { }
+    func pinStatus(_ view: UIView, isValid: Bool, pinType: PinType)
 }
 ```
 
-To send the PIN number, we can use the component to perform the request. For ForagePINTextFieldView, we need to specify which type of request we are doing, a balance or capture request.
+To send the PIN number, we can use the ForageSDK to perform the request.
+
+### Balance
+
 ```swift
-/// Balance payment
-pinNumberTextField.performRequest(
-    forPIN:
-            .balance(
-                paymentMethodReference: paymentMethodReference,
-                cardNumberToken: cardNumberToken
-            )
-)
+// Signature
+
+func checkBalance(
+    bearerToken: String,
+    merchantAccount: String,
+    paymentMethodReference: String,
+    cardNumberToken: String,
+    completion: @escaping (Result<Data?, Error>) -> Void)
 ```
 
 ```swift
-/// Capture payment
-pinNumberTextField.performRequest(
-    forPIN:
-            .ebtCapture(
-                paymentReference: paymentReference,
-                cardNumberToken: cardNumberToken
-            )
-)
+// Usage
+
+ForageSDK.shared.checkBalance(
+    bearerToken: bearerToken,
+    merchantAccount: merchantID,
+    paymentMethodReference: paymentMethodReference,
+    cardNumberToken: cardNumberToken) { result in
+        // handle callback here
+    }
+```
+
+### Capture payment
+
+```swift
+// Signature
+
+func capturePayment(
+    bearerToken: String,
+    merchantAccount: String,
+    paymentReference: String,
+    cardNumberToken: String,
+    completion: @escaping (Result<Data?, Error>) -> Void)
+```
+
+```swift
+// Usage
+
+ForageSDK.shared.capturePayment(
+    bearerToken: bearerToken,
+    merchantAccount: merchantID,
+    paymentReference: paymentReference,
+    cardNumberToken: cardNumberToken) { result in
+        // handle callback here
+    }
 ```
 
 ## Demo Application
