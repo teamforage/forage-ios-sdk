@@ -1,6 +1,3 @@
-# Created by https://www.toptal.com/developers/gitignore/api/xcode,swift,swiftpackagemanager
-# Edit at https://www.toptal.com/developers/gitignore?templates=xcode,swift,swiftpackagemanager
-
 ### Swift ###
 # Xcode
 #
@@ -8,26 +5,6 @@
 
 ## User settings
 xcuserdata/
-
-## compatibility with Xcode 8 and earlier (ignoring not required starting Xcode 9)
-*.xcscmblueprint
-*.xccheckout
-
-## compatibility with Xcode 3 and earlier (ignoring not required starting Xcode 4)
-build/
-DerivedData/
-*.moved-aside
-*.pbxuser
-!default.pbxuser
-*.mode1v3
-!default.mode1v3
-*.mode2v3
-!default.mode2v3
-*.perspectivev3
-!default.perspectivev3
-
-## Obj-C/Swift specific
-*.hmap
 
 ## App packaging
 *.ipa
@@ -40,13 +17,13 @@ playground.xcworkspace
 
 # Swift Package Manager
 # Add this line if you want to avoid checking in source code from Swift Package Manager dependencies.
-# Packages/
-# Package.pins
-# Package.resolved
-# *.xcodeproj
+Packages/
+Package.pins
+Package.resolved
+*.xcodeproj
 # Xcode automatically generates this directory with a .xcworkspacedata file and xcuserdata
 # hence it is not needed unless you have added a package configuration file to your project
-# .swiftpm
+.swiftpm
 
 .build/
 
@@ -79,29 +56,7 @@ fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
 
-# Code Injection
-# After new code Injection tools there's a generated folder /iOSInjectionProject
-# https://github.com/johnno1962/injectionforxcode
-
-iOSInjectionProject/
-
 ### SwiftPackageManager ###
 Packages
 xcuserdata
 *.xcodeproj
-
-
-### Xcode ###
-
-## Xcode 8 and earlier
-
-### Xcode Patch ###
-*.xcodeproj/*
-!*.xcodeproj/project.pbxproj
-!*.xcodeproj/xcshareddata/
-!*.xcodeproj/project.xcworkspace/
-!*.xcworkspace/contents.xcworkspacedata
-/*.gcno
-**/xcshareddata/WorkspaceSettings.xcsettings
-
-# End of https://www.toptal.com/developers/gitignore/api/xcode,swift,swiftpackagemanager
