@@ -1,6 +1,6 @@
 # ForageSDK
 
-A description of this package.
+The ForageSDK process Electronic Benefits Transfer (EBT) payments in your e-commerce application. Providing a secure user interface for collecting an EBT cardholders's PAN. And, a PIN entry to process all EBT payments, and to check the balances of an EBT card.
 
 Table of contents
 =================
