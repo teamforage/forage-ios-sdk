@@ -5,44 +5,132 @@
 //  Created by Symphony on 18/10/22.
 //
 
+import VGSCollectSDK
+import Foundation
+
+private enum CardType: String {
+    case ebt = "ebt"
+}
+
 protocol ForageSDKService: AnyObject {
-    func refreshAuthentication(for bearerToken: String)
+    var collector: VGSCollect? { get }
+    var service: ForageService? { get }
+    
+    func tokenizeEBTCard(
+        merchantAccount: String,
+        bearerToken: String,
+        completion: @escaping (Result<Data?, Error>) -> Void)
+        
+    func checkBalance(
+        bearerToken: String,
+        merchantAccount: String,
+        paymentMethodReference: String,
+        cardNumberToken: String,
+        completion: @escaping (Result<Data?, Error>) -> Void)
+    
+    func capturePayment(
+        bearerToken: String,
+        merchantAccount: String,
+        paymentReference: String,
+        cardNumberToken: String,
+        completion: @escaping (Result<Data?, Error>) -> Void)
+    
+    func cancelRequest()
 }
 
 public class ForageSDK: ForageSDKService {
     
     // MARK: Properties
     
-    static let shared = ForageSDK()
-    private static var config: Config?
-    internal var merchantID: String = ""
-    internal var bearerToken: String = ""
+    internal var collector: VGSCollect?
+    internal var service: ForageService?
+    internal var panNumber: String = ""
     
-    public struct Config {
-        let merchantID: String
-        let bearerToken: String
-        
-        public init(merchantID: String, bearerToken: String) {
-            self.merchantID = merchantID
-            self.bearerToken = bearerToken
-        }
-    }
+    public static let shared: ForageSDK = {
+        let instance = ForageSDK()
+        return instance
+    }()
     
-    public class func setup(_ config: Config) {
-        ForageSDK.config = config
-    }
+    // MARK: Init
     
     private init() {
-        guard let config = ForageSDK.config else {
-            assertionFailure("ForageSDK missing Config setup")
-            return
-        }
-        
-        merchantID = config.merchantID
-        bearerToken = config.bearerToken
+        self.collector = VGSCollect(id: "tntagcot4b1", environment: .sandbox)
+        self.service = LiveForageService(collector)
     }
     
-    func refreshAuthentication(for bearerToken: String) {
-        self.bearerToken = bearerToken
+    // MARK: ForageSDKService Methods
+    
+    public func tokenizeEBTCard(
+        merchantAccount: String,
+        bearerToken: String,
+        completion: @escaping (Result<Data?, Error>) -> Void) {
+        let request = ForagePANRequest(
+            authorization: bearerToken,
+            merchantAccount: merchantAccount,
+            panNumber: panNumber,
+            type: CardType.ebt.rawValue,
+            reusable: true
+        )
+        service?.tokenizeEBTCard(request: request, completion: completion)
+    }
+    
+    public func checkBalance(
+        bearerToken: String,
+        merchantAccount: String,
+        paymentMethodReference: String,
+        cardNumberToken: String,
+        completion: @escaping (Result<Data?, Error>) -> Void) {
+        service?.getXKey(bearerToken: bearerToken) { result in
+            switch result {
+            case .success(let model):
+                let request = ForageBalanceRequest(
+                    authorization: bearerToken,
+                    paymentMethodReference: paymentMethodReference,
+                    cardNumberToken: cardNumberToken,
+                    merchantID: merchantAccount,
+                    xKey: model.alias
+                )
+                self.service?.getBalance(request: request, completion: completion)
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    public func capturePayment(
+        bearerToken: String,
+        merchantAccount: String,
+        paymentReference: String,
+        cardNumberToken: String,
+        completion: @escaping (Result<Data?, Error>) -> Void) {
+        service?.getXKey(bearerToken: bearerToken) { result in
+            switch result {
+            case .success(let model):
+                let request = ForageCaptureRequest(
+                    authorization: bearerToken,
+                    paymentReference: paymentReference,
+                    cardNumberToken: cardNumberToken,
+                    merchantID: merchantAccount,
+                    xKey: model.alias
+                )
+                
+                self.service?.requestCapturePayment(request: request, completion: completion)
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    public func cancelRequest() {
+        service?.provider.stopRequestOnGoing()
+    }
+    
+    private func getXKey(
+        _ bearerToken: String,
+        completion: @escaping (Result<ForageXKeyModel, Error>) -> Void)
+    -> Void {
+        service?.getXKey(bearerToken: bearerToken) { result in
+            completion(result)
+        }
     }
 }

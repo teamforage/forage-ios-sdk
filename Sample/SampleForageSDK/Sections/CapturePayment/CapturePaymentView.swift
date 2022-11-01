@@ -31,21 +31,21 @@ class CapturePaymentView: UIView {
         return label
     }()
     
-    private let snapTextField: ForagePINTextFieldView = {
-        let tf = ForagePINTextFieldView()
+    private let snapTextField: ForagePINTextField = {
+        let tf = ForagePINTextField()
         tf.placeholder = "PIN Snap Field"
         tf.isSecureTextEntry = true
         tf.layer.borderColor = UIColor.red.cgColor
-        tf.translatesAutoresizingMaskIntoConstraints = false
+        tf.pinType = .snap
         return tf
     }()
     
-    private let nonSnapTextField: ForagePINTextFieldView = {
-        let tf = ForagePINTextFieldView()
+    private let nonSnapTextField: ForagePINTextField = {
+        let tf = ForagePINTextField()
         tf.placeholder = "PIN Snap Field"
         tf.isSecureTextEntry = true
         tf.layer.borderColor = UIColor.red.cgColor
-        tf.translatesAutoresizingMaskIntoConstraints = false
+        tf.pinType = .nonSnap
         return tf
     }()
     
@@ -65,7 +65,6 @@ class CapturePaymentView: UIView {
         button.setTitle("Capture Non Snap Payment", for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         button.tintColor = .white
-        button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(performCaptureNonSnapPayment(_:)), for: .touchUpInside)
         button.backgroundColor = .systemBlue
         return button
@@ -102,23 +101,29 @@ class CapturePaymentView: UIView {
     // MARK: Private Methods
     
     private func capturePayment(isEbtSnap: Bool) {
-        let paymentReference =
-            isEbtSnap
-                ? ClientSharedData.shared.paymentReference[FundingType.ebtSnap] ?? ""
-                : ClientSharedData.shared.paymentReference[FundingType.ebtCash] ?? ""
-        snapTextField.performRequest(
-            forPIN:
-                    .ebtCapture(
-                        paymentReference: paymentReference,
-                        cardNumberToken: ClientSharedData.shared.cardNumberToken
-                    )
-        )
+        if isPINValid {
+            let paymentReference =
+                isEbtSnap
+                    ? ClientSharedData.shared.paymentReference[FundingType.ebtSnap] ?? ""
+                    : ClientSharedData.shared.paymentReference[FundingType.ebtCash] ?? ""
+            
+            ForageSDK.shared.capturePayment(
+                bearerToken: ClientSharedData.shared.bearerToken,
+                merchantAccount: ClientSharedData.shared.merchantID,
+                paymentReference: paymentReference,
+                cardNumberToken: ClientSharedData.shared.cardNumberToken) { result in
+                    self.printResult(result: result)
+                }
+        }
     }
     
-    private func printResult(result: Result<ForageCaptureModel, Error>) {
+    private func printResult(result: Result<Data?, Error>) {
         DispatchQueue.main.async {
             switch result {
-            case .success(let response):
+            case .success(let data):
+                guard let data = data,
+                      let response = try? JSONDecoder().decode(ForageCaptureModel.self, from: data)
+                else { return }
                 self.resultLabel.text = """
                 Success:\n
                 PaymentRef: \(response.paymentIdentifier)\n
@@ -221,11 +226,8 @@ class CapturePaymentView: UIView {
 // MARK: - ForagePINTextFieldDelegate
 
 extension CapturePaymentView: ForagePINTextFieldDelegate {
-    func pinStatus(_ view: UIView, isValid: Bool) {
-        debugPrint("Status: \(isValid)")
-    }
-    
-    func capturePaymentCallback(_ view: UIView, result: (Result<ForageCaptureModel, Error>)) {
-        printResult(result: result)
+    func pinStatus(_ view: UIView, isValid: Bool, pinType: PinType) {
+        isPINValid = isValid
+        resultLabel.text = "Is valid pin? \(isValid) - type: \(pinType.rawValue)"
     }
 }

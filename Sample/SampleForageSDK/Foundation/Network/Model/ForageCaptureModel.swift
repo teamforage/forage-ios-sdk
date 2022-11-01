@@ -1,8 +1,8 @@
 //
-//  ForageBalanceModel.swift
-//  ForageSDK
+//  ForageCaptureModel.swift
+//  SampleForageSDK
 //
-//  Created by Symphony on 27/10/22.
+//  Created by Symphony on 31/10/22.
 //
 
 import UIKit
