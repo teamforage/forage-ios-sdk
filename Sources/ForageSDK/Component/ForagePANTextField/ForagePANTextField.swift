@@ -1,28 +1,28 @@
 //
-//  ForagePINTextFieldView.swift
+//  ForagePANTextField.swift
 //  ForageSDK
 //
-//  Created by Symphony on 23/10/22.
+//  Created by Symphony on 16/10/22.
 //
 
 import UIKit
 import VGSCollectSDK
 
-public enum PINType {
-    case balance(paymentMethodReference: String, cardNumberToken: String)
-    case ebtCapture(paymentReference: String, cardNumberToken: String)
+private enum CardType: String {
+    case ebt = "ebt"
 }
 
-public class ForagePINTextFieldView: UIView, Identifiable {
-    
-    // MARK: Public Delegate
-    
-    /// Delegate that updates client's side about state of the entered pin
-    public weak var delegate: ForagePINTextFieldDelegate?
+public class ForagePANTextField: UIView, Identifiable {
     
     // MARK: Private Properties
     
-    private var controller: ForagePINTextFieldViewController!
+    private var panNumber = ""
+    private var stateIIN: StateIIN?
+    
+    // MARK: Public Delegate
+    
+    /// Delegate that updates client's side about state of the entered card number
+    public weak var delegate: ForagePANTextFieldDelegate?
     
     // MARK: Public Properties
     
@@ -64,6 +64,16 @@ public class ForagePINTextFieldView: UIView, Identifiable {
         didSet { textField.textAlignment = textAlignment }
     }
     
+    /// Allow user to clear text field
+    /// `clearButtonMode` default value is `never`
+    @IBInspectable public var clearButtonMode: UITextField.ViewMode = .never {
+        didSet { textField.clearButtonMode = clearButtonMode }
+    }
+    
+    override public var intrinsicContentSize: CGSize {
+        return CGSize(width: frame.width, height: 83)
+    }
+    
     // MARK: Private components
     
     private lazy var container: UIView = {
@@ -72,15 +82,14 @@ public class ForagePINTextFieldView: UIView, Identifiable {
         return view
     }()
     
-    private lazy var textField: VGSTextField = {
-        let tf = VGSTextField()
+    private lazy var textField: UITextField = {
+        let tf = UITextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
         tf.textColor = UIColor.black
         tf.font = UIFont.systemFont(ofSize: 14, weight: .regular)
+        tf.borderStyle = .roundedRect
         tf.autocorrectionType = .no
-        tf.borderWidth = 0.25
-        tf.borderColor = UIColor.lightGray
-        tf.padding = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 0)
+        tf.keyboardType = UIKeyboardType.phonePad
         return tf
     }()
     
@@ -103,18 +112,12 @@ public class ForagePINTextFieldView: UIView, Identifiable {
     // MARK: Private Methods
     
     private func commonInit() {
-        controller = LiveForagePINTextFieldViewController()
         addSubview(container)
         
         container.addSubview(textField)
         
         textField.delegate = self
-        let configuration = VGSConfiguration(collector: controller.collector, fieldName: "pin")
-        configuration.type = .none
-        configuration.keyboardType = .numberPad
-        configuration.maxInputLength = 4
-        textField.configuration = configuration
-        
+
         container.anchor(
             top: self.topAnchor,
             leading: self.leadingAnchor,
@@ -132,7 +135,7 @@ public class ForagePINTextFieldView: UIView, Identifiable {
             centerXAnchor: nil,
             padding: UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         )
-        
+
         let tapGesture = UITapGestureRecognizer(
             target: self,
             action: #selector(requestFocus(_:))
@@ -143,69 +146,60 @@ public class ForagePINTextFieldView: UIView, Identifiable {
     @objc fileprivate func requestFocus(_ gesture: UIGestureRecognizer) {
         becomeFirstResponder()
     }
-    
-    // MARK: Public Methods
-    
-    public func performRequest(forPIN type: PINType) {
-        switch type {
-        case .balance(let paymentMethodReference, let cardNumberToken):
-            requestBalance(paymentMethodReference: paymentMethodReference, cardNumberToken: cardNumberToken)
-        case .ebtCapture(let paymentReference, let cardNumberToken):
-            capturePayment(paymentReference: paymentReference, cardNumberToken: cardNumberToken)
-        }
-    }
-    
-    public func cancelRequest() {
-        controller.cancelRequest()
-    }
-    
-    private func requestBalance(
-        paymentMethodReference: String,
-        cardNumberToken: String) -> Void {
-        controller.requestBalance(
-            paymentMethodReference: paymentMethodReference,
-            cardNumberToken: cardNumberToken) { result in
-                self.delegate?.balanceCallback(self, result: result)
-            }
-    }
-    
-    private func capturePayment(
-        paymentReference: String,
-        cardNumberToken: String
-    ) -> Void {
-            controller.capturePayment(
-                paymentReference: paymentReference,
-                cardNumberToken: cardNumberToken,
-                merchantID: ForageSDK.shared.merchantID
-            ) { result in
-                self.delegate?.capturePaymentCallback(self, result: result)
-            }
-    }
 }
 
-extension ForagePINTextFieldView: VGSTextFieldDelegate {
-    /// Check active vgs textfield's state when editing the field
-    public func vgsTextFieldDidChange(_ textField: VGSTextField) {
-        let isValid = textField.state.inputLength == 4
-        delegate?.pinStatus(self, isValid: isValid)
+// MARK: - UITextFieldDelegate
+
+extension ForagePANTextField: UITextFieldDelegate {
+    public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        let currentString = (textField.text ?? "") as NSString
+        let newString = currentString.replacingCharacters(in: range, with: string)
+        
+        /// While entering first 6 digits continue typing allowed
+        if newString.count < 6 {
+            delegate?.panNumberStatus(self, cardStatus: .identifying)
+            return true
+        }
+        
+        /// Check if 6 first entered number are valid
+        if let stateIIN = ForagePANValidations.checkPANLength(newString) {
+            /// Check max length allowed is fulfill
+            if newString.count > stateIIN.panLength {
+                return false
+            }
+            
+            if newString.count < stateIIN.panLength {
+                delegate?.panNumberStatus(self, cardStatus: .identifying)
+            } else {
+                ForageSDK.shared.panNumber = newString
+                delegate?.panNumberStatus(self, cardStatus: .valid)
+            }
+            return true
+            /// A pan number is invalid in case it has more than 6 digits and is not in the allowed list
+        } else if newString.count >= 6 {
+            delegate?.panNumberStatus(self, cardStatus: .invalid)
+        }
+        
+        /// Default text field allowed digits
+        return newString.count <= 16
     }
 }
 
 // MARK: - UIResponder methods
 
-extension ForagePINTextFieldView {
+extension ForagePANTextField {
     
-    /// Make `ForagePINTextFieldView` focused.
+    /// Make `ForagePANTextField` focused.
     @discardableResult override public func becomeFirstResponder() -> Bool {
         return textField.becomeFirstResponder()
     }
     
-    /// Remove  focus from `ForagePINTextFieldView`.
+    /// Remove  focus from `ForagePANTextField`.
     @discardableResult override public func resignFirstResponder() -> Bool {
         return textField.resignFirstResponder()
     }
     
-    /// Check if `ForagePINTextFieldView` is focused.
+    /// Check if `ForagePANTextField` is focused.
     override public var isFirstResponder: Bool {
         return textField.isFirstResponder
     }
