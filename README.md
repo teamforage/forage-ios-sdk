@@ -9,6 +9,7 @@ Table of contents
    * [Integration](#integration)
       * [Swift Package Manager](#swift-package-manager) 
    * [Usage](#usage)
+      * [Create ForageSDK instance](#create-foragesdk-instance)
       * [Forage UI Elements](#forage-ui-elements)
       * [ForagePANTextField](#foragepantextfield)
       * [ForagePINTextField](#foragepintextfield)
@@ -50,6 +51,16 @@ Click on `Add Package` button. And, on the next screen, select the package `Fora
 ### Import SDK into your file
 ```swift
 import ForageSDK
+```
+
+### Create ForageSDK instance
+
+Initializing a ForageSDK instance, you need to provide the environment.
+
+```swift
+ForageSDK.setup(
+    ForageSDK.Config(environment: .sandbox)            
+)
 ```
 
 ## Forage UI Elements

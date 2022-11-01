@@ -8,6 +8,19 @@
 import VGSCollectSDK
 import Foundation
 
+public enum EnvironmentTarget: String {
+    case dev = "api.dev.joinforage.app"
+    case staging = "api.staging.joinforage.app"
+    case sandbox = "api.sandbox.joinforage.app"
+    case cert = "api.cert.joinforage.app"
+    case prod = "api.joinforage.app"
+}
+
+private enum VaultId: String {
+    case sandbox = "tntagcot4b1"
+    case prod = "tntagcot4b1_prod"
+}
+
 private enum CardType: String {
     case ebt = "ebt"
 }
@@ -42,20 +55,36 @@ public class ForageSDK: ForageSDKService {
     
     // MARK: Properties
     
+    private static var config: Config?
     internal var collector: VGSCollect?
     internal var service: ForageService?
     internal var panNumber: String = ""
+    internal var environment: EnvironmentTarget = .sandbox
     
-    public static let shared: ForageSDK = {
-        let instance = ForageSDK()
-        return instance
-    }()
+    public static let shared = ForageSDK()
     
     // MARK: Init
     
     private init() {
-        self.collector = VGSCollect(id: "tntagcot4b1", environment: .sandbox)
+        guard let config = ForageSDK.config else {
+            assertionFailure("ForageSDK missing Config setup")
+            return
+        }
+        
+        self.collector = VGSCollect(id: vaultID(config.environment).rawValue, environment: environmentVGS(config.environment))
         self.service = LiveForageService(collector)
+    }
+    
+    public struct Config {
+        let environment: EnvironmentTarget
+
+        public init(environment: EnvironmentTarget = .sandbox) {
+            self.environment = environment
+        }
+    }
+    
+    public class func setup(_ config: Config) {
+        ForageSDK.config = config
     }
     
     // MARK: ForageSDKService Methods
@@ -131,6 +160,20 @@ public class ForageSDK: ForageSDKService {
     -> Void {
         service?.getXKey(bearerToken: bearerToken) { result in
             completion(result)
+        }
+    }
+    
+    private func vaultID(_ environment: EnvironmentTarget) -> VaultId {
+        switch environment {
+        case .dev, .staging, .cert, .sandbox: return .sandbox
+        case .prod: return .prod
+        }
+    }
+    
+    private func environmentVGS(_ environment: EnvironmentTarget) -> VGSCollectSDK.Environment {
+        switch environment {
+        case .dev, .staging, .cert, .sandbox: return .sandbox
+        case .prod: return .live
         }
     }
 }
