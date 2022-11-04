@@ -36,12 +36,12 @@ class RequestBalanceView: UIView {
         return label
     }()
     
-    private let pinNumberTextField: ForagePINTextFieldView = {
-        let tf = ForagePINTextFieldView()
+    private let pinNumberTextField: ForagePINTextField = {
+        let tf = ForagePINTextField()
         tf.placeholder = "PIN Field"
         tf.isSecureTextEntry = true
         tf.layer.borderColor = UIColor.red.cgColor
-        tf.translatesAutoresizingMaskIntoConstraints = false
+        tf.pinType = .balance
         return tf
     }()
     
@@ -93,13 +93,13 @@ class RequestBalanceView: UIView {
     // MARK: Fileprivate Methods
     
     @objc fileprivate func getBalanceInfo(_ gesture: UIGestureRecognizer) {
-        pinNumberTextField.performRequest(
-            forPIN:
-                    .balance(
-                        paymentMethodReference: ClientSharedData.shared.paymentMethodReference,
-                        cardNumberToken: ClientSharedData.shared.cardNumberToken
-                    )
-        )
+        ForageSDK.shared.checkBalance(
+            bearerToken: ClientSharedData.shared.bearerToken,
+            merchantAccount: ClientSharedData.shared.merchantID,
+            paymentMethodReference: ClientSharedData.shared.paymentMethodReference,
+            cardNumberToken: ClientSharedData.shared.cardNumberToken) { result in
+                self.printPINResult(result: result)
+            }
     }
     
     @objc fileprivate func goToCreatePayment(_ gesture: UIGestureRecognizer) {
@@ -116,10 +116,13 @@ class RequestBalanceView: UIView {
     
     // MARK: Private Methods
     
-    private func printPINResult(result: Result<ForageBalanceModel, Error>) {
+    private func printPINResult(result: Result<Data?, Error>) {
         DispatchQueue.main.async {
             switch result {
-            case .success(let response):
+            case .success(let data):
+                guard let data = data,
+                      let response = try? JSONDecoder().decode(ForageBalanceModel.self, from: data)
+                else { return }
                 self.resultLabel.text = """
                 Success:\n
                 SNAP: \(response.snap)\n
@@ -228,8 +231,7 @@ class RequestBalanceView: UIView {
 // MARK: - ForagePINTextFieldDelegate
 
 extension RequestBalanceView: ForagePINTextFieldDelegate {
-    
-    func pinStatus(_ view: UIView, isValid: Bool) {
+    func pinStatus(_ view: UIView, isValid: Bool, pinType: PinType) {
         if isValid {
             statusLabel.text = "It is a VALID pin"
             statusLabel.textColor = .green
@@ -239,9 +241,5 @@ extension RequestBalanceView: ForagePINTextFieldDelegate {
         }
         updateButtonState(isEnabled: isValid, button: requestBalanceButton)
         isPINValid = isValid
-    }
-    
-    func balanceCallback(_ view: UIView, result: (Result<ForageBalanceModel, Error>)) {
-        printPINResult(result: result)
     }
 }

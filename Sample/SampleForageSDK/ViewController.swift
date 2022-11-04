@@ -32,13 +32,6 @@ class ViewController: UIViewController {
         ClientSharedData.shared.merchantID = merchantID
         ClientSharedData.shared.bearerToken = bearerToken
         
-        ForageSDK.setup(
-            ForageSDK.Config(
-                merchantID: merchantID,
-                bearerToken: bearerToken
-            )
-        )
-        
         let cardNumberViewController = CardNumberViewController()
         navigationController?.pushViewController(cardNumberViewController, animated: true)
     }

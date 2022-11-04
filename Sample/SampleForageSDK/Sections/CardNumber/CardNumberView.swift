@@ -36,10 +36,9 @@ class CardNumberView: UIView {
         return label
     }()
     
-    private let panNumberTextField: ForagePANTextFieldView = {
-        let tf = ForagePANTextFieldView()
+    private let panNumberTextField: ForagePANTextField = {
+        let tf = ForagePANTextField()
         tf.placeholder = "PAN Number"
-        tf.translatesAutoresizingMaskIntoConstraints = false
         return tf
     }()
     
@@ -92,7 +91,11 @@ class CardNumberView: UIView {
     
     @objc fileprivate func sendInfo(_ gesture: UIGestureRecognizer) {
         if isCardValid {
-            self.panNumberTextField.sendPanCardNumber()
+            ForageSDK.shared.tokenizeEBTCard(
+                merchantAccount: ClientSharedData.shared.merchantID,
+                bearerToken: ClientSharedData.shared.bearerToken) { result in
+                    self.printResult(result: result)
+                }
         }
     }
     
@@ -110,10 +113,14 @@ class CardNumberView: UIView {
     
     // MARK: Private Methods
     
-    private func printResult(result: Result<ForagePANModel, Error>) {
+    private func printResult(result: Result<Data?, Error>) {        
         DispatchQueue.main.async {
             switch result {
-            case .success(let response):
+            case .success(let data):
+                guard let data = data,
+                      let response = try? JSONDecoder().decode(ForagePANModel.self, from: data)
+                else { return }
+                
                 self.resultLabel.text = """
                 Success:\n
                 ref: \(response.paymentMethodIdentifier)\n
@@ -127,24 +134,6 @@ class CardNumberView: UIView {
             case .failure(let error):
                 self.resultLabel.text = "Error: \n\(error.localizedDescription)"
                 self.updateButtonState(isEnabled: false, button: self.nextButton)
-            }
-            
-            self.layoutIfNeeded()
-            self.layoutSubviews()
-        }
-    }
-    
-    private func printPINResult(result: Result<ForageBalanceModel, Error>) {
-        DispatchQueue.main.async {
-            switch result {
-            case .success(let response):
-                self.resultLabel.text = """
-                Success:\n
-                SNAP: \(response.snap)\n
-                NON SNAP: \(response.nonSnap)\n
-                """
-            case .failure(let error):
-                self.resultLabel.text = "Error: \n\(error.localizedDescription)"
             }
             
             self.layoutIfNeeded()
@@ -263,9 +252,5 @@ extension CardNumberView: ForagePANTextFieldDelegate {
         
         updateButtonState(isEnabled: isValid, button: sendPanButton)
         isCardValid = isValid
-    }
-    
-    func panNumberCallback(_ view: UIView, result: (Result<ForagePANModel, Error>)) {
-        printResult(result: result)
     }
 }
