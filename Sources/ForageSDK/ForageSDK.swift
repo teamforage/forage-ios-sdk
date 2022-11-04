@@ -17,8 +17,11 @@ public enum EnvironmentTarget: String {
 }
 
 private enum VaultId: String {
+    case dev = "tntlqkidhc6"
+    case staging = "tnteykuh975"
     case sandbox = "tntagcot4b1"
-    case prod = "tntagcot4b1_prod"
+    case cert = "tntpnht7psv"
+    case prod = "tntbcrncmgi"
 }
 
 private enum CardType: String {
@@ -165,7 +168,10 @@ public class ForageSDK: ForageSDKService {
     
     private func vaultID(_ environment: EnvironmentTarget) -> VaultId {
         switch environment {
-        case .dev, .staging, .cert, .sandbox: return .sandbox
+        case .dev: return .dev
+        case .staging: return .staging
+        case .sandbox: return .sandbox
+        case .cert: return .cert
         case .prod: return .prod
         }
     }
