@@ -6,13 +6,16 @@
 //
 
 import UIKit
+import ForageSDK
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        ForageSDK.setup(
+            ForageSDK.Config(environment: .sandbox)            
+        )
+        
         // Override point for customization after application launch.
         return true
     }

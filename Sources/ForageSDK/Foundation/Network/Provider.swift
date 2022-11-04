@@ -34,6 +34,27 @@ internal class Provider {
         }
     }
     
+    internal func execute(endpoint: ServiceProtocol, completion: @escaping (Result<Data?, Error>) -> Void) throws {
+        do {
+            let request = try endpoint.urlRequest()
+            task = urlSession.dataTask(with: request) { (data, response, error) in
+                self.processResponse(response: response) { result in
+                    DispatchQueue.main.async {
+                        switch result {
+                        case .success: completion(.success(data))
+                        case .failure:
+                            guard let error = error else { return }
+                            completion(.failure(error))
+                        }
+                    }
+                }
+            }
+            task?.resume()
+        } catch {
+            throw error
+        }
+    }
+    
     internal func stopRequestOnGoing() {
         if let task = task {
             task.cancel()

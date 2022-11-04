@@ -17,7 +17,7 @@ class ForagePANValidations {
         
         return nil
     }
-    
+
     static var panNumbers: [StateIIN] = [
         StateIIN(state: "ALABAMA", panNumber: "507680", panLength: 16),
         StateIIN(state: "ALASKA", panNumber: "507695", panLength: 16),

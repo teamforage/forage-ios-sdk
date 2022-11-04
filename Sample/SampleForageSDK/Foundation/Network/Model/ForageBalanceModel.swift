@@ -1,8 +1,8 @@
 //
 //  ForageBalanceModel.swift
-//  ForageSDK
+//  SampleForageSDK
 //
-//  Created by Symphony on 23/10/22.
+//  Created by Symphony on 31/10/22.
 //
 
 import Foundation
@@ -18,3 +18,4 @@ public struct ForageBalanceModel: Codable {
         case updated
     }
 }
+
