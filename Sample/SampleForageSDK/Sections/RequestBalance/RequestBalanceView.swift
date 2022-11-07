@@ -40,7 +40,6 @@ class RequestBalanceView: UIView {
         let tf = ForagePINTextField()
         tf.placeholder = "PIN Field"
         tf.isSecureTextEntry = true
-        tf.layer.borderColor = UIColor.red.cgColor
         tf.pinType = .balance
         return tf
     }()
