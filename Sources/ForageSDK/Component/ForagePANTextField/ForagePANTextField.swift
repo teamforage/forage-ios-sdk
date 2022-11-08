@@ -40,7 +40,7 @@ public class ForagePANTextField: UIView, Identifiable {
     }
     
     /// Size of the text for the text field
-    /// `textColor` default value is `black`
+    /// `size` default value is `24`
     @IBInspectable public var size: Double = 24.0 {
         didSet { textField.font = UIFont.systemFont(ofSize: size) }
     }
@@ -68,6 +68,13 @@ public class ForagePANTextField: UIView, Identifiable {
     /// `clearButtonMode` default value is `never`
     @IBInspectable public var clearButtonMode: UITextField.ViewMode = .never {
         didSet { textField.clearButtonMode = clearButtonMode }
+    }
+    
+    /// Change UIFont
+    /// `UITextField` text font
+    @IBInspectable public var font: UIFont? {
+        get { return textField.font }
+        set { textField.font = newValue }
     }
     
     override public var intrinsicContentSize: CGSize {

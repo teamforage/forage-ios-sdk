@@ -35,7 +35,6 @@ class CapturePaymentView: UIView {
         let tf = ForagePINTextField()
         tf.placeholder = "PIN Snap Field"
         tf.isSecureTextEntry = true
-        tf.layer.borderColor = UIColor.red.cgColor
         tf.pinType = .snap
         return tf
     }()
@@ -44,7 +43,6 @@ class CapturePaymentView: UIView {
         let tf = ForagePINTextField()
         tf.placeholder = "PIN Snap Field"
         tf.isSecureTextEntry = true
-        tf.layer.borderColor = UIColor.red.cgColor
         tf.pinType = .nonSnap
         return tf
     }()
