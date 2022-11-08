@@ -80,7 +80,7 @@ internal class LiveForageService: ForageService {
         completion: @escaping (Result<Data?, Error>) -> Void) -> Void {
             collector?.customHeaders = [
                 "X-KEY": request.xKey,
-                "IDEMPOTENCY-KEY": request.paymentMethodReference,
+                "IDEMPOTENCY-KEY": UUID.init().uuidString,
                 "Merchant-Account": request.merchantID
             ]
 
