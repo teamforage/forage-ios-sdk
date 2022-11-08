@@ -33,7 +33,7 @@ public class ForagePINTextField: UIView, Identifiable {
     }
     
     /// Size of the text for the text field
-    /// `textColor` default value is `black`
+    /// `size` default value is `24`
     @IBInspectable public var size: Double = 24.0 {
         didSet { textField.font = UIFont.systemFont(ofSize: size) }
     }
@@ -46,8 +46,8 @@ public class ForagePINTextField: UIView, Identifiable {
     }
     
     /// Hide text and disable copy when set `true`
-    /// `isSecureTextEntry` default value is `false`
-    @IBInspectable public var isSecureTextEntry: Bool = false {
+    /// `isSecureTextEntry` default value is `true`
+    @IBInspectable public var isSecureTextEntry: Bool = true {
         didSet { textField.isSecureTextEntry = isSecureTextEntry }
     }
     
@@ -55,6 +55,13 @@ public class ForagePINTextField: UIView, Identifiable {
     /// `textAlignment` default value is `natural`
     @IBInspectable public var textAlignment: NSTextAlignment = .natural {
         didSet { textField.textAlignment = textAlignment }
+    }
+    
+    /// Change UIFont
+    /// `VGSTextField` text font
+    @IBInspectable public var font: UIFont? {
+        get { return textField.font }
+        set { textField.font = newValue }
     }
     
     // MARK: Private components

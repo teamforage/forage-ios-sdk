@@ -71,6 +71,7 @@
 		4976E75D29074D76004FD1CD /* RequestBalanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestBalanceView.swift; sourceTree = "<group>"; };
 		4985C745290A0AD9000568BF /* CapturePaymentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapturePaymentView.swift; sourceTree = "<group>"; };
 		4985C747290A0AE1000568BF /* CapturePaymentViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapturePaymentViewController.swift; sourceTree = "<group>"; };
+		49A15DBB29155A9E0023762E /* forage-ios-sdk */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "forage-ios-sdk"; path = ..; sourceTree = "<group>"; };
 		49AA74FB2905615F00802CAC /* UIView+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Extension.swift"; sourceTree = "<group>"; };
 		49ED5EC12910879A00216288 /* ForageBalanceModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForageBalanceModel.swift; sourceTree = "<group>"; };
 		49ED5EC3291087B800216288 /* ForageCaptureModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForageCaptureModel.swift; sourceTree = "<group>"; };
@@ -166,6 +167,7 @@
 		49475BE228FCD93B00190846 = {
 			isa = PBXGroup;
 			children = (
+				49A15DBA29155A9E0023762E /* Packages */,
 				49475BED28FCD93B00190846 /* SampleForageSDK */,
 				49475BEC28FCD93B00190846 /* Products */,
 				49475C1A28FCDE0600190846 /* Frameworks */,
@@ -230,6 +232,14 @@
 				4985C747290A0AE1000568BF /* CapturePaymentViewController.swift */,
 			);
 			path = CapturePayment;
+			sourceTree = "<group>";
+		};
+		49A15DBA29155A9E0023762E /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				49A15DBB29155A9E0023762E /* forage-ios-sdk */,
+			);
+			name = Packages;
 			sourceTree = "<group>";
 		};
 		49AA74FA2905615400802CAC /* Extension */ = {
