@@ -7,6 +7,7 @@ Table of contents
 
 <!--ts-->
    * [Integration](#integration)
+      * [CocoaPods](#cocoapods)
       * [Swift Package Manager](#swift-package-manager) 
    * [Usage](#usage)
       * [Create ForageSDK instance](#create-foragesdk-instance)
@@ -18,6 +19,14 @@ Table of contents
 <!--te-->
 
 ## Integration
+
+### CocoaPods
+
+[CocoaPods](https://cocoapods.org) is a dependency manager for Cocoa projects. For usage and installation instructions, visit their website. To integrate ForageSDK into your Xcode project using CocoaPods, specify it in your `Podfile`:
+
+```swift
+pod 'ForageSDK', '~> 0.1.0'
+```
 
 ### Swift Package Manager
 
