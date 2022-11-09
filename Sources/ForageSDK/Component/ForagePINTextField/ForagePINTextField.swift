@@ -110,10 +110,13 @@ public class ForagePINTextField: UIView, Identifiable {
         
         textField.delegate = self
         
+        var rules = VGSValidationRuleSet()
+        rules.add(rule: VGSValidationRulePattern(pattern: "^[0-9]+$", error: VGSValidationErrorType.pattern.rawValue))
         let configuration = VGSConfiguration(collector: collector, fieldName: "pin")
         configuration.type = .none
         configuration.keyboardType = .numberPad
         configuration.maxInputLength = 4
+        configuration.validationRules = rules
         textField.configuration = configuration
         
         container.anchor(
