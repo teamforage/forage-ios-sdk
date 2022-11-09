@@ -159,6 +159,12 @@ public class ForagePANTextField: UIView, Identifiable {
 
 extension ForagePANTextField: UITextFieldDelegate {
     public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        
+        let invalidCharacters = CharacterSet(charactersIn: "0123456789").inverted
+        if !(string.rangeOfCharacter(from: invalidCharacters) == nil) {
+            return false
+        }
+        
         let currentString = (textField.text ?? "") as NSString
         let newString = currentString.replacingCharacters(in: range, with: string)
         
