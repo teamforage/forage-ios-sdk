@@ -71,6 +71,7 @@ public class ForageSDK: ForageSDKService {
         }
         
         VGSCollectLogger.shared.disableAllLoggers()
+        self.environment = config.environment
         self.collector = VGSCollect(id: vaultID(config.environment).rawValue, environment: environmentVGS(config.environment))
         self.service = LiveForageService(collector)
     }
