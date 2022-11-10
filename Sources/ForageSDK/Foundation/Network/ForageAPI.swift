@@ -10,6 +10,8 @@ import Foundation
 enum ForageAPI {
     case panNumber(request: ForagePANRequest)
     case xKey(bearerToken: String)
+    case message(request: MessageResponse, bearerToken: String, merchantID: String)
+    case retrieveBalance(request: ForageBalanceRequest)
 }
 
 extension ForageAPI: ServiceProtocol {
@@ -21,13 +23,15 @@ extension ForageAPI: ServiceProtocol {
         switch self {
         case .panNumber: return "/api/payment_methods/"
         case .xKey: return "/iso_server/encryption_alias/"
+        case .message(request: let response, _, _): return "/api/message/\(response.contentId)/"
+        case .retrieveBalance(request: let request): return "/api/payment_methods/\(request.paymentMethodReference)/"
         }
     }
     
     var method: HttpMethod {
         switch self {
         case .panNumber: return .post
-        case .xKey: return .get
+        case .xKey, .message, .retrieveBalance: return .get
         }
     }
     
@@ -57,10 +61,36 @@ extension ForageAPI: ServiceProtocol {
                 urlParameters: nil,
                 additionalHeaders: httpHeaders
             )
+            
         case .xKey(bearerToken: let bearerToken):
             let httpHeaders: HTTPHeaders = [
                 "authorization": "Bearer \(bearerToken)",
                 "accept": "application/json"
+            ]
+            
+            return .requestParametersAndHeaders(
+                bodyParameters: nil,
+                urlParameters: nil,
+                additionalHeaders: httpHeaders
+            )
+            
+        case .message(_, bearerToken: let bearerToken, merchantID: let merchantID):
+            let httpHeaders: HTTPHeaders = [
+                "Merchant-Account": merchantID,
+                "authorization": "Bearer \(bearerToken)",
+                "accept": "application/json"
+            ]
+            
+            return .requestParametersAndHeaders(
+                bodyParameters: nil,
+                urlParameters: nil,
+                additionalHeaders: httpHeaders
+            )
+            
+        case .retrieveBalance(request: let request):
+            let httpHeaders: HTTPHeaders = [
+                "Merchant-Account": request.merchantID,
+                "authorization": "Bearer \(request.authorization)"
             ]
             
             return .requestParametersAndHeaders(

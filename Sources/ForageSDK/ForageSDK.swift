@@ -12,12 +12,14 @@ public enum EnvironmentTarget: String {
     case sandbox = "api.sandbox.joinforage.app"
     case cert = "api.cert.joinforage.app"
     case prod = "api.joinforage.app"
+    case dev = "api.dev.joinforage.app"
 }
 
 private enum VaultId: String {
     case sandbox = "tntagcot4b1"
     case cert = "tntpnht7psv"
     case prod = "tntbcrncmgi"
+    case dev = "tntlqkidhc6"
 }
 
 private enum CardType: String {
@@ -120,7 +122,7 @@ public class ForageSDK: ForageSDKService {
                     merchantID: merchantAccount,
                     xKey: model.alias
                 )
-                self.service?.getBalance(request: request, completion: completion)
+                self.service?.getBalance(request: request, bearerToken: bearerToken, merchantID: merchantAccount, completion: completion)
             case .failure(let error):
                 completion(.failure(error))
             }
@@ -169,12 +171,13 @@ public class ForageSDK: ForageSDKService {
         case .sandbox: return .sandbox
         case .cert: return .cert
         case .prod: return .prod
+        case .dev: return .dev
         }
     }
     
     private func environmentVGS(_ environment: EnvironmentTarget) -> VGSCollectSDK.Environment {
         switch environment {
-        case .cert, .sandbox: return .sandbox
+        case .cert, .sandbox, .dev: return .sandbox
         case .prod: return .live
         }
     }

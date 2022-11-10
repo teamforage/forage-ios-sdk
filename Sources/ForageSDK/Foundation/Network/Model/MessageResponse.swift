@@ -1,23 +1,11 @@
 //
-//  ForageBalanceModel.swift
-//  SampleForageSDK
+//  MessageResponse.swift
+//  ForageSDK
 //
-//  Created by Symphony on 31/10/22.
+//  Created by Symphony on 10/11/22.
 //
 
 import Foundation
-
-public struct ForageBalanceModel: Codable {
-    public let snap: String
-    public let nonSnap: String
-    public let updated: String
-    
-    private enum CodingKeys : String, CodingKey {
-        case snap
-        case nonSnap = "non_snap"
-        case updated
-    }
-}
 
 internal enum BalanceStatus: String, Codable {
     case sentToProxy = "sent_to_proxy"

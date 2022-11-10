@@ -122,6 +122,11 @@ class RequestBalanceView: UIView {
                 guard let data = data,
                       let response = try? JSONDecoder().decode(ForageBalanceModel.self, from: data)
                 else { return }
+//                self.resultLabel.text = """
+//                Success:\n
+//                Status: \(response.status.rawValue)\n
+//                Content ID: \(response.contentId)\n
+//                """
                 self.resultLabel.text = """
                 Success:\n
                 SNAP: \(response.snap)\n
