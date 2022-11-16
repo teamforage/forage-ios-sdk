@@ -83,10 +83,32 @@ public class ForagePANTextField: UIView, Identifiable {
     
     // MARK: Private components
     
-    private lazy var container: UIView = {
+    private lazy var root: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
+    }()
+    
+    private lazy var textFieldContainer: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    private lazy var imageViewContainer: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    private lazy var container: UIStackView = {
+        let sv = UIStackView()
+        sv.translatesAutoresizingMaskIntoConstraints = false
+        sv.axis = .vertical
+        sv.alignment = .fill
+        sv.distribution = .fill
+        sv.spacing = 8
+        return sv
     }()
     
     private lazy var textField: UITextField = {
@@ -98,6 +120,18 @@ public class ForagePANTextField: UIView, Identifiable {
         tf.autocorrectionType = .no
         tf.keyboardType = UIKeyboardType.phonePad
         return tf
+    }()
+    
+    private lazy var imageView: UIImageView = {
+        let imgView = UIImageView()
+        let image = UIImage(named: "forageLogo", in: .module, compatibleWith: nil)
+        imgView.translatesAutoresizingMaskIntoConstraints = false
+        imgView.adjustsImageSizeForAccessibilityContentSizeCategory = true
+        imgView.image = image
+        imgView.contentMode = .scaleAspectFit
+        imgView.translatesAutoresizingMaskIntoConstraints = false
+        imgView.heightAnchor.constraint(equalToConstant: 14).isActive = true
+        return imgView
     }()
     
     // MARK: Lifecycle methods
@@ -119,13 +153,18 @@ public class ForagePANTextField: UIView, Identifiable {
     // MARK: Private Methods
     
     private func commonInit() {
-        addSubview(container)
+        addSubview(root)
         
-        container.addSubview(textField)
+        root.addSubview(container)
+        
+        textFieldContainer.addSubview(textField)
+        imageViewContainer.addSubview(imageView)
+        container.addArrangedSubview(textFieldContainer)
+        container.addArrangedSubview(imageViewContainer)
         
         textField.delegate = self
 
-        container.anchor(
+        root.anchor(
             top: self.topAnchor,
             leading: self.leadingAnchor,
             bottom: self.bottomAnchor,
@@ -134,11 +173,29 @@ public class ForagePANTextField: UIView, Identifiable {
             padding: UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         )
         
+        container.anchor(
+            top: root.topAnchor,
+            leading: root.leadingAnchor,
+            bottom: root.bottomAnchor,
+            trailing: root.trailingAnchor,
+            centerXAnchor: nil,
+            padding: UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        )
+        
         textField.anchor(
-            top: self.topAnchor,
-            leading: self.leadingAnchor,
-            bottom: self.bottomAnchor,
-            trailing: self.trailingAnchor,
+            top: textFieldContainer.topAnchor,
+            leading: textFieldContainer.leadingAnchor,
+            bottom: textFieldContainer.bottomAnchor,
+            trailing: textFieldContainer.trailingAnchor,
+            centerXAnchor: nil,
+            padding: UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        )
+        
+        imageView.anchor(
+            top: imageViewContainer.topAnchor,
+            leading: imageViewContainer.leadingAnchor,
+            bottom: imageViewContainer.bottomAnchor,
+            trailing: imageViewContainer.trailingAnchor,
             centerXAnchor: nil,
             padding: UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         )
