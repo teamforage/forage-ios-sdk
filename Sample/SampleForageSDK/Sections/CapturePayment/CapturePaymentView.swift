@@ -177,7 +177,7 @@ class CapturePaymentView: UIView {
             trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
             centerXAnchor: contentView.centerXAnchor,
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 12, right: 24),
-            size: .init(width: 0, height: 42)
+            size: .init(width: 0, height: 60)
         )
         
         captureSnapPaymentButton.anchor(
@@ -197,7 +197,7 @@ class CapturePaymentView: UIView {
             trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
             centerXAnchor: contentView.centerXAnchor,
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 12, right: 24),
-            size: .init(width: 0, height: 42)
+            size: .init(width: 0, height: 60)
         )
         
         captureNonSnapPaymentButton.anchor(
