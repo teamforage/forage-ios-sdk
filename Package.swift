@@ -30,6 +30,9 @@ let package = Package(
             name: "ForageSDK",
             dependencies: [
                 "VGSCollectSDK",
+            ],
+            path: "Sources", resources: [
+                .process("Resources/Media.xcassets")
             ]),
         .testTarget(
             name: "ForageSDKTests",
