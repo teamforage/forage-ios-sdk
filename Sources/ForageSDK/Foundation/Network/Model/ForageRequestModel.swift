@@ -1,14 +1,15 @@
 //
-//  ForageCaptureRequest.swift
+//  ForageRetrieveModel.swift
 //  ForageSDK
 //
-//  Created by Symphony on 31/10/22.
+//  Created by Symphony on 16/11/22.
 //
 
 import Foundation
 
-internal struct ForageCaptureRequest {
+internal struct ForageRequestModel {
     let authorization: String
+    let paymentMethodReference: String
     let paymentReference: String
     let cardNumberToken: String
     let merchantID: String

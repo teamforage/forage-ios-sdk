@@ -8,10 +8,10 @@
 import Foundation
 
 enum ForageAPI {
-    case panNumber(request: ForagePANRequest)
+    case panNumber(request: ForagePANRequestModel)
     case xKey(bearerToken: String)
-    case message(request: MessageResponse, bearerToken: String, merchantID: String)
-    case retrieveBalance(request: ForageBalanceRequest)
+    case message(request: MessageResponseModel, bearerToken: String, merchantID: String)
+    case retrieveBalance(request: ForageRequestModel)
 }
 
 extension ForageAPI: ServiceProtocol {

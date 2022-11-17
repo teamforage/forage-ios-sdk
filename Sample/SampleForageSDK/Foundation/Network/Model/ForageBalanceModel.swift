@@ -7,6 +7,10 @@
 
 import Foundation
 
+public struct ForageBalance: Codable {
+    public let balance: ForageBalanceModel
+}
+
 public struct ForageBalanceModel: Codable {
     public let snap: String
     public let nonSnap: String
@@ -30,10 +34,6 @@ internal struct MessageResponse: Codable {
     let status: BalanceStatus
     let failed: Bool
     let errors: [String]
-    
-    internal init(contentId: String, messageType: String, status: BalanceStatus, failed: Bool, errors: [String]) {
-        self.init(contentId: contentId, messageType: messageType, status: status, failed: failed, errors: errors)
-    }
     
     private enum CodingKeys : String, CodingKey {
         case contentId = "content_id"

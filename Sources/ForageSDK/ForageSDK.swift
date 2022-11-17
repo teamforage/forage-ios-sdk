@@ -96,7 +96,7 @@ public class ForageSDK: ForageSDKService {
         merchantAccount: String,
         bearerToken: String,
         completion: @escaping (Result<Data?, Error>) -> Void) {
-        let request = ForagePANRequest(
+        let request = ForagePANRequestModel(
             authorization: bearerToken,
             merchantAccount: merchantAccount,
             panNumber: panNumber,
@@ -115,14 +115,15 @@ public class ForageSDK: ForageSDKService {
         service?.getXKey(bearerToken: bearerToken) { result in
             switch result {
             case .success(let model):
-                let request = ForageBalanceRequest(
+                let request = ForageRequestModel(
                     authorization: bearerToken,
                     paymentMethodReference: paymentMethodReference,
+                    paymentReference: "",
                     cardNumberToken: cardNumberToken,
                     merchantID: merchantAccount,
                     xKey: model.alias
                 )
-                self.service?.getBalance(request: request, bearerToken: bearerToken, merchantID: merchantAccount, completion: completion)
+                self.service?.getBalance(request: request, completion: completion)
             case .failure(let error):
                 completion(.failure(error))
             }
@@ -138,8 +139,9 @@ public class ForageSDK: ForageSDKService {
         service?.getXKey(bearerToken: bearerToken) { result in
             switch result {
             case .success(let model):
-                let request = ForageCaptureRequest(
+                let request = ForageRequestModel(
                     authorization: bearerToken,
+                    paymentMethodReference: "",
                     paymentReference: paymentReference,
                     cardNumberToken: cardNumberToken,
                     merchantID: merchantAccount,

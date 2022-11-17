@@ -120,17 +120,12 @@ class RequestBalanceView: UIView {
             switch result {
             case .success(let data):
                 guard let data = data,
-                      let response = try? JSONDecoder().decode(ForageBalanceModel.self, from: data)
+                      let response = try? JSONDecoder().decode(ForageBalance.self, from: data)
                 else { return }
-//                self.resultLabel.text = """
-//                Success:\n
-//                Status: \(response.status.rawValue)\n
-//                Content ID: \(response.contentId)\n
-//                """
                 self.resultLabel.text = """
                 Success:\n
-                SNAP: \(response.snap)\n
-                NON SNAP: \(response.nonSnap)\n
+                SNAP: \(response.balance.snap)\n
+                NON SNAP: \(response.balance.nonSnap)\n
                 """
                 self.updateButtonState(isEnabled: true, button: self.nextButton)
             case .failure(let error):
