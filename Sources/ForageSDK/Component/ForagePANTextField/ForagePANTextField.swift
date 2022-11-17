@@ -125,12 +125,11 @@ public class ForagePANTextField: UIView, Identifiable {
     private lazy var imageView: UIImageView = {
         let imgView = UIImageView()
         let image = UIImage(named: "forageLogo", in: .module, compatibleWith: nil)
-        imgView.translatesAutoresizingMaskIntoConstraints = false
         imgView.adjustsImageSizeForAccessibilityContentSizeCategory = true
         imgView.image = image
         imgView.contentMode = .scaleAspectFit
         imgView.translatesAutoresizingMaskIntoConstraints = false
-        imgView.heightAnchor.constraint(equalToConstant: 14).isActive = true
+        imgView.heightAnchor.constraint(equalToConstant: 16).isActive = true
         return imgView
     }()
     
