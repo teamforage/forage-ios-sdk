@@ -111,9 +111,9 @@ public class ForagePINTextField: UIView, Identifiable {
         let image = UIImage(named: "forageLogo", in: .module, compatibleWith: nil)
         imgView.adjustsImageSizeForAccessibilityContentSizeCategory = true
         imgView.image = image
-        imgView.contentMode = .scaleAspectFit
         imgView.translatesAutoresizingMaskIntoConstraints = false
         imgView.heightAnchor.constraint(equalToConstant: 16).isActive = true
+        imgView.widthAnchor.constraint(equalToConstant: 110).isActive = true
         return imgView
     }()
     
@@ -186,7 +186,7 @@ public class ForagePINTextField: UIView, Identifiable {
         
         imageView.anchor(
             top: imageViewContainer.topAnchor,
-            leading: imageViewContainer.leadingAnchor,
+            leading: nil,
             bottom: imageViewContainer.bottomAnchor,
             trailing: imageViewContainer.trailingAnchor,
             centerXAnchor: nil,
