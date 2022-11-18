@@ -12,12 +12,14 @@ public enum EnvironmentTarget: String {
     case sandbox = "api.sandbox.joinforage.app"
     case cert = "api.cert.joinforage.app"
     case prod = "api.joinforage.app"
+    case dev = "api.dev.joinforage.app"
 }
 
 private enum VaultId: String {
     case sandbox = "tntagcot4b1"
     case cert = "tntpnht7psv"
     case prod = "tntbcrncmgi"
+    case dev = "tntlqkidhc6"
 }
 
 private enum CardType: String {
@@ -94,7 +96,7 @@ public class ForageSDK: ForageSDKService {
         merchantAccount: String,
         bearerToken: String,
         completion: @escaping (Result<Data?, Error>) -> Void) {
-        let request = ForagePANRequest(
+        let request = ForagePANRequestModel(
             authorization: bearerToken,
             merchantAccount: merchantAccount,
             panNumber: panNumber,
@@ -113,9 +115,10 @@ public class ForageSDK: ForageSDKService {
         service?.getXKey(bearerToken: bearerToken) { result in
             switch result {
             case .success(let model):
-                let request = ForageBalanceRequest(
+                let request = ForageRequestModel(
                     authorization: bearerToken,
                     paymentMethodReference: paymentMethodReference,
+                    paymentReference: "",
                     cardNumberToken: cardNumberToken,
                     merchantID: merchantAccount,
                     xKey: model.alias
@@ -136,8 +139,9 @@ public class ForageSDK: ForageSDKService {
         service?.getXKey(bearerToken: bearerToken) { result in
             switch result {
             case .success(let model):
-                let request = ForageCaptureRequest(
+                let request = ForageRequestModel(
                     authorization: bearerToken,
+                    paymentMethodReference: "",
                     paymentReference: paymentReference,
                     cardNumberToken: cardNumberToken,
                     merchantID: merchantAccount,
@@ -169,12 +173,13 @@ public class ForageSDK: ForageSDKService {
         case .sandbox: return .sandbox
         case .cert: return .cert
         case .prod: return .prod
+        case .dev: return .dev
         }
     }
     
     private func environmentVGS(_ environment: EnvironmentTarget) -> VGSCollectSDK.Environment {
         switch environment {
-        case .cert, .sandbox: return .sandbox
+        case .cert, .sandbox, .dev: return .sandbox
         case .prod: return .live
         }
     }
