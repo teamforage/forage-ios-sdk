@@ -31,6 +31,10 @@ internal protocol ForageService: AnyObject {
         request: ForageRequestModel,
         completion: @escaping (Result<Data?, Error>) -> Void)
     
+    func retrieveCapturedPayment(
+        request: ForageRequestModel,
+        completion: @escaping (Result<Data?, Error>) -> Void)
+    
     func pollingMessage(
         message: MessageResponseModel,
         bearerToken: String,
@@ -155,16 +159,31 @@ internal class LiveForageService: ForageService {
         collector?.sendData(
             path: "/api/payments/\(request.paymentReference)/capture/",
             extraData: extraData) { result in
-                switch result {
-                case .success(_, let data, _):
-                    completion(.success(data))
-                case .failure(_, _, _, let error):
-                    guard let error = error else {
-                        return completion(.failure(ServiceError.emptyError))
+                self.polling(.snap, response: result, request: request, completion: { pollingResult in
+                    switch pollingResult {
+                    case .success:
+                        self.retrieveCapturedPayment(
+                            request: request,
+                            completion: completion
+                        )
+                    case .failure(let error):
+                        completion(.failure(error))
                     }
-                    completion(.failure(error))
-                }
+                })
             }
+    }
+    
+    internal func retrieveCapturedPayment(
+        request: ForageRequestModel,
+        completion: @escaping (Result<Data?, Error>) -> Void)
+    {
+        do {
+            try provider.execute(endpoint: ForageAPI.retrieveCapturedPayment(request: request), completion: { result in
+                completion(result)
+            })
+        } catch {
+            completion(.failure(error))
+        }
     }
     
     // TODO: SYM-80 Polish polling message
@@ -220,25 +239,46 @@ extension LiveForageService: Polling {
     func polling(_ pinType: PinType, response: VGSResponse, request: ForageRequestModel, completion: @escaping (Result<Data?, Error>) -> Void) {
         switch response {
         case .success(_, let data, _):
-            self.parseVGSData(model: MessageResponseModel.self, data: data) { [weak self] messageResponse in
-                switch messageResponse {
-                case .success(let message):
-                    self?.pollingMessage(
-                        message: message,
-                        bearerToken: request.authorization,
-                        merchantID: request.merchantID) { pollingResult in
-                            switch pollingResult {
-                            case .success:
-                                self?.retrieveCheckBalance(
-                                    request: request,
-                                    completion: completion
-                                )
-                            case .failure(let error):
-                                completion(.failure(error))
+            // TODO: SYM-81 - Padronize implementation for message, remove this IF-ELSE, keep only the implementation inside this IF
+            if pinType == .balance {
+                
+                self.parseVGSData(model: MessageResponseModel.self, data: data) { [weak self] messageResponse in
+                    switch messageResponse {
+                    case .success(let message):
+                        self?.pollingMessage(
+                            message: message,
+                            bearerToken: request.authorization,
+                            merchantID: request.merchantID) { pollingResult in
+                                switch pollingResult {
+                                case .success:
+                                    completion(.success(nil))
+                                case .failure(let error):
+                                    completion(.failure(error))
+                                }
                             }
-                        }
-                case .failure(let error):
-                    completion(.failure(error))
+                    case .failure(let error):
+                        completion(.failure(error))
+                    }
+                }
+                
+            } else {
+                self.parseVGSData(model: MessageBigModel.self, data: data) { [weak self] messageResponse in
+                    switch messageResponse {
+                    case .success(let message):
+                        self?.pollingMessage(
+                            message: message.message,
+                            bearerToken: request.authorization,
+                            merchantID: request.merchantID) { pollingResult in
+                                switch pollingResult {
+                                case .success:
+                                    completion(.success(nil))
+                                case .failure(let error):
+                                    completion(.failure(error))
+                                }
+                            }
+                    case .failure(let error):
+                        completion(.failure(error))
+                    }
                 }
             }
 
