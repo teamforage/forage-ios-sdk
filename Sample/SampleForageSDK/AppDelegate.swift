@@ -13,7 +13,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         ForageSDK.setup(
-            ForageSDK.Config(environment: .sandbox)            
+            ForageSDK.Config(environment: .dev)
         )
         
         // Override point for customization after application launch.
