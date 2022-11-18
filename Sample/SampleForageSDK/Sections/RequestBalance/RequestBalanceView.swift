@@ -154,7 +154,7 @@ class RequestBalanceView: UIView {
             switch result {
             case .success(let data):
                 guard let data = data,
-                      let response = try? JSONDecoder().decode(ForageBalanceModel.self, from: data)
+                      let response = try? JSONDecoder().decode(ForageBalance.self, from: data)
                 else { return }
                 self.snapBalanceLabel.text = "snap=\(response.snap)"
                 self.nonSnapBalanceLabel.text = "nonSnap=\(response.nonSnap)"
