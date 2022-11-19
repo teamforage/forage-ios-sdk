@@ -19,6 +19,11 @@ class BaseViewCodeViewController<CustomViewProtocol: UIView>: UIViewController {
         view = CustomViewProtocol()
     }
     
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        dismissKeyboardTapOutside()
+    }
+    
     func alert(message: String, title: String = "", completion: Handler? = nil) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         let OKAction = UIAlertAction(title: "OK", style: .default) { (_) in
@@ -28,5 +33,15 @@ class BaseViewCodeViewController<CustomViewProtocol: UIView>: UIViewController {
         alert.addAction(OKAction)
         
         self.present(alert, animated: true, completion: nil)
+    }
+    
+    @objc func dismissKeyboardTapOutside() {
+        let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(BaseViewCodeViewController.dismissKeyboard))
+        tap.cancelsTouchesInView = false
+        view.addGestureRecognizer(tap)
+    }
+    
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
     }
 }
