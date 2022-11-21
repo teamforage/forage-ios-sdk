@@ -12,6 +12,7 @@ enum ForageAPI {
     case xKey(bearerToken: String)
     case message(request: MessageResponseModel, bearerToken: String, merchantID: String)
     case retrieveBalance(request: ForageRequestModel)
+    case retrieveCapturedPayment(request: ForageRequestModel)
 }
 
 extension ForageAPI: ServiceProtocol {
@@ -25,13 +26,14 @@ extension ForageAPI: ServiceProtocol {
         case .xKey: return "/iso_server/encryption_alias/"
         case .message(request: let response, _, _): return "/api/message/\(response.contentId)/"
         case .retrieveBalance(request: let request): return "/api/payment_methods/\(request.paymentMethodReference)/"
+        case .retrieveCapturedPayment(request: let request): return "/api/payments/\(request.paymentReference)/"
         }
     }
     
     var method: HttpMethod {
         switch self {
         case .panNumber: return .post
-        case .xKey, .message, .retrieveBalance: return .get
+        case .xKey, .message, .retrieveBalance, .retrieveCapturedPayment: return .get
         }
     }
     
@@ -88,6 +90,18 @@ extension ForageAPI: ServiceProtocol {
             )
             
         case .retrieveBalance(request: let request):
+            let httpHeaders: HTTPHeaders = [
+                "Merchant-Account": request.merchantID,
+                "authorization": "Bearer \(request.authorization)"
+            ]
+            
+            return .requestParametersAndHeaders(
+                bodyParameters: nil,
+                urlParameters: nil,
+                additionalHeaders: httpHeaders
+            )
+            
+        case .retrieveCapturedPayment(request: let request):
             let httpHeaders: HTTPHeaders = [
                 "Merchant-Account": request.merchantID,
                 "authorization": "Bearer \(request.authorization)"

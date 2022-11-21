@@ -31,6 +31,10 @@ internal protocol ForageService: AnyObject {
         request: ForageRequestModel,
         completion: @escaping (Result<Data?, Error>) -> Void)
     
+    func retrieveCapturedPayment(
+        request: ForageRequestModel,
+        completion: @escaping (Result<Data?, Error>) -> Void)
+    
     func pollingMessage(
         message: MessageResponseModel,
         bearerToken: String,
@@ -157,30 +161,31 @@ internal class LiveForageService: ForageService {
         collector?.sendData(
             path: "/api/payments/\(request.paymentReference)/capture/",
             extraData: extraData) { result in
-                switch result {
-                case .success(_, let data, _):
-                    return completion(.success(data))
-                case .failure(let code, let data, let response, let error):
-                    if let data = data {
-                        self.provider.processVGSData(
-                            model: ForageServiceError.self,
-                            code: code,
-                            data: data,
-                            response: response) { errorResult in
-                            switch errorResult {
-                            case .success(let errorParsed):
-                                return completion(.failure(errorParsed))
-                            case .failure(let error):
-                                return completion(.failure(error))
-                            }
-                        }
-                    } else if let error = error {
-                        return completion(.failure(error))
-                    } else {
-                        return completion(.failure(ServiceError.emptyError))
+                self.polling(.snap, response: result, request: request, completion: { pollingResult in
+                    switch pollingResult {
+                    case .success:
+                        self.retrieveCapturedPayment(
+                            request: request,
+                            completion: completion
+                        )
+                    case .failure(let error):
+                        completion(.failure(error))
                     }
-                }
+                })
             }
+    }
+    
+    internal func retrieveCapturedPayment(
+        request: ForageRequestModel,
+        completion: @escaping (Result<Data?, Error>) -> Void)
+    {
+        do {
+            try provider.execute(endpoint: ForageAPI.retrieveCapturedPayment(request: request), completion: { result in
+                completion(result)
+            })
+        } catch {
+            completion(.failure(error))
+        }
     }
     
     // TODO: SYM-80 Polish polling message
@@ -245,10 +250,7 @@ extension LiveForageService: Polling {
                         merchantID: request.merchantID) { pollingResult in
                             switch pollingResult {
                             case .success:
-                                self?.retrieveCheckBalance(
-                                    request: request,
-                                    completion: completion
-                                )
+                                completion(.success(nil))
                             case .failure(let error):
                                 completion(.failure(error))
                             }
