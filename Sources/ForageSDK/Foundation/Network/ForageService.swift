@@ -35,21 +35,19 @@ internal protocol ForageService: AnyObject {
         request: ForageRequestModel,
         completion: @escaping (Result<Data?, Error>) -> Void)
     
-    func pollingMessage(
-        message: MessageResponseModel,
-        bearerToken: String,
-        merchantID: String,
-        completion: @escaping (Result<MessageResponseModel, Error>) -> Void) -> Void
-    
     func cancelRequest()
 }
 
 internal protocol Polling: AnyObject {
     func polling(
-        _ pinType: PinType,
         response: VGSResponse,
         request: ForageRequestModel,
         completion: @escaping (Result<Data?, Error>) -> Void)
+    
+    func pollingMessage(
+        message: MessageResponseModel,
+        request: ForageRequestModel,
+        completion: @escaping (Result<MessageResponseModel, Error>) -> Void) -> Void
 }
 
 internal class LiveForageService: ForageService {
@@ -65,40 +63,25 @@ internal class LiveForageService: ForageService {
         self.collector = collector
     }
     
+    // MARK: Tokenize EBT card
+    
     internal func tokenizeEBTCard(request: ForagePANRequestModel, completion: @escaping (Result<Data?, Error>) -> Void) {
-        do {
-            try provider.execute(endpoint: ForageAPI.panNumber(request: request), completion: { result in
-                switch result {
-                case .success(let data): completion(.success(data))
-                case .failure(let error): completion(.failure(error))
-                }
-            })
-        } catch {
-            completion(.failure(error))
-        }
+        do { try provider.execute(endpoint: ForageAPI.panNumber(request: request), completion: completion) }
+        catch { completion(.failure(error)) }
     }
     
-    internal func getXKey(bearerToken: String, completion: @escaping (Result<ForageXKeyModel, Error>) -> Void)
-    {
-        do {
-            try provider.execute(model: ForageXKeyModel.self, endpoint: ForageAPI.xKey(bearerToken: bearerToken), completion: { result in
-                switch result {
-                case .success(let data):
-                    completion(.success(data))
-                case .failure(let error):
-                    completion(.failure(error))
-                }
-            })
-        } catch {
-            completion(.failure(error))
-        }
+    // MARK: X-key
+    
+    internal func getXKey(bearerToken: String, completion: @escaping (Result<ForageXKeyModel, Error>) -> Void) {
+        do { try provider.execute(model: ForageXKeyModel.self, endpoint: ForageAPI.xKey(bearerToken: bearerToken), completion: completion) }
+        catch { completion(.failure(error)) }
     }
     
-    internal func cancelRequest() {
-        provider.stopRequestOnGoing()
-    }
+    // MARK: Cancel request
     
-    // MARK: Implementations
+    internal func cancelRequest() { provider.stopRequestOnGoing() }
+    
+    // MARK: Check balance
     
     internal func getBalance(
         request: ForageRequestModel,
@@ -117,7 +100,7 @@ internal class LiveForageService: ForageService {
         collector?.sendData(
             path: "/api/payment_methods/\(request.paymentMethodReference)/balance/",
             extraData: extraData) { [weak self] result in
-                self?.polling(.balance, response: result, request: request, completion: { pollingResult in
+                self?.polling(response: result, request: request, completion: { pollingResult in
                     switch pollingResult {
                     case .success:
                         self?.retrieveCheckBalance(
@@ -134,13 +117,13 @@ internal class LiveForageService: ForageService {
     internal func retrieveCheckBalance(request: ForageRequestModel,
                                        completion: @escaping (Result<Data?, Error>) -> Void) {
         do {
-            try provider.execute(endpoint: ForageAPI.retrieveBalance(request: request), completion: { result in
-                completion(result)
-            })
+            try provider.execute(endpoint: ForageAPI.retrieveBalance(request: request), completion: completion)
         } catch {
             completion(.failure(error))
         }
     }
+    
+    // MARK: Capture payment
     
     internal func requestCapturePayment(
         request: ForageRequestModel,
@@ -159,7 +142,7 @@ internal class LiveForageService: ForageService {
         collector?.sendData(
             path: "/api/payments/\(request.paymentReference)/capture/",
             extraData: extraData) { result in
-                self.polling(.snap, response: result, request: request, completion: { pollingResult in
+                self.polling(response: result, request: request, completion: { pollingResult in
                     switch pollingResult {
                     case .success:
                         self.retrieveCapturedPayment(
@@ -177,75 +160,23 @@ internal class LiveForageService: ForageService {
         request: ForageRequestModel,
         completion: @escaping (Result<Data?, Error>) -> Void)
     {
-        do {
-            try provider.execute(endpoint: ForageAPI.retrieveCapturedPayment(request: request), completion: { result in
-                completion(result)
-            })
-        } catch {
-            completion(.failure(error))
-        }
-    }
-    
-    // TODO: SYM-80 Polish polling message
-    internal func pollingMessage(
-        message: MessageResponseModel,
-        bearerToken: String,
-        merchantID: String,
-        completion: @escaping (Result<MessageResponseModel, Error>) -> Void) -> Void
-    {
-        var retryCount = 0
-        do {
-            try provider.execute(model: MessageResponseModel.self, endpoint: ForageAPI.message(request: message, bearerToken: bearerToken, merchantID: merchantID), completion: { [weak self] result in
-                guard let self = self else { return }
-                switch result {
-                case .success(let data):
-                    if data.failed == false && data.status == .completed {
-                        autoreleasepool {
-                            completion(.success(data))
-                        }
-                    } else if data.failed == true {
-                        autoreleasepool {
-                            completion(.failure(NSError(domain: "Message failed", code: 001, userInfo: nil)))
-                        }
-                    } else if retryCount < self.maxAttempts {
-                        retryCount += 1
-                        DispatchQueue.main.asyncAfter(deadline: .now() + self.intervalBetweenAttempts) {
-                            self.pollingMessage(
-                                message: data,
-                                bearerToken: bearerToken,
-                                merchantID: merchantID,
-                                completion: completion
-                            )
-                        }
-                    } else {
-                        autoreleasepool {
-                            completion(.failure(NSError(domain: "Reached max attempts", code: 002, userInfo: nil)))
-                        }
-                    }
-                    
-                case .failure(let error):
-                    autoreleasepool {
-                        completion(.failure(error))
-                    }
-                }
-            })
-        } catch {
-            completion(.failure(error))
-        }
+        do { try provider.execute(endpoint: ForageAPI.retrieveCapturedPayment(request: request), completion: completion) }
+        catch { completion(.failure(error)) }
     }
 }
 
+// MARK: - Polling
+
 extension LiveForageService: Polling {
-    func polling(_ pinType: PinType, response: VGSResponse, request: ForageRequestModel, completion: @escaping (Result<Data?, Error>) -> Void) {
+    internal func polling(response: VGSResponse, request: ForageRequestModel, completion: @escaping (Result<Data?, Error>) -> Void) {
         switch response {
         case .success(_, let data, _):
-            self.parseVGSData(model: MessageResponseModel.self, data: data) { [weak self] messageResponse in
+            provider.processVGSData(model: MessageResponseModel.self, code: nil, data: data, response: nil) { [weak self] messageResponse in
                 switch messageResponse {
                 case .success(let message):
                     self?.pollingMessage(
                         message: message,
-                        bearerToken: request.authorization,
-                        merchantID: request.merchantID) { pollingResult in
+                        request: request) { pollingResult in
                             switch pollingResult {
                             case .success:
                                 completion(.success(nil))
@@ -265,20 +196,49 @@ extension LiveForageService: Polling {
             completion(.failure(error))
         }
     }
-}
-
-// MARK: - Parse VGS Data
-
-extension LiveForageService {
-    private func parseVGSData<T: Decodable>(model: T.Type, data: Data?, completion: @escaping (Result<T, Error>) -> Void) {
-        provider.processVGSData(model: model, code: nil, data: data, response: nil) { resultMessage in
-            switch resultMessage {
-            case .success(let message):
-                // TODO: SYM-80 Handle success of all messages before moving on, or any error (check rules)
-                completion(.success(message))
-            case .failure(let error):
-                completion(.failure(error))
-            }
+    
+    internal func pollingMessage(
+        message: MessageResponseModel,
+        request: ForageRequestModel,
+        completion: @escaping (Result<MessageResponseModel, Error>) -> Void) -> Void
+    {
+        var retryCount = 0
+        do {
+            try provider.execute(model: MessageResponseModel.self, endpoint: ForageAPI.message(request: message, bearerToken: request.authorization, merchantID: request.merchantID), completion: { [weak self] result in
+                guard let self = self else { return }
+                switch result {
+                case .success(let data):
+                    if data.failed == false && data.status == .completed {
+                        autoreleasepool {
+                            completion(.success(data))
+                        }
+                    } else if data.failed == true {
+                        autoreleasepool {
+                            completion(.failure(NSError(domain: "Message failed", code: 001, userInfo: nil)))
+                        }
+                    } else if retryCount < self.maxAttempts {
+                        retryCount += 1
+                        DispatchQueue.main.asyncAfter(deadline: .now() + self.intervalBetweenAttempts) {
+                            self.pollingMessage(
+                                message: data,
+                                request: request,
+                                completion: completion
+                            )
+                        }
+                    } else {
+                        autoreleasepool {
+                            completion(.failure(NSError(domain: "Reached max attempts", code: 002, userInfo: nil)))
+                        }
+                    }
+                    
+                case .failure(let error):
+                    autoreleasepool {
+                        completion(.failure(error))
+                    }
+                }
+            })
+        } catch {
+            completion(.failure(error))
         }
     }
 }
