@@ -13,7 +13,8 @@ class CapturePaymentView: UIView {
     
     // MARK: Public Properties
     
-    var isPINValid: Bool = false
+    var isSnapPINValid: Bool = false
+    var isNonSnapPINValid: Bool = false
     
     // MARK: Private Components
     
@@ -99,7 +100,7 @@ class CapturePaymentView: UIView {
     // MARK: Private Methods
     
     private func capturePayment(isEbtSnap: Bool) {
-        if isPINValid {
+        if isSnapPINValid || isNonSnapPINValid {
             let paymentReference =
                 isEbtSnap
                     ? ClientSharedData.shared.paymentReference[FundingType.ebtSnap] ?? ""
@@ -225,7 +226,12 @@ class CapturePaymentView: UIView {
 
 extension CapturePaymentView: ForagePINTextFieldDelegate {
     func pinStatus(_ view: UIView, isValid: Bool, pinType: PinType) {
-        isPINValid = isValid
+        if pinType == .snap {
+            isSnapPINValid = isValid
+        } else {
+            isNonSnapPINValid = isValid
+        }
+        
         resultLabel.text = "Is valid pin? \(isValid) - type: \(pinType.rawValue)"
     }
 }
