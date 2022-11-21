@@ -239,46 +239,22 @@ extension LiveForageService: Polling {
     func polling(_ pinType: PinType, response: VGSResponse, request: ForageRequestModel, completion: @escaping (Result<Data?, Error>) -> Void) {
         switch response {
         case .success(_, let data, _):
-            // TODO: SYM-81 - Padronize implementation for message, remove this IF-ELSE, keep only the implementation inside this IF
-            if pinType == .balance {
-                
-                self.parseVGSData(model: MessageResponseModel.self, data: data) { [weak self] messageResponse in
-                    switch messageResponse {
-                    case .success(let message):
-                        self?.pollingMessage(
-                            message: message,
-                            bearerToken: request.authorization,
-                            merchantID: request.merchantID) { pollingResult in
-                                switch pollingResult {
-                                case .success:
-                                    completion(.success(nil))
-                                case .failure(let error):
-                                    completion(.failure(error))
-                                }
+            self.parseVGSData(model: MessageResponseModel.self, data: data) { [weak self] messageResponse in
+                switch messageResponse {
+                case .success(let message):
+                    self?.pollingMessage(
+                        message: message,
+                        bearerToken: request.authorization,
+                        merchantID: request.merchantID) { pollingResult in
+                            switch pollingResult {
+                            case .success:
+                                completion(.success(nil))
+                            case .failure(let error):
+                                completion(.failure(error))
                             }
-                    case .failure(let error):
-                        completion(.failure(error))
-                    }
-                }
-                
-            } else {
-                self.parseVGSData(model: MessageBigModel.self, data: data) { [weak self] messageResponse in
-                    switch messageResponse {
-                    case .success(let message):
-                        self?.pollingMessage(
-                            message: message.message,
-                            bearerToken: request.authorization,
-                            merchantID: request.merchantID) { pollingResult in
-                                switch pollingResult {
-                                case .success:
-                                    completion(.success(nil))
-                                case .failure(let error):
-                                    completion(.failure(error))
-                                }
-                            }
-                    case .failure(let error):
-                        completion(.failure(error))
-                    }
+                        }
+                case .failure(let error):
+                    completion(.failure(error))
                 }
             }
 

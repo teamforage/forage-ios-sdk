@@ -12,10 +12,6 @@ internal enum BalanceStatus: String, Codable {
     case completed = "completed"
 }
 
-internal struct MessageBigModel: Codable {
-    let message: MessageResponseModel
-}
-
 internal struct MessageResponseModel: Codable {
     let contentId: String
     let messageType: String
