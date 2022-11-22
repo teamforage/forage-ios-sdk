@@ -24,12 +24,14 @@
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Bearer token" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="XQn-BZ-Hem">
                                                 <rect key="frame" x="10" y="10" width="394" height="35"/>
+                                                <accessibility key="accessibilityConfiguration" identifier="lbl_bearer_token" label="Bearer token label"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="IP0oRQBc16nFG5xsHP5ViyIdajyb7Z" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="2Jp-Qt-zxc">
                                                 <rect key="frame" x="24" y="53" width="366" height="42"/>
+                                                <accessibility key="accessibilityConfiguration" identifier="tf_bearer_token" label="Bearer token text field"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="42" id="jkn-Le-Frm"/>
                                                 </constraints>
@@ -53,12 +55,14 @@
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Merchant ID" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qKa-5q-sqa">
                                                 <rect key="frame" x="10" y="10" width="394" height="35"/>
+                                                <accessibility key="accessibilityConfiguration" identifier="lbl_merchant_id" label="Merchant Id label"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="8000009" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="oqE-tP-yg0">
                                                 <rect key="frame" x="24" y="53" width="366" height="42"/>
+                                                <accessibility key="accessibilityConfiguration" identifier="tf_merchant_id" label="Merchant Id text field"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="42" id="AnD-sa-q4l"/>
                                                 </constraints>
@@ -83,6 +87,7 @@
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="UNl-84-jaw">
                                                 <rect key="frame" x="24" y="5" width="366" height="42"/>
                                                 <color key="backgroundColor" systemColor="systemBlueColor"/>
+                                                <accessibility key="accessibilityConfiguration" identifier="bt_next" label="Next button"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="42" id="EMJ-jY-mq6"/>
                                                 </constraints>

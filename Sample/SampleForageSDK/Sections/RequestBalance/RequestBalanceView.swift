@@ -33,6 +33,8 @@ class RequestBalanceView: UIView {
         let label = UILabel()
         label.text = "Request Balance"
         label.font = UIFont.systemFont(ofSize: 28, weight: .bold)
+        label.accessibilityLabel = "Title label"
+        label.accessibilityIdentifier = "lbl_title"
         return label
     }()
     
@@ -41,6 +43,8 @@ class RequestBalanceView: UIView {
         tf.placeholder = "PIN Field"
         tf.isSecureTextEntry = true
         tf.pinType = .balance
+        tf.accessibilityLabel = "PIN balance Text Field"
+        tf.accessibilityIdentifier = "tf_pin_balance"
         return tf
     }()
     
@@ -49,6 +53,8 @@ class RequestBalanceView: UIView {
         label.text = "PIN status"
         label.textColor = .red
         label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        label.accessibilityLabel = "Status label"
+        label.accessibilityIdentifier = "lbl_status"
         return label
     }()
     
@@ -63,6 +69,8 @@ class RequestBalanceView: UIView {
         button.isEnabled = false
         button.isUserInteractionEnabled = false
         button.alpha = 0.5
+        button.accessibilityLabel = "Check balance button"
+        button.accessibilityIdentifier = "bt_check_balance"
         return button
     }()
     
@@ -77,6 +85,8 @@ class RequestBalanceView: UIView {
         button.isEnabled = false
         button.isUserInteractionEnabled = false
         button.alpha = 0.5
+        button.accessibilityLabel = "Next button"
+        button.accessibilityIdentifier = "bt_next"
         return button
     }()
     
@@ -86,6 +96,8 @@ class RequestBalanceView: UIView {
         label.textColor = .black
         label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         label.numberOfLines = 0
+        label.accessibilityLabel = "Result label"
+        label.accessibilityIdentifier = "lbl_result"
         return label
     }()
     

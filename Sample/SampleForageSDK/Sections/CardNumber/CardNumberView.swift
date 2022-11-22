@@ -33,12 +33,16 @@ class CardNumberView: UIView {
         let label = UILabel()
         label.text = "PAN number"
         label.font = UIFont.systemFont(ofSize: 28, weight: .bold)
+        label.accessibilityLabel = "Title label"
+        label.accessibilityIdentifier = "lbl_title"
         return label
     }()
     
     private let panNumberTextField: ForagePANTextField = {
         let tf = ForagePANTextField()
         tf.placeholder = "PAN Number"
+        tf.accessibilityLabel = "Ebt Number Text Field"
+        tf.accessibilityIdentifier = "tf_ebt_number"
         return tf
     }()
     
@@ -47,6 +51,8 @@ class CardNumberView: UIView {
         label.text = "Card number status"
         label.textColor = .red
         label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        label.accessibilityLabel = "Result label"
+        label.accessibilityIdentifier = "lbl_result"
         return label
     }()
     
@@ -61,6 +67,8 @@ class CardNumberView: UIView {
         button.isEnabled = false
         button.isUserInteractionEnabled = false
         button.alpha = 0.5
+        button.accessibilityLabel = "Send ebt number button"
+        button.accessibilityIdentifier = "bt_send_ebt_number"
         return button
     }()
     
@@ -75,6 +83,8 @@ class CardNumberView: UIView {
         button.isEnabled = false
         button.isUserInteractionEnabled = false
         button.alpha = 0.5
+        button.accessibilityLabel = "Next button"
+        button.accessibilityIdentifier = "bt_next"
         return button
     }()
     
