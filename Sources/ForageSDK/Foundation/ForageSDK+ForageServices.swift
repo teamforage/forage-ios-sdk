@@ -4,6 +4,7 @@
 //
 //  Created by Symphony on 22/11/22.
 //
+
 import VGSCollectSDK
 import Foundation
 
@@ -28,7 +29,7 @@ protocol ForageSDKService: AnyObject {
         bearerToken: String,
         merchantAccount: String,
         completion: @escaping (Result<Data?, Error>) -> Void)
-
+        
     /// Check balance for a given EBT Card
     ///
     /// - Parameters:
@@ -43,7 +44,7 @@ protocol ForageSDKService: AnyObject {
         paymentMethodReference: String,
         cardNumberToken: String,
         completion: @escaping (Result<Data?, Error>) -> Void)
-
+    
     /// Capture a payment for a given payment reference
     ///
     /// - Parameters:
@@ -58,14 +59,15 @@ protocol ForageSDKService: AnyObject {
         paymentReference: String,
         cardNumberToken: String,
         completion: @escaping (Result<Data?, Error>) -> Void)
-
+    
     /// Cancel any ongoing request
     func cancelRequest()
 }
 
 // MARK: - ForageSDKService
-extension ForageSDK: ForageSDKService {
 
+extension ForageSDK: ForageSDKService {
+    
     // MARK: Private Methods
     
     private func getXKey(
@@ -76,7 +78,7 @@ extension ForageSDK: ForageSDKService {
             completion(result)
         }
     }
-
+    
     // MARK: Public Methods
     
     public func tokenizeEBTCard(
@@ -92,7 +94,7 @@ extension ForageSDK: ForageSDKService {
         )
         service?.tokenizeEBTCard(request: request, completion: completion)
     }
-
+    
     public func checkBalance(
         bearerToken: String,
         merchantAccount: String,
@@ -116,7 +118,7 @@ extension ForageSDK: ForageSDKService {
             }
         }
     }
-
+    
     public func capturePayment(
         bearerToken: String,
         merchantAccount: String,
@@ -134,14 +136,14 @@ extension ForageSDK: ForageSDKService {
                     merchantID: merchantAccount,
                     xKey: model.alias
                 )
-
+                
                 self.service?.requestCapturePayment(request: request, completion: completion)
             case .failure(let error):
                 completion(.failure(error))
             }
         }
     }
-
+    
     public func cancelRequest() {
         service?.provider.stopRequestOnGoing()
     }
