@@ -9,6 +9,7 @@ import UIKit
 
 class ForagePANValidations {
     
+    /// Check ebt card number length
     static func checkPANLength(_ panNumber: String) -> StateIIN? {
         if panNumber.count >= 6 {
             let pan = panNumber.prefix(6)
@@ -18,6 +19,7 @@ class ForagePANValidations {
         return nil
     }
 
+    /// List of allowed ebt card numbers and its respective length
     static var panNumbers: [StateIIN] = [
         StateIIN(state: "ALABAMA", panNumber: "507680", panLength: 16),
         StateIIN(state: "ALASKA", panNumber: "507695", panLength: 16),
@@ -75,6 +77,7 @@ class ForagePANValidations {
     ]
 }
 
+/// StateINN object to identify card object valid data
 struct StateIIN {
     let state: String
     let panNumber: String

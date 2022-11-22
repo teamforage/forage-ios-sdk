@@ -7,8 +7,11 @@
 
 import Foundation
 
+/**
+ Map the endpoints used on ForageSDK
+ */
 enum ForageAPI {
-    case panNumber(request: ForagePANRequestModel)
+    case tokenizeNumber(request: ForagePANRequestModel)
     case xKey(bearerToken: String)
     case message(request: MessageResponseModel, bearerToken: String, merchantID: String)
     case retrieveBalance(request: ForageRequestModel)
@@ -22,7 +25,7 @@ extension ForageAPI: ServiceProtocol {
     
     var path: String {
         switch self {
-        case .panNumber: return "/api/payment_methods/"
+        case .tokenizeNumber: return "/api/payment_methods/"
         case .xKey: return "/iso_server/encryption_alias/"
         case .message(request: let response, _, _): return "/api/message/\(response.contentId)/"
         case .retrieveBalance(request: let request): return "/api/payment_methods/\(request.paymentMethodReference)/"
@@ -32,14 +35,14 @@ extension ForageAPI: ServiceProtocol {
     
     var method: HttpMethod {
         switch self {
-        case .panNumber: return .post
+        case .tokenizeNumber: return .post
         case .xKey, .message, .retrieveBalance, .retrieveCapturedPayment: return .get
         }
     }
     
     var task: HttpTask {
         switch self {
-        case .panNumber(
+        case .tokenizeNumber(
             request: let model
         ):
             var card = [String: String]()

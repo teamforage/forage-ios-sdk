@@ -30,7 +30,7 @@ internal class LiveForageService: ForageService {
     ///  - request: *ForagePANRequestModel* contains ebt card object.
     ///  - completion: Returns tokenized object.
     internal func tokenizeEBTCard(request: ForagePANRequestModel, completion: @escaping (Result<Data?, Error>) -> Void) {
-        do { try provider.execute(endpoint: ForageAPI.panNumber(request: request), completion: completion) }
+        do { try provider.execute(endpoint: ForageAPI.tokenizeNumber(request: request), completion: completion) }
         catch { completion(.failure(error)) }
     }
     
