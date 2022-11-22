@@ -7,11 +7,13 @@
 
 import Foundation
 
+/// `BalanceStatus` enum used to identify message status
 internal enum BalanceStatus: String, Codable {
     case sentToProxy = "sent_to_proxy"
     case completed = "completed"
 }
 
+/// `MessageResponseModel` used for handling message for polling request
 internal struct MessageResponseModel: Codable {
     let contentId: String
     let messageType: String
