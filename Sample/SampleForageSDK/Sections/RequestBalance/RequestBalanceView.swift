@@ -156,8 +156,8 @@ class RequestBalanceView: UIView {
                 guard let data = data,
                       let response = try? JSONDecoder().decode(ForageBalance.self, from: data)
                 else { return }
-                self.snapBalanceLabel.text = "snap=\(response.snap)"
-                self.nonSnapBalanceLabel.text = "nonSnap=\(response.nonSnap)"
+                self.snapBalanceLabel.text = "snap=\(response.balance.snap)"
+                self.nonSnapBalanceLabel.text = "nonSnap=\(response.balance.nonSnap)"
                 self.errorLabel.text = ""
                 self.updateButtonState(isEnabled: true, button: self.nextButton)
             case .failure(let error):

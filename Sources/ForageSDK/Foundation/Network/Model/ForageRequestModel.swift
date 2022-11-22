@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// `ForageRequestModel` used for compose ForageSDK requests
 internal struct ForageRequestModel {
     let authorization: String
     let paymentMethodReference: String
