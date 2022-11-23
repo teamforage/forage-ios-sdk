@@ -51,8 +51,8 @@ class CardNumberView: UIView {
         label.text = "Card number status"
         label.textColor = .red
         label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        label.accessibilityLabel = "Result label"
-        label.accessibilityIdentifier = "lbl_result"
+        label.accessibilityLabel = "Status label"
+        label.accessibilityIdentifier = "lbl_status"
         return label
     }()
     
@@ -88,12 +88,58 @@ class CardNumberView: UIView {
         return button
     }()
     
-    private let resultLabel: UILabel = {
+    private let refLabel: UILabel = {
         let label = UILabel()
-        label.text = "Result"
+        label.text = ""
         label.textColor = .black
         label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         label.numberOfLines = 0
+        label.accessibilityLabel = "Ref label"
+        label.accessibilityIdentifier = "lbl_ref"
+        return label
+    }()
+    
+    private let tokenLabel: UILabel = {
+        let label = UILabel()
+        label.text = ""
+        label.textColor = .black
+        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        label.numberOfLines = 0
+        label.accessibilityLabel = "Token label"
+        label.accessibilityIdentifier = "lbl_token"
+        return label
+    }()
+    
+    private let typeLabel: UILabel = {
+        let label = UILabel()
+        label.text = ""
+        label.textColor = .black
+        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        label.numberOfLines = 0
+        label.accessibilityLabel = "Type label"
+        label.accessibilityIdentifier = "lbl_type"
+        return label
+    }()
+    
+    private let last4Label: UILabel = {
+        let label = UILabel()
+        label.text = ""
+        label.textColor = .black
+        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        label.numberOfLines = 0
+        label.accessibilityLabel = "Last4 label"
+        label.accessibilityIdentifier = "lbl_last4"
+        return label
+    }()
+    
+    private let errorLabel: UILabel = {
+        let label = UILabel()
+        label.text = ""
+        label.textColor = .black
+        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        label.numberOfLines = 0
+        label.accessibilityLabel = "Error label"
+        label.accessibilityIdentifier = "lbl_error"
         return label
     }()
     
@@ -131,18 +177,15 @@ class CardNumberView: UIView {
                       let response = try? JSONDecoder().decode(ForagePANModel.self, from: data)
                 else { return }
                 
-                self.resultLabel.text = """
-                Success:\n
-                ref: \(response.paymentMethodIdentifier)\n
-                type: \(response.type)\n
-                card.token: \(response.card.token)\n
-                card.last4: \(response.card.last4)\n
-                """
+                self.refLabel.text = "ref=\(response.paymentMethodIdentifier)"
+                self.typeLabel.text = "type=\(response.type)"
+                self.tokenLabel.text = "token=\(response.card.token)"
+                self.last4Label.text = "last4=\(response.card.last4)"
                 ClientSharedData.shared.cardNumberToken = response.card.token
                 ClientSharedData.shared.paymentMethodReference = response.paymentMethodIdentifier
                 self.updateButtonState(isEnabled: true, button: self.nextButton)
             case .failure(let error):
-                self.resultLabel.text = "Error: \n\(error.localizedDescription)"
+                self.errorLabel.text = "error: \n\(error.localizedDescription)"
                 self.updateButtonState(isEnabled: false, button: self.nextButton)
             }
             
@@ -156,7 +199,11 @@ class CardNumberView: UIView {
         contentView.addSubview(titleLabel)
         contentView.addSubview(panNumberTextField)
         contentView.addSubview(statusLabel)
-        contentView.addSubview(resultLabel)
+        contentView.addSubview(refLabel)
+        contentView.addSubview(typeLabel)
+        contentView.addSubview(tokenLabel)
+        contentView.addSubview(last4Label)
+        contentView.addSubview(errorLabel)
         contentView.addSubview(sendPanButton)
         contentView.addSubview(nextButton)
     }
@@ -203,8 +250,44 @@ class CardNumberView: UIView {
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
         )
         
-        resultLabel.anchor(
+        refLabel.anchor(
             top: statusLabel.safeAreaLayoutGuide.bottomAnchor,
+            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
+            bottom: nil,
+            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
+            centerXAnchor: contentView.centerXAnchor,
+            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
+        )
+        
+        typeLabel.anchor(
+            top: refLabel.safeAreaLayoutGuide.bottomAnchor,
+            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
+            bottom: nil,
+            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
+            centerXAnchor: contentView.centerXAnchor,
+            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
+        )
+        
+        tokenLabel.anchor(
+            top: typeLabel.safeAreaLayoutGuide.bottomAnchor,
+            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
+            bottom: nil,
+            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
+            centerXAnchor: contentView.centerXAnchor,
+            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
+        )
+        
+        last4Label.anchor(
+            top: tokenLabel.safeAreaLayoutGuide.bottomAnchor,
+            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
+            bottom: nil,
+            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
+            centerXAnchor: contentView.centerXAnchor,
+            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
+        )
+        
+        errorLabel.anchor(
+            top: last4Label.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
             bottom: nil,
             trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
