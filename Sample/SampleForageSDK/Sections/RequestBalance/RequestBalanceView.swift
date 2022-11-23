@@ -48,16 +48,6 @@ class RequestBalanceView: UIView {
         return tf
     }()
     
-    private let statusLabel: UILabel = {
-        let label = UILabel()
-        label.text = "PIN status"
-        label.textColor = .red
-        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        label.accessibilityLabel = "Status label"
-        label.accessibilityIdentifier = "lbl_status"
-        return label
-    }()
-    
     private let requestBalanceButton: UIButton = {
         let button = UIButton()
         button.setTitle("Get Balance", for: .normal)
@@ -90,14 +80,35 @@ class RequestBalanceView: UIView {
         return button
     }()
     
-    private let resultLabel: UILabel = {
+    private let statusLabel: UILabel = {
         let label = UILabel()
-        label.text = "Result"
+        label.text = "PIN status"
+        label.textColor = .red
+        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        label.accessibilityLabel = "Status label"
+        label.accessibilityIdentifier = "lbl_status"
+        return label
+    }()
+    
+    private let snapBalanceLabel: UILabel = {
+        let label = UILabel()
+        label.text = ""
         label.textColor = .black
         label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         label.numberOfLines = 0
-        label.accessibilityLabel = "Result label"
-        label.accessibilityIdentifier = "lbl_result"
+        label.accessibilityLabel = "Snap balance label"
+        label.accessibilityIdentifier = "lbl_snap_balance"
+        return label
+    }()
+    
+    private let nonSnapBalanceLabel: UILabel = {
+        let label = UILabel()
+        label.text = ""
+        label.textColor = .black
+        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        label.numberOfLines = 0
+        label.accessibilityLabel = "Non snap balance label"
+        label.accessibilityIdentifier = "lbl_non_snap_balance"
         return label
     }()
     
@@ -134,14 +145,11 @@ class RequestBalanceView: UIView {
                 guard let data = data,
                       let response = try? JSONDecoder().decode(ForageBalanceModel.self, from: data)
                 else { return }
-                self.resultLabel.text = """
-                Success:\n
-                SNAP: \(response.snap)\n
-                NON SNAP: \(response.nonSnap)\n
-                """
+                self.snapBalanceLabel.text = "snap=\(response.snap)"
+                self.nonSnapBalanceLabel.text = "nonSnap=\(response.nonSnap)"
                 self.updateButtonState(isEnabled: true, button: self.nextButton)
             case .failure(let error):
-                self.resultLabel.text = "Error: \n\(error.localizedDescription)"
+                self.snapBalanceLabel.text = "error: \n\(error.localizedDescription)"
                 self.updateButtonState(isEnabled: false, button: self.nextButton)
             }
             
@@ -155,7 +163,8 @@ class RequestBalanceView: UIView {
         contentView.addSubview(titleLabel)
         contentView.addSubview(pinNumberTextField)
         contentView.addSubview(statusLabel)
-        contentView.addSubview(resultLabel)
+        contentView.addSubview(snapBalanceLabel)
+        contentView.addSubview(nonSnapBalanceLabel)
         contentView.addSubview(requestBalanceButton)
         contentView.addSubview(nextButton)
     }
@@ -202,8 +211,17 @@ class RequestBalanceView: UIView {
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
         )
         
-        resultLabel.anchor(
+        snapBalanceLabel.anchor(
             top: statusLabel.safeAreaLayoutGuide.bottomAnchor,
+            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
+            bottom: nil,
+            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
+            centerXAnchor: contentView.centerXAnchor,
+            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
+        )
+        
+        nonSnapBalanceLabel.anchor(
+            top: snapBalanceLabel.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
             bottom: nil,
             trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
