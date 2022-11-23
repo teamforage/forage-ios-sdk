@@ -98,14 +98,58 @@ class CreatePaymentView: UIView {
         return button
     }()
     
-    private let resultLabel: UILabel = {
+    private let fundingTypeLabel: UILabel = {
         let label = UILabel()
-        label.text = "Result"
+        label.text = ""
         label.textColor = .black
         label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         label.numberOfLines = 0
-        label.accessibilityLabel = "Result label"
-        label.accessibilityIdentifier = "lbl_result"
+        label.accessibilityLabel = "Funding type label"
+        label.accessibilityIdentifier = "lbl_funding_type"
+        return label
+    }()
+    
+    private let paymentMethodIdentifierLabel: UILabel = {
+        let label = UILabel()
+        label.text = ""
+        label.textColor = .black
+        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        label.numberOfLines = 0
+        label.accessibilityLabel = "Payment Method Identifier label"
+        label.accessibilityIdentifier = "lbl_payment_method_identifier"
+        return label
+    }()
+    
+    private let paymentIdentifierLabel: UILabel = {
+        let label = UILabel()
+        label.text = ""
+        label.textColor = .black
+        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        label.numberOfLines = 0
+        label.accessibilityLabel = "Payment Identifier label"
+        label.accessibilityIdentifier = "lbl_payment_identifier"
+        return label
+    }()
+    
+    private let merchantAccountLabel: UILabel = {
+        let label = UILabel()
+        label.text = ""
+        label.textColor = .black
+        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        label.numberOfLines = 0
+        label.accessibilityLabel = "Merchant Account label"
+        label.accessibilityIdentifier = "lbl_merchant_account"
+        return label
+    }()
+    
+    private let amountLabel: UILabel = {
+        let label = UILabel()
+        label.text = ""
+        label.textColor = .black
+        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        label.numberOfLines = 0
+        label.accessibilityLabel = "Amount label"
+        label.accessibilityIdentifier = "lbl_amount"
         return label
     }()
     
@@ -176,15 +220,15 @@ class CreatePaymentView: UIView {
         DispatchQueue.main.async {
             switch result {
             case .success(let response):
-                self.resultLabel.text = """
-                Success:\n
-                PaymentRef: \(response.paymentIdentifier)\n
-                Funding Type: \(response.fundingType.rawValue)\n
-                """
+                self.fundingTypeLabel.text = "fundingType=\(response.fundingType.rawValue)"
+                self.paymentMethodIdentifierLabel.text = "paymentMethodIdentifier=\(response.paymentMethodIdentifier)"
+                self.paymentIdentifierLabel.text = "paymentIdentifier=\(response.paymentIdentifier)"
+                self.merchantAccountLabel.text = "merchantAccount=\(response.merchantAccount)"
+                self.amountLabel.text = "amount=\(response.amount)"
                 ClientSharedData.shared.paymentReference = [response.fundingType : response.paymentIdentifier]
                 
             case .failure(let error):
-                self.resultLabel.text = "Error: \n\(error.localizedDescription)"
+                self.fundingTypeLabel.text = "error: \n\(error.localizedDescription)"
             }
             
             self.layoutIfNeeded()
@@ -199,7 +243,11 @@ class CreatePaymentView: UIView {
         contentView.addSubview(createSnapPaymentButton)
         contentView.addSubview(nonSnapTextField)
         contentView.addSubview(createNonSnapPaymentButton)
-        contentView.addSubview(resultLabel)
+        contentView.addSubview(fundingTypeLabel)
+        contentView.addSubview(paymentMethodIdentifierLabel)
+        contentView.addSubview(paymentIdentifierLabel)
+        contentView.addSubview(merchantAccountLabel)
+        contentView.addSubview(amountLabel)
         contentView.addSubview(nextButton)
     }
     
@@ -266,8 +314,44 @@ class CreatePaymentView: UIView {
             size: .init(width: 0, height: 48)
         )
         
-        resultLabel.anchor(
+        fundingTypeLabel.anchor(
             top: createNonSnapPaymentButton.safeAreaLayoutGuide.bottomAnchor,
+            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
+            bottom: nil,
+            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
+            centerXAnchor: contentView.centerXAnchor,
+            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
+        )
+        
+        paymentMethodIdentifierLabel.anchor(
+            top: fundingTypeLabel.safeAreaLayoutGuide.bottomAnchor,
+            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
+            bottom: nil,
+            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
+            centerXAnchor: contentView.centerXAnchor,
+            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
+        )
+        
+        paymentIdentifierLabel.anchor(
+            top: paymentMethodIdentifierLabel.safeAreaLayoutGuide.bottomAnchor,
+            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
+            bottom: nil,
+            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
+            centerXAnchor: contentView.centerXAnchor,
+            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
+        )
+        
+        merchantAccountLabel.anchor(
+            top: paymentIdentifierLabel.safeAreaLayoutGuide.bottomAnchor,
+            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
+            bottom: nil,
+            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
+            centerXAnchor: contentView.centerXAnchor,
+            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
+        )
+        
+        amountLabel.anchor(
+            top: merchantAccountLabel.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
             bottom: nil,
             trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
