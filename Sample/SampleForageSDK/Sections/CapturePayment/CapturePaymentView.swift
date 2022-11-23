@@ -13,7 +13,8 @@ class CapturePaymentView: UIView {
     
     // MARK: Public Properties
     
-    var isPINValid: Bool = false
+    var isSnapPINValid: Bool = false
+    var isNonSnapPINValid: Bool = false
     
     // MARK: Private Components
     
@@ -78,14 +79,58 @@ class CapturePaymentView: UIView {
         return button
     }()
     
-    private let resultLabel: UILabel = {
+    private let statusTypeLabel: UILabel = {
         let label = UILabel()
-        label.text = "Result"
+        label.text = ""
         label.textColor = .black
         label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         label.numberOfLines = 0
-        label.accessibilityLabel = "Result label"
-        label.accessibilityIdentifier = "lbl_result"
+        label.accessibilityLabel = "Status type label"
+        label.accessibilityIdentifier = "lbl_status_type"
+        return label
+    }()
+    
+    private let statusLabel: UILabel = {
+        let label = UILabel()
+        label.text = ""
+        label.textColor = .black
+        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        label.numberOfLines = 0
+        label.accessibilityLabel = "Status label"
+        label.accessibilityIdentifier = "lbl_status"
+        return label
+    }()
+    
+    private let paymentRefLabel: UILabel = {
+        let label = UILabel()
+        label.text = ""
+        label.textColor = .black
+        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        label.numberOfLines = 0
+        label.accessibilityLabel = "Payment ref label"
+        label.accessibilityIdentifier = "lbl_payment_ref"
+        return label
+    }()
+    
+    private let fundingTypeLabel: UILabel = {
+        let label = UILabel()
+        label.text = ""
+        label.textColor = .black
+        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        label.numberOfLines = 0
+        label.accessibilityLabel = "Funding type label"
+        label.accessibilityIdentifier = "lbl_funding_type"
+        return label
+    }()
+    
+    private let amountLabel: UILabel = {
+        let label = UILabel()
+        label.text = ""
+        label.textColor = .black
+        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        label.numberOfLines = 0
+        label.accessibilityLabel = "Amount label"
+        label.accessibilityIdentifier = "lbl_amount"
         return label
     }()
     
@@ -111,7 +156,7 @@ class CapturePaymentView: UIView {
     // MARK: Private Methods
     
     private func capturePayment(isEbtSnap: Bool) {
-        if isPINValid {
+        if isSnapPINValid || isNonSnapPINValid {
             let paymentReference =
                 isEbtSnap
                     ? ClientSharedData.shared.paymentReference[FundingType.ebtSnap] ?? ""
@@ -134,14 +179,11 @@ class CapturePaymentView: UIView {
                 guard let data = data,
                       let response = try? JSONDecoder().decode(ForageCaptureModel.self, from: data)
                 else { return }
-                self.resultLabel.text = """
-                Success:\n
-                PaymentRef: \(response.paymentIdentifier)\n
-                Funding Type: \(response.fundingType)\n
-                Amount: \(response.amount)\n
-                """
+                self.paymentRefLabel.text = "paymentRef=\(response.paymentIdentifier)"
+                self.fundingTypeLabel.text = "fundingType=\(response.fundingType)"
+                self.amountLabel.text = "amount=\(response.amount)"
             case .failure(let error):
-                self.resultLabel.text = "Error: \n\(error.localizedDescription)"
+                self.paymentRefLabel.text = "error: \n\(error.localizedDescription)"
             }
             
             self.layoutIfNeeded()
@@ -156,7 +198,11 @@ class CapturePaymentView: UIView {
         contentView.addSubview(captureSnapPaymentButton)
         contentView.addSubview(nonSnapTextField)
         contentView.addSubview(captureNonSnapPaymentButton)
-        contentView.addSubview(resultLabel)
+        contentView.addSubview(statusTypeLabel)
+        contentView.addSubview(statusLabel)
+        contentView.addSubview(paymentRefLabel)
+        contentView.addSubview(fundingTypeLabel)
+        contentView.addSubview(amountLabel)
     }
     
     private func setupConstraints() {
@@ -222,8 +268,44 @@ class CapturePaymentView: UIView {
             size: .init(width: 0, height: 48)
         )
         
-        resultLabel.anchor(
+        statusTypeLabel.anchor(
             top: captureNonSnapPaymentButton.safeAreaLayoutGuide.bottomAnchor,
+            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
+            bottom: nil,
+            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
+            centerXAnchor: contentView.centerXAnchor,
+            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
+        )
+        
+        statusLabel.anchor(
+            top: statusTypeLabel.safeAreaLayoutGuide.bottomAnchor,
+            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
+            bottom: nil,
+            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
+            centerXAnchor: contentView.centerXAnchor,
+            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
+        )
+        
+        paymentRefLabel.anchor(
+            top: statusLabel.safeAreaLayoutGuide.bottomAnchor,
+            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
+            bottom: nil,
+            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
+            centerXAnchor: contentView.centerXAnchor,
+            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
+        )
+        
+        fundingTypeLabel.anchor(
+            top: paymentRefLabel.safeAreaLayoutGuide.bottomAnchor,
+            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
+            bottom: nil,
+            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
+            centerXAnchor: contentView.centerXAnchor,
+            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
+        )
+        
+        amountLabel.anchor(
+            top: fundingTypeLabel.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
             bottom: nil,
             trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
@@ -237,7 +319,12 @@ class CapturePaymentView: UIView {
 
 extension CapturePaymentView: ForagePINTextFieldDelegate {
     func pinStatus(_ view: UIView, isValid: Bool, pinType: PinType) {
-        isPINValid = isValid
-        resultLabel.text = "Is valid pin? \(isValid) - type: \(pinType.rawValue)"
+        if pinType == .snap {
+            isSnapPINValid = isValid
+        } else {
+            isNonSnapPINValid = isValid
+        }
+        statusTypeLabel.text = "type=\(pinType.rawValue)"
+        statusLabel.text = "isValid=\(isValid)"
     }
 }
