@@ -153,6 +153,17 @@ class CreatePaymentView: UIView {
         return label
     }()
     
+    private let errorLabel: UILabel = {
+        let label = UILabel()
+        label.text = ""
+        label.textColor = .black
+        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        label.numberOfLines = 0
+        label.accessibilityLabel = "Error label"
+        label.accessibilityIdentifier = "lbl_error"
+        return label
+    }()
+    
     // MARK: Fileprivate Methods
     
     @objc fileprivate func performSnapPayment(_ gesture: UIGestureRecognizer) {
@@ -228,7 +239,7 @@ class CreatePaymentView: UIView {
                 ClientSharedData.shared.paymentReference = [response.fundingType : response.paymentIdentifier]
                 
             case .failure(let error):
-                self.fundingTypeLabel.text = "error: \n\(error.localizedDescription)"
+                self.errorLabel.text = "error: \n\(error.localizedDescription)"
             }
             
             self.layoutIfNeeded()
@@ -248,6 +259,7 @@ class CreatePaymentView: UIView {
         contentView.addSubview(paymentIdentifierLabel)
         contentView.addSubview(merchantAccountLabel)
         contentView.addSubview(amountLabel)
+        contentView.addSubview(errorLabel)
         contentView.addSubview(nextButton)
     }
     
@@ -352,6 +364,15 @@ class CreatePaymentView: UIView {
         
         amountLabel.anchor(
             top: merchantAccountLabel.safeAreaLayoutGuide.bottomAnchor,
+            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
+            bottom: nil,
+            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
+            centerXAnchor: contentView.centerXAnchor,
+            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
+        )
+        
+        errorLabel.anchor(
+            top: amountLabel.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
             bottom: nil,
             trailing: contentView.safeAreaLayoutGuide.trailingAnchor,

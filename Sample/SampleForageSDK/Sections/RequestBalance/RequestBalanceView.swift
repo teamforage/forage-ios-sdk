@@ -112,6 +112,17 @@ class RequestBalanceView: UIView {
         return label
     }()
     
+    private let errorLabel: UILabel = {
+        let label = UILabel()
+        label.text = ""
+        label.textColor = .black
+        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        label.numberOfLines = 0
+        label.accessibilityLabel = "Error label"
+        label.accessibilityIdentifier = "lbl_error"
+        return label
+    }()
+    
     // MARK: Fileprivate Methods
     
     @objc fileprivate func getBalanceInfo(_ gesture: UIGestureRecognizer) {
@@ -149,7 +160,7 @@ class RequestBalanceView: UIView {
                 self.nonSnapBalanceLabel.text = "nonSnap=\(response.nonSnap)"
                 self.updateButtonState(isEnabled: true, button: self.nextButton)
             case .failure(let error):
-                self.snapBalanceLabel.text = "error: \n\(error.localizedDescription)"
+                self.errorLabel.text = "error: \n\(error.localizedDescription)"
                 self.updateButtonState(isEnabled: false, button: self.nextButton)
             }
             
@@ -165,6 +176,7 @@ class RequestBalanceView: UIView {
         contentView.addSubview(statusLabel)
         contentView.addSubview(snapBalanceLabel)
         contentView.addSubview(nonSnapBalanceLabel)
+        contentView.addSubview(errorLabel)
         contentView.addSubview(requestBalanceButton)
         contentView.addSubview(nextButton)
     }
@@ -222,6 +234,15 @@ class RequestBalanceView: UIView {
         
         nonSnapBalanceLabel.anchor(
             top: snapBalanceLabel.safeAreaLayoutGuide.bottomAnchor,
+            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
+            bottom: nil,
+            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
+            centerXAnchor: contentView.centerXAnchor,
+            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
+        )
+        
+        errorLabel.anchor(
+            top: nonSnapBalanceLabel.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
             bottom: nil,
             trailing: contentView.safeAreaLayoutGuide.trailingAnchor,

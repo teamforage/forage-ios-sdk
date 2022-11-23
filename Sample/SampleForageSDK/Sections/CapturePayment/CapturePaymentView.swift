@@ -134,6 +134,17 @@ class CapturePaymentView: UIView {
         return label
     }()
     
+    private let errorLabel: UILabel = {
+        let label = UILabel()
+        label.text = ""
+        label.textColor = .black
+        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        label.numberOfLines = 0
+        label.accessibilityLabel = "Error label"
+        label.accessibilityIdentifier = "lbl_error"
+        return label
+    }()
+    
     // MARK: Fileprivate Methods
     
     @objc fileprivate func performCaptureSnapPayment(_ gesture: UIGestureRecognizer) {
@@ -183,7 +194,7 @@ class CapturePaymentView: UIView {
                 self.fundingTypeLabel.text = "fundingType=\(response.fundingType)"
                 self.amountLabel.text = "amount=\(response.amount)"
             case .failure(let error):
-                self.paymentRefLabel.text = "error: \n\(error.localizedDescription)"
+                self.errorLabel.text = "error: \n\(error.localizedDescription)"
             }
             
             self.layoutIfNeeded()
@@ -203,6 +214,7 @@ class CapturePaymentView: UIView {
         contentView.addSubview(paymentRefLabel)
         contentView.addSubview(fundingTypeLabel)
         contentView.addSubview(amountLabel)
+        contentView.addSubview(errorLabel)
     }
     
     private func setupConstraints() {
@@ -306,6 +318,15 @@ class CapturePaymentView: UIView {
         
         amountLabel.anchor(
             top: fundingTypeLabel.safeAreaLayoutGuide.bottomAnchor,
+            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
+            bottom: nil,
+            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
+            centerXAnchor: contentView.centerXAnchor,
+            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
+        )
+        
+        errorLabel.anchor(
+            top: amountLabel.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
             bottom: nil,
             trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
