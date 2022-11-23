@@ -119,6 +119,8 @@ public class ForagePANTextField: UIView, Identifiable {
         tf.borderStyle = .roundedRect
         tf.autocorrectionType = .no
         tf.keyboardType = UIKeyboardType.phonePad
+        tf.accessibilityLabel = "Forage PAN Text Field"
+        tf.accessibilityIdentifier = "tf_forage_ebt_text_field"
         return tf
     }()
     
@@ -130,6 +132,8 @@ public class ForagePANTextField: UIView, Identifiable {
         imgView.contentMode = .scaleAspectFit
         imgView.translatesAutoresizingMaskIntoConstraints = false
         imgView.heightAnchor.constraint(equalToConstant: 16).isActive = true
+        imgView.accessibilityLabel = "Forage logo"
+        imgView.accessibilityIdentifier = "img_forage_logo"
         return imgView
     }()
     
