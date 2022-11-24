@@ -127,11 +127,11 @@ internal class LiveForageService: ForageService {
 
         collector?.sendData(
             path: "/api/payments/\(request.paymentReference)/capture/",
-            extraData: extraData) { result in
-                self.polling(response: result, request: request, completion: { pollingResult in
+            extraData: extraData) { [weak self] result in
+                self?.polling(response: result, request: request, completion: { pollingResult in
                     switch pollingResult {
                     case .success:
-                        self.retrieveCapturedPayment(
+                        self?.retrieveCapturedPayment(
                             request: request,
                             completion: completion
                         )
@@ -188,11 +188,25 @@ extension LiveForageService: Polling {
                 }
             }
 
-        case .failure(_, _, _, let error):
-            guard let error = error else {
+        case .failure(let code, let data, let response, let error):
+            if let data = data {
+                self.provider.processVGSData(
+                    model: ForageServiceError.self,
+                    code: code,
+                    data: data,
+                    response: response) { errorResult in
+                    switch errorResult {
+                    case .success(let errorParsed):
+                        return completion(.failure(errorParsed))
+                    case .failure(let error):
+                        return completion(.failure(error))
+                    }
+                }
+            } else if let error = error {
+                return completion(.failure(error))
+            } else {
                 return completion(.failure(ServiceError.emptyError))
             }
-            completion(.failure(error))
         }
     }
     
@@ -213,7 +227,7 @@ extension LiveForageService: Polling {
                 switch result {
                 case .success(let data):
                     /// check message is not failed and is completed
-                    if data.failed == false && data.status == .completed {
+                    if data.failed == false && data.status == "completed" {
                         completion(.success(data))
                     /// check message is failed to return error immediately
                     } else if data.failed == true {

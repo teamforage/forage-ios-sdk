@@ -15,7 +15,7 @@ internal class BalanceStub {
 
     private init() {}
     
-    internal func makeMessageResponse(_ status: BalanceStatus, failed: Bool) -> MessageResponseModel {
+    internal func makeMessageResponse(_ status: String, failed: Bool) -> MessageResponseModel {
         let messageStub = MessageResponseModel(
             contentId: "ee1889a2-7366-41a4-b918-bddae792d5f5",
             messageType: "0200",
