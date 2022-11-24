@@ -23,15 +23,10 @@ public struct ForageBalanceModel: Codable {
     }
 }
 
-internal enum BalanceStatus: String, Codable {
-    case sentToProxy = "sent_to_proxy"
-    case completed = "completed"
-}
-
 internal struct MessageResponse: Codable {
     let contentId: String
     let messageType: String
-    let status: BalanceStatus
+    let status: String
     let failed: Bool
     let errors: [String]
     
