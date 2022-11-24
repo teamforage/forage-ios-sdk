@@ -181,11 +181,16 @@ class CardNumberView: UIView {
                 self.typeLabel.text = "type=\(response.type)"
                 self.tokenLabel.text = "token=\(response.card.token)"
                 self.last4Label.text = "last4=\(response.card.last4)"
+                self.errorLabel.text = ""
                 ClientSharedData.shared.cardNumberToken = response.card.token
                 ClientSharedData.shared.paymentMethodReference = response.paymentMethodIdentifier
                 self.updateButtonState(isEnabled: true, button: self.nextButton)
             case .failure(let error):
-                self.errorLabel.text = "error: \n\(error.localizedDescription)"
+                self.errorLabel.text = "error: \n\(error)"
+                self.refLabel.text = ""
+                self.typeLabel.text = ""
+                self.tokenLabel.text = ""
+                self.last4Label.text = ""
                 self.updateButtonState(isEnabled: false, button: self.nextButton)
             }
             

@@ -252,7 +252,7 @@ extension ForagePANTextField: UITextFieldDelegate {
         } else if newString.count >= 6 {
             delegate?.panNumberStatus(self, cardStatus: .invalid)
         }
-        
+
         /// Default text field allowed digits
         return newString.count <= 16
     }

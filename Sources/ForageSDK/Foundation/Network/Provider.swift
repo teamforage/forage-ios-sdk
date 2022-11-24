@@ -17,8 +17,8 @@ internal class Provider {
         do {
             let request = try endpoint.urlRequest()
             task = urlSession.dataTask(with: request) { (data, response, error) in
-                self.middleware(model: model, data: data, response: response, error: error) { (result) in
-                    DispatchQueue.main.async {
+                DispatchQueue.main.async {
+                    self.middleware(model: model, data: data, response: response, error: error) { (result) in
                         switch result {
                         case .success(let data):
                             completion(.success(data))
@@ -41,10 +41,27 @@ internal class Provider {
                 self.processResponse(response: response) { result in
                     DispatchQueue.main.async {
                         switch result {
-                        case .success: completion(.success(data))
+                        case .success:
+                            completion(.success(data))
                         case .failure:
-                            guard let error = error else { return }
-                            completion(.failure(error))
+                            if let data = data {
+                                self.processVGSData(
+                                    model: ForageServiceError.self,
+                                    code: nil,
+                                    data: data,
+                                    response: response) { errorResult in
+                                    switch errorResult {
+                                    case .success(let errorParsed):
+                                        return completion(.failure(errorParsed))
+                                    case .failure(let error):
+                                        return completion(.failure(error))
+                                    }
+                                }
+                            } else if let error = error {
+                                return completion(.failure(error))
+                            } else {
+                                return completion(.failure(ServiceError.emptyError))
+                            }
                         }
                     }
                 }
@@ -69,8 +86,8 @@ internal class Provider {
             switch result {
             case .success(let response):
                 httpResponse = response
-            case .failure(_):
-                return completion(.failure(NSError(domain: "Invalid response", code: -999, userInfo: nil)))
+            case .failure(let error):
+                return completion(.failure(error))
             }
         }
         
@@ -110,7 +127,7 @@ internal class Provider {
             return completion(.success(()))
         }
         
-        completion(.failure(NSError(domain: "Error: \(error.localizedDescription)", code: response?.statusCode ?? -992, userInfo: nil)))
+        completion(.failure(NSError(domain: "Error: \(error)", code: response?.statusCode ?? -992, userInfo: nil)))
     }
     
     private func processData<T: Decodable>(model: T.Type, data: Data?, response: HTTPURLResponse?, error: Error?, completion: @escaping (Result<T, Error>) -> Void) {
@@ -120,7 +137,7 @@ internal class Provider {
         }
         
         guard let result = try? JSONDecoder().decode(T.self, from: data) else {
-            return completion(.failure(NSError(domain: "Could not decode payload", code: response?.statusCode ?? 201, userInfo: nil)))
+            return completion(.failure(NSError(domain: "Could not decode payload - \(String(decoding: data, as: UTF8.self))", code: response?.statusCode ?? 201, userInfo: nil)))
         }
         
         return completion(.success(result))
@@ -133,7 +150,7 @@ internal class Provider {
         }
         
         guard let result = try? JSONDecoder().decode(T.self, from: data) else {
-            return completion(.failure(NSError(domain: "Could not decode payload", code: code ?? 201, userInfo: nil)))
+            return completion(.failure(NSError(domain: "Could not decode payload - \(String(decoding: data, as: UTF8.self))", code: code ?? 201, userInfo: nil)))
         }
         
         return completion(.success(result))

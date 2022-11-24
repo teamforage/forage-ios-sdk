@@ -158,9 +158,12 @@ class RequestBalanceView: UIView {
                 else { return }
                 self.snapBalanceLabel.text = "snap=\(response.snap)"
                 self.nonSnapBalanceLabel.text = "nonSnap=\(response.nonSnap)"
+                self.errorLabel.text = ""
                 self.updateButtonState(isEnabled: true, button: self.nextButton)
             case .failure(let error):
-                self.errorLabel.text = "error: \n\(error.localizedDescription)"
+                self.errorLabel.text = "\(error)"
+                self.snapBalanceLabel.text = ""
+                self.nonSnapBalanceLabel.text = ""
                 self.updateButtonState(isEnabled: false, button: self.nextButton)
             }
             

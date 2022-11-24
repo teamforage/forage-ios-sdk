@@ -45,8 +45,10 @@ internal class LiveForageService: ForageService {
         do {
             try provider.execute(endpoint: ForageAPI.panNumber(request: request), completion: { result in
                 switch result {
-                case .success(let data): completion(.success(data))
-                case .failure(let error): completion(.failure(error))
+                case .success(let data):
+                    completion(.success(data))
+                case .failure(let error):
+                    completion(.failure(error))
                 }
             })
         } catch {
@@ -94,11 +96,25 @@ internal class LiveForageService: ForageService {
                     switch result {
                     case .success(_, let data, _):
                         completion(.success(data))
-                    case .failure(_, _, _, let error):
-                        guard let error = error else {
+                    case .failure(let code, let data, let response, let error):
+                        if let data = data {
+                            self.provider.processVGSData(
+                                model: ForageServiceError.self,
+                                code: code,
+                                data: data,
+                                response: response) { errorResult in
+                                switch errorResult {
+                                case .success(let errorParsed):
+                                    return completion(.failure(errorParsed))
+                                case .failure(let error):
+                                    return completion(.failure(error))
+                                }
+                            }
+                        } else if let error = error {
+                            return completion(.failure(error))
+                        } else {
                             return completion(.failure(ServiceError.emptyError))
                         }
-                        completion(.failure(error))
                     }
                 }
         }
@@ -122,12 +138,26 @@ internal class LiveForageService: ForageService {
             extraData: extraData) { result in
                 switch result {
                 case .success(_, let data, _):
-                    completion(.success(data))
-                case .failure(_, _, _, let error):
-                    guard let error = error else {
+                    return completion(.success(data))
+                case .failure(let code, let data, let response, let error):
+                    if let data = data {
+                        self.provider.processVGSData(
+                            model: ForageServiceError.self,
+                            code: code,
+                            data: data,
+                            response: response) { errorResult in
+                            switch errorResult {
+                            case .success(let errorParsed):
+                                return completion(.failure(errorParsed))
+                            case .failure(let error):
+                                return completion(.failure(error))
+                            }
+                        }
+                    } else if let error = error {
+                        return completion(.failure(error))
+                    } else {
                         return completion(.failure(ServiceError.emptyError))
                     }
-                    completion(.failure(error))
                 }
             }
     }
