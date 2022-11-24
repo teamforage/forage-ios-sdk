@@ -193,8 +193,12 @@ class CapturePaymentView: UIView {
                 self.paymentRefLabel.text = "paymentRef=\(response.paymentIdentifier)"
                 self.fundingTypeLabel.text = "fundingType=\(response.fundingType)"
                 self.amountLabel.text = "amount=\(response.amount)"
+                self.errorLabel.text = ""
             case .failure(let error):
-                self.errorLabel.text = "error: \n\(error.localizedDescription)"
+                self.errorLabel.text = "\(error)"
+                self.paymentRefLabel.text = ""
+                self.fundingTypeLabel.text = ""
+                self.amountLabel.text = ""
             }
             
             self.layoutIfNeeded()
