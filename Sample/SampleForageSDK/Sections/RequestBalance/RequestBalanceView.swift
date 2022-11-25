@@ -35,6 +35,7 @@ class RequestBalanceView: UIView {
         label.font = UIFont.systemFont(ofSize: 28, weight: .bold)
         label.accessibilityLabel = "Title label"
         label.accessibilityIdentifier = "lbl_title"
+        label.isAccessibilityElement = true
         return label
     }()
     
@@ -45,6 +46,7 @@ class RequestBalanceView: UIView {
         tf.pinType = .balance
         tf.accessibilityLabel = "PIN balance Text Field"
         tf.accessibilityIdentifier = "tf_pin_balance"
+        tf.isAccessibilityElement = true
         return tf
     }()
     
@@ -61,6 +63,7 @@ class RequestBalanceView: UIView {
         button.alpha = 0.5
         button.accessibilityLabel = "Check balance button"
         button.accessibilityIdentifier = "bt_check_balance"
+        button.isAccessibilityElement = true
         return button
     }()
     
@@ -77,6 +80,7 @@ class RequestBalanceView: UIView {
         button.alpha = 0.5
         button.accessibilityLabel = "Next button"
         button.accessibilityIdentifier = "bt_next"
+        button.isAccessibilityElement = true
         return button
     }()
     
@@ -87,6 +91,7 @@ class RequestBalanceView: UIView {
         label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         label.accessibilityLabel = "Status label"
         label.accessibilityIdentifier = "lbl_status"
+        label.isAccessibilityElement = true
         return label
     }()
     
@@ -98,6 +103,7 @@ class RequestBalanceView: UIView {
         label.numberOfLines = 0
         label.accessibilityLabel = "Snap balance label"
         label.accessibilityIdentifier = "lbl_snap_balance"
+        label.isAccessibilityElement = true
         return label
     }()
     
@@ -109,6 +115,7 @@ class RequestBalanceView: UIView {
         label.numberOfLines = 0
         label.accessibilityLabel = "Non snap balance label"
         label.accessibilityIdentifier = "lbl_non_snap_balance"
+        label.isAccessibilityElement = true
         return label
     }()
     
@@ -120,6 +127,7 @@ class RequestBalanceView: UIView {
         label.numberOfLines = 0
         label.accessibilityLabel = "Error label"
         label.accessibilityIdentifier = "lbl_error"
+        label.isAccessibilityElement = true
         return label
     }()
     

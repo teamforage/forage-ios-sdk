@@ -121,6 +121,7 @@ public class ForagePANTextField: UIView, Identifiable {
         tf.keyboardType = UIKeyboardType.phonePad
         tf.accessibilityLabel = "Forage PAN Text Field"
         tf.accessibilityIdentifier = "tf_forage_ebt_text_field"
+        tf.isAccessibilityElement = true
         return tf
     }()
     
@@ -134,6 +135,7 @@ public class ForagePANTextField: UIView, Identifiable {
         imgView.heightAnchor.constraint(equalToConstant: 16).isActive = true
         imgView.accessibilityLabel = "Forage logo"
         imgView.accessibilityIdentifier = "img_forage_logo"
+        imgView.isAccessibilityElement = true
         return imgView
     }()
     
