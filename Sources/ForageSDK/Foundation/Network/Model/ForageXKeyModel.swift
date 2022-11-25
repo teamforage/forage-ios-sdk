@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// `ForageXKeyModel` used for compose X-key request
 internal struct ForageXKeyModel: Codable {
     let alias: String
 }
