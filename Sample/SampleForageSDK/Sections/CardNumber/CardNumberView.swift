@@ -35,6 +35,7 @@ class CardNumberView: UIView {
         label.font = UIFont.systemFont(ofSize: 28, weight: .bold)
         label.accessibilityLabel = "Title label"
         label.accessibilityIdentifier = "lbl_title"
+        label.isAccessibilityElement = true
         return label
     }()
     
@@ -43,6 +44,7 @@ class CardNumberView: UIView {
         tf.placeholder = "PAN Number"
         tf.accessibilityLabel = "Ebt Number Text Field"
         tf.accessibilityIdentifier = "tf_ebt_number"
+        tf.isAccessibilityElement = true
         return tf
     }()
     
@@ -53,6 +55,7 @@ class CardNumberView: UIView {
         label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         label.accessibilityLabel = "Status label"
         label.accessibilityIdentifier = "lbl_status"
+        label.isAccessibilityElement = true
         return label
     }()
     
@@ -69,6 +72,7 @@ class CardNumberView: UIView {
         button.alpha = 0.5
         button.accessibilityLabel = "Send ebt number button"
         button.accessibilityIdentifier = "bt_send_ebt_number"
+        button.isAccessibilityElement = true
         return button
     }()
     
@@ -85,6 +89,7 @@ class CardNumberView: UIView {
         button.alpha = 0.5
         button.accessibilityLabel = "Next button"
         button.accessibilityIdentifier = "bt_next"
+        button.isAccessibilityElement = true
         return button
     }()
     
@@ -96,6 +101,7 @@ class CardNumberView: UIView {
         label.numberOfLines = 0
         label.accessibilityLabel = "Ref label"
         label.accessibilityIdentifier = "lbl_ref"
+        label.isAccessibilityElement = true
         return label
     }()
     
@@ -107,6 +113,7 @@ class CardNumberView: UIView {
         label.numberOfLines = 0
         label.accessibilityLabel = "Token label"
         label.accessibilityIdentifier = "lbl_token"
+        label.isAccessibilityElement = true
         return label
     }()
     
@@ -118,6 +125,7 @@ class CardNumberView: UIView {
         label.numberOfLines = 0
         label.accessibilityLabel = "Type label"
         label.accessibilityIdentifier = "lbl_type"
+        label.isAccessibilityElement = true
         return label
     }()
     
@@ -129,6 +137,7 @@ class CardNumberView: UIView {
         label.numberOfLines = 0
         label.accessibilityLabel = "Last4 label"
         label.accessibilityIdentifier = "lbl_last4"
+        label.isAccessibilityElement = true
         return label
     }()
     
@@ -140,6 +149,7 @@ class CardNumberView: UIView {
         label.numberOfLines = 0
         label.accessibilityLabel = "Error label"
         label.accessibilityIdentifier = "lbl_error"
+        label.isAccessibilityElement = true
         return label
     }()
     
