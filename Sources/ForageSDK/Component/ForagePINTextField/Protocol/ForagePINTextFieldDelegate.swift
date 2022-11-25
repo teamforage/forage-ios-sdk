@@ -17,5 +17,11 @@ public enum PinType: String {
 
 /// Protocol to comunicate `ForagePINTextField` to the client application
 public protocol ForagePINTextFieldDelegate: AnyObject {
+    /// Passcode pin status
+    ///
+    /// - Parameters:
+    ///  - view: ForagePINTextField view reference.
+    ///  - isValid: Entered pin current status.
+    ///  - pinType: Pin text field type. Check ``PinType`` for details.
     func pinStatus(_ view: UIView, isValid: Bool, pinType: PinType)
 }

@@ -8,7 +8,7 @@
 import Foundation
 
 enum ForageAPI {
-    case panNumber(request: ForagePANRequest)
+    case tokenizeNumber(request: ForagePANRequestModel)
     case xKey(bearerToken: String)
 }
 
@@ -19,21 +19,21 @@ extension ForageAPI: ServiceProtocol {
     
     var path: String {
         switch self {
-        case .panNumber: return "/api/payment_methods/"
+        case .tokenizeNumber: return "/api/payment_methods/"
         case .xKey: return "/iso_server/encryption_alias/"
         }
     }
     
     var method: HttpMethod {
         switch self {
-        case .panNumber: return .post
+        case .tokenizeNumber: return .post
         case .xKey: return .get
         }
     }
     
     var task: HttpTask {
         switch self {
-        case .panNumber(
+        case .tokenizeNumber(
             request: let model
         ):
             var card = [String: String]()
