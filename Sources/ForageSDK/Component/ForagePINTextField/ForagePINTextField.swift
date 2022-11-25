@@ -103,7 +103,6 @@ public class ForagePINTextField: UIView, Identifiable {
         tf.borderWidth = 0.25
         tf.borderColor = UIColor.lightGray
         tf.padding = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 0)
-        tf.accessibilityLabel = "Forage PIN Text Field"
         tf.accessibilityIdentifier = "tf_forage_pin_text_field"
         tf.isAccessibilityElement = true
         return tf
@@ -117,7 +116,6 @@ public class ForagePINTextField: UIView, Identifiable {
         imgView.contentMode = .scaleAspectFit
         imgView.translatesAutoresizingMaskIntoConstraints = false
         imgView.heightAnchor.constraint(equalToConstant: 16).isActive = true
-        imgView.accessibilityLabel = "Forage logo"
         imgView.accessibilityIdentifier = "img_forage_logo"
         imgView.isAccessibilityElement = true
         return imgView

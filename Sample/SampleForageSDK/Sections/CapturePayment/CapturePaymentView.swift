@@ -29,7 +29,6 @@ class CapturePaymentView: UIView {
         let label = UILabel()
         label.text = "Capture Payment"
         label.font = UIFont.systemFont(ofSize: 28, weight: .bold)
-        label.accessibilityLabel = "Title label"
         label.accessibilityIdentifier = "lbl_title"
         label.isAccessibilityElement = true
         return label
@@ -40,7 +39,6 @@ class CapturePaymentView: UIView {
         tf.placeholder = "PIN Snap Field"
         tf.isSecureTextEntry = true
         tf.pinType = .snap
-        tf.accessibilityLabel = "Snap PIN Text Field"
         tf.accessibilityIdentifier = "tf_pin_snap"
         tf.isAccessibilityElement = true
         return tf
@@ -51,7 +49,6 @@ class CapturePaymentView: UIView {
         tf.placeholder = "PIN Snap Field"
         tf.isSecureTextEntry = true
         tf.pinType = .nonSnap
-        tf.accessibilityLabel = "Non snap PIN Text Field"
         tf.accessibilityIdentifier = "tf_pin_non_snap"
         tf.isAccessibilityElement = true
         return tf
@@ -65,7 +62,6 @@ class CapturePaymentView: UIView {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(performCaptureSnapPayment(_:)), for: .touchUpInside)
         button.backgroundColor = .systemBlue
-        button.accessibilityLabel = "Capture snap button"
         button.accessibilityIdentifier = "bt_capture_snap_payment"
         button.isAccessibilityElement = true
         return button
@@ -78,7 +74,6 @@ class CapturePaymentView: UIView {
         button.tintColor = .white
         button.addTarget(self, action: #selector(performCaptureNonSnapPayment(_:)), for: .touchUpInside)
         button.backgroundColor = .systemBlue
-        button.accessibilityLabel = "Capture non snap button"
         button.accessibilityIdentifier = "bt_capture_non_snap_payment"
         button.isAccessibilityElement = true
         return button
@@ -90,7 +85,6 @@ class CapturePaymentView: UIView {
         label.textColor = .black
         label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         label.numberOfLines = 0
-        label.accessibilityLabel = "Status type label"
         label.accessibilityIdentifier = "lbl_status_type"
         label.isAccessibilityElement = true
         return label
@@ -102,7 +96,6 @@ class CapturePaymentView: UIView {
         label.textColor = .black
         label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         label.numberOfLines = 0
-        label.accessibilityLabel = "Status label"
         label.accessibilityIdentifier = "lbl_status"
         label.isAccessibilityElement = true
         return label
@@ -114,7 +107,6 @@ class CapturePaymentView: UIView {
         label.textColor = .black
         label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         label.numberOfLines = 0
-        label.accessibilityLabel = "Payment ref label"
         label.accessibilityIdentifier = "lbl_payment_ref"
         label.isAccessibilityElement = true
         return label
@@ -126,7 +118,6 @@ class CapturePaymentView: UIView {
         label.textColor = .black
         label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         label.numberOfLines = 0
-        label.accessibilityLabel = "Funding type label"
         label.accessibilityIdentifier = "lbl_funding_type"
         label.isAccessibilityElement = true
         return label
@@ -138,7 +129,6 @@ class CapturePaymentView: UIView {
         label.textColor = .black
         label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         label.numberOfLines = 0
-        label.accessibilityLabel = "Amount label"
         label.accessibilityIdentifier = "lbl_amount"
         label.isAccessibilityElement = true
         return label
@@ -150,7 +140,6 @@ class CapturePaymentView: UIView {
         label.textColor = .black
         label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         label.numberOfLines = 0
-        label.accessibilityLabel = "Error label"
         label.accessibilityIdentifier = "lbl_error"
         label.isAccessibilityElement = true
         return label
