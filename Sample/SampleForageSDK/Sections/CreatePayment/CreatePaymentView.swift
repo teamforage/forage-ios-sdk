@@ -34,7 +34,6 @@ class CreatePaymentView: UIView {
         let label = UILabel()
         label.text = "Create Payment"
         label.font = UIFont.systemFont(ofSize: 28, weight: .bold)
-        label.accessibilityLabel = "Title label"
         label.accessibilityIdentifier = "lbl_title"
         label.isAccessibilityElement = true
         return label
@@ -45,7 +44,6 @@ class CreatePaymentView: UIView {
         tf.placeholder = "Snap amount"
         tf.translatesAutoresizingMaskIntoConstraints = false
         tf.borderStyle = .roundedRect
-        tf.accessibilityLabel = "Snap amount Text Field"
         tf.accessibilityIdentifier = "tf_snap_amount"
         tf.isAccessibilityElement = true
         return tf
@@ -56,7 +54,6 @@ class CreatePaymentView: UIView {
         tf.placeholder = "Non Snap amount"
         tf.translatesAutoresizingMaskIntoConstraints = false
         tf.borderStyle = .roundedRect
-        tf.accessibilityLabel = "Non Snap amount Text Field"
         tf.accessibilityIdentifier = "tf_non_snap_amount"
         tf.isAccessibilityElement = true
         return tf
@@ -70,7 +67,6 @@ class CreatePaymentView: UIView {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(performSnapPayment(_:)), for: .touchUpInside)
         button.backgroundColor = .systemBlue
-        button.accessibilityLabel = "Create snap payment button"
         button.accessibilityIdentifier = "bt_create_snap_payment"
         button.isAccessibilityElement = true
         return button
@@ -84,7 +80,6 @@ class CreatePaymentView: UIView {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(performNonSnapPayment(_:)), for: .touchUpInside)
         button.backgroundColor = .systemBlue
-        button.accessibilityLabel = "Create non snap payment button"
         button.accessibilityIdentifier = "bt_create_non_snap_payment"
         button.isAccessibilityElement = true
         return button
@@ -98,7 +93,6 @@ class CreatePaymentView: UIView {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(goToCapture(_:)), for: .touchUpInside)
         button.backgroundColor = .systemBlue
-        button.accessibilityLabel = "Next button"
         button.accessibilityIdentifier = "bt_next"
         button.isAccessibilityElement = true
         return button
@@ -110,7 +104,6 @@ class CreatePaymentView: UIView {
         label.textColor = .black
         label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         label.numberOfLines = 0
-        label.accessibilityLabel = "Funding type label"
         label.accessibilityIdentifier = "lbl_funding_type"
         label.isAccessibilityElement = true
         return label
@@ -122,7 +115,6 @@ class CreatePaymentView: UIView {
         label.textColor = .black
         label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         label.numberOfLines = 0
-        label.accessibilityLabel = "Payment Method Identifier label"
         label.accessibilityIdentifier = "lbl_payment_method_identifier"
         label.isAccessibilityElement = true
         return label
@@ -134,7 +126,6 @@ class CreatePaymentView: UIView {
         label.textColor = .black
         label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         label.numberOfLines = 0
-        label.accessibilityLabel = "Payment Identifier label"
         label.accessibilityIdentifier = "lbl_payment_identifier"
         label.isAccessibilityElement = true
         return label
@@ -146,7 +137,6 @@ class CreatePaymentView: UIView {
         label.textColor = .black
         label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         label.numberOfLines = 0
-        label.accessibilityLabel = "Merchant Account label"
         label.accessibilityIdentifier = "lbl_merchant_account"
         label.isAccessibilityElement = true
         return label
@@ -158,7 +148,6 @@ class CreatePaymentView: UIView {
         label.textColor = .black
         label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         label.numberOfLines = 0
-        label.accessibilityLabel = "Amount label"
         label.accessibilityIdentifier = "lbl_amount"
         label.isAccessibilityElement = true
         return label
@@ -170,7 +159,6 @@ class CreatePaymentView: UIView {
         label.textColor = .black
         label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         label.numberOfLines = 0
-        label.accessibilityLabel = "Error label"
         label.accessibilityIdentifier = "lbl_error"
         label.isAccessibilityElement = true
         return label
