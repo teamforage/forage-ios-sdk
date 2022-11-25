@@ -158,8 +158,8 @@ class CardNumberView: UIView {
     @objc fileprivate func sendInfo(_ gesture: UIGestureRecognizer) {
         if isCardValid {
             ForageSDK.shared.tokenizeEBTCard(
-                merchantAccount: ClientSharedData.shared.merchantID,
-                bearerToken: ClientSharedData.shared.bearerToken) { result in
+                bearerToken: ClientSharedData.shared.bearerToken,
+                merchantAccount: ClientSharedData.shared.merchantID) { result in
                     self.printResult(result: result)
                 }
         }
