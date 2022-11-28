@@ -4,6 +4,7 @@
 //
 //  Created by Symphony on 16/11/22.
 //
+
 import Foundation
 
 /// `ForageRequestModel` used for compose ForageSDK requests

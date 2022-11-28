@@ -15,6 +15,7 @@ public enum EnvironmentTarget: String {
     case sandbox = "api.sandbox.joinforage.app"
     case cert = "api.cert.joinforage.app"
     case prod = "api.joinforage.app"
+    case dev = "api.dev.joinforage.app"
 }
 
 /**
@@ -24,6 +25,7 @@ private enum VaultId: String {
     case sandbox = "tntagcot4b1"
     case cert = "tntpnht7psv"
     case prod = "tntbcrncmgi"
+    case dev = "tntlqkidhc6"
 }
 
 public class ForageSDK {
@@ -55,9 +57,9 @@ public class ForageSDK {
     /**
      ``Config`` struct to set environment(``EnvironmentTarget``) on `ForageSDK` singleton
      
-    - Parameters:
-       - environment: *EnvironmentTarget* enum to set environment.
-    */
+     - Parameters:
+        - environment: *EnvironmentTarget* enum to set environment.
+     */
     public struct Config {
         let environment: EnvironmentTarget
 
@@ -69,19 +71,19 @@ public class ForageSDK {
     /**
      Setup ForageSDK using Config struct.
      
-    - Parameters:
-     - config: *Config* struct object to set environment.
+     - Parameters:
+       - config: *Config* struct object to set environment.
      
     ````
       ForageSDK.setup(
          ForageSDK.Config(environment: .dev)
       )
     ````
-    */
+     */
     public class func setup(_ config: Config) {
         ForageSDK.config = config
     }
-    
+
     // MARK: Private Methods
     
     private func vaultID(_ environment: EnvironmentTarget) -> VaultId {
@@ -89,12 +91,13 @@ public class ForageSDK {
         case .sandbox: return .sandbox
         case .cert: return .cert
         case .prod: return .prod
+        case .dev: return .dev
         }
     }
     
     private func environmentVGS(_ environment: EnvironmentTarget) -> VGSCollectSDK.Environment {
         switch environment {
-        case .cert, .sandbox: return .sandbox
+        case .cert, .sandbox, .dev: return .sandbox
         case .prod: return .live
         }
     }

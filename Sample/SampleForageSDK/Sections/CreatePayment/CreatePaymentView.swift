@@ -237,7 +237,7 @@ class CreatePaymentView: UIView {
                 self.merchantAccountLabel.text = "merchantAccount=\(response.merchantAccount)"
                 self.amountLabel.text = "amount=\(response.amount)"
                 self.errorLabel.text = ""
-                ClientSharedData.shared.paymentReference = [response.fundingType : response.paymentIdentifier]
+                ClientSharedData.shared.paymentReference[response.fundingType] = response.paymentIdentifier
                 
             case .failure(let error):
                 self.errorLabel.text = "error: \n\(error.localizedDescription)"
