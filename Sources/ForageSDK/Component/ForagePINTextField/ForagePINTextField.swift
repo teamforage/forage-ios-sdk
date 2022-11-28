@@ -110,7 +110,7 @@ public class ForagePINTextField: UIView, Identifiable {
     
     private lazy var imageView: UIImageView = {
         let imgView = UIImageView()
-        let image = UIImage(named: "forageLogo", in: .module, compatibleWith: nil)
+        let image = UIImage(named: "forageLogo", in: AssetsBundle.main.iconBundle, compatibleWith: nil)
         imgView.adjustsImageSizeForAccessibilityContentSizeCategory = true
         imgView.image = image
         imgView.contentMode = .scaleAspectFit
