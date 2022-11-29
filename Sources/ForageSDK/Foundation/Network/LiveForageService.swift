@@ -1,5 +1,5 @@
 //
-//  ForageService.swift
+//  LiveForageService.swift
 //  ForageSDK
 //
 //  Created by Symphony on 30/10/22.
@@ -11,11 +11,12 @@ internal class LiveForageService: ForageService {
 
     // MARK: Properties
     
-    internal let provider = Provider()
+    internal var provider: Provider
     private var collector: VGSCollect?
 
-    init(_ collector: VGSCollect?) {
+    init(_ collector: VGSCollect?, provider: Provider = Provider()) {
         self.collector = collector
+        self.provider = provider
     }
 
     // MARK: Tokenize EBT card
