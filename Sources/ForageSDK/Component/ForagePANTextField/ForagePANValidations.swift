@@ -89,3 +89,5 @@ struct StateIIN {
         self.panLength = panLength
     }
 }
+
+extension StateIIN: Equatable {}
