@@ -348,7 +348,10 @@ extension CardNumberView: ForagePANTextFieldDelegate {
             isValid = false
         }
         
-        updateButtonState(isEnabled: isValid, button: sendPanButton)
-        isCardValid = isValid
+        // Force enabling the button for automation
+        updateButtonState(isEnabled: true, button: sendPanButton)
+        isCardValid = true
+//        updateButtonState(isEnabled: isValid, button: sendPanButton)
+//        isCardValid = isValid
     }
 }
