@@ -8,10 +8,12 @@
 import Foundation
 
 internal class Provider {
-    var urlSession = URLSession.shared
+    var urlSession: URLSessionProtocol!
     var task: URLSessionDataTask?
     
-    init() { }
+    init(_ urlSession: URLSessionProtocol = URLSession.shared) {
+        self.urlSession = urlSession
+    }
     
     internal func execute<T: Decodable>(model: T.Type, endpoint: ServiceProtocol, completion: @escaping (Result<T, Error>) -> Void) throws {
         do {

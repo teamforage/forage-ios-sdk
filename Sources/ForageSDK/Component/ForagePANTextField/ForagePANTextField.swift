@@ -233,14 +233,14 @@ extension ForagePANTextField: UITextFieldDelegate {
             delegate?.panNumberStatus(self, cardStatus: .identifying)
             return true
         }
-        
+
         /// Check if 6 first entered number are valid
         if let stateIIN = ForagePANValidations.checkPANLength(newString) {
             /// Check max length allowed is fulfill
             if newString.count > stateIIN.panLength {
                 return false
             }
-            
+
             if newString.count < stateIIN.panLength {
                 delegate?.panNumberStatus(self, cardStatus: .identifying)
             } else {

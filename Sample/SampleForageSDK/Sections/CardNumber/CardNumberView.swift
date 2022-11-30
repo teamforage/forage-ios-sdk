@@ -335,7 +335,7 @@ extension CardNumberView: ForagePANTextFieldDelegate {
         var isValid = false
         switch cardStatus {
         case .valid:
-            statusLabel.text = "It is an VALID card number"
+            statusLabel.text = "It is a VALID card number"
             statusLabel.textColor = .green
             isValid = true
         case .invalid:
