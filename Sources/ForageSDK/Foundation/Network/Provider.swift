@@ -139,7 +139,7 @@ internal class Provider {
         }
         
         guard let result = try? JSONDecoder().decode(T.self, from: data) else {
-            return completion(.failure(NSError(domain: "Could not decode payload - \(String(decoding: data, as: UTF8.self))", code: response?.statusCode ?? 201, userInfo: nil)))
+            return completion(.failure(NSError(domain: "\(String(decoding: data, as: UTF8.self))", code: response?.statusCode ?? 201, userInfo: nil)))
         }
         
         return completion(.success(result))
@@ -152,7 +152,7 @@ internal class Provider {
         }
         
         guard let result = try? JSONDecoder().decode(T.self, from: data) else {
-            return completion(.failure(NSError(domain: "Could not decode payload - \(String(decoding: data, as: UTF8.self))", code: code ?? 201, userInfo: nil)))
+            return completion(.failure(NSError(domain: "\(String(decoding: data, as: UTF8.self))", code: code ?? 201, userInfo: nil)))
         }
         
         return completion(.success(result))
