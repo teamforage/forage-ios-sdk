@@ -341,11 +341,11 @@ extension CardNumberView: ForagePANTextFieldDelegate {
         case .invalid:
             statusLabel.text = "It is a NON VALID card number"
             statusLabel.textColor = .red
-            isValid = false
+            isValid = true
         case .identifying:
             statusLabel.text = "It is IDENTIFYING card number"
             statusLabel.textColor = .gray
-            isValid = false
+            isValid = true
         }
         
         updateButtonState(isEnabled: isValid, button: sendPanButton)
