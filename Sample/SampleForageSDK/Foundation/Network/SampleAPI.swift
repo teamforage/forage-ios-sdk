@@ -14,7 +14,7 @@ enum SampleAPI {
 extension SampleAPI: ServiceProtocol {
     var scheme: String { return "https" }
     
-    var host: String { return "api.dev.joinforage.app" }
+    var host: String { return "api.sandbox.joinforage.app" }
     
     var path: String { return "/api/payments/" }
     

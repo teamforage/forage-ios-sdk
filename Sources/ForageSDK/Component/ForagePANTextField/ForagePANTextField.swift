@@ -220,6 +220,7 @@ public class ForagePANTextField: UIView, Identifiable {
 extension ForagePANTextField: UITextFieldDelegate {
     public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         
+        /// Only allow numbers to be entered into the input field!
         let invalidCharacters = CharacterSet(charactersIn: "0123456789").inverted
         if !(string.rangeOfCharacter(from: invalidCharacters) == nil) {
             return false
@@ -228,33 +229,43 @@ extension ForagePANTextField: UITextFieldDelegate {
         let currentString = (textField.text ?? "") as NSString
         let newString = currentString.replacingCharacters(in: range, with: string)
         
-        /// While entering first 6 digits continue typing allowed
+        if newString.count > 19 {
+            return false
+        }
+
+        /// Set the Pan Number
+        ForageSDK.shared.panNumber = newString
+
+        /// Until 6 digits are entered, we can't apply any validation
         if newString.count < 6 {
             delegate?.panNumberStatus(self, cardStatus: .identifying)
             return true
         }
 
-        /// Check if 6 first entered number are valid
+        /// Check if the first 6 digits are valid
         if let stateIIN = ForagePANValidations.checkPANLength(newString) {
-            /// Check max length allowed is fulfill
+            /// If the first 6 digits are valid, then we know what the expected length of the card will be.
+            /// Set the status to invalid if we exceed that length.
             if newString.count > stateIIN.panLength {
-                return false
+                delegate?.panNumberStatus(self, cardStatus: .invalid)
+                return true
             }
 
+            /// Until the expected length is seen, we are still "identifying" the card.
             if newString.count < stateIIN.panLength {
                 delegate?.panNumberStatus(self, cardStatus: .identifying)
             } else {
-                ForageSDK.shared.panNumber = newString
+                /// If the first 6 digits are correct and we have the correct length, we set status to valid.
                 delegate?.panNumberStatus(self, cardStatus: .valid)
             }
-            return true
-            /// A pan number is invalid in case it has more than 6 digits and is not in the allowed list
-        } else if newString.count >= 6 {
+        } else {
+            /// If 6 of more digits are included and the first 6 digits don't map to a known state, we set the
+            /// status to invalid.
             delegate?.panNumberStatus(self, cardStatus: .invalid)
         }
 
         /// Default text field allowed digits
-        return newString.count <= 16
+        return newString.count <= 19
     }
 }
 
