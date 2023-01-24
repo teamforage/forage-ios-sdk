@@ -15,6 +15,7 @@ public enum EnvironmentTarget: String {
     case sandbox = "api.sandbox.joinforage.app"
     case cert = "api.cert.joinforage.app"
     case prod = "api.joinforage.app"
+    case staging = "api.staging.joinforage.app"
     case dev = "api.dev.joinforage.app"
 }
 
@@ -25,6 +26,7 @@ private enum VaultId: String {
     case sandbox = "tntagcot4b1"
     case cert = "tntpnht7psv"
     case prod = "tntbcrncmgi"
+    case staging = "tnteykuh975"
     case dev = "tntlqkidhc6"
 }
 
@@ -76,7 +78,7 @@ public class ForageSDK {
      
     ````
       ForageSDK.setup(
-         ForageSDK.Config(environment: .dev)
+         ForageSDK.Config(environment: .sandbox)
       )
     ````
      */
@@ -91,13 +93,14 @@ public class ForageSDK {
         case .sandbox: return .sandbox
         case .cert: return .cert
         case .prod: return .prod
+        case .staging: return .staging
         case .dev: return .dev
         }
     }
     
     private func environmentVGS(_ environment: EnvironmentTarget) -> VGSCollectSDK.Environment {
         switch environment {
-        case .cert, .sandbox, .dev: return .sandbox
+        case .cert, .sandbox, .staging, .dev: return .sandbox
         case .prod: return .live
         }
     }
