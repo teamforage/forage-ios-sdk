@@ -234,6 +234,7 @@ To get the application running,
 2. Ensure that you have a valid FNS number for the Forage API, which can be found on the dashboard ([sandbox](https://dashboard.sandbox.joinforage.app/login/) | [prod](https://dashboard.joinforage.app/login/)).
 3. [Create a bearer token](https://docs.joinforage.app/recipes/generate-a-token) with pinpad_only scope.
 4. Run the Sample app project and provide your FNS number and bearer token on the first screen.
+  1. These credentials will be passed through to all the SDK calls inside the sample app.
 
 ## Dependencies
 - iOS 10+
