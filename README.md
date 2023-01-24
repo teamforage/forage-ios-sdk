@@ -1,6 +1,6 @@
 # ForageSDK
 
-The ForageSDK process Electronic Benefits Transfer (EBT) payments in your e-commerce application. Providing a secure user interface for collecting an EBT cardholders's PAN. And, a PIN entry to process all EBT payments, and to check the balances of an EBT card.
+The ForageSDK processes Electronic Benefits Transfer (EBT) payments in your e-commerce application. It provides secure user interfaces for collecting and tokenizing an EBT cardholder's PAN and accepting an EBT cardholder's PIN to execute a balance check and process a payment.
 
 Table of contents
 =================
@@ -32,7 +32,7 @@ pod 'ForageSDK', '~> 0.1.1'
 
 The [Swift Package Manager](https://www.swift.org/package-manager/) is a tool for managing the distribution of Swift code. It’s integrated with the Swift build system to automate the process of downloading, compiling, and linking dependencies.
 
-We recommend to use Xcode with at least Swift tools version of 5.3. Earlier Xcode versions don't support Swift packages with resources.
+We recommend using Xcode with Swift tools version 5.3 or higher. Earlier Xcode versions don't support Swift packages with resources.
 To check your current Swift tools version run in your terminal:
 
 ```swift
@@ -51,7 +51,7 @@ To use Swift Package Manager, in Xcode add the https://github.com/teamforage/for
 
 ![Screen Shot 2022-10-31 at 09 56 50](https://user-images.githubusercontent.com/115553362/199013574-59c1968a-f879-4404-99df-9db4c0c93f78.png)
 
-Click on `Add Package` button. And, on the next screen, select the package `ForageSDK`, and finishes clicking on `Add Package`.
+Click on `Add Package` button. And, on the next screen, select the package `ForageSDK`, and finish by clicking on `Add Package`.
 
 ![Screen Shot 2022-10-31 at 10 00 57](https://user-images.githubusercontent.com/115553362/199013832-ad86b074-63e3-469b-ad8c-75d65169433b.png)
 
@@ -64,7 +64,7 @@ import ForageSDK
 
 ### Create ForageSDK instance
 
-Initializing a ForageSDK instance, you need to provide the environment.
+To initialize a ForageSDK instance, you need to provide the environment.
 
 ```swift
 ForageSDK.setup(
@@ -74,11 +74,11 @@ ForageSDK.setup(
 
 ## Forage UI Elements
 
-ForageSDK provides two UI Elements to work as proxy between your application and Forage service using compliance comunication.
+ForageSDK provides two UI Elements to securely communicate with the Forage API.
 
 ### ForagePANTextField
 
-It is a component to handle PAN number. This field valids the pan number based on the [StateIIN lists](https://www.nacha.org/sites/default/files/2019-05/State-IINs-04-10-19.pdf)
+A component that securely accepts the PAN number. This field validates the PAN number based on the [StateIIN list](https://www.nacha.org/sites/default/files/2019-05/State-IINs-04-10-19.pdf)
 
 ![Screen Shot 2022-10-31 at 10 19 27](https://user-images.githubusercontent.com/115553362/199017253-ee05dcf0-01c8-41dc-9662-9da525e573c9.png)
 
@@ -118,7 +118,8 @@ To send the PAN number, we can use ForageSDK to perform the request.
 func tokenizeEBTCard(
     bearerToken: String,
     merchantAccount: String,
-    completion: @escaping (Result<Data?, Error>) -> Void)
+    completion: @escaping (Result<Data?, Error>) -> Void
+)
 ```
 
 ```swift
@@ -129,11 +130,12 @@ ForageSDK.shared.tokenizeEBTCard(
     merchantAccount: merchantID) { result in
         // handle callback here
     }
+)
 ```
 
 ### ForagePINTextField
 
-It is a component to handle PIN number for balance and payment capture. It accepts only number entry and check for 4 digits to be valid.
+A component the securely accepts an EBT PIN for balance requests and payment capture. It only accepts 4 digit numbers.
 
 ![Screen Shot 2022-10-31 at 10 21 32](https://user-images.githubusercontent.com/115553362/199017609-33b2094c-339c-4117-8124-00b5ce130dac.png)
 
@@ -147,7 +149,7 @@ private let pinNumberTextField: ForagePINTextField = {
 }()
 ```
 
-To identify the type of pin we are handling on the component, you can use the `pinType` property to set, we have support for these types:
+To identify the type of pin we are handling in the component, you can use the `pinType` property. We have support for these types:
 ```swift
 public enum PinType: String {
     case snap
@@ -179,7 +181,8 @@ func checkBalance(
     merchantAccount: String,
     paymentMethodReference: String,
     cardNumberToken: String,
-    completion: @escaping (Result<Data?, Error>) -> Void)
+    completion: @escaping (Result<Data?, Error>) -> Void
+)
 ```
 
 ```swift
@@ -192,6 +195,7 @@ ForageSDK.shared.checkBalance(
     cardNumberToken: cardNumberToken) { result in
         // handle callback here
     }
+)
 ```
 
 ### Capture payment
@@ -204,7 +208,8 @@ func capturePayment(
     merchantAccount: String,
     paymentReference: String,
     cardNumberToken: String,
-    completion: @escaping (Result<Data?, Error>) -> Void)
+    completion: @escaping (Result<Data?, Error>) -> Void
+)
 ```
 
 ```swift
@@ -217,6 +222,7 @@ ForageSDK.shared.capturePayment(
     cardNumberToken: cardNumberToken) { result in
         // handle callback here
     }
+)
 ```
 
 ## Demo Application
