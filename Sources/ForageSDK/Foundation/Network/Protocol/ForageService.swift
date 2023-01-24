@@ -2,7 +2,7 @@
 //  ForageService.swift
 //  ForageSDK
 //
-//  Created by Symphony on 30/10/22.
+//  Created by Symphony on 21/11/22.
 //
 
 import Foundation
@@ -42,12 +42,30 @@ internal protocol ForageService: AnyObject {
         request: ForageRequestModel,
         completion: @escaping (Result<Data?, Error>) -> Void) -> Void
     
+    /// After polling balance, this endpoint retrieves the balance object to `getBalance` callback.
+    ///
+    /// - Parameters:
+    ///  - request: `ForageRequestModel` info to request balance.
+    ///  - completion: Which will retrieve the balance object. (See more [here](https://docs.joinforage.app/reference/check-balance))
+    func retrieveCheckBalance(
+        request: ForageRequestModel,
+        completion: @escaping (Result<Data?, Error>) -> Void)
+    
     /// Perform request through VGS to capture payment
     ///
     /// - Parameters:
     ///  - request: `ForageRequestModel` info to request balance.
     ///  - completion: Which will return the payment object.
     func requestCapturePayment(
+        request: ForageRequestModel,
+        completion: @escaping (Result<Data?, Error>) -> Void)
+    
+    /// After polling the payment, this endpoint retrieves the payment object to `requestCapturePayment` callback.
+    ///
+    /// - Parameters:
+    ///  - request: `ForageRequestModel` info to request balance.
+    ///  - completion: Which will retrieve the payment object. (See more [here](https://docs.joinforage.app/reference/capture-payment))
+    func retrieveCapturedPayment(
         request: ForageRequestModel,
         completion: @escaping (Result<Data?, Error>) -> Void)
     
