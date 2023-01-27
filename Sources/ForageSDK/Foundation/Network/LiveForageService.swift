@@ -30,8 +30,9 @@ internal class LiveForageService: ForageService {
     /// - Parameters:
     ///  - request: *ForagePANRequestModel* contains ebt card object.
     ///  - completion: Returns tokenized object.
-    internal func tokenizeEBTCard(request: ForagePANRequestModel, completion: @escaping (Result<Data?, Error>) -> Void) {
-        do { try provider.execute(endpoint: ForageAPI.tokenizeNumber(request: request), completion: completion) }
+    internal func tokenizeEBTCard(request: ForagePANRequestModel, completion: @escaping (Result<ForagePANResponseModel, Error>) -> Void) {
+        do {
+            try provider.execute(model: ForagePANResponseModel.self, endpoint: ForageAPI.tokenizeNumber(request: request), completion: completion) }
         catch { completion(.failure(error)) }
     }
     
@@ -231,7 +232,13 @@ extension LiveForageService: Polling {
                         completion(.success(data))
                     /// check message is failed to return error immediately
                     } else if data.failed == true {
-                        completion(.failure(NSError(domain: "Message failed", code: 001, userInfo: nil)))
+                        /// Parse the error returned from SQS message and return it back
+                        let error = data.errors[0]
+                        let statusCode = error.statusCode
+                        let forageErrorCode = error.forageCode
+                        let message = error.message
+                        let forageError = ForageError(status:statusCode, code:forageErrorCode, message:message)
+                        completion(.failure(forageError))
                     /// check maxAttempts to retry
                     } else if self.retryCount < self.maxAttempts {
                         self.waitNextAttempt {

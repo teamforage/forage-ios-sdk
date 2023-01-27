@@ -22,7 +22,7 @@ internal protocol ForageService: AnyObject {
     ///  - completion: Returns tokenized object. (See more [here](https://docs.joinforage.app/reference/create-payment-method-1))
     func tokenizeEBTCard(
         request: ForagePANRequestModel,
-        completion: @escaping (Result<Data?, Error>) -> Void) -> Void
+        completion: @escaping (Result<ForagePANResponseModel, Error>) -> Void) -> Void
     
     /// Retrieve X-key header for requests
     ///

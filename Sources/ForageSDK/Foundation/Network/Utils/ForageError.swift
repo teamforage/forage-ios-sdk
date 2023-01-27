@@ -7,18 +7,24 @@
 
 import Foundation
 
-struct ForageServiceError: Error, Codable {
+internal struct ForageServiceError: Error, Codable {
     let path: String
-    let errors: [ForageError]
+    let errors: [ForageErrorObj]
 }
 
-struct ForageError: Codable {
+internal struct ForageErrorObj: Codable {
     let code: String
     let message: String
-    let source: [ForageErrorSource]?
+    let source: ForageErrorSource?
 }
 
-struct ForageErrorSource: Codable {
+internal struct ForageErrorSource: Codable {
     let resource: String
     let ref: String
+}
+
+public struct ForageError: Error, Codable {
+    public let status: Int
+    public let code: String
+    public let message: String
 }

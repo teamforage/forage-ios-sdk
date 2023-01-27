@@ -114,7 +114,7 @@ internal class Provider {
     
     private func processResponse(response: URLResponse?, completion: @escaping (Result<HTTPURLResponse, Error>) -> Void) {
         guard let httpResponse = response as? HTTPURLResponse else {
-            return completion(.failure(NSError(domain: "Invalid response", code: -999, userInfo: nil)))
+            return completion(.failure(NSError(domain: "Invalid response", code: 500, userInfo: nil)))
         }
         
         guard 200 ... 299 ~= httpResponse.statusCode else {
@@ -129,32 +129,46 @@ internal class Provider {
             return completion(.success(()))
         }
         
-        completion(.failure(NSError(domain: "Error: \(error)", code: response?.statusCode ?? -992, userInfo: nil)))
+        completion(.failure(NSError(domain: "Error: \(error)", code: response?.statusCode ?? 500, userInfo: nil)))
     }
     
     private func processData<T: Decodable>(model: T.Type, data: Data?, response: HTTPURLResponse?, error: Error?, completion: @escaping (Result<T, Error>) -> Void) {
         
         guard let data = data else {
-            return completion(.failure(NSError(domain: "Invalid data", code: response?.statusCode ?? -991, userInfo: nil)))
+            return completion(.failure(NSError(domain: "Invalid data", code: response?.statusCode ?? 500, userInfo: nil)))
         }
         
         guard let result = try? JSONDecoder().decode(T.self, from: data) else {
-            return completion(.failure(NSError(domain: "Could not decode payload - \(String(decoding: data, as: UTF8.self))", code: response?.statusCode ?? 201, userInfo: nil)))
+            // NOW TRY TO DECODE IT AS AN ERROR!
+            guard let forageServiceError = try? JSONDecoder().decode(ForageServiceError.self, from: data) else {
+                return completion(.failure(NSError(domain: "Could not decode payload - \(String(decoding: data, as: UTF8.self))", code: response?.statusCode ?? 500, userInfo: nil)))
+            }
+            
+            let code = forageServiceError.errors[0].code
+            let message = forageServiceError.errors[0].message
+            return completion(.failure(ForageError(status:response?.statusCode ?? 500, code:code, message:message)))
         }
         
         return completion(.success(result))
     }
     
     internal func processVGSData<T: Decodable>(model: T.Type, code: Int?, data: Data?, response: URLResponse?, completion: @escaping (Result<T, Error>) -> Void) {
-        
         guard let data = data else {
-            return completion(.failure(NSError(domain: "Invalid data", code: code ?? -991, userInfo: nil)))
+            return completion(.failure(NSError(domain: "Invalid data", code: code ?? 500, userInfo: nil)))
         }
         
         guard let result = try? JSONDecoder().decode(T.self, from: data) else {
-            return completion(.failure(NSError(domain: "Could not decode payload - \(String(decoding: data, as: UTF8.self))", code: code ?? 201, userInfo: nil)))
+            // NOW TRY TO DECODE IT AS AN ERROR!
+            guard let forageServiceError = try? JSONDecoder().decode(ForageServiceError.self, from: data) else {
+                return completion(.failure(NSError(domain: "Could not decode payload - \(String(decoding: data, as: UTF8.self))", code: 500, userInfo: nil)))
+            }
+            
+            let code = forageServiceError.errors[0].code
+            let message = forageServiceError.errors[0].message
+            // Wasn't sure what to do about the status code here!
+            return completion(.failure(ForageError(status:400, code:code, message:message)))
         }
-        
+
         return completion(.success(result))
     }
 }
