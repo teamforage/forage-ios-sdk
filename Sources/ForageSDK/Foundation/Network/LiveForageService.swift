@@ -170,8 +170,8 @@ extension LiveForageService: Polling {
         retryCount = 0
         
         switch response {
-        case .success(_, let data, _):
-            provider.processVGSData(model: MessageResponseModel.self, code: nil, data: data, response: nil) { [weak self] messageResponse in
+        case .success(_, let data, let response):
+            provider.processVGSData(model: MessageResponseModel.self, code: nil, data: data, response: response) { [weak self] messageResponse in
                 switch messageResponse {
                 case .success(let message):
                     self?.pollingMessage(
@@ -237,8 +237,7 @@ extension LiveForageService: Polling {
                         let statusCode = error.statusCode
                         let forageErrorCode = error.forageCode
                         let message = error.message
-                        let forageError = ForageError(status:statusCode, code:forageErrorCode, message:message)
-                        completion(.failure(forageError))
+                        completion(.failure(ForageError(errors:[ForageErrorObj(httpStatusCode:statusCode, code:forageErrorCode, message:message)])))
                     /// check maxAttempts to retry
                     } else if self.retryCount < self.maxAttempts {
                         self.waitNextAttempt {

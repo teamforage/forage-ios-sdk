@@ -9,10 +9,10 @@ import Foundation
 
 internal struct ForageServiceError: Error, Codable {
     let path: String
-    let errors: [ForageErrorObj]
+    let errors: [ForageApiError]
 }
 
-internal struct ForageErrorObj: Codable {
+internal struct ForageApiError: Codable {
     let code: String
     let message: String
     let source: ForageErrorSource?
@@ -24,7 +24,11 @@ internal struct ForageErrorSource: Codable {
 }
 
 public struct ForageError: Error, Codable {
-    public let status: Int
+    public let errors: [ForageErrorObj]
+}
+
+public struct ForageErrorObj: Codable {
+    public let httpStatusCode: Int
     public let code: String
     public let message: String
 }
