@@ -249,7 +249,7 @@ extension LiveForageService: Polling {
                         }
                     /// in case run out of attempts
                     } else {
-                        completion(.failure(NSError(domain: "Reached max attempts", code: 429, userInfo: nil)))
+                        completion(.failure(ForageError(errors:[ForageErrorObj(httpStatusCode:500, code:"unknown_server_error", message:"Unknown Server Error")])))
                     }
                     
                 case .failure(let error):
