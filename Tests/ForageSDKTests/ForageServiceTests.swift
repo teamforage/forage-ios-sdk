@@ -36,11 +36,7 @@ final class ForageServiceTests: XCTestCase {
         
         service.tokenizeEBTCard(request: foragePANRequestModel) { result in
             switch result {
-            case .success(let data):
-                guard let data = data,
-                      let response = try? JSONDecoder().decode(ForagePANModel.self, from: data)
-                else { return }
-                
+            case .success(let response):
                 XCTAssertEqual(response.type, "ebt")
                 XCTAssertEqual(response.paymentMethodIdentifier, "d0c47b0ed5")
                 XCTAssertEqual(response.card.last4, "3412")

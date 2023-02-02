@@ -83,7 +83,8 @@ extension ForageAPI: ServiceProtocol {
             let httpHeaders: HTTPHeaders = [
                 "Merchant-Account": merchantID,
                 "authorization": "Bearer \(bearerToken)",
-                "accept": "application/json"
+                "accept": "application/json",
+                "API-VERSION": "2023-02-01"
             ]
             
             return .requestParametersAndHeaders(

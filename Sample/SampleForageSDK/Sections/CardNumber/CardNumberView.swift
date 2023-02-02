@@ -169,14 +169,10 @@ class CardNumberView: UIView {
     
     // MARK: Private Methods
     
-    private func printResult(result: Result<Data?, Error>) {        
+    private func printResult(result: Result<ForagePANResponseModel, Error>) {
         DispatchQueue.main.async {
             switch result {
-            case .success(let data):
-                guard let data = data,
-                      let response = try? JSONDecoder().decode(ForagePANModel.self, from: data)
-                else { return }
-                
+            case .success(let response):
                 self.refLabel.text = "ref=\(response.paymentMethodIdentifier)"
                 self.typeLabel.text = "type=\(response.type)"
                 self.tokenLabel.text = "token=\(response.card.token)"

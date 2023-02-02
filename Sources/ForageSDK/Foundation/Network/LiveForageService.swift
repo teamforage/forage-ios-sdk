@@ -30,8 +30,9 @@ internal class LiveForageService: ForageService {
     /// - Parameters:
     ///  - request: *ForagePANRequestModel* contains ebt card object.
     ///  - completion: Returns tokenized object.
-    internal func tokenizeEBTCard(request: ForagePANRequestModel, completion: @escaping (Result<Data?, Error>) -> Void) {
-        do { try provider.execute(endpoint: ForageAPI.tokenizeNumber(request: request), completion: completion) }
+    internal func tokenizeEBTCard(request: ForagePANRequestModel, completion: @escaping (Result<ForagePANResponseModel, Error>) -> Void) {
+        do {
+            try provider.execute(model: ForagePANResponseModel.self, endpoint: ForageAPI.tokenizeNumber(request: request), completion: completion) }
         catch { completion(.failure(error)) }
     }
     
@@ -169,8 +170,8 @@ extension LiveForageService: Polling {
         retryCount = 0
         
         switch response {
-        case .success(_, let data, _):
-            provider.processVGSData(model: MessageResponseModel.self, code: nil, data: data, response: nil) { [weak self] messageResponse in
+        case .success(_, let data, let response):
+            provider.processVGSData(model: MessageResponseModel.self, code: nil, data: data, response: response) { [weak self] messageResponse in
                 switch messageResponse {
                 case .success(let message):
                     self?.pollingMessage(
@@ -231,7 +232,12 @@ extension LiveForageService: Polling {
                         completion(.success(data))
                     /// check message is failed to return error immediately
                     } else if data.failed == true {
-                        completion(.failure(NSError(domain: "Message failed", code: 001, userInfo: nil)))
+                        /// Parse the error returned from SQS message and return it back
+                        let error = data.errors[0]
+                        let statusCode = error.statusCode
+                        let forageErrorCode = error.forageCode
+                        let message = error.message
+                        completion(.failure(ForageError(errors:[ForageErrorObj(httpStatusCode:statusCode, code:forageErrorCode, message:message)])))
                     /// check maxAttempts to retry
                     } else if self.retryCount < self.maxAttempts {
                         self.waitNextAttempt {
@@ -243,7 +249,7 @@ extension LiveForageService: Polling {
                         }
                     /// in case run out of attempts
                     } else {
-                        completion(.failure(NSError(domain: "Reached max attempts", code: 429, userInfo: nil)))
+                        completion(.failure(ForageError(errors:[ForageErrorObj(httpStatusCode:500, code:"unknown_server_error", message:"Unknown Server Error")])))
                     }
                     
                 case .failure(let error):

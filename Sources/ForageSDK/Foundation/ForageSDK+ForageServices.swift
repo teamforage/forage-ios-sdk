@@ -28,7 +28,7 @@ protocol ForageSDKService: AnyObject {
     func tokenizeEBTCard(
         bearerToken: String,
         merchantAccount: String,
-        completion: @escaping (Result<Data?, Error>) -> Void)
+        completion: @escaping (Result<ForagePANResponseModel, Error>) -> Void)
         
     /// Check balance for a given EBT Card
     ///
@@ -84,7 +84,7 @@ extension ForageSDK: ForageSDKService {
     public func tokenizeEBTCard(
         bearerToken: String,
         merchantAccount: String,
-        completion: @escaping (Result<Data?, Error>) -> Void) {
+        completion: @escaping (Result<ForagePANResponseModel, Error>) -> Void) {
         let request = ForagePANRequestModel(
             authorization: bearerToken,
             merchantAccount: merchantAccount,
