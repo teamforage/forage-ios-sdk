@@ -79,7 +79,7 @@ final class ForageServiceTests: XCTestCase {
         let collector = VGSCollect(id: "1234", environment: .sandbox)
         let service = LiveForageService(collector, provider: Provider(mockSession))
         
-        service.getXKey(bearerToken: "auth1234") { result in
+        service.getXKey(bearerToken: "auth1234", merchantAccount: "1234567") { result in
             switch result {
             case .success(let model):
                 XCTAssertEqual(model.alias, "tok_sandbox_agCcwWZs8TMkkq89f8KHSx")
@@ -96,7 +96,7 @@ final class ForageServiceTests: XCTestCase {
         let collector = VGSCollect(id: "1234", environment: .sandbox)
         let service = LiveForageService(collector, provider: Provider(mockSession))
         
-        service.getXKey(bearerToken: "auth1234") { result in
+        service.getXKey(bearerToken: "auth1234", merchantAccount: "1234567") { result in
             switch result {
             case .success:
                 XCTFail("Expected failure")

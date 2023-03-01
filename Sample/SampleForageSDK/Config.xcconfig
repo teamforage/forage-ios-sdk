@@ -1,0 +1,11 @@
+//
+//  Config.xcconfig
+//  SampleForageSDK
+//
+//  Created by Danny Leiser on 3/1/23.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974
+
+FORAGE_SDK_ENVIRONMENT = .sandbox

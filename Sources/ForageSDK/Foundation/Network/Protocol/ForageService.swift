@@ -28,9 +28,11 @@ internal protocol ForageService: AnyObject {
     ///
     /// - Parameters:
     ///  - bearerToken: Authorization token.
+    ///  - merchantAccount: The Merchant FNS number.
     ///  - completion: Which will return the x-key object.
     func getXKey(
         bearerToken: String,
+        merchantAccount: String,
         completion: @escaping (Result<ForageXKeyModel, Error>) -> Void) -> Void
     
     /// Perform request through VGS to retrieve balance

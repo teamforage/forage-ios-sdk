@@ -12,12 +12,23 @@ import ForageSDK
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        guard let infoDictionary: [String: Any] = Bundle.main.infoDictionary else { return false }
+        guard let forageSdkEnv: String = infoDictionary["FORAGE_SDK_ENVIRONMENT"] as? String else { return false }
         ForageSDK.setup(
-            ForageSDK.Config(environment: .sandbox)
+            ForageSDK.Config(environment: parseForageEnvString(forageSdkEnv))
         )
-        
-        // Override point for customization after application launch.
         return true
+    }
+    
+    func parseForageEnvString(_ env: String) -> EnvironmentTarget {
+        switch(env) {
+            case ".dev": return EnvironmentTarget.dev
+            case ".staging": return EnvironmentTarget.staging
+            case ".sandbox": return EnvironmentTarget.sandbox
+            case ".cert": return EnvironmentTarget.cert
+            case ".prod": return EnvironmentTarget.prod
+            default: return EnvironmentTarget.sandbox
+        }
     }
 
     // MARK: UISceneSession Lifecycle

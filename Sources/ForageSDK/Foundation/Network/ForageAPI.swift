@@ -12,7 +12,7 @@ import Foundation
  */
 enum ForageAPI {
     case tokenizeNumber(request: ForagePANRequestModel)
-    case xKey(bearerToken: String)
+    case xKey(bearerToken: String, merchantAccount: String)
     case message(request: MessageResponseModel, bearerToken: String, merchantID: String)
     case retrieveBalance(request: ForageRequestModel)
     case retrieveCapturedPayment(request: ForageRequestModel)
@@ -67,10 +67,11 @@ extension ForageAPI: ServiceProtocol {
                 additionalHeaders: httpHeaders
             )
             
-        case .xKey(bearerToken: let bearerToken):
+        case .xKey(bearerToken: let bearerToken, merchantAccount: let merchantAccount):
             let httpHeaders: HTTPHeaders = [
                 "authorization": "Bearer \(bearerToken)",
-                "accept": "application/json"
+                "accept": "application/json",
+                "Merchant-Account": merchantAccount
             ]
             
             return .requestParametersAndHeaders(
