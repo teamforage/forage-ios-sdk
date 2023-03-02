@@ -43,6 +43,7 @@ jobs:
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
       - name: Build app
         run: |
+          cd Sample
           mkdir -p ios_build
           xcodebuild -scheme SampleForageSDK -destination 'generic/platform=iOS' CONFIGURATION_BUILD_DIR=./ios_build build
           ls
