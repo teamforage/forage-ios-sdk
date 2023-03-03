@@ -45,7 +45,7 @@ jobs:
         run: |
           cd Sample
           mkdir -p ios_build
-          xcodebuild -scheme SampleForageSDK -destination 'generic/platform=iOS' -allowProvisioningUpdates CONFIGURATION_BUILD_DIR=./ios_build build DEVELOPMENT_TEAM=3D54TBBRF3
+          xcodebuild -scheme SampleForageSDK -destination 'generic/platform=iOS' CONFIGURATION_BUILD_DIR=./ios_build build DEVELOPMENT_TEAM=3D54TBBRF3
           ls
       - name: Clean up keychain and provisioning profile
         if: ${{ always() }}
