@@ -23,8 +23,7 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.data = forageMocks.tokenizeSuccess
         mockSession.response = forageMocks.mockSuccessResponse
-        let collector = VGSCollect(id: "1234", environment: .sandbox)
-        let service = LiveForageService(collector, provider: Provider(mockSession))
+        let service = LiveForageService(provider: Provider(mockSession))
         
         let foragePANRequestModel = ForagePANRequestModel(
             authorization: "authToken123",
@@ -51,8 +50,7 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.error = forageMocks.tokenizeFailure
         mockSession.response = forageMocks.mockFailureResponse
-        let collector = VGSCollect(id: "1234", environment: .sandbox)
-        let service = LiveForageService(collector, provider: Provider(mockSession))
+        let service = LiveForageService(provider: Provider(mockSession))
         
         let foragePANRequestModel = ForagePANRequestModel(
             authorization: "authToken123",
@@ -76,8 +74,8 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.data = forageMocks.xKeySuccess
         mockSession.response = forageMocks.mockSuccessResponse
-        let collector = VGSCollect(id: "1234", environment: .sandbox)
-        let service = LiveForageService(collector, provider: Provider(mockSession))
+//        let collector = VGSCollect(id: "1234", environment: .sandbox)
+        let service = LiveForageService(provider: Provider(mockSession))
         
         service.getXKey(bearerToken: "auth1234") { result in
             switch result {
@@ -93,8 +91,8 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.error = forageMocks.generalError
         mockSession.response = forageMocks.mockFailureResponse
-        let collector = VGSCollect(id: "1234", environment: .sandbox)
-        let service = LiveForageService(collector, provider: Provider(mockSession))
+//        let collector = VGSCollect(id: "1234", environment: .sandbox)
+        let service = LiveForageService(provider: Provider(mockSession))
         
         service.getXKey(bearerToken: "auth1234") { result in
             switch result {
@@ -110,8 +108,8 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.data = forageMocks.getBalanceSuccess
         mockSession.response = forageMocks.mockSuccessResponse
-        let collector = VGSCollect(id: "1234", environment: .sandbox)
-        let service = LiveForageService(collector, provider: Provider(mockSession))
+        let vgs = VGSCollect(id: "1234", environment: .sandbox)
+        let service = LiveForageService(provider: Provider(mockSession))
         
         let forageRequestModel = ForageRequestModel(
             authorization: "authToken123",
@@ -122,7 +120,7 @@ final class ForageServiceTests: XCTestCase {
             xKey: "tok_sandbox_agCcwWZs8TMkkq89f8KHSx"
         )
 
-        service.getBalance(request: forageRequestModel) { result in
+        service.getBalance(vgs: vgs, request: forageRequestModel) { result in
             switch result {
             case .success(let data):
                 guard let data = data,
@@ -142,8 +140,8 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.error = forageMocks.generalError
         mockSession.response = forageMocks.mockFailureResponse
-        let collector = VGSCollect(id: "1234", environment: .sandbox)
-        let service = LiveForageService(collector, provider: Provider(mockSession))
+        let vgs = VGSCollect(id: "1234", environment: .sandbox)
+        let service = LiveForageService(provider: Provider(mockSession))
         
         let forageRequestModel = ForageRequestModel(
             authorization: "authToken123",
@@ -154,7 +152,7 @@ final class ForageServiceTests: XCTestCase {
             xKey: "tok_sandbox_agCcwWZs8TMkkq89f8KHSx"
         )
 
-        service.getBalance(request: forageRequestModel) { result in
+        service.getBalance(vgs: vgs, request: forageRequestModel) { result in
             switch result {
             case .success:
                 XCTFail("Expected failure")
@@ -168,8 +166,8 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.data = forageMocks.capturePaymentSuccess
         mockSession.response = forageMocks.mockSuccessResponse
-        let collector = VGSCollect(id: "1234", environment: .sandbox)
-        let service = LiveForageService(collector, provider: Provider(mockSession))
+        let vgs = VGSCollect(id: "1234", environment: .sandbox)
+        let service = LiveForageService(provider: Provider(mockSession))
         
         let forageRequestModel = ForageRequestModel(
             authorization: "authToken123",
@@ -180,7 +178,7 @@ final class ForageServiceTests: XCTestCase {
             xKey: "tok_sandbox_agCcwWZs8TMkkq89f8KHSx"
         )
 
-        service.requestCapturePayment(request: forageRequestModel) { result in
+        service.requestCapturePayment(vgs: vgs, request: forageRequestModel) { result in
             switch result {
             case .success(let data):
                 guard let data = data,
@@ -203,8 +201,8 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.error = forageMocks.generalError
         mockSession.response = forageMocks.mockFailureResponse
-        let collector = VGSCollect(id: "1234", environment: .sandbox)
-        let service = LiveForageService(collector, provider: Provider(mockSession))
+        let vgs = VGSCollect(id: "1234", environment: .sandbox)
+        let service = LiveForageService(provider: Provider(mockSession))
         
         let forageRequestModel = ForageRequestModel(
             authorization: "authToken123",
@@ -215,7 +213,7 @@ final class ForageServiceTests: XCTestCase {
             xKey: "tok_sandbox_agCcwWZs8TMkkq89f8KHSx"
         )
 
-        service.getBalance(request: forageRequestModel) { result in
+        service.getBalance(vgs: vgs, request: forageRequestModel) { result in
             switch result {
             case .success:
                 XCTFail("Expected failure")
