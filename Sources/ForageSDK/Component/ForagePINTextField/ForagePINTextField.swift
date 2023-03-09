@@ -19,6 +19,8 @@ public class ForagePINTextField: UIView, Identifiable {
     
     public var pinType: PinType = .balance
     
+    internal var collector: VGSCollect = Collector.CreateVGS()
+    
     /// Placeholder for the text field
     @IBInspectable public var placeholder: String? {
         get { return textField.placeholder }
@@ -140,7 +142,6 @@ public class ForagePINTextField: UIView, Identifiable {
     // MARK: Private Methods
     
     private func commonInit() {
-        guard let collector = ForageSDK.shared.collector else { return }
         addSubview(root)
         
         root.addSubview(container)
@@ -154,7 +155,7 @@ public class ForagePINTextField: UIView, Identifiable {
         
         var rules = VGSValidationRuleSet()
         rules.add(rule: VGSValidationRulePattern(pattern: "^[0-9]+$", error: VGSValidationErrorType.pattern.rawValue))
-        let configuration = VGSConfiguration(collector: collector, fieldName: "pin")
+        let configuration = VGSConfiguration(collector: self.collector, fieldName: "pin")
         configuration.type = .none
         configuration.keyboardType = .numberPad
         configuration.maxInputLength = 4

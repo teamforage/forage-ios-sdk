@@ -9,17 +9,14 @@ import Foundation
 import VGSCollectSDK
 
 internal class LiveForageService: ForageService {
-    
     // MARK: Properties
     
     internal var provider: Provider
-    private var collector: VGSCollect?
     private var maxAttempts: Int = 10
     private var intervalBetweenAttempts: Double = 1.0
     private var retryCount = 0
     
-    init(_ collector: VGSCollect?, provider: Provider = Provider()) {
-        self.collector = collector
+    init(provider: Provider = Provider()) {
         self.provider = provider
     }
     
@@ -43,8 +40,8 @@ internal class LiveForageService: ForageService {
     /// - Parameters:
     ///  - bearerToken: Session authorization token.
     ///  - completion: Returns *ForageXKeyModel* object.
-    internal func getXKey(bearerToken: String, completion: @escaping (Result<ForageXKeyModel, Error>) -> Void) {
-        do { try provider.execute(model: ForageXKeyModel.self, endpoint: ForageAPI.xKey(bearerToken: bearerToken), completion: completion) }
+    internal func getXKey(bearerToken: String, merchantAccount: String, completion: @escaping (Result<ForageXKeyModel, Error>) -> Void) {
+        do { try provider.execute(model: ForageXKeyModel.self, endpoint: ForageAPI.xKey(bearerToken: bearerToken, merchantAccount: merchantAccount), completion: completion) }
         catch { completion(.failure(error)) }
     }
     
@@ -58,13 +55,15 @@ internal class LiveForageService: ForageService {
     /// Perform VGS SDK request to retrieve balance.
     ///
     /// - Parameters:
+    ///  - pinCollector: The pin collection service
     ///  - request: Model element with data to perform request.
     ///  - completion: Returns balance object.
     internal func getBalance(
+        pinCollector: VGSCollect,
         request: ForageRequestModel,
         completion: @escaping (Result<Data?, Error>) -> Void) -> Void
     {
-        collector?.customHeaders = [
+        pinCollector.customHeaders = [
             "X-KEY": request.xKey,
             "IDEMPOTENCY-KEY": UUID.init().uuidString,
             "Merchant-Account": request.merchantID
@@ -74,7 +73,7 @@ internal class LiveForageService: ForageService {
             "card_number_token": request.cardNumberToken
         ]
 
-        collector?.sendData(
+        pinCollector.sendData(
             path: "/api/payment_methods/\(request.paymentMethodReference)/balance/",
             extraData: extraData) { [weak self] result in
                 self?.polling(response: result, request: request, completion: { pollingResult in
@@ -110,13 +109,15 @@ internal class LiveForageService: ForageService {
     /// Perform VGS SDK request to capture payment.
     ///
     /// - Parameters:
+    ///  - pinCollector: The pin collection service
     ///  - request: Model element with data to perform request.
     ///  - completion: Returns captured payment object.
     internal func requestCapturePayment(
+        pinCollector: VGSCollect,
         request: ForageRequestModel,
         completion: @escaping (Result<Data?, Error>) -> Void)
     {
-        collector?.customHeaders = [
+        pinCollector.customHeaders = [
             "X-KEY": request.xKey,
             "IDEMPOTENCY-KEY": request.paymentReference,
             "Merchant-Account": request.merchantID
@@ -126,7 +127,7 @@ internal class LiveForageService: ForageService {
             "card_number_token": request.cardNumberToken
         ]
 
-        collector?.sendData(
+        pinCollector.sendData(
             path: "/api/payments/\(request.paymentReference)/capture/",
             extraData: extraData) { [weak self] result in
                 self?.polling(response: result, request: request, completion: { pollingResult in

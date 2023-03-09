@@ -43,6 +43,7 @@ protocol ForageSDKService: AnyObject {
         merchantAccount: String,
         paymentMethodReference: String,
         cardNumberToken: String,
+        foragePinTextEdit: ForagePINTextField,
         completion: @escaping (Result<Data?, Error>) -> Void)
     
     /// Capture a payment for a given payment reference
@@ -58,6 +59,7 @@ protocol ForageSDKService: AnyObject {
         merchantAccount: String,
         paymentReference: String,
         cardNumberToken: String,
+        foragePinTextEdit: ForagePINTextField,
         completion: @escaping (Result<Data?, Error>) -> Void)
     
     /// Cancel any ongoing request
@@ -72,9 +74,10 @@ extension ForageSDK: ForageSDKService {
     
     private func getXKey(
         _ bearerToken: String,
+        _ merchantAccount: String,
         completion: @escaping (Result<ForageXKeyModel, Error>) -> Void)
     -> Void {
-        service?.getXKey(bearerToken: bearerToken) { result in
+        service?.getXKey(bearerToken: bearerToken, merchantAccount: merchantAccount) { result in
             completion(result)
         }
     }
@@ -100,8 +103,9 @@ extension ForageSDK: ForageSDKService {
         merchantAccount: String,
         paymentMethodReference: String,
         cardNumberToken: String,
+        foragePinTextEdit: ForagePINTextField,
         completion: @escaping (Result<Data?, Error>) -> Void) {
-        service?.getXKey(bearerToken: bearerToken) { result in
+            service?.getXKey(bearerToken: bearerToken, merchantAccount: merchantAccount) { result in
             switch result {
             case .success(let model):
                 let request = ForageRequestModel(
@@ -112,7 +116,7 @@ extension ForageSDK: ForageSDKService {
                     merchantID: merchantAccount,
                     xKey: model.alias
                 )
-                self.service?.getBalance(request: request, completion: completion)
+                self.service?.getBalance(pinCollector: foragePinTextEdit.collector, request: request, completion: completion)
             case .failure(let error):
                 completion(.failure(error))
             }
@@ -124,8 +128,9 @@ extension ForageSDK: ForageSDKService {
         merchantAccount: String,
         paymentReference: String,
         cardNumberToken: String,
+        foragePinTextEdit: ForagePINTextField,
         completion: @escaping (Result<Data?, Error>) -> Void) {
-        service?.getXKey(bearerToken: bearerToken) { result in
+            service?.getXKey(bearerToken: bearerToken, merchantAccount: merchantAccount) { result in
             switch result {
             case .success(let model):
                 let request = ForageRequestModel(
@@ -137,7 +142,7 @@ extension ForageSDK: ForageSDKService {
                     xKey: model.alias
                 )
                 
-                self.service?.requestCapturePayment(request: request, completion: completion)
+                self.service?.requestCapturePayment(pinCollector: foragePinTextEdit.collector, request: request, completion: completion)
             case .failure(let error):
                 completion(.failure(error))
             }

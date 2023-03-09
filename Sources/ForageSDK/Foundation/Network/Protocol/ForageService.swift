@@ -28,17 +28,21 @@ internal protocol ForageService: AnyObject {
     ///
     /// - Parameters:
     ///  - bearerToken: Authorization token.
+    ///  - merchantAccount: The merchant FNS number.
     ///  - completion: Which will return the x-key object.
     func getXKey(
         bearerToken: String,
+        merchantAccount: String,
         completion: @escaping (Result<ForageXKeyModel, Error>) -> Void) -> Void
     
     /// Perform request through VGS to retrieve balance
     ///
     /// - Parameters:
+    ///  - pinCollector: The pin collection service
     ///  - request: `ForageRequestModel` info to request balance.
     ///  - completion: Which will return the balance object.
     func getBalance(
+        pinCollector: VGSCollect,
         request: ForageRequestModel,
         completion: @escaping (Result<Data?, Error>) -> Void) -> Void
     
@@ -54,9 +58,11 @@ internal protocol ForageService: AnyObject {
     /// Perform request through VGS to capture payment
     ///
     /// - Parameters:
+    ///  - pinCollector: The pin collection service
     ///  - request: `ForageRequestModel` info to request balance.
     ///  - completion: Which will return the payment object.
     func requestCapturePayment(
+        pinCollector: VGSCollect,
         request: ForageRequestModel,
         completion: @escaping (Result<Data?, Error>) -> Void)
     
