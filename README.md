@@ -220,7 +220,7 @@ ForageSDK.shared.capturePayment(
     bearerToken: bearerToken,
     merchantAccount: merchantID,
     paymentReference: paymentReference,
-    cardNumberToken: cardNumberToken
+    cardNumberToken: cardNumberToken,
     foragePinTextEdit: pinNumberTextField) { result in
         // handle callback here
     }

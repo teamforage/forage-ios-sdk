@@ -74,7 +74,6 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.data = forageMocks.xKeySuccess
         mockSession.response = forageMocks.mockSuccessResponse
-//        let collector = VGSCollect(id: "1234", environment: .sandbox)
         let service = LiveForageService(provider: Provider(mockSession))
         
         service.getXKey(bearerToken: "auth1234") { result in
@@ -91,7 +90,6 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.error = forageMocks.generalError
         mockSession.response = forageMocks.mockFailureResponse
-//        let collector = VGSCollect(id: "1234", environment: .sandbox)
         let service = LiveForageService(provider: Provider(mockSession))
         
         service.getXKey(bearerToken: "auth1234") { result in
