@@ -173,11 +173,14 @@ class CapturePaymentView: UIView {
                     ? ClientSharedData.shared.paymentReference[FundingType.ebtSnap] ?? ""
                     : ClientSharedData.shared.paymentReference[FundingType.ebtCash] ?? ""
             
+            let inputFieldReference = isEbtSnap ? snapTextField : nonSnapTextField
+            
             ForageSDK.shared.capturePayment(
                 bearerToken: ClientSharedData.shared.bearerToken,
                 merchantAccount: ClientSharedData.shared.merchantID,
                 paymentReference: paymentReference,
-                cardNumberToken: ClientSharedData.shared.cardNumberToken) { result in
+                cardNumberToken: ClientSharedData.shared.cardNumberToken,
+                foragePinTextEdit: inputFieldReference) { result in
                     self.printResult(result: result)
                 }
         }

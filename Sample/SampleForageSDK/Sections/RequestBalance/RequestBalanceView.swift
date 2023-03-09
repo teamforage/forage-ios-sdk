@@ -130,7 +130,8 @@ class RequestBalanceView: UIView {
             bearerToken: ClientSharedData.shared.bearerToken,
             merchantAccount: ClientSharedData.shared.merchantID,
             paymentMethodReference: ClientSharedData.shared.paymentMethodReference,
-            cardNumberToken: ClientSharedData.shared.cardNumberToken) { result in
+            cardNumberToken: ClientSharedData.shared.cardNumberToken,
+            foragePinTextEdit:pinNumberTextField) { result in
                 self.printPINResult(result: result)
             }
     }

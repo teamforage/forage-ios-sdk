@@ -5,8 +5,8 @@
 //  Created by Symphony on 18/10/22.
 //
 
-import VGSCollectSDK
 import Foundation
+import VGSCollectSDK
 
 /**
  Environment base URL
@@ -19,23 +19,11 @@ public enum EnvironmentTarget: String {
     case dev = "api.dev.joinforage.app"
 }
 
-/**
- VGS VaultId
- */
-private enum VaultId: String {
-    case sandbox = "tntagcot4b1"
-    case cert = "tntpnht7psv"
-    case prod = "tntbcrncmgi"
-    case staging = "tnteykuh975"
-    case dev = "tntlqkidhc6"
-}
-
 public class ForageSDK {
     
     // MARK: Properties
     
     private static var config: Config?
-    internal var collector: VGSCollect?
     internal var service: ForageService?
     internal var panNumber: String = ""
     internal var environment: EnvironmentTarget = .sandbox
@@ -52,8 +40,7 @@ public class ForageSDK {
         
         VGSCollectLogger.shared.disableAllLoggers()
         self.environment = config.environment
-        self.collector = VGSCollect(id: vaultID(config.environment).rawValue, environment: environmentVGS(config.environment))
-        self.service = LiveForageService(collector)
+        self.service = LiveForageService()
     }
     
     /**
@@ -84,24 +71,5 @@ public class ForageSDK {
      */
     public class func setup(_ config: Config) {
         ForageSDK.config = config
-    }
-
-    // MARK: Private Methods
-    
-    private func vaultID(_ environment: EnvironmentTarget) -> VaultId {
-        switch environment {
-        case .sandbox: return .sandbox
-        case .cert: return .cert
-        case .prod: return .prod
-        case .staging: return .staging
-        case .dev: return .dev
-        }
-    }
-    
-    private func environmentVGS(_ environment: EnvironmentTarget) -> VGSCollectSDK.Environment {
-        switch environment {
-        case .cert, .sandbox, .staging, .dev: return .sandbox
-        case .prod: return .live
-        }
     }
 }

@@ -130,7 +130,6 @@ ForageSDK.shared.tokenizeEBTCard(
     merchantAccount: merchantID) { result in
         // handle callback here
     }
-)
 ```
 
 ### ForagePINTextField
@@ -181,6 +180,7 @@ func checkBalance(
     merchantAccount: String,
     paymentMethodReference: String,
     cardNumberToken: String,
+    foragePinTextEdit: ForagePINTextField,
     completion: @escaping (Result<Data?, Error>) -> Void
 )
 ```
@@ -192,10 +192,10 @@ ForageSDK.shared.checkBalance(
     bearerToken: bearerToken,
     merchantAccount: merchantID,
     paymentMethodReference: paymentMethodReference,
-    cardNumberToken: cardNumberToken) { result in
+    cardNumberToken: cardNumberToken,
+    foragePinTextEdit: pinNumberTextField) { result in
         // handle callback here
     }
-)
 ```
 
 ### Capture payment
@@ -208,6 +208,7 @@ func capturePayment(
     merchantAccount: String,
     paymentReference: String,
     cardNumberToken: String,
+    foragePinTextEdit: ForagePINTextField,
     completion: @escaping (Result<Data?, Error>) -> Void
 )
 ```
@@ -219,10 +220,10 @@ ForageSDK.shared.capturePayment(
     bearerToken: bearerToken,
     merchantAccount: merchantID,
     paymentReference: paymentReference,
-    cardNumberToken: cardNumberToken) { result in
+    cardNumberToken: cardNumberToken
+    foragePinTextEdit: pinNumberTextField) { result in
         // handle callback here
     }
-)
 ```
 
 ## Demo Application
