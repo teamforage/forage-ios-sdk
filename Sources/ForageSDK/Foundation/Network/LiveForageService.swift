@@ -55,14 +55,15 @@ internal class LiveForageService: ForageService {
     /// Perform VGS SDK request to retrieve balance.
     ///
     /// - Parameters:
+    ///  - pinCollector: The pin collection service
     ///  - request: Model element with data to perform request.
     ///  - completion: Returns balance object.
     internal func getBalance(
-        vgs: VGSCollect,
+        pinCollector: VGSCollect,
         request: ForageRequestModel,
         completion: @escaping (Result<Data?, Error>) -> Void) -> Void
     {
-        vgs.customHeaders = [
+        pinCollector.customHeaders = [
             "X-KEY": request.xKey,
             "IDEMPOTENCY-KEY": UUID.init().uuidString,
             "Merchant-Account": request.merchantID
@@ -72,7 +73,7 @@ internal class LiveForageService: ForageService {
             "card_number_token": request.cardNumberToken
         ]
 
-        vgs.sendData(
+        pinCollector.sendData(
             path: "/api/payment_methods/\(request.paymentMethodReference)/balance/",
             extraData: extraData) { [weak self] result in
                 self?.polling(response: result, request: request, completion: { pollingResult in
@@ -108,14 +109,15 @@ internal class LiveForageService: ForageService {
     /// Perform VGS SDK request to capture payment.
     ///
     /// - Parameters:
+    ///  - pinCollector: The pin collection service
     ///  - request: Model element with data to perform request.
     ///  - completion: Returns captured payment object.
     internal func requestCapturePayment(
-        vgs: VGSCollect,
+        pinCollector: VGSCollect,
         request: ForageRequestModel,
         completion: @escaping (Result<Data?, Error>) -> Void)
     {
-        vgs.customHeaders = [
+        pinCollector.customHeaders = [
             "X-KEY": request.xKey,
             "IDEMPOTENCY-KEY": request.paymentReference,
             "Merchant-Account": request.merchantID
@@ -125,7 +127,7 @@ internal class LiveForageService: ForageService {
             "card_number_token": request.cardNumberToken
         ]
 
-        vgs.sendData(
+        pinCollector.sendData(
             path: "/api/payments/\(request.paymentReference)/capture/",
             extraData: extraData) { [weak self] result in
                 self?.polling(response: result, request: request, completion: { pollingResult in

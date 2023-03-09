@@ -242,4 +242,3 @@ To get the application running,
 - Swift 5
 - 3rd party libraries:
   - [VGS-Collect-iOS](https://github.com/verygoodsecurity/vgs-collect-ios)
-  - [CardIO](https://github.com/card-io/card.io-iOS-SDK)

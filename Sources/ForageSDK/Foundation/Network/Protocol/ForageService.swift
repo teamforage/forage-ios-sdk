@@ -38,11 +38,11 @@ internal protocol ForageService: AnyObject {
     /// Perform request through VGS to retrieve balance
     ///
     /// - Parameters:
-    ///  - vgs: The VGSCollect instance containing the PIN
+    ///  - pinCollector: The pin collection service
     ///  - request: `ForageRequestModel` info to request balance.
     ///  - completion: Which will return the balance object.
     func getBalance(
-        vgs: VGSCollect,
+        pinCollector: VGSCollect,
         request: ForageRequestModel,
         completion: @escaping (Result<Data?, Error>) -> Void) -> Void
     
@@ -58,11 +58,11 @@ internal protocol ForageService: AnyObject {
     /// Perform request through VGS to capture payment
     ///
     /// - Parameters:
-    ///  - vgs: The VGSCollect instance containing the PIN
+    ///  - pinCollector: The pin collection service
     ///  - request: `ForageRequestModel` info to request balance.
     ///  - completion: Which will return the payment object.
     func requestCapturePayment(
-        vgs: VGSCollect,
+        pinCollector: VGSCollect,
         request: ForageRequestModel,
         completion: @escaping (Result<Data?, Error>) -> Void)
     

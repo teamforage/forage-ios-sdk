@@ -116,7 +116,7 @@ extension ForageSDK: ForageSDKService {
                     merchantID: merchantAccount,
                     xKey: model.alias
                 )
-                self.service?.getBalance(vgs: foragePinTextEdit.collector, request: request, completion: completion)
+                self.service?.getBalance(pinCollector: foragePinTextEdit.collector, request: request, completion: completion)
             case .failure(let error):
                 completion(.failure(error))
             }
@@ -142,7 +142,7 @@ extension ForageSDK: ForageSDKService {
                     xKey: model.alias
                 )
                 
-                self.service?.requestCapturePayment(vgs: foragePinTextEdit.collector, request: request, completion: completion)
+                self.service?.requestCapturePayment(pinCollector: foragePinTextEdit.collector, request: request, completion: completion)
             case .failure(let error):
                 completion(.failure(error))
             }

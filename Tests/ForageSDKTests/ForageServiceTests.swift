@@ -118,7 +118,7 @@ final class ForageServiceTests: XCTestCase {
             xKey: "tok_sandbox_agCcwWZs8TMkkq89f8KHSx"
         )
 
-        service.getBalance(vgs: vgs, request: forageRequestModel) { result in
+        service.getBalance(pinCollector: vgs, request: forageRequestModel) { result in
             switch result {
             case .success(let data):
                 guard let data = data,
@@ -150,7 +150,7 @@ final class ForageServiceTests: XCTestCase {
             xKey: "tok_sandbox_agCcwWZs8TMkkq89f8KHSx"
         )
 
-        service.getBalance(vgs: vgs, request: forageRequestModel) { result in
+        service.getBalance(pinCollector: vgs, request: forageRequestModel) { result in
             switch result {
             case .success:
                 XCTFail("Expected failure")
@@ -176,7 +176,7 @@ final class ForageServiceTests: XCTestCase {
             xKey: "tok_sandbox_agCcwWZs8TMkkq89f8KHSx"
         )
 
-        service.requestCapturePayment(vgs: vgs, request: forageRequestModel) { result in
+        service.requestCapturePayment(pinCollector: vgs, request: forageRequestModel) { result in
             switch result {
             case .success(let data):
                 guard let data = data,
@@ -211,7 +211,7 @@ final class ForageServiceTests: XCTestCase {
             xKey: "tok_sandbox_agCcwWZs8TMkkq89f8KHSx"
         )
 
-        service.getBalance(vgs: vgs, request: forageRequestModel) { result in
+        service.getBalance(pinCollector: vgs, request: forageRequestModel) { result in
             switch result {
             case .success:
                 XCTFail("Expected failure")
