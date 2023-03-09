@@ -74,9 +74,10 @@ extension ForageSDK: ForageSDKService {
     
     private func getXKey(
         _ bearerToken: String,
+        _ merchantAccount: String,
         completion: @escaping (Result<ForageXKeyModel, Error>) -> Void)
     -> Void {
-        service?.getXKey(bearerToken: bearerToken) { result in
+        service?.getXKey(bearerToken: bearerToken, merchantAccount: merchantAccount) { result in
             completion(result)
         }
     }
@@ -104,7 +105,7 @@ extension ForageSDK: ForageSDKService {
         cardNumberToken: String,
         foragePinTextEdit: ForagePINTextField,
         completion: @escaping (Result<Data?, Error>) -> Void) {
-        service?.getXKey(bearerToken: bearerToken) { result in
+            service?.getXKey(bearerToken: bearerToken, merchantAccount: merchantAccount) { result in
             switch result {
             case .success(let model):
                 let request = ForageRequestModel(
@@ -129,7 +130,7 @@ extension ForageSDK: ForageSDKService {
         cardNumberToken: String,
         foragePinTextEdit: ForagePINTextField,
         completion: @escaping (Result<Data?, Error>) -> Void) {
-        service?.getXKey(bearerToken: bearerToken) { result in
+            service?.getXKey(bearerToken: bearerToken, merchantAccount: merchantAccount) { result in
             switch result {
             case .success(let model):
                 let request = ForageRequestModel(

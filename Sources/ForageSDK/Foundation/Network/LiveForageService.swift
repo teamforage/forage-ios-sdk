@@ -40,8 +40,8 @@ internal class LiveForageService: ForageService {
     /// - Parameters:
     ///  - bearerToken: Session authorization token.
     ///  - completion: Returns *ForageXKeyModel* object.
-    internal func getXKey(bearerToken: String, completion: @escaping (Result<ForageXKeyModel, Error>) -> Void) {
-        do { try provider.execute(model: ForageXKeyModel.self, endpoint: ForageAPI.xKey(bearerToken: bearerToken), completion: completion) }
+    internal func getXKey(bearerToken: String, merchantAccount: String, completion: @escaping (Result<ForageXKeyModel, Error>) -> Void) {
+        do { try provider.execute(model: ForageXKeyModel.self, endpoint: ForageAPI.xKey(bearerToken: bearerToken, merchantAccount: merchantAccount), completion: completion) }
         catch { completion(.failure(error)) }
     }
     

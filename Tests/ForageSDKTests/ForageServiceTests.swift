@@ -76,7 +76,7 @@ final class ForageServiceTests: XCTestCase {
         mockSession.response = forageMocks.mockSuccessResponse
         let service = LiveForageService(provider: Provider(mockSession))
         
-        service.getXKey(bearerToken: "auth1234") { result in
+        service.getXKey(bearerToken: "auth1234", merchantAccount: "1234567") { result in
             switch result {
             case .success(let model):
                 XCTAssertEqual(model.alias, "tok_sandbox_agCcwWZs8TMkkq89f8KHSx")
@@ -92,7 +92,7 @@ final class ForageServiceTests: XCTestCase {
         mockSession.response = forageMocks.mockFailureResponse
         let service = LiveForageService(provider: Provider(mockSession))
         
-        service.getXKey(bearerToken: "auth1234") { result in
+        service.getXKey(bearerToken: "auth1234", merchantAccount: "1234567") { result in
             switch result {
             case .success:
                 XCTFail("Expected failure")
