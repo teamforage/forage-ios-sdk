@@ -21,10 +21,12 @@ public struct ForagePANModel: Codable {
     public let paymentMethodIdentifier: String
     public let type: String
     public let card: ForageCard
+    public let userID: String?
     
     private enum CodingKeys : String, CodingKey {
         case paymentMethodIdentifier = "ref"
         case type
         case card
+        case userID = "user_id"
     }
 }

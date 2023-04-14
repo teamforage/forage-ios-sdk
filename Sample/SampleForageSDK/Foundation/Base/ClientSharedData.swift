@@ -15,4 +15,5 @@ class ClientSharedData {
     var merchantID: String = ""
     var bearerToken: String = ""
     var paymentReference: [FundingType : String] = [:]
+    var userID: String? = "test-ios-user-id"
 }

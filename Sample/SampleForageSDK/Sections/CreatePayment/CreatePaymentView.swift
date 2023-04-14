@@ -219,7 +219,8 @@ class CreatePaymentView: UIView {
                 zipcode: "12345",
                 state: "LA"
             ),
-            isDelivery: false
+            isDelivery: false,
+            userID: "test-ios-user-id"
         )
         
         controller.createPayment(request: request) { result in

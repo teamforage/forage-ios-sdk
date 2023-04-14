@@ -37,7 +37,7 @@ class ForageMocks {
         return NSError(domain: response, code: 400, userInfo: nil)
     }
     
-    var tokenizeSuccess: Data {
+    var tokenizeSuccessWithUserID: Data {
         let response = """
         {
            "ref":"d0c47b0ed5",
@@ -47,7 +47,25 @@ class ForageMocks {
               "last_4":"3412",
               "created":"2022-11-29T03:31:52.349193-08:00",
               "token":"tok_sandbox_72VEC9LasHbMYiiVWP9zms"
-           }
+           },
+           "user_id":"test-ios-user-id"
+        }
+"""
+        return Data(response.utf8)
+    }
+    
+    var tokenizeSuccessWithoutUserID: Data {
+        let response = """
+        {
+           "ref":"d0c47b0ed5",
+           "type":"ebt",
+           "balance":null,
+           "card":{
+              "last_4":"3412",
+              "created":"2022-11-29T03:31:52.349193-08:00",
+              "token":"tok_sandbox_72VEC9LasHbMYiiVWP9zms"
+           },
+           "user_id":null
         }
 """
         return Data(response.utf8)

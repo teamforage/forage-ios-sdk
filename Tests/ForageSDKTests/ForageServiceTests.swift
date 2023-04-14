@@ -19,9 +19,9 @@ final class ForageServiceTests: XCTestCase {
         forageMocks = ForageMocks()
     }
     
-    func test_tokenizeEBTCard_onSuccess_checkExpectedPayload() {
+    func setUpTokenizeEBTCardTest(userID: String? = nil) -> (service: LiveForageService, foragePANRequestModel: ForagePANRequestModel) {
         let mockSession = URLSessionMock()
-        mockSession.data = forageMocks.tokenizeSuccess
+        mockSession.data = userID == nil ? forageMocks.tokenizeSuccessWithoutUserID : forageMocks.tokenizeSuccessWithUserID
         mockSession.response = forageMocks.mockSuccessResponse
         let service = LiveForageService(provider: Provider(mockSession))
         
@@ -30,16 +30,42 @@ final class ForageServiceTests: XCTestCase {
             merchantAccount: "merchantID123",
             panNumber: "5076801234123412",
             type: "ebt",
-            reusable: true
+            reusable: true,
+            userID: userID
         )
+
+        return (service: service, foragePANRequestModel: foragePANRequestModel)
+    }
+    
+    func test_tokenizeEBTCard_onSuccess_checkExpectedPayload_withUserID() {
+        let testUserID = "test-ios-user-id"
+        let setupResult = self.setUpTokenizeEBTCardTest(userID: testUserID)
         
-        service.tokenizeEBTCard(request: foragePANRequestModel) { result in
+        setupResult.service.tokenizeEBTCard(request: setupResult.foragePANRequestModel) { result in
             switch result {
             case .success(let response):
                 XCTAssertEqual(response.type, "ebt")
                 XCTAssertEqual(response.paymentMethodIdentifier, "d0c47b0ed5")
                 XCTAssertEqual(response.card.last4, "3412")
                 XCTAssertEqual(response.card.token, "tok_sandbox_72VEC9LasHbMYiiVWP9zms")
+                XCTAssertEqual(response.userID, testUserID)
+            case .failure:
+                XCTFail("Expected success")
+            }
+        }
+    }
+    
+    func test_tokenizeEBTCard_onSuccess_checkExpectedPayload_withoutUserID() {
+        let setupResult = self.setUpTokenizeEBTCardTest()
+        
+        setupResult.service.tokenizeEBTCard(request: setupResult.foragePANRequestModel) { result in
+            switch result {
+            case .success(let response):
+                XCTAssertEqual(response.type, "ebt")
+                XCTAssertEqual(response.paymentMethodIdentifier, "d0c47b0ed5")
+                XCTAssertEqual(response.card.last4, "3412")
+                XCTAssertEqual(response.card.token, "tok_sandbox_72VEC9LasHbMYiiVWP9zms")
+                XCTAssertEqual(response.userID, nil)
             case .failure:
                 XCTFail("Expected success")
             }
@@ -57,7 +83,8 @@ final class ForageServiceTests: XCTestCase {
             merchantAccount: "merchantID123",
             panNumber: "5076801234123412",
             type: "ebt",
-            reusable: true
+            reusable: true,
+            userID: "test-ios-user-id"
         )
         
         service.tokenizeEBTCard(request: foragePANRequestModel) { result in

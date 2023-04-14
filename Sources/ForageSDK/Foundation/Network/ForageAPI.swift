@@ -48,17 +48,22 @@ extension ForageAPI: ServiceProtocol {
             var card = [String: String]()
             card["number"] = model.panNumber
             
-            let bodyParameters: Parameters = [
+            var bodyParameters: Parameters = [
                 "type": model.type,
                 "reusable": model.reusable,
                 "card": card
             ]
+            
+           if let userID = model.userID {
+               bodyParameters["user_id"] = userID
+           }
 
             let httpHeaders: HTTPHeaders = [
                 "Merchant-Account": model.merchantAccount,
                 "authorization": "Bearer \(model.authorization)",
                 "content-type": "application/json",
-                "accept": "application/json"
+                "accept": "application/json",
+               "API-VERSION": "2023-03-31"
             ]
             
             return .requestParametersAndHeaders(
