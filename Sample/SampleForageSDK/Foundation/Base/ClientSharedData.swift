@@ -12,7 +12,6 @@ class ClientSharedData {
     static let shared = ClientSharedData()
     
     var paymentMethodReference: String = ""
-    var cardNumberToken: String = ""
     var merchantID: String = ""
     var bearerToken: String = ""
     var paymentReference: [FundingType : String] = [:]

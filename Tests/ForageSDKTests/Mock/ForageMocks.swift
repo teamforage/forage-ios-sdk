@@ -74,6 +74,46 @@ class ForageMocks {
         return NSError(domain: response, code: 400, userInfo: nil)
     }
     
+    var getPaymentMethodSuccess: Data {
+        let response = """
+        {
+            "ref": "ca29d3443f",
+            "type": "ebt",
+            "balance": {
+                "snap": "100.00",
+                "non_snap": "100.00",
+                "updated": "2023-02-23T14:26:02.140579-08:00"
+            },
+            "card": {
+                "last_4": "1234",
+                "created": "2023-02-23T14:25:37.531327-08:00",
+                "token": "tok_sandbox_vJp2BwDc6R6Z16mgzCxuXk",
+                "state": "PA"
+            }
+        }
+"""
+        return Data(response.utf8)
+    }
+    
+    var getPaymentMethodFailure: Error {
+        let response = """
+        {
+            "path": "/api/payment_methods/ca293443f/",
+            "errors": [
+                {
+                    "code": "resource_not_found",
+                    "message": "Payment method with id ca293443f does not exist for Tenant BaseTenant using FNS 9000002",
+                    "source": {
+                        "resource": "Payment_Methods",
+                        "ref": "ca293443f"
+                    }
+                }
+            ]
+        }
+"""
+        return NSError(domain: response, code: 400, userInfo: nil)
+    }
+    
     var xKeySuccess: Data {
         let response = """
         {
@@ -97,34 +137,69 @@ class ForageMocks {
     var capturePaymentSuccess: Data {
         let response = """
         {
-           "ref":"8a15d4a672",
-           "merchant":"8000009",
-           "funding_type":"ebt_snap",
-           "amount":"0.01",
-           "description":"desc",
-           "metadata":{
-              
-           },
-           "payment_method":"1bfc157553",
-           "delivery_address":{
-              "city":"Los Angeles",
-              "country":"United States",
-              "line1":"Street",
-              "line2":"Number",
-              "state":"LA",
-              "zipcode":"12345"
-           },
-           "is_delivery":false,
-           "created":"2022-11-29T12:57:10.269929-08:00",
-           "updated":"2022-11-29T12:57:18.561355-08:00",
-           "status":"succeeded",
-           "last_processing_error":null,
-           "success_date":"2022-11-29T20:57:18.548072Z",
-           "refunds":[
-              
-           ]
+            "ref": "11767381fd",
+            "merchant": "9000002",
+            "funding_type": "ebt_snap",
+            "amount": "10.00",
+            "description": "Testing the JS SDK",
+            "metadata": {},
+            "payment_method": "81dab02290",
+            "delivery_address": {
+                "city": "New York",
+                "country": "US",
+                "line1": "203 Spring Street",
+                "line2": "",
+                "state": "NY",
+                "zipcode": "10012"
+            },
+            "is_delivery": false,
+            "created": "2023-04-26T18:50:57.049025-07:00",
+            "updated": "2023-04-26T18:50:59.379628-07:00",
+            "status": "succeeded",
+            "last_processing_error": null,
+            "success_date": "2023-04-27T01:50:59.350429Z",
+            "receipt": {
+                "ref_number": "11767381fd",
+                "is_voided": false,
+                "snap_amount": "10.00",
+                "ebt_cash_amount": "0.00",
+                "other_amount": "0.00",
+                "sales_tax_applied": "0.00",
+                "balance": {
+                    "id": 57869,
+                    "snap": "90.00",
+                    "non_snap": "100.00",
+                    "updated": "2023-04-26T18:50:59.336838-07:00"
+                },
+                "last_4": "6789",
+                "message": "Approved",
+                "transaction_type": "Payment",
+                "created": "2023-04-26T18:50:59.345272-07:00"
+            },
+            "refunds": [
+                "9bf75154be"
+            ]
         }
 """
         return Data(response.utf8)
+    }
+    
+    var getPaymentError: Error {
+        let response = """
+        {
+            "path": "/api/payments/1767381fd/",
+            "errors": [
+                {
+                    "code": "resource_not_found",
+                    "message": "Payment with ref 1767381fd does not exist for current Merchant with FNS 9000002. For payments that are associated with an order, please use `/api/orders/<order_ref>/payments/` instead",
+                    "source": {
+                        "resource": "Payments",
+                        "ref": "1767381fd"
+                    }
+                }
+            ]
+        }
+"""
+        return NSError(domain: response, code: 400, userInfo: nil)
     }
 }

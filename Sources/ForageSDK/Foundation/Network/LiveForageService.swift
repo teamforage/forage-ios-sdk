@@ -27,9 +27,9 @@ internal class LiveForageService: ForageService {
     /// - Parameters:
     ///  - request: *ForagePANRequestModel* contains ebt card object.
     ///  - completion: Returns tokenized object.
-    internal func tokenizeEBTCard(request: ForagePANRequestModel, completion: @escaping (Result<ForagePANResponseModel, Error>) -> Void) {
+    internal func tokenizeEBTCard(request: ForagePANRequestModel, completion: @escaping (Result<PaymentMethodModel, Error>) -> Void) {
         do {
-            try provider.execute(model: ForagePANResponseModel.self, endpoint: ForageAPI.tokenizeNumber(request: request), completion: completion) }
+            try provider.execute(model: PaymentMethodModel.self, endpoint: ForageAPI.tokenizeNumber(request: request), completion: completion) }
         catch { completion(.failure(error)) }
     }
     
@@ -45,11 +45,6 @@ internal class LiveForageService: ForageService {
         catch { completion(.failure(error)) }
     }
     
-    // MARK: Cancel request
-    
-    /// Cancel any ongoing request.
-    internal func cancelRequest() { provider.stopRequestOnGoing() }
-    
     // MARK: Check balance
     
     /// Perform VGS SDK request to retrieve balance.
@@ -57,11 +52,11 @@ internal class LiveForageService: ForageService {
     /// - Parameters:
     ///  - pinCollector: The pin collection service
     ///  - request: Model element with data to perform request.
-    ///  - completion: Returns balance object.
-    internal func getBalance(
+    ///  - completion: Returns PaymentMethod.
+    internal func checkBalance(
         pinCollector: VGSCollect,
         request: ForageRequestModel,
-        completion: @escaping (Result<Data?, Error>) -> Void) -> Void
+        completion: @escaping (Result<BalanceModel, Error>) -> Void) -> Void
     {
         pinCollector.customHeaders = [
             "X-KEY": request.xKey,
@@ -79,9 +74,23 @@ internal class LiveForageService: ForageService {
                 self?.polling(response: result, request: request, completion: { pollingResult in
                     switch pollingResult {
                     case .success:
-                        self?.retrieveCheckBalance(
-                            request: request,
-                            completion: completion
+                        self?.getPaymentMethod(
+                            bearerToken: request.authorization,
+                            merchantAccount: request.merchantID,
+                            paymentMethodRef: request.paymentMethodReference,
+                            completion: { paymentMethodResult in
+                                switch paymentMethodResult {
+                                case .success(let paymentMethod):
+                                    if (paymentMethod.balance == nil) {
+                                        completion(.failure(ForageError(errors:[ForageErrorObj(httpStatusCode: 500, code:"invalid_data", message:"Invalid Data")])))
+                                        return
+                                    }
+                                    completion(.success(paymentMethod.balance!))
+                                case .failure(let error):
+                                    completion(.failure(error))
+                                }
+                                
+                            }
                         )
                     case .failure(let error):
                         completion(.failure(error))
@@ -95,13 +104,9 @@ internal class LiveForageService: ForageService {
     /// - Parameters:
     ///  - request: Model element with data to perform request.
     ///  - completion: Returns balance object.
-    internal func retrieveCheckBalance(request: ForageRequestModel,
-                                       completion: @escaping (Result<Data?, Error>) -> Void) {
-        do {
-            try provider.execute(endpoint: ForageAPI.retrieveBalance(request: request), completion: completion)
-        } catch {
-            completion(.failure(error))
-        }
+    internal func getPaymentMethod(bearerToken: String, merchantAccount: String, paymentMethodRef: String, completion: @escaping (Result<PaymentMethodModel, Error>) -> Void) {
+        do { try provider.execute(model: PaymentMethodModel.self, endpoint: ForageAPI.getPaymentMethod(bearerToken: bearerToken, merchantAccount: merchantAccount, paymentMethodRef: paymentMethodRef), completion: completion) }
+        catch { completion(.failure(error)) }
     }
     
     // MARK: Capture payment
@@ -112,10 +117,10 @@ internal class LiveForageService: ForageService {
     ///  - pinCollector: The pin collection service
     ///  - request: Model element with data to perform request.
     ///  - completion: Returns captured payment object.
-    internal func requestCapturePayment(
+    internal func capturePayment(
         pinCollector: VGSCollect,
         request: ForageRequestModel,
-        completion: @escaping (Result<Data?, Error>) -> Void)
+        completion: @escaping (Result<PaymentModel, Error>) -> Void)
     {
         pinCollector.customHeaders = [
             "X-KEY": request.xKey,
@@ -133,8 +138,10 @@ internal class LiveForageService: ForageService {
                 self?.polling(response: result, request: request, completion: { pollingResult in
                     switch pollingResult {
                     case .success:
-                        self?.retrieveCapturedPayment(
-                            request: request,
+                        self?.getPayment(
+                            bearerToken: request.authorization,
+                            merchantAccount: request.merchantID,
+                            paymentRef: request.paymentReference,
                             completion: completion
                         )
                     case .failure(let error):
@@ -148,12 +155,9 @@ internal class LiveForageService: ForageService {
     ///
     /// - Parameters:
     ///  - request: Model element with data to perform request.
-    ///  - completion: Returns captured payment object.
-    internal func retrieveCapturedPayment(
-        request: ForageRequestModel,
-        completion: @escaping (Result<Data?, Error>) -> Void)
-    {
-        do { try provider.execute(endpoint: ForageAPI.retrieveCapturedPayment(request: request), completion: completion) }
+    ///  - completion: Returns balance object.
+    internal func getPayment(bearerToken: String, merchantAccount: String, paymentRef: String, completion: @escaping (Result<PaymentModel, Error>) -> Void) {
+        do { try provider.execute(model: PaymentModel.self, endpoint: ForageAPI.getPayment(bearerToken: bearerToken, merchantAccount: merchantAccount, paymentRef: paymentRef), completion: completion) }
         catch { completion(.failure(error)) }
     }
 }

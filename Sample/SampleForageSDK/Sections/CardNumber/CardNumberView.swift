@@ -169,7 +169,7 @@ class CardNumberView: UIView {
     
     // MARK: Private Methods
     
-    private func printResult(result: Result<ForagePANResponseModel, Error>) {
+    private func printResult(result: Result<PaymentMethodModel, Error>) {
         DispatchQueue.main.async {
             switch result {
             case .success(let response):
@@ -178,7 +178,6 @@ class CardNumberView: UIView {
                 self.tokenLabel.text = "token=\(response.card.token)"
                 self.last4Label.text = "last4=\(response.card.last4)"
                 self.errorLabel.text = ""
-                ClientSharedData.shared.cardNumberToken = response.card.token
                 ClientSharedData.shared.paymentMethodReference = response.paymentMethodIdentifier
                 self.updateButtonState(isEnabled: true, button: self.nextButton)
             case .failure(let error):

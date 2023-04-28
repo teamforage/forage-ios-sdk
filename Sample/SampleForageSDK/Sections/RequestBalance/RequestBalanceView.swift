@@ -130,7 +130,6 @@ class RequestBalanceView: UIView {
             bearerToken: ClientSharedData.shared.bearerToken,
             merchantAccount: ClientSharedData.shared.merchantID,
             paymentMethodReference: ClientSharedData.shared.paymentMethodReference,
-            cardNumberToken: ClientSharedData.shared.cardNumberToken,
             foragePinTextEdit: pinNumberTextField) { result in
                 self.printPINResult(result: result)
             }
@@ -150,15 +149,12 @@ class RequestBalanceView: UIView {
     
     // MARK: Private Methods
     
-    private func printPINResult(result: Result<Data?, Error>) {
+    private func printPINResult(result: Result<BalanceModel, Error>) {
         DispatchQueue.main.async {
             switch result {
-            case .success(let data):
-                guard let data = data,
-                      let response = try? JSONDecoder().decode(ForageBalance.self, from: data)
-                else { return }
-                self.snapBalanceLabel.text = "snap=\(response.balance.snap)"
-                self.nonSnapBalanceLabel.text = "nonSnap=\(response.balance.nonSnap)"
+            case .success(let response):
+                self.snapBalanceLabel.text = "snap=\(response.snap)"
+                self.nonSnapBalanceLabel.text = "cash=\(response.cash)"
                 self.errorLabel.text = ""
                 self.updateButtonState(isEnabled: true, button: self.nextButton)
             case .failure(let error):

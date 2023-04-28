@@ -118,7 +118,7 @@ To send the PAN number, we can use ForageSDK to perform the request.
 func tokenizeEBTCard(
     bearerToken: String,
     merchantAccount: String,
-    completion: @escaping (Result<Data?, Error>) -> Void
+    completion: @escaping (Result<PaymentMethodModel, Error>) -> Void
 )
 ```
 
@@ -179,9 +179,8 @@ func checkBalance(
     bearerToken: String,
     merchantAccount: String,
     paymentMethodReference: String,
-    cardNumberToken: String,
     foragePinTextEdit: ForagePINTextField,
-    completion: @escaping (Result<Data?, Error>) -> Void
+    completion: @escaping (Result<BalanceModel, Error>) -> Void
 )
 ```
 
@@ -192,7 +191,6 @@ ForageSDK.shared.checkBalance(
     bearerToken: bearerToken,
     merchantAccount: merchantID,
     paymentMethodReference: paymentMethodReference,
-    cardNumberToken: cardNumberToken,
     foragePinTextEdit: pinNumberTextField) { result in
         // handle callback here
     }
@@ -207,9 +205,8 @@ func capturePayment(
     bearerToken: String,
     merchantAccount: String,
     paymentReference: String,
-    cardNumberToken: String,
     foragePinTextEdit: ForagePINTextField,
-    completion: @escaping (Result<Data?, Error>) -> Void
+    completion: @escaping (Result<PaymentModel, Error>) -> Void
 )
 ```
 
@@ -220,7 +217,6 @@ ForageSDK.shared.capturePayment(
     bearerToken: bearerToken,
     merchantAccount: merchantID,
     paymentReference: paymentReference,
-    cardNumberToken: cardNumberToken,
     foragePinTextEdit: pinNumberTextField) { result in
         // handle callback here
     }

@@ -101,6 +101,78 @@ final class ForageServiceTests: XCTestCase {
             }
         }
     }
+    
+    func test_getPaymentMethod_onSuccess_checkExpectedPayload() {
+        let mockSession = URLSessionMock()
+        mockSession.data = forageMocks.getPaymentMethodSuccess
+        mockSession.response = forageMocks.mockSuccessResponse
+        let service = LiveForageService(provider: Provider(mockSession))
+        
+        service.getPaymentMethod(bearerToken: "auth1234", merchantAccount: "1234567", paymentMethodRef: "ca29d3443f") { result in
+            switch result {
+            case .success(let paymentMethod):
+                XCTAssertEqual(paymentMethod.paymentMethodIdentifier, "ca29d3443f")
+                XCTAssertEqual(paymentMethod.type, "ebt")
+                XCTAssertEqual(paymentMethod.balance?.snap, "100.00")
+                XCTAssertEqual(paymentMethod.balance?.cash, "100.00")
+                XCTAssertEqual(paymentMethod.card.token, "tok_sandbox_vJp2BwDc6R6Z16mgzCxuXk")
+            case .failure:
+                XCTFail("Expected success")
+            }
+        }
+    }
+    
+    func test_getPaymentMethod_onFailure_shouldReturnFailure() {
+        let mockSession = URLSessionMock()
+        mockSession.error = forageMocks.getPaymentMethodFailure
+        mockSession.response = forageMocks.mockFailureResponse
+        let service = LiveForageService(provider: Provider(mockSession))
+        
+        service.getPaymentMethod(bearerToken: "auth1234", merchantAccount: "1234567", paymentMethodRef: "ca29d3443f") { result in
+            switch result {
+            case .success:
+                XCTFail("Expected failure")
+            case .failure(let error):
+                XCTAssertNotNil(error)
+            }
+        }
+    }
+    
+    func test_getPayment_onSuccess_checkExpectedPayload() {
+        let mockSession = URLSessionMock()
+        mockSession.data = forageMocks.capturePaymentSuccess
+        mockSession.response = forageMocks.mockSuccessResponse
+        let service = LiveForageService(provider: Provider(mockSession))
+        
+        service.getPayment(bearerToken: "auth1234", merchantAccount: "1234567", paymentRef: "11767381fd") { result in
+            switch result {
+            case .success(let payment):
+                XCTAssertEqual(payment.paymentMethodRef, "81dab02290")
+                XCTAssertEqual(payment.receipt?.refNumber, "11767381fd")
+                XCTAssertEqual(payment.receipt?.balance.snap, "90.00")
+                XCTAssertEqual(payment.lastProcessingError, nil)
+                XCTAssertEqual(payment.refunds[0], "9bf75154be")
+            case .failure:
+                XCTFail("Expected success")
+            }
+        }
+    }
+    
+    func test_getPayment_onFailure_shouldReturnFailure() {
+        let mockSession = URLSessionMock()
+        mockSession.error = forageMocks.getPaymentError
+        mockSession.response = forageMocks.mockFailureResponse
+        let service = LiveForageService(provider: Provider(mockSession))
+        
+        service.getPayment(bearerToken: "auth1234", merchantAccount: "1234567", paymentRef: "11767381fd") { result in
+            switch result {
+            case .success:
+                XCTFail("Expected failure")
+            case .failure(let error):
+                XCTAssertNotNil(error)
+            }
+        }
+    }
 
     func test_getBalance_onSuccess_checkExpectedPayload() {
         let mockSession = URLSessionMock()
@@ -118,15 +190,11 @@ final class ForageServiceTests: XCTestCase {
             xKey: "tok_sandbox_agCcwWZs8TMkkq89f8KHSx"
         )
 
-        service.getBalance(pinCollector: vgs, request: forageRequestModel) { result in
+        service.checkBalance(pinCollector: vgs, request: forageRequestModel) { result in
             switch result {
-            case .success(let data):
-                guard let data = data,
-                      let response = try? JSONDecoder().decode(ForageBalanceModel.self, from: data)
-                else { return }
-                
+            case .success(let response):
                 XCTAssertEqual(response.snap, "99.76")
-                XCTAssertEqual(response.nonSnap, "100.00")
+                XCTAssertEqual(response.cash, "100.00")
                 XCTAssertEqual(response.updated, "2022-11-29T12:36:57.482668-08:00")
             case .failure:
                 XCTFail("Expected success")
@@ -150,7 +218,7 @@ final class ForageServiceTests: XCTestCase {
             xKey: "tok_sandbox_agCcwWZs8TMkkq89f8KHSx"
         )
 
-        service.getBalance(pinCollector: vgs, request: forageRequestModel) { result in
+        service.checkBalance(pinCollector: vgs, request: forageRequestModel) { result in
             switch result {
             case .success:
                 XCTFail("Expected failure")
@@ -176,19 +244,16 @@ final class ForageServiceTests: XCTestCase {
             xKey: "tok_sandbox_agCcwWZs8TMkkq89f8KHSx"
         )
 
-        service.requestCapturePayment(pinCollector: vgs, request: forageRequestModel) { result in
+        service.capturePayment(pinCollector: vgs, request: forageRequestModel) { result in
             switch result {
-            case .success(let data):
-                guard let data = data,
-                      let response = try? JSONDecoder().decode(ForageCaptureModel.self, from: data)
-                else { return }
+            case .success(let response):
                 
-                XCTAssertEqual(response.paymentIdentifier, "8a15d4a672")
+                XCTAssertEqual(response.paymentRef, "8a15d4a672")
                 XCTAssertEqual(response.merchantAccount, "8000009")
                 XCTAssertEqual(response.fundingType, "ebt_snap")
                 XCTAssertEqual(response.amount, "0.01")
-                XCTAssertEqual(response.paymentMethodIdentifier, "1bfc157553")
-                XCTAssertEqual(response.status.rawValue, "succeeded")
+                XCTAssertEqual(response.paymentMethodRef, "1bfc157553")
+                XCTAssertEqual(response.status, "succeeded")
             case .failure:
                 XCTFail("Expected success")
             }
@@ -211,7 +276,7 @@ final class ForageServiceTests: XCTestCase {
             xKey: "tok_sandbox_agCcwWZs8TMkkq89f8KHSx"
         )
 
-        service.getBalance(pinCollector: vgs, request: forageRequestModel) { result in
+        service.checkBalance(pinCollector: vgs, request: forageRequestModel) { result in
             switch result {
             case .success:
                 XCTFail("Expected failure")

@@ -179,21 +179,17 @@ class CapturePaymentView: UIView {
                 bearerToken: ClientSharedData.shared.bearerToken,
                 merchantAccount: ClientSharedData.shared.merchantID,
                 paymentReference: paymentReference,
-                cardNumberToken: ClientSharedData.shared.cardNumberToken,
                 foragePinTextEdit: inputFieldReference) { result in
                     self.printResult(result: result)
                 }
         }
     }
     
-    private func printResult(result: Result<Data?, Error>) {
+    private func printResult(result: Result<PaymentModel, Error>) {
         DispatchQueue.main.async {
             switch result {
-            case .success(let data):
-                guard let data = data,
-                      let response = try? JSONDecoder().decode(ForageCaptureModel.self, from: data)
-                else { return }
-                self.paymentRefLabel.text = "paymentRef=\(response.paymentIdentifier)"
+            case .success(let response):
+                self.paymentRefLabel.text = "paymentRef=\(response.paymentRef)"
                 self.fundingTypeLabel.text = "fundingType=\(response.fundingType)"
                 self.amountLabel.text = "amount=\(response.amount)"
                 self.errorLabel.text = ""
