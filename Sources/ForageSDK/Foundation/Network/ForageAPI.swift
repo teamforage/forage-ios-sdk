@@ -52,7 +52,7 @@ extension ForageAPI: ServiceProtocol {
                 "type": model.type,
                 "reusable": model.reusable,
                 "card": card,
-                "user_id": model.userID
+                "user_id": model.customerID
             ]
 
             let httpHeaders: HTTPHeaders = [
