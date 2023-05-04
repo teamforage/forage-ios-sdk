@@ -52,7 +52,7 @@ internal class LiveForageService: ForageService {
     /// - Parameters:
     ///  - pinCollector: The pin collection service
     ///  - request: Model element with data to perform request.
-    ///  - completion: Returns PaymentMethod.
+    ///  - completion: Returns BalanceModel.
     internal func checkBalance(
         pinCollector: VGSCollect,
         request: ForageRequestModel,
