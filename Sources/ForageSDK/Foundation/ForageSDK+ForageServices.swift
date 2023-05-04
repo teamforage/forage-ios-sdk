@@ -24,15 +24,13 @@ protocol ForageSDKService: AnyObject {
     /// - Parameters:
     ///  - bearerToken: Authorization token.
     ///  - merchantAccount: Merchant account identifier, `merchant id`.
-    ///  - userID: A unique ID for the end customer making the payment.
+    ///  - customerID: A unique ID for the end customer making the payment. We recommend that you hash this value.
     ///  - completion: Which will return the result. See more [here](https://docs.joinforage.app/reference/create-payment-method-1)
-    ///
-    ///  - Note: If you're providing your internal user ID for `userID`, then we recommend that you hash the value before sending it on the payload. This field is optional, but omitting it causes resource action endpoints to throttle on the customer's IP.
     func tokenizeEBTCard(
         bearerToken: String,
         merchantAccount: String,
         completion: @escaping (Result<PaymentMethodModel, Error>) -> Void,
-        userID: String?)
+        userID: String)
         
     /// Check balance for a given EBT Card
     ///
@@ -71,7 +69,7 @@ extension ForageSDK: ForageSDKService {
         bearerToken: String,
         merchantAccount: String,
         completion: @escaping (Result<PaymentMethodModel, Error>) -> Void,
-        userID: String? = nil
+        userID: String
     ) {
         let request = ForagePANRequestModel(
             authorization: bearerToken,

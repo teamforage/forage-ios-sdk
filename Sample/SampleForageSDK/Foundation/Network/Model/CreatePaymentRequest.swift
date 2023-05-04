@@ -16,5 +16,5 @@ struct CreatePaymentRequest {
     let metadata: [String:String]
     let deliveryAddress: Address
     let isDelivery: Bool
-    let userID: String?
+    let userID: String
 }

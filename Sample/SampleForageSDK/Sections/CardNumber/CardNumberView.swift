@@ -189,7 +189,7 @@ class CardNumberView: UIView {
                 self.typeLabel.text = "type=\(response.type)"
                 self.tokenLabel.text = "token=\(response.card.token)"
                 self.last4Label.text = "last4=\(response.card.last4)"
-                self.userIDLabel.text = "userID=\(response.userID ?? "nil")"
+                self.userIDLabel.text = "userID=\(response.userID)"
                 self.errorLabel.text = ""
                 ClientSharedData.shared.paymentMethodReference = response.paymentMethodIdentifier
                 self.updateButtonState(isEnabled: true, button: self.nextButton)

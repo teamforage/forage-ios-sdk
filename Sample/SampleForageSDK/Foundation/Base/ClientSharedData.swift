@@ -15,5 +15,7 @@ class ClientSharedData {
     var merchantID: String = ""
     var bearerToken: String = ""
     var paymentReference: [FundingType : String] = [:]
-    var userID: String? = "test-ios-user-id"
+    // NOTE: The following line is for testing purposes only and should not be used in production.
+    // Please replace this line with a real hashed customer ID value.
+    var userID: String = UUID.init().uuidString
 }

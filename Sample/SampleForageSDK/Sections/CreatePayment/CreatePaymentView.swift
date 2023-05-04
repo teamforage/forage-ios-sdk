@@ -220,7 +220,7 @@ class CreatePaymentView: UIView {
                 state: "LA"
             ),
             isDelivery: false,
-            userID: "test-ios-user-id"
+            userID: ClientSharedData.shared.userID
         )
         
         controller.createPayment(request: request) { result in
