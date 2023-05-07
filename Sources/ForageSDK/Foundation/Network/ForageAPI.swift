@@ -60,7 +60,7 @@ extension ForageAPI: ServiceProtocol {
                 "authorization": "Bearer \(model.authorization)",
                 "content-type": "application/json",
                 "accept": "application/json",
-               "API-VERSION": "2023-03-31"
+                "API-VERSION": "2023-03-31"
             ]
             
             return .requestParametersAndHeaders(
