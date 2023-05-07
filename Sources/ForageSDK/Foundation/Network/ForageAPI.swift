@@ -99,7 +99,8 @@ extension ForageAPI: ServiceProtocol {
         case .getPaymentMethod(request: let request):
             let httpHeaders: HTTPHeaders = [
                 "Merchant-Account": request.merchantAccount,
-                "authorization": "Bearer \(request.bearerToken)"
+                "authorization": "Bearer \(request.bearerToken)",
+                "API-VERSION": "2023-03-31"
             ]
             
             return .requestParametersAndHeaders(
