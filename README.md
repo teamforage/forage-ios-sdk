@@ -68,7 +68,7 @@ To initialize a ForageSDK instance, you need to provide the environment.
 
 ```swift
 ForageSDK.setup(
-    ForageSDK.Config(environment: .sandbox)            
+    ForageSDK.Config(environment: .sandbox)
 )
 ```
 

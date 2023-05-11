@@ -33,14 +33,15 @@ public class ForageSDK {
     // MARK: Init
     
     private init() {
-        guard let config = ForageSDK.config else {
+        guard let forageConfig = ForageSDK.config else {
             assertionFailure("ForageSDK missing Config setup")
             return
         }
-        
+        self.environment = forageConfig.environment
+        // TODO: Maybe move this shared logger call!
         VGSCollectLogger.shared.disableAllLoggers()
-        self.environment = config.environment
         self.service = LiveForageService()
+        LDManager.shared.initialize(self.environment)
     }
     
     /**
