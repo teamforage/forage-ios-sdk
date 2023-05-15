@@ -20,6 +20,24 @@
         }
       },
       {
+        "package": "LaunchDarkly",
+        "repositoryURL": "https://github.com/launchdarkly/ios-client-sdk.git",
+        "state": {
+          "branch": null,
+          "revision": "4274708ead155753818ba03f7e2dd3bba677dd35",
+          "version": "8.0.1"
+        }
+      },
+      {
+        "package": "LDSwiftEventSource",
+        "repositoryURL": "https://github.com/LaunchDarkly/swift-eventsource.git",
+        "state": {
+          "branch": null,
+          "revision": "aa03131eb30bbc35513153609ed65209853603a7",
+          "version": "3.0.0"
+        }
+      },
+      {
         "package": "VGSCollectSDK",
         "repositoryURL": "https://github.com/verygoodsecurity/vgs-collect-ios.git",
         "state": {

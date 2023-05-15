@@ -37,9 +37,10 @@ public class ForageSDK {
             assertionFailure("ForageSDK missing Config setup")
             return
         }
-        
-        VGSCollectLogger.shared.disableAllLoggers()
         self.environment = config.environment
+        LDManager.shared.initialize(self.environment)
+        // TODO: Maybe move this shared logger call!
+        VGSCollectLogger.shared.disableAllLoggers()
         self.service = LiveForageService()
     }
     
