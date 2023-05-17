@@ -22,19 +22,3 @@ public struct ForageBalanceModel: Codable {
         case updated
     }
 }
-
-internal struct MessageResponse: Codable {
-    let contentId: String
-    let messageType: String
-    let status: String
-    let failed: Bool
-    let errors: [String]
-    
-    private enum CodingKeys : String, CodingKey {
-        case contentId = "content_id"
-        case messageType = "message_type"
-        case status
-        case failed
-        case errors
-    }
-}
