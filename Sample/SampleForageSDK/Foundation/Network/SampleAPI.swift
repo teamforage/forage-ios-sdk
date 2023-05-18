@@ -38,7 +38,7 @@ extension SampleAPI: ServiceProtocol {
                     "state": model.deliveryAddress.state,
                 ],
                 "is_delivery": model.isDelivery,
-                "user_id": model.userID
+                "customer_id": model.customerID
             ]
             
             let httpHeaders: HTTPHeaders = [

@@ -7,15 +7,6 @@
 
 import UIKit
 
-public struct ForageAddress: Codable {
-    public let city: String
-    public let country: String
-    public let line1: String?
-    public let line2: String?
-    public let zipcode: String
-    public let state: String
-}
-
 public enum ForageOrderStatus: String, Codable {
     case draft
     case processing
@@ -31,7 +22,7 @@ public struct ForageCaptureModel: Codable {
     public let amount: String
     public let description: String
     public let paymentMethodIdentifier: String
-    public let deliveryAddress: ForageAddress
+    public let deliveryAddress: Address
     public let isDelivery: Bool
     public let createdDate: String
     public let updatedDate: String

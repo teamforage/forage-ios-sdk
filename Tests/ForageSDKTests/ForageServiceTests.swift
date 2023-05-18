@@ -31,7 +31,7 @@ final class ForageServiceTests: XCTestCase {
             panNumber: "5076801234123412",
             type: "ebt",
             reusable: true,
-            userID: "test-ios-customer-id"
+            customerID: "test-ios-customer-id"
         )
         
         service.tokenizeEBTCard(request: foragePANRequestModel) { result in
@@ -41,7 +41,7 @@ final class ForageServiceTests: XCTestCase {
                 XCTAssertEqual(response.paymentMethodIdentifier, "d0c47b0ed5")
                 XCTAssertEqual(response.card.last4, "3412")
                 XCTAssertEqual(response.card.token, "tok_sandbox_72VEC9LasHbMYiiVWP9zms")
-                XCTAssertEqual(response.userID, "test-ios-customer-id")
+                XCTAssertEqual(response.customerID, "test-ios-customer-id")
             case .failure:
                 XCTFail("Expected success")
             }
@@ -60,7 +60,7 @@ final class ForageServiceTests: XCTestCase {
             panNumber: "5076801234123412",
             type: "ebt",
             reusable: true,
-            userID: "test-ios-user-id"
+            customerID: "test-ios-customer-id"
         )
         
         service.tokenizeEBTCard(request: foragePANRequestModel) { result in

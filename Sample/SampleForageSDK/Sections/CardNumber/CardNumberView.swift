@@ -132,13 +132,13 @@ class CardNumberView: UIView {
         return label
     }()
     
-    private let userIDLabel: UILabel = {
+    private let customerIDLabel: UILabel = {
         let label = UILabel()
         label.text = ""
         label.textColor = .black
         label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         label.numberOfLines = 0
-        label.accessibilityIdentifier = "lbl_userID"
+        label.accessibilityIdentifier = "lbl_customerID"
         label.isAccessibilityElement = true
         return label
     }()
@@ -161,7 +161,7 @@ class CardNumberView: UIView {
             ForageSDK.shared.tokenizeEBTCard(
                 bearerToken: ClientSharedData.shared.bearerToken,
                 merchantAccount: ClientSharedData.shared.merchantID,
-                userID: ClientSharedData.shared.userID) { result in
+                customerID: ClientSharedData.shared.customerID) { result in
                     self.printResult(result: result)
                 }
         }
@@ -189,7 +189,7 @@ class CardNumberView: UIView {
                 self.typeLabel.text = "type=\(response.type)"
                 self.tokenLabel.text = "token=\(response.card.token)"
                 self.last4Label.text = "last4=\(response.card.last4)"
-                self.userIDLabel.text = "userID=\(response.userID)"
+                self.customerIDLabel.text = "customerID=\(response.customerID ?? "NO CUST ID")"
                 self.errorLabel.text = ""
                 ClientSharedData.shared.paymentMethodReference = response.paymentMethodIdentifier
                 self.updateButtonState(isEnabled: true, button: self.nextButton)
@@ -199,7 +199,7 @@ class CardNumberView: UIView {
                 self.typeLabel.text = ""
                 self.tokenLabel.text = ""
                 self.last4Label.text = ""
-                self.userIDLabel.text = ""
+                self.customerIDLabel.text = ""
                 self.updateButtonState(isEnabled: false, button: self.nextButton)
             }
             
@@ -217,7 +217,7 @@ class CardNumberView: UIView {
         contentView.addSubview(typeLabel)
         contentView.addSubview(tokenLabel)
         contentView.addSubview(last4Label)
-        contentView.addSubview(userIDLabel)
+        contentView.addSubview(customerIDLabel)
         contentView.addSubview(errorLabel)
         contentView.addSubview(sendPanButton)
         contentView.addSubview(nextButton)
@@ -301,7 +301,7 @@ class CardNumberView: UIView {
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
         )
         
-        userIDLabel.anchor(
+        customerIDLabel.anchor(
             top: last4Label.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
             bottom: nil,

@@ -118,7 +118,7 @@ To send the PAN number, we can use ForageSDK to perform the request.
 func tokenizeEBTCard(
     bearerToken: String,
     merchantAccount: String,
-    userID: String,
+    customerID: String,
     completion: @escaping (Result<PaymentMethodModel, Error>) -> Void
 )
 ```
@@ -131,7 +131,7 @@ ForageSDK.shared.tokenizeEBTCard(
     merchantAccount: merchantID,
     // NOTE: The following line is for testing purposes only and should not be used in production.
     // Please replace this line with a real hashed customer ID value.
-    userID: UUID.init().uuidString) { result in
+    customerID: UUID.init().uuidString) { result in
         // handle callback here
     }
 ```
