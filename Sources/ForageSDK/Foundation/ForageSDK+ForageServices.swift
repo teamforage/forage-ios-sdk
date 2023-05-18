@@ -24,10 +24,12 @@ protocol ForageSDKService: AnyObject {
     /// - Parameters:
     ///  - bearerToken: Authorization token.
     ///  - merchantAccount: Merchant account identifier, `merchant id`.
-    ///  - completion: Which will return the result. (See more [here](https://docs.joinforage.app/reference/create-payment-method-1))
+    ///  - customerID: A unique ID for the end customer making the payment. We recommend that you hash this value.
+    ///  - completion: Which will return the result. See more [here](https://docs.joinforage.app/reference/create-payment-method-1)
     func tokenizeEBTCard(
         bearerToken: String,
         merchantAccount: String,
+        customerID: String,
         completion: @escaping (Result<PaymentMethodModel, Error>) -> Void)
         
     /// Check balance for a given EBT Card
@@ -66,13 +68,16 @@ extension ForageSDK: ForageSDKService {
     public func tokenizeEBTCard(
         bearerToken: String,
         merchantAccount: String,
-        completion: @escaping (Result<PaymentMethodModel, Error>) -> Void) {
+        customerID: String,
+        completion: @escaping (Result<PaymentMethodModel, Error>) -> Void
+    ) {
         let request = ForagePANRequestModel(
             authorization: bearerToken,
             merchantAccount: merchantAccount,
             panNumber: panNumber,
             type: CardType.ebt.rawValue,
-            reusable: true
+            reusable: true,
+            customerID: customerID
         )
         service?.tokenizeEBTCard(request: request, completion: completion)
     }

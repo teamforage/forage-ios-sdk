@@ -47,7 +47,8 @@ class ForageMocks {
               "last_4":"3412",
               "created":"2022-11-29T03:31:52.349193-08:00",
               "token":"tok_sandbox_72VEC9LasHbMYiiVWP9zms"
-           }
+           },
+           "customer_id":"test-ios-customer-id"
         }
 """
         return Data(response.utf8)

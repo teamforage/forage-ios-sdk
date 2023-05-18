@@ -30,7 +30,8 @@ final class ForageServiceTests: XCTestCase {
             merchantAccount: "merchantID123",
             panNumber: "5076801234123412",
             type: "ebt",
-            reusable: true
+            reusable: true,
+            customerID: "test-ios-customer-id"
         )
         
         service.tokenizeEBTCard(request: foragePANRequestModel) { result in
@@ -40,6 +41,7 @@ final class ForageServiceTests: XCTestCase {
                 XCTAssertEqual(response.paymentMethodIdentifier, "d0c47b0ed5")
                 XCTAssertEqual(response.card.last4, "3412")
                 XCTAssertEqual(response.card.token, "tok_sandbox_72VEC9LasHbMYiiVWP9zms")
+                XCTAssertEqual(response.customerID, "test-ios-customer-id")
             case .failure:
                 XCTFail("Expected success")
             }
@@ -57,7 +59,8 @@ final class ForageServiceTests: XCTestCase {
             merchantAccount: "merchantID123",
             panNumber: "5076801234123412",
             type: "ebt",
-            reusable: true
+            reusable: true,
+            customerID: "test-ios-customer-id"
         )
         
         service.tokenizeEBTCard(request: foragePANRequestModel) { result in
@@ -69,7 +72,7 @@ final class ForageServiceTests: XCTestCase {
             }
         }
     }
-
+    
     func test_getXKey_onSuccess_checkExpectedPayload() {
         let mockSession = URLSessionMock()
         mockSession.data = forageMocks.xKeySuccess
@@ -173,7 +176,7 @@ final class ForageServiceTests: XCTestCase {
             }
         }
     }
-
+    
     func test_getBalance_onSuccess_checkExpectedPayload() {
         let mockSession = URLSessionMock()
         mockSession.data = forageMocks.getBalanceSuccess
@@ -189,7 +192,7 @@ final class ForageServiceTests: XCTestCase {
             merchantID: "merchantID123",
             xKey: "tok_sandbox_agCcwWZs8TMkkq89f8KHSx"
         )
-
+        
         service.checkBalance(pinCollector: vgs, request: forageRequestModel) { result in
             switch result {
             case .success(let response):
@@ -217,7 +220,7 @@ final class ForageServiceTests: XCTestCase {
             merchantID: "merchantID123",
             xKey: "tok_sandbox_agCcwWZs8TMkkq89f8KHSx"
         )
-
+        
         service.checkBalance(pinCollector: vgs, request: forageRequestModel) { result in
             switch result {
             case .success:
@@ -243,7 +246,7 @@ final class ForageServiceTests: XCTestCase {
             merchantID: "merchantID123",
             xKey: "tok_sandbox_agCcwWZs8TMkkq89f8KHSx"
         )
-
+        
         service.capturePayment(pinCollector: vgs, request: forageRequestModel) { result in
             switch result {
             case .success(let response):
@@ -275,7 +278,7 @@ final class ForageServiceTests: XCTestCase {
             merchantID: "merchantID123",
             xKey: "tok_sandbox_agCcwWZs8TMkkq89f8KHSx"
         )
-
+        
         service.checkBalance(pinCollector: vgs, request: forageRequestModel) { result in
             switch result {
             case .success:

@@ -51,14 +51,16 @@ extension ForageAPI: ServiceProtocol {
             let bodyParameters: Parameters = [
                 "type": model.type,
                 "reusable": model.reusable,
-                "card": card
+                "card": card,
+                "customer_id": model.customerID
             ]
 
             let httpHeaders: HTTPHeaders = [
                 "Merchant-Account": model.merchantAccount,
                 "authorization": "Bearer \(model.authorization)",
                 "content-type": "application/json",
-                "accept": "application/json"
+                "accept": "application/json",
+                "API-VERSION": "2023-03-31"
             ]
             
             return .requestParametersAndHeaders(
@@ -97,7 +99,8 @@ extension ForageAPI: ServiceProtocol {
         case .getPaymentMethod(request: let request):
             let httpHeaders: HTTPHeaders = [
                 "Merchant-Account": request.merchantAccount,
-                "authorization": "Bearer \(request.bearerToken)"
+                "authorization": "Bearer \(request.bearerToken)",
+                "API-VERSION": "2023-03-31"
             ]
             
             return .requestParametersAndHeaders(
@@ -109,7 +112,8 @@ extension ForageAPI: ServiceProtocol {
         case .getPayment(request: let request):
             let httpHeaders: HTTPHeaders = [
                 "Merchant-Account": request.merchantAccount,
-                "authorization": "Bearer \(request.bearerToken)"
+                "authorization": "Bearer \(request.bearerToken)",
+                "API-VERSION": "2023-03-31"
             ]
             
             return .requestParametersAndHeaders(
