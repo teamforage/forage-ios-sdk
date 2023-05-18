@@ -27,6 +27,6 @@ public struct ForagePANModel: Codable {
         case paymentMethodIdentifier = "ref"
         case type
         case card
-        case customerID = "user_id"
+        case customerID = "customer_id"
     }
 }
