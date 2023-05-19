@@ -7,13 +7,15 @@
 
 import Foundation
 
-public struct Balance: Codable {
-    let snap: Double
-    let nonSnap: Double
+public struct BalanceModel: Codable {
+    public let snap: String
+    public let cash: String
+    public let updated: String
     
     private enum CodingKeys: String, CodingKey {
-        case nonSnap = "non_snap"
+        case cash = "non_snap"
         case snap
+        case updated
     }
 }
 
@@ -31,17 +33,19 @@ public struct ForageCard: Codable {
     }
 }
 
-/// `ForagePANRequestModel` used for compose request to tokenize Ebt Card
-public struct ForagePANResponseModel: Codable {
+/// `PaymentMethodModel` used to represent a tokenized EBT Card
+public struct PaymentMethodModel: Codable {
     public let paymentMethodIdentifier: String
     public let type: String
-    public let balance: Balance?
+    public let balance: BalanceModel?
     public let card: ForageCard
+    public let customerID: String?
     
     private enum CodingKeys : String, CodingKey {
         case paymentMethodIdentifier = "ref"
         case type
         case card
         case balance
+        case customerID = "customer_id"
     }
 }

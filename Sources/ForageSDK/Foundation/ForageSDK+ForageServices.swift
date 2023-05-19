@@ -24,11 +24,13 @@ protocol ForageSDKService: AnyObject {
     /// - Parameters:
     ///  - bearerToken: Authorization token.
     ///  - merchantAccount: Merchant account identifier, `merchant id`.
-    ///  - completion: Which will return the result. (See more [here](https://docs.joinforage.app/reference/create-payment-method-1))
+    ///  - customerID: A unique ID for the end customer making the payment. We recommend that you hash this value.
+    ///  - completion: Which will return the result. See more [here](https://docs.joinforage.app/reference/create-payment-method-1)
     func tokenizeEBTCard(
         bearerToken: String,
         merchantAccount: String,
-        completion: @escaping (Result<ForagePANResponseModel, Error>) -> Void)
+        customerID: String,
+        completion: @escaping (Result<PaymentMethodModel, Error>) -> Void)
         
     /// Check balance for a given EBT Card
     ///
@@ -42,9 +44,8 @@ protocol ForageSDKService: AnyObject {
         bearerToken: String,
         merchantAccount: String,
         paymentMethodReference: String,
-        cardNumberToken: String,
         foragePinTextEdit: ForagePINTextField,
-        completion: @escaping (Result<Data?, Error>) -> Void)
+        completion: @escaping (Result<BalanceModel, Error>) -> Void)
     
     /// Capture a payment for a given payment reference
     ///
@@ -58,42 +59,25 @@ protocol ForageSDKService: AnyObject {
         bearerToken: String,
         merchantAccount: String,
         paymentReference: String,
-        cardNumberToken: String,
         foragePinTextEdit: ForagePINTextField,
-        completion: @escaping (Result<Data?, Error>) -> Void)
-    
-    /// Cancel any ongoing request
-    func cancelRequest()
+        completion: @escaping (Result<PaymentModel, Error>) -> Void)
 }
 
-// MARK: - ForageSDKService
-
 extension ForageSDK: ForageSDKService {
-    
-    // MARK: Private Methods
-    
-    private func getXKey(
-        _ bearerToken: String,
-        _ merchantAccount: String,
-        completion: @escaping (Result<ForageXKeyModel, Error>) -> Void)
-    -> Void {
-        service?.getXKey(bearerToken: bearerToken, merchantAccount: merchantAccount) { result in
-            completion(result)
-        }
-    }
-    
-    // MARK: Public Methods
     
     public func tokenizeEBTCard(
         bearerToken: String,
         merchantAccount: String,
-        completion: @escaping (Result<ForagePANResponseModel, Error>) -> Void) {
+        customerID: String,
+        completion: @escaping (Result<PaymentMethodModel, Error>) -> Void
+    ) {
         let request = ForagePANRequestModel(
             authorization: bearerToken,
             merchantAccount: merchantAccount,
             panNumber: panNumber,
             type: CardType.ebt.rawValue,
-            reusable: true
+            reusable: true,
+            customerID: customerID
         )
         service?.tokenizeEBTCard(request: request, completion: completion)
     }
@@ -102,21 +86,27 @@ extension ForageSDK: ForageSDKService {
         bearerToken: String,
         merchantAccount: String,
         paymentMethodReference: String,
-        cardNumberToken: String,
         foragePinTextEdit: ForagePINTextField,
-        completion: @escaping (Result<Data?, Error>) -> Void) {
+        completion: @escaping (Result<BalanceModel, Error>) -> Void) {
             service?.getXKey(bearerToken: bearerToken, merchantAccount: merchantAccount) { result in
             switch result {
             case .success(let model):
-                let request = ForageRequestModel(
-                    authorization: bearerToken,
-                    paymentMethodReference: paymentMethodReference,
-                    paymentReference: "",
-                    cardNumberToken: cardNumberToken,
-                    merchantID: merchantAccount,
-                    xKey: model.alias
-                )
-                self.service?.getBalance(pinCollector: foragePinTextEdit.collector, request: request, completion: completion)
+                self.service?.getPaymentMethod(bearerToken: bearerToken, merchantAccount: merchantAccount, paymentMethodRef: paymentMethodReference) { result in
+                    switch result {
+                    case .success(let paymentMethod):
+                        let request = ForageRequestModel(
+                            authorization: bearerToken,
+                            paymentMethodReference: paymentMethodReference,
+                            paymentReference: "",
+                            cardNumberToken: paymentMethod.card.token,
+                            merchantID: merchantAccount,
+                            xKey: model.alias
+                        )
+                        self.service?.checkBalance(pinCollector: foragePinTextEdit.collector, request: request, completion: completion)
+                    case .failure(let error):
+                        completion(.failure(error))
+                    }
+                }
             case .failure(let error):
                 completion(.failure(error))
             }
@@ -127,29 +117,38 @@ extension ForageSDK: ForageSDKService {
         bearerToken: String,
         merchantAccount: String,
         paymentReference: String,
-        cardNumberToken: String,
         foragePinTextEdit: ForagePINTextField,
-        completion: @escaping (Result<Data?, Error>) -> Void) {
+        completion: @escaping (Result<PaymentModel, Error>) -> Void) {
             service?.getXKey(bearerToken: bearerToken, merchantAccount: merchantAccount) { result in
             switch result {
             case .success(let model):
-                let request = ForageRequestModel(
-                    authorization: bearerToken,
-                    paymentMethodReference: "",
-                    paymentReference: paymentReference,
-                    cardNumberToken: cardNumberToken,
-                    merchantID: merchantAccount,
-                    xKey: model.alias
-                )
-                
-                self.service?.requestCapturePayment(pinCollector: foragePinTextEdit.collector, request: request, completion: completion)
+                self.service?.getPayment(bearerToken: bearerToken, merchantAccount: merchantAccount, paymentRef: paymentReference) { result in
+                    switch result {
+                    case .success(let payment):
+                        self.service?.getPaymentMethod(bearerToken: bearerToken, merchantAccount: merchantAccount, paymentMethodRef: payment.paymentMethodRef) { result in
+                            switch result {
+                            case .success(let paymentMethod):
+                                let request = ForageRequestModel(
+                                    authorization: bearerToken,
+                                    paymentMethodReference: "",
+                                    paymentReference: paymentReference,
+                                    cardNumberToken: paymentMethod.card.token,
+                                    merchantID: merchantAccount,
+                                    xKey: model.alias
+                                )
+                                
+                                self.service?.capturePayment(pinCollector: foragePinTextEdit.collector, request: request, completion: completion)
+                            case .failure(let error):
+                                completion(.failure(error))
+                            }
+                        }
+                    case .failure(let error):
+                        completion(.failure(error))
+                    }
+                }
             case .failure(let error):
                 completion(.failure(error))
             }
         }
-    }
-    
-    public func cancelRequest() {
-        service?.provider.stopRequestOnGoing()
     }
 }

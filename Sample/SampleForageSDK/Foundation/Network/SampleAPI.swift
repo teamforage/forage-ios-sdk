@@ -37,13 +37,15 @@ extension SampleAPI: ServiceProtocol {
                     "zipcode": model.deliveryAddress.zipcode,
                     "state": model.deliveryAddress.state,
                 ],
-                "is_delivery": model.isDelivery
+                "is_delivery": model.isDelivery,
+                "customer_id": model.customerID
             ]
             
             let httpHeaders: HTTPHeaders = [
                 "Merchant-Account": model.merchantAccount,
                 "IDEMPOTENCY-KEY": UUID.init().uuidString,
-                "authorization": "Bearer \(ClientSharedData.shared.bearerToken)"
+                "authorization": "Bearer \(ClientSharedData.shared.bearerToken)",
+                "API-VERSION": "2023-03-31"
             ]
             
             return .requestParametersAndHeaders(

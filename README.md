@@ -68,7 +68,7 @@ To initialize a ForageSDK instance, you need to provide the environment.
 
 ```swift
 ForageSDK.setup(
-    ForageSDK.Config(environment: .sandbox)            
+    ForageSDK.Config(environment: .sandbox)
 )
 ```
 
@@ -118,7 +118,8 @@ To send the PAN number, we can use ForageSDK to perform the request.
 func tokenizeEBTCard(
     bearerToken: String,
     merchantAccount: String,
-    completion: @escaping (Result<Data?, Error>) -> Void
+    customerID: String,
+    completion: @escaping (Result<PaymentMethodModel, Error>) -> Void
 )
 ```
 
@@ -127,7 +128,10 @@ func tokenizeEBTCard(
 
 ForageSDK.shared.tokenizeEBTCard(
     bearerToken: bearerToken,
-    merchantAccount: merchantID) { result in
+    merchantAccount: merchantID,
+    // NOTE: The following line is for testing purposes only and should not be used in production.
+    // Please replace this line with a real hashed customer ID value.
+    customerID: UUID.init().uuidString) { result in
         // handle callback here
     }
 ```
@@ -179,9 +183,8 @@ func checkBalance(
     bearerToken: String,
     merchantAccount: String,
     paymentMethodReference: String,
-    cardNumberToken: String,
     foragePinTextEdit: ForagePINTextField,
-    completion: @escaping (Result<Data?, Error>) -> Void
+    completion: @escaping (Result<BalanceModel, Error>) -> Void
 )
 ```
 
@@ -192,7 +195,6 @@ ForageSDK.shared.checkBalance(
     bearerToken: bearerToken,
     merchantAccount: merchantID,
     paymentMethodReference: paymentMethodReference,
-    cardNumberToken: cardNumberToken,
     foragePinTextEdit: pinNumberTextField) { result in
         // handle callback here
     }
@@ -207,9 +209,8 @@ func capturePayment(
     bearerToken: String,
     merchantAccount: String,
     paymentReference: String,
-    cardNumberToken: String,
     foragePinTextEdit: ForagePINTextField,
-    completion: @escaping (Result<Data?, Error>) -> Void
+    completion: @escaping (Result<PaymentModel, Error>) -> Void
 )
 ```
 
@@ -220,7 +221,6 @@ ForageSDK.shared.capturePayment(
     bearerToken: bearerToken,
     merchantAccount: merchantID,
     paymentReference: paymentReference,
-    cardNumberToken: cardNumberToken,
     foragePinTextEdit: pinNumberTextField) { result in
         // handle callback here
     }
@@ -242,3 +242,4 @@ To get the application running,
 - Swift 5
 - 3rd party libraries:
   - [VGS-Collect-iOS](https://github.com/verygoodsecurity/vgs-collect-ios)
+  - [LaunchDarkly](https://github.com/launchdarkly/ios-client-sdk.git)

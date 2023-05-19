@@ -21,6 +21,11 @@ let package = Package(
             name: "VGSCollectSDK",
             url: "https://github.com/verygoodsecurity/vgs-collect-ios.git",
             from: "1.11.0"
+        ),
+        .package(
+            name: "LaunchDarkly",
+            url: "https://github.com/launchdarkly/ios-client-sdk.git",
+            from: "8.0.1"
         )
     ],
     targets: [
@@ -30,6 +35,7 @@ let package = Package(
             name: "ForageSDK",
             dependencies: [
                 "VGSCollectSDK",
+                "LaunchDarkly",
             ],
             path: "Sources", resources: [
                 .process("Resources/Media.xcassets")

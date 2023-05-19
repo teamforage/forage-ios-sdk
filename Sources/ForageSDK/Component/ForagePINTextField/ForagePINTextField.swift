@@ -153,6 +153,15 @@ public class ForagePINTextField: UIView, Identifiable {
         
         textField.delegate = self
         
+        let vaultType = LDManager.shared.getVaultType()
+        if (vaultType == VaultType.btVaultType) {
+            // Do BT Stuff!
+        } else if (vaultType == VaultType.vgsVaultType) {
+            // Do VGS Stuff!
+        } else {
+            // This should be an error and some logging
+        }
+
         var rules = VGSValidationRuleSet()
         rules.add(rule: VGSValidationRulePattern(pattern: "^[0-9]+$", error: VGSValidationErrorType.pattern.rawValue))
         let configuration = VGSConfiguration(collector: self.collector, fieldName: "pin")
