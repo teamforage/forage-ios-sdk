@@ -311,7 +311,7 @@ class CardNumberView: UIView {
         )
         
         errorLabel.anchor(
-            top: errorLabel.safeAreaLayoutGuide.bottomAnchor,
+            top: customerIDLabel.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
             bottom: nil,
             trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
