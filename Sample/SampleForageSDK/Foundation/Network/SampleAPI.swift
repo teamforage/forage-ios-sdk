@@ -13,13 +13,13 @@ enum SampleAPI {
 
 extension SampleAPI: ServiceProtocol {
     var scheme: String { return "https" }
-    
+
     var host: String { return "api.sandbox.joinforage.app" }
-    
+
     var path: String { return "/api/payments/" }
-    
+
     var method: HttpMethod { return .post }
-    
+
     var task: HttpTask {
         switch self {
         case .createPayment(request: let model):
@@ -40,14 +40,14 @@ extension SampleAPI: ServiceProtocol {
                 "is_delivery": model.isDelivery,
                 "customer_id": model.customerID
             ]
-            
+
             let httpHeaders: HTTPHeaders = [
                 "Merchant-Account": model.merchantAccount,
                 "IDEMPOTENCY-KEY": UUID.init().uuidString,
                 "authorization": "Bearer \(ClientSharedData.shared.bearerToken)",
-                "API-VERSION": "2023-03-31"
+                "API-VERSION": "2023-05-15"
             ]
-            
+
             return .requestParametersAndHeaders(
                 bodyParameters: bodyParameters,
                 urlParameters: nil,
