@@ -217,6 +217,11 @@ public class ForagePINTextField: UIView, Identifiable {
     @objc fileprivate func requestFocus(_ gesture: UIGestureRecognizer) {
         becomeFirstResponder()
     }
+    
+    // Internal Methods
+    internal func clearText() {
+        textField.cleanText()
+    }
 }
 
 extension ForagePINTextField: VGSTextFieldDelegate {

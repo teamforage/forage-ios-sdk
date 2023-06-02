@@ -103,6 +103,7 @@ extension ForageSDK: ForageSDKService {
                             xKey: model.alias
                         )
                         self.service?.checkBalance(pinCollector: foragePinTextEdit.collector, request: request, completion: completion)
+                        foragePinTextEdit.clearText()
                     case .failure(let error):
                         completion(.failure(error))
                     }
@@ -138,6 +139,7 @@ extension ForageSDK: ForageSDKService {
                                 )
                                 
                                 self.service?.capturePayment(pinCollector: foragePinTextEdit.collector, request: request, completion: completion)
+                                foragePinTextEdit.clearText()
                             case .failure(let error):
                                 completion(.failure(error))
                             }
