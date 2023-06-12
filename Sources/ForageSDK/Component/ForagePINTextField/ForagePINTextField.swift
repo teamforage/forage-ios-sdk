@@ -21,6 +21,8 @@ public class ForagePINTextField: UIView, Identifiable {
     
     internal var collector: VGSCollect = Collector.CreateVGS()
     
+//    internal var basisTheoryCollector: BasisTheoryConfig = Collector.CreateBasisTheory()
+//
     /// Placeholder for the text field
     @IBInspectable public var placeholder: String? {
         get { return textField.placeholder }
@@ -96,19 +98,34 @@ public class ForagePINTextField: UIView, Identifiable {
         return sv
     }()
     
-    private lazy var textField: VGSTextField = {
-        let tf = VGSTextField()
-        tf.translatesAutoresizingMaskIntoConstraints = false
-        tf.textColor = UIColor.black
-        tf.font = UIFont.systemFont(ofSize: 14, weight: .regular)
-        tf.autocorrectionType = .no
-        tf.borderWidth = 0.25
-        tf.borderColor = UIColor.lightGray
-        tf.padding = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 0)
-        tf.accessibilityIdentifier = "tf_forage_pin_text_field"
-        tf.isAccessibilityElement = true
-        return tf
+    private lazy var textField: PINVaultTextField = {
+        // Temporary forcing of vault type
+        var vaultType = VaultType.vgsVaultType
+        
+        var tf: PINVaultTextField?
+        
+        if (vaultType == VaultType.vgsVaultType) {
+            tf = VGSTextFieldWrapper()
+        } else if (vaultType == VaultType.btVaultType) {
+            tf = BasisTheoryTextFieldWrapper()
+        } else {
+            // Throw error
+            tf = VGSTextFieldWrapper()
+        }
+        
+        tf?.translatesAutoresizingMaskIntoConstraints = false
+        tf?.textColor = UIColor.black
+        tf?.font = UIFont.systemFont(ofSize: 14, weight: .regular)
+        tf?.autocorrectionType = .no
+        tf?.borderWidth = 0.25
+        tf?.borderColor = UIColor.lightGray
+        tf?.padding = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 0)
+        tf?.accessibilityIdentifier = "tf_forage_pin_text_field"
+        tf?.isAccessibilityElement = true
+        
+        return tf ?? VGSTextFieldWrapper()
     }()
+
     
     private lazy var imageView: UIImageView = {
         let imgView = UIImageView()
@@ -152,24 +169,6 @@ public class ForagePINTextField: UIView, Identifiable {
         container.addArrangedSubview(imageViewContainer)
         
         textField.delegate = self
-        
-        let vaultType = LDManager.shared.getVaultType()
-        if (vaultType == VaultType.btVaultType) {
-            // Do BT Stuff!
-        } else if (vaultType == VaultType.vgsVaultType) {
-            // Do VGS Stuff!
-        } else {
-            // This should be an error and some logging
-        }
-
-        var rules = VGSValidationRuleSet()
-        rules.add(rule: VGSValidationRulePattern(pattern: "^[0-9]+$", error: VGSValidationErrorType.pattern.rawValue))
-        let configuration = VGSConfiguration(collector: self.collector, fieldName: "pin")
-        configuration.type = .none
-        configuration.keyboardType = .numberPad
-        configuration.maxInputLength = 4
-        configuration.validationRules = rules
-        textField.configuration = configuration
         
         root.anchor(
             top: self.topAnchor,
@@ -219,12 +218,12 @@ public class ForagePINTextField: UIView, Identifiable {
     }
 }
 
-extension ForagePINTextField: VGSTextFieldDelegate {
+extension ForagePINTextField: PINVaultTextFieldDelegate {
     /// Check active vgs textfield's state when editing the field
-    public func vgsTextFieldDidChange(_ textField: VGSTextField) {
-        let isValid = textField.state.inputLength == 4
-        delegate?.pinStatus(self, isValid: isValid, pinType: pinType)
-    }
+    public func textFieldDidChange(_ textField: PINVaultTextField) {
+           let isValid = textField.isValid()
+           delegate?.pinStatus(self, isValid: isValid, pinType: pinType)
+       }
 }
 
 // MARK: - UIResponder methods
