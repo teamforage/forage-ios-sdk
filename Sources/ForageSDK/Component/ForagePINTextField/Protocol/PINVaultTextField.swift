@@ -11,6 +11,7 @@ import BasisTheoryElements
 
 public protocol PINVaultTextField: UIView {
     var placeholder: String? { get set }
+    var collector: VaultCollector { get set }
     var textColor: UIColor? { get set }
     var tfTintColor: UIColor? { get set }
     var isSecureTextEntry: Bool { get set }
@@ -30,6 +31,8 @@ public protocol PINVaultTextField: UIView {
 }
 
 class VGSTextFieldWrapper: UIView, PINVaultTextField{
+    var collector: VaultCollector
+    
     weak var delegate: PINVaultTextFieldDelegate?
     
     var placeholder: String?
@@ -40,6 +43,7 @@ class VGSTextFieldWrapper: UIView, PINVaultTextField{
     
     override init(frame: CGRect) {
         textField = VGSTextField()
+        collector = CollectorFactory.createVGS(environment: ForageSDK.shared.environment)
         super.init(frame: frame)
         
         commonInit()
@@ -53,6 +57,7 @@ class VGSTextFieldWrapper: UIView, PINVaultTextField{
     
     required init?(coder aDecoder: NSCoder) {
         textField = VGSTextField()
+        collector = CollectorFactory.createVGS(environment: ForageSDK.shared.environment)
         super.init(coder: aDecoder)
         
         commonInit()
@@ -158,6 +163,8 @@ class VGSTextFieldWrapper: UIView, PINVaultTextField{
 }
 
 class BasisTheoryTextFieldWrapper: UIView, PINVaultTextField{
+    var collector: VaultCollector
+    
     weak var delegate: PINVaultTextFieldDelegate?
     
     func isValid() -> Bool {
@@ -183,6 +190,7 @@ class BasisTheoryTextFieldWrapper: UIView, PINVaultTextField{
     
     override init(frame: CGRect) {
         textField = TextElementUITextField()
+        collector = CollectorFactory.createBasisTheory(environment: ForageSDK.shared.environment)
         super.init(frame: frame)
         
         commonInit()
@@ -190,6 +198,7 @@ class BasisTheoryTextFieldWrapper: UIView, PINVaultTextField{
     
     required init?(coder aDecoder: NSCoder) {
         textField = TextElementUITextField()
+        collector = CollectorFactory.createBasisTheory(environment: ForageSDK.shared.environment)
         super.init(coder: aDecoder)
         
         commonInit()

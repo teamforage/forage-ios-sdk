@@ -181,7 +181,7 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.data = forageMocks.getBalanceSuccess
         mockSession.response = forageMocks.mockSuccessResponse
-        let vgs = VGSCollect(id: "1234", environment: .sandbox)
+        let vgs = CollectorFactory.createVGS(environment: .sandbox)
         let service = LiveForageService(provider: Provider(mockSession))
         
         let forageRequestModel = ForageRequestModel(
@@ -209,7 +209,7 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.error = forageMocks.generalError
         mockSession.response = forageMocks.mockFailureResponse
-        let vgs = VGSCollect(id: "1234", environment: .sandbox)
+        let vgs = CollectorFactory.createVGS(environment: .sandbox)
         let service = LiveForageService(provider: Provider(mockSession))
         
         let forageRequestModel = ForageRequestModel(
@@ -235,7 +235,7 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.data = forageMocks.capturePaymentSuccess
         mockSession.response = forageMocks.mockSuccessResponse
-        let vgs = VGSCollect(id: "1234", environment: .sandbox)
+        let vgs = CollectorFactory.createVGS(environment: .sandbox)
         let service = LiveForageService(provider: Provider(mockSession))
         
         let forageRequestModel = ForageRequestModel(
@@ -267,7 +267,7 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.error = forageMocks.generalError
         mockSession.response = forageMocks.mockFailureResponse
-        let vgs = VGSCollect(id: "1234", environment: .sandbox)
+        let vgs = CollectorFactory.createVGS(environment: .sandbox)
         let service = LiveForageService(provider: Provider(mockSession))
         
         let forageRequestModel = ForageRequestModel(

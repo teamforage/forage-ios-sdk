@@ -54,15 +54,15 @@ internal class LiveForageService: ForageService {
     ///  - request: Model element with data to perform request.
     ///  - completion: Returns BalanceModel.
     internal func checkBalance(
-        pinCollector: VGSCollect,
+        pinCollector: VaultCollector,
         request: ForageRequestModel,
         completion: @escaping (Result<BalanceModel, Error>) -> Void) -> Void
     {
-        pinCollector.customHeaders = [
+        pinCollector.setCustomHeaders(headers: [
             "X-KEY": request.xKey,
             "IDEMPOTENCY-KEY": UUID.init().uuidString,
             "Merchant-Account": request.merchantID
-        ]
+        ])
 
         let extraData = [
             "card_number_token": request.cardNumberToken
@@ -118,15 +118,15 @@ internal class LiveForageService: ForageService {
     ///  - request: Model element with data to perform request.
     ///  - completion: Returns captured payment object.
     internal func capturePayment(
-        pinCollector: VGSCollect,
+        pinCollector: VaultCollector,
         request: ForageRequestModel,
         completion: @escaping (Result<PaymentModel, Error>) -> Void)
     {
-        pinCollector.customHeaders = [
+        pinCollector.setCustomHeaders(headers: [
             "X-KEY": request.xKey,
-            "IDEMPOTENCY-KEY": request.paymentReference,
+            "IDEMPOTENCY-KEY": UUID.init().uuidString,
             "Merchant-Account": request.merchantID
-        ]
+        ])
 
         let extraData = [
             "card_number_token": request.cardNumberToken

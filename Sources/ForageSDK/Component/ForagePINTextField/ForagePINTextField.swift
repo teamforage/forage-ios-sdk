@@ -19,7 +19,7 @@ public class ForagePINTextField: UIView, Identifiable {
     
     public var pinType: PinType = .balance
     
-    internal var collector: VGSCollect = Collector.CreateVGS()
+    internal var collector: VaultCollector?
     
 //    internal var basisTheoryCollector: BasisTheoryConfig = Collector.CreateBasisTheory()
 //
@@ -122,6 +122,7 @@ public class ForagePINTextField: UIView, Identifiable {
         tf?.padding = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 0)
         tf?.accessibilityIdentifier = "tf_forage_pin_text_field"
         tf?.isAccessibilityElement = true
+        collector = tf?.collector
         
         return tf ?? VGSTextFieldWrapper()
     }()
