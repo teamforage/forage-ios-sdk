@@ -31,7 +31,7 @@ protocol ForageSDKService: AnyObject {
         merchantAccount: String,
         customerID: String,
         completion: @escaping (Result<PaymentMethodModel, Error>) -> Void)
-        
+    
     /// Check balance for a given EBT Card
     ///
     /// - Parameters:
@@ -89,30 +89,30 @@ extension ForageSDK: ForageSDKService {
         foragePinTextEdit: ForagePINTextField,
         completion: @escaping (Result<BalanceModel, Error>) -> Void) {
             service?.getXKey(bearerToken: bearerToken, merchantAccount: merchantAccount) { result in
-            switch result {
-            case .success(let model):
-                self.service?.getPaymentMethod(bearerToken: bearerToken, merchantAccount: merchantAccount, paymentMethodRef: paymentMethodReference) { result in
-                    switch result {
-                    case .success(let paymentMethod):
-                        let request = ForageRequestModel(
-                            authorization: bearerToken,
-                            paymentMethodReference: paymentMethodReference,
-                            paymentReference: "",
-                            cardNumberToken: paymentMethod.card.token,
-                            merchantID: merchantAccount,
-                            xKey: model.alias
-                        )
-                        self.service?.checkBalance(pinCollector: foragePinTextEdit.collector, request: request, completion: completion)
-                        foragePinTextEdit.clearText()
-                    case .failure(let error):
-                        completion(.failure(error))
+                switch result {
+                case .success(let model):
+                    self.service?.getPaymentMethod(bearerToken: bearerToken, merchantAccount: merchantAccount, paymentMethodRef: paymentMethodReference) { result in
+                        switch result {
+                        case .success(let paymentMethod):
+                            let request = ForageRequestModel(
+                                authorization: bearerToken,
+                                paymentMethodReference: paymentMethodReference,
+                                paymentReference: "",
+                                cardNumberToken: paymentMethod.card.token,
+                                merchantID: merchantAccount,
+                                xKey: model.alias
+                            )
+                            self.service?.checkBalance(pinCollector: foragePinTextEdit.collector!, request: request, completion: completion)
+                            
+                        case .failure(let error):
+                            completion(.failure(error))
+                        }
                     }
+                case .failure(let error):
+                    completion(.failure(error))
                 }
-            case .failure(let error):
-                completion(.failure(error))
             }
         }
-    }
     
     public func capturePayment(
         bearerToken: String,
@@ -121,36 +121,34 @@ extension ForageSDK: ForageSDKService {
         foragePinTextEdit: ForagePINTextField,
         completion: @escaping (Result<PaymentModel, Error>) -> Void) {
             service?.getXKey(bearerToken: bearerToken, merchantAccount: merchantAccount) { result in
-            switch result {
-            case .success(let model):
-                self.service?.getPayment(bearerToken: bearerToken, merchantAccount: merchantAccount, paymentRef: paymentReference) { result in
-                    switch result {
-                    case .success(let payment):
-                        self.service?.getPaymentMethod(bearerToken: bearerToken, merchantAccount: merchantAccount, paymentMethodRef: payment.paymentMethodRef) { result in
-                            switch result {
-                            case .success(let paymentMethod):
-                                let request = ForageRequestModel(
-                                    authorization: bearerToken,
-                                    paymentMethodReference: "",
-                                    paymentReference: paymentReference,
-                                    cardNumberToken: paymentMethod.card.token,
-                                    merchantID: merchantAccount,
-                                    xKey: model.alias
-                                )
-                                
-                                self.service?.capturePayment(pinCollector: foragePinTextEdit.collector, request: request, completion: completion)
-                                foragePinTextEdit.clearText()
-                            case .failure(let error):
-                                completion(.failure(error))
+                switch result {
+                case .success(let model):
+                    self.service?.getPayment(bearerToken: bearerToken, merchantAccount: merchantAccount, paymentRef: paymentReference) { result in
+                        switch result {
+                        case .success(let payment):
+                            self.service?.getPaymentMethod(bearerToken: bearerToken, merchantAccount: merchantAccount, paymentMethodRef: payment.paymentMethodRef) { result in
+                                switch result {
+                                case .success(let paymentMethod):
+                                    let request = ForageRequestModel(
+                                        authorization: bearerToken,
+                                        paymentMethodReference: "",
+                                        paymentReference: paymentReference,
+                                        cardNumberToken: paymentMethod.card.token,
+                                        merchantID: merchantAccount,
+                                        xKey: model.alias
+                                    )
+                                    self.service?.capturePayment(pinCollector: foragePinTextEdit.collector!, request: request, completion: completion)
+                                case .failure(let error):
+                                    completion(.failure(error))
+                                }
                             }
+                        case .failure(let error):
+                            completion(.failure(error))
                         }
-                    case .failure(let error):
-                        completion(.failure(error))
                     }
+                case .failure(let error):
+                    completion(.failure(error))
                 }
-            case .failure(let error):
-                completion(.failure(error))
             }
         }
-    }
 }
