@@ -60,7 +60,7 @@ extension ForageAPI: ServiceProtocol {
                 "authorization": "Bearer \(model.authorization)",
                 "content-type": "application/json",
                 "accept": "application/json",
-                "API-VERSION": "2023-03-31"
+                "API-VERSION": "2023-05-15"
             ]
             
             return .requestParametersAndHeaders(
@@ -87,7 +87,7 @@ extension ForageAPI: ServiceProtocol {
                 "Merchant-Account": merchantID,
                 "authorization": "Bearer \(bearerToken)",
                 "accept": "application/json",
-                "API-VERSION": "2023-02-01"
+                "API-VERSION": "2023-05-15"
             ]
             
             return .requestParametersAndHeaders(
@@ -100,7 +100,7 @@ extension ForageAPI: ServiceProtocol {
             let httpHeaders: HTTPHeaders = [
                 "Merchant-Account": request.merchantAccount,
                 "authorization": "Bearer \(request.bearerToken)",
-                "API-VERSION": "2023-03-31"
+                "API-VERSION": "2023-05-15"
             ]
             
             return .requestParametersAndHeaders(
@@ -113,7 +113,7 @@ extension ForageAPI: ServiceProtocol {
             let httpHeaders: HTTPHeaders = [
                 "Merchant-Account": request.merchantAccount,
                 "authorization": "Bearer \(request.bearerToken)",
-                "API-VERSION": "2023-03-31"
+                "API-VERSION": "2023-05-15"
             ]
             
             return .requestParametersAndHeaders(

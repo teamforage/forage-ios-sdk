@@ -21,7 +21,6 @@ public protocol PINVaultTextField: UIView {
     var borderColor: UIColor? { get set }
     var padding: UIEdgeInsets { get set }
     var autocorrectionType: UITextAutocorrectionType { get set }
-    func configure(_ collector: VGSCollect, rules: VGSValidationRuleSet)
     var delegate: PINVaultTextFieldDelegate? { get set }
     func isValid() -> Bool
     func setTranslatesAutoresizingMaskIntoConstraints(_ flag: Bool)
@@ -30,7 +29,7 @@ public protocol PINVaultTextField: UIView {
     func setPlaceholderText(_ text: String)
 }
 
-class VGSTextFieldWrapper: UIView, PINVaultTextField{
+class VGSTextFieldWrapper: UIView, PINVaultTextField, VGSTextFieldDelegate{
     var collector: VaultCollector
     
     weak var delegate: PINVaultTextFieldDelegate?
@@ -49,35 +48,44 @@ class VGSTextFieldWrapper: UIView, PINVaultTextField{
         commonInit()
     }
     
-    override func didChangeValue(forKey key: String) {
-            if key == "text" {
-                delegate?.textFieldDidChange(self)
-            }
-        }
+    func vgsTextFieldDidChange(_ textField: VGSTextField) {
+            delegate?.textFieldDidChange(self)
+    }
     
     required init?(coder aDecoder: NSCoder) {
         textField = VGSTextField()
         collector = CollectorFactory.createVGS(environment: ForageSDK.shared.environment)
         super.init(coder: aDecoder)
-        
+            
         commonInit()
     }
     
     private func commonInit() {
         addSubview(textField)
-    }
-    
-    func isValid() -> Bool {
-        return textField.state.inputLength == 4
-    }
-    
-    func configure(_ collector: VGSCollectSDK.VGSCollect, rules: VGSCollectSDK.VGSValidationRuleSet) {
-        let configuration = VGSConfiguration(collector: collector, fieldName: "pin")
+        var rules = VGSValidationRuleSet()
+        rules.add(rule: VGSValidationRulePattern(pattern: "^[0-9]+$", error: VGSValidationErrorType.pattern.rawValue))
+        let configuration = VGSConfiguration(collector: (collector as! VGSCollectWrapper).vgsCollect, fieldName: "pin")
         configuration.type = .none
         configuration.keyboardType = .numberPad
         configuration.maxInputLength = 4
         configuration.validationRules = rules
         textField.configuration = configuration
+        textField.translatesAutoresizingMaskIntoConstraints = false
+
+        textField.anchor(
+            top: self.topAnchor,
+            leading: self.leadingAnchor,
+            bottom: self.bottomAnchor,
+            trailing: self.trailingAnchor,
+            centerXAnchor: nil,
+            padding: UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        )
+        
+        textField.delegate = self
+    }
+    
+    func isValid() -> Bool {
+        return textField.state.inputLength == 4
     }
     
     func setPlaceholderText(_ text: String) {
@@ -162,21 +170,18 @@ class VGSTextFieldWrapper: UIView, PINVaultTextField{
     
 }
 
-class BasisTheoryTextFieldWrapper: UIView, PINVaultTextField{
+class BasisTheoryTextFieldWrapper: UIView, UITextFieldDelegate, PINVaultTextField{
     var collector: VaultCollector
     
     weak var delegate: PINVaultTextFieldDelegate?
     
     func isValid() -> Bool {
-        return textField.text?.count == 4
+        return textField.metadata.valid
     }
     
-    override func didChangeValue(forKey key: String) {
-            if key == "text" {
-                delegate?.textFieldDidChange(self)
-            }
-        }
-    
+    @objc func btTextFieldDidChange(_ textField: UITextField) {
+            delegate?.textFieldDidChange(self)
+    }
     
     var placeholder: String?
     
@@ -190,7 +195,8 @@ class BasisTheoryTextFieldWrapper: UIView, PINVaultTextField{
     
     override init(frame: CGRect) {
         textField = TextElementUITextField()
-        collector = CollectorFactory.createBasisTheory(environment: ForageSDK.shared.environment)
+        collector = CollectorFactory.createBasisTheory(environment: ForageSDK.shared.environment, textElement: textField)
+        
         super.init(frame: frame)
         
         commonInit()
@@ -198,7 +204,7 @@ class BasisTheoryTextFieldWrapper: UIView, PINVaultTextField{
     
     required init?(coder aDecoder: NSCoder) {
         textField = TextElementUITextField()
-        collector = CollectorFactory.createBasisTheory(environment: ForageSDK.shared.environment)
+        collector = CollectorFactory.createBasisTheory(environment: ForageSDK.shared.environment, textElement: textField)
         super.init(coder: aDecoder)
         
         commonInit()
@@ -206,12 +212,23 @@ class BasisTheoryTextFieldWrapper: UIView, PINVaultTextField{
     
     private func commonInit() {
         addSubview(textField)
-    }
-    
-    func configure(_ collector: VGSCollectSDK.VGSCollect, rules: VGSCollectSDK.VGSValidationRuleSet) {
+        textField.translatesAutoresizingMaskIntoConstraints = false
         
+        let regexDigit = try! NSRegularExpression(pattern: "\\d")
+        
+        let pinMask =   [
+            regexDigit,
+            regexDigit,
+            regexDigit,
+            regexDigit
+        ] as [Any]
+        
+        let phoneNumberRegex = try! NSRegularExpression(pattern: "^\\d{4}$")
+        
+        try! textField.setConfig(options: TextElementOptions(mask: pinMask, validation: phoneNumberRegex))
+        
+        textField.addTarget(self, action: #selector(btTextFieldDidChange(_:)), for: .editingChanged)
     }
-    
     
     func setPlaceholderText(_ text: String) {
         textField.placeholder = text
@@ -242,7 +259,7 @@ class BasisTheoryTextFieldWrapper: UIView, PINVaultTextField{
     
     var padding = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0) {
             didSet { setMainPaddings() }
-        }
+    }
     
     var borderColor: UIColor? {
         get {

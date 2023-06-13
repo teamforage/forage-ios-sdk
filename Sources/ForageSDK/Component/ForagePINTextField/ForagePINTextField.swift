@@ -20,9 +20,7 @@ public class ForagePINTextField: UIView, Identifiable {
     public var pinType: PinType = .balance
     
     internal var collector: VaultCollector?
-    
-//    internal var basisTheoryCollector: BasisTheoryConfig = Collector.CreateBasisTheory()
-//
+
     /// Placeholder for the text field
     @IBInspectable public var placeholder: String? {
         get { return textField.placeholder }
@@ -100,7 +98,7 @@ public class ForagePINTextField: UIView, Identifiable {
     
     private lazy var textField: PINVaultTextField = {
         // Temporary forcing of vault type
-        var vaultType = VaultType.vgsVaultType
+        var vaultType = VaultType.btVaultType
         
         var tf: PINVaultTextField?
         
@@ -161,10 +159,10 @@ public class ForagePINTextField: UIView, Identifiable {
     
     private func commonInit() {
         addSubview(root)
-        
+            
         root.addSubview(container)
         
-        textFieldContainer.addSubview(textField)
+        textFieldContainer.addSubview(textField as UIView)
         imageViewContainer.addSubview(imageView)
         container.addArrangedSubview(textFieldContainer)
         container.addArrangedSubview(imageViewContainer)
@@ -220,7 +218,7 @@ public class ForagePINTextField: UIView, Identifiable {
 }
 
 extension ForagePINTextField: PINVaultTextFieldDelegate {
-    /// Check active vgs textfield's state when editing the field
+    /// Check active  textfield's state when editing the field
     public func textFieldDidChange(_ textField: PINVaultTextField) {
            let isValid = textField.isValid()
            delegate?.pinStatus(self, isValid: isValid, pinType: pinType)

@@ -7,6 +7,7 @@
 
 import Foundation
 import VGSCollectSDK
+import BasisTheoryElements
 
 public protocol VaultCollector {
     func setCustomHeaders(headers: [String: String])
@@ -30,7 +31,7 @@ struct BasisTheoryConfig {
 // Wrapper class for VGSCollect
 class VGSCollectWrapper: VaultCollector {
     
-    private let vgsCollect: VGSCollect
+    public let vgsCollect: VGSCollect
     
     init(config: VGSCollectConfig) {
         self.vgsCollect = VGSCollect(id: config.id, environment: config.environment)
@@ -48,114 +49,36 @@ class VGSCollectWrapper: VaultCollector {
 // Wrapper class for BasisTheory
 class BasisTheoryWrapper: VaultCollector {
     var customHeaders: [String: String] = [:]
-        
-        func setCustomHeaders(headers: [String: String]) {
-            self.customHeaders = headers
-        }
-    
-    func sendData(path: String, extraData: [String : Any], completion: @escaping (VGSCollectSDK.VGSResponse) -> Void) {
-        return
-    }
-    
+    let textElement: TextElementUITextField
     
     private let basisTheoryConfig: BasisTheoryConfig
     
-    init(config: BasisTheoryConfig) {
-        self.basisTheoryConfig = config
+        
+    func setCustomHeaders(headers: [String: String]) {
+        self.customHeaders = headers
     }
+    
+    init(textElement: TextElementUITextField, basisTheoryconfig: BasisTheoryConfig) {
+        self.textElement = textElement
+        self.customHeaders = [:]
+        self.basisTheoryConfig = basisTheoryconfig
+    }
+    
+    func sendData(path: String, extraData: [String : Any], completion: @escaping (VGSCollectSDK.VGSResponse) -> Void) {
+        var body: [String: Any] = ["pin": textElement]
+            for (key, value) in extraData {
+                body[key] = value
+            }
+        let proxyHttpRequest = ProxyHttpRequest(method: .post, path: path, body: body, headers: self.customHeaders)
+        
+        return BasisTheoryElements.proxy(
+            apiKey: basisTheoryConfig.publicKey,
+            proxyKey: basisTheoryConfig.proxyKey,
 
+            proxyHttpRequest: proxyHttpRequest
+        ) { response, data, error in print(data, response, error) }
+    }
 }
-
-
-
-//
-//internal class Collector {
-//    /**
-//     VGS VaultId
-//     */
-//    private enum VaultId: String {
-//        case sandbox = "tntagcot4b1"
-//        case cert = "tntpnht7psv"
-//        case prod = "tntbcrncmgi"
-//        case staging = "tnteykuh975"
-//        case dev = "tntlqkidhc6"
-//    }
-//
-//    public static func CreateVGS() -> VGSCollect {
-//        return VGSCollect(id: vaultID(ForageSDK.shared.environment).rawValue, environment: environmentVGS(ForageSDK.shared.environment))
-//    }
-//
-//    private static func vaultID(_ environment: EnvironmentTarget) -> VaultId {
-//        switch environment {
-//        case .sandbox: return .sandbox
-//        case .cert: return .cert
-//        case .prod: return .prod
-//        case .staging: return .staging
-//        case .dev: return .dev
-//        }
-//    }
-//
-//    private static func environmentVGS(_ environment: EnvironmentTarget) -> VGSCollectSDK.Environment {
-//        switch environment {
-//        case .cert, .sandbox, .staging, .dev: return .sandbox
-//        case .prod: return .live
-//        }
-//    }
-//
-//    /**
-//     BT public Keys
-//     */
-//    private enum PublicKey: String {
-//        case sandbox = "tntagcot4b1"
-//        case cert = "tntpnht7psv"
-//        case prod = "tntbcrncmgi"
-//        case staging = "tnteykuh975"
-//        case dev = "tntlqkidhc6"
-//    }
-//
-//    private static func publicKey(_ environment: EnvironmentTarget) -> PublicKey {
-//        switch environment {
-//        case .sandbox: return .sandbox
-//        case .cert: return .cert
-//        case .prod: return .prod
-//        case .staging: return .staging
-//        case .dev: return .dev
-//        }
-//    }
-//
-//    private static func proxyKey(_ environment: EnvironmentTarget) -> ProxyKey {
-//            switch environment {
-//            case .sandbox: return .sandbox
-//            case .cert: return .cert
-//            case .prod: return .prod
-//            case .staging: return .staging
-//            case .dev: return .dev
-//            }
-//        }
-//
-//    /**
-//         BT proxy Keys
-//         */
-//        private enum ProxyKey: String {
-//            case sandbox = "sandbox-proxy-key"
-//            case cert = "cert-proxy-key"
-//            case prod = "prod-proxy-key"
-//            case staging = "staging-proxy-key"
-//            case dev = "dev-proxy-key"
-//        }
-////
-////    public static func CreateBasisTheory() -> {
-////        return BasisTheoryConfig(publicKey: publicKey(ForageSDK.shared.environment).rawValue,
-////                                         proxyKey: proxyKey(ForageSDK.shared.environment).rawValue)
-////    }
-//
-//
-//}
-//
-//struct BasisTheoryConfig {
-//    let publicKey: String
-//    let proxyKey: String
-//}
 
 class CollectorFactory {
         /**
@@ -194,7 +117,7 @@ class CollectorFactory {
          BT public Keys
          */
         private enum PublicKey: String {
-            case sandbox = "tntagcot4b1"
+            case sandbox = "R1CNiogSdhnHeNq6ZFWrG1"
             case cert = "tntpnht7psv"
             case prod = "tntbcrncmgi"
             case staging = "tnteykuh975"
@@ -225,7 +148,7 @@ class CollectorFactory {
          BT proxy Keys
      */
     private enum ProxyKey: String {
-        case sandbox = "sandbox-proxy-key"
+        case sandbox = "key_DQ5NfUAgiqzwX1pxqcrSzK"
         case cert = "cert-proxy-key"
         case prod = "prod-proxy-key"
         case staging = "staging-proxy-key"
@@ -239,11 +162,11 @@ class CollectorFactory {
         return VGSCollectWrapper(config: config)
     }
 
-    static func createBasisTheory(environment: EnvironmentTarget) -> BasisTheoryWrapper {
+    static func createBasisTheory(environment: EnvironmentTarget, textElement: TextElementUITextField) -> BasisTheoryWrapper {
         let publicKey = proxyKey(environment).rawValue
         let proxyKey = proxyKey(environment).rawValue
         let config = BasisTheoryConfig(publicKey: publicKey, proxyKey: proxyKey)
-        return BasisTheoryWrapper(config: config)
+        return BasisTheoryWrapper(textElement: textElement, basisTheoryconfig: config)
     }
 
 }
