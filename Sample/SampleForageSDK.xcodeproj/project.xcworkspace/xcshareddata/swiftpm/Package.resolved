@@ -2,6 +2,42 @@
   "object": {
     "pins": [
       {
+        "package": "AnyCodable",
+        "repositoryURL": "https://github.com/Flight-School/AnyCodable",
+        "state": {
+          "branch": null,
+          "revision": "862808b2070cd908cb04f9aafe7de83d35f81b05",
+          "version": "0.6.7"
+        }
+      },
+      {
+        "package": "BasisTheoryElements",
+        "repositoryURL": "https://github.com/Basis-Theory/basistheory-ios",
+        "state": {
+          "branch": null,
+          "revision": "63bb3b863428aa0d2a41a1a8965cb514ad5d944e",
+          "version": "2.1.0"
+        }
+      },
+      {
+        "package": "BasisTheory",
+        "repositoryURL": "https://github.com/Basis-Theory/basistheory-swift",
+        "state": {
+          "branch": null,
+          "revision": "bf18937db09350893f02fd853b50ffd873dd4559",
+          "version": "0.6.1"
+        }
+      },
+      {
+        "package": "BlinkCard",
+        "repositoryURL": "https://github.com/blinkcard/blinkcard-swift-package",
+        "state": {
+          "branch": null,
+          "revision": "e74689f8e0df9c4fbebf46b87c4ab716325516a8",
+          "version": "2.7.0"
+        }
+      },
+      {
         "package": "CardIOSDK",
         "repositoryURL": "https://github.com/verygoodsecurity/CardIOSDK-iOS.git",
         "state": {
@@ -11,12 +47,12 @@
         }
       },
       {
-        "package": "CardScan",
-        "repositoryURL": "https://github.com/getbouncer/cardscan-ios.git",
+        "package": "Datadog",
+        "repositoryURL": "https://github.com/Datadog/dd-sdk-ios.git",
         "state": {
           "branch": null,
-          "revision": "84e7d1e7805675274edd85bc786b2dd1e4d864e0",
-          "version": "2.0.9"
+          "revision": "6418c623b0a91b9ac7a9d91c1c61ccc0aa2bf668",
+          "version": "1.16.0"
         }
       },
       {
@@ -24,8 +60,17 @@
         "repositoryURL": "https://github.com/launchdarkly/ios-client-sdk.git",
         "state": {
           "branch": null,
-          "revision": "4274708ead155753818ba03f7e2dd3bba677dd35",
-          "version": "8.0.1"
+          "revision": "cbf4b7311ff12cc109d5e5cebb81554802262d91",
+          "version": "8.1.0"
+        }
+      },
+      {
+        "package": "PLCrashReporter",
+        "repositoryURL": "https://github.com/microsoft/plcrashreporter.git",
+        "state": {
+          "branch": null,
+          "revision": "1aed8f7dc79ce8e674c61e430ef51ca3db18cea9",
+          "version": "1.11.1"
         }
       },
       {
@@ -33,8 +78,8 @@
         "repositoryURL": "https://github.com/LaunchDarkly/swift-eventsource.git",
         "state": {
           "branch": null,
-          "revision": "aa03131eb30bbc35513153609ed65209853603a7",
-          "version": "3.0.0"
+          "revision": "f50e92d27a33e47acb0f9d61adfcd526c63fd7b4",
+          "version": "3.1.0"
         }
       },
       {
@@ -42,8 +87,8 @@
         "repositoryURL": "https://github.com/verygoodsecurity/vgs-collect-ios.git",
         "state": {
           "branch": null,
-          "revision": "33a6c0de3c62778ba4f92629fb737e8b3013b60f",
-          "version": "1.11.2"
+          "revision": "5206e5bc012e18850fc23d111b557f01f8021cb7",
+          "version": "1.13.0"
         }
       }
     ]
