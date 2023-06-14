@@ -98,7 +98,7 @@ public class ForagePINTextField: UIView, Identifiable {
     
     private lazy var textField: PINVaultTextField = {
         // Temporary forcing of vault type
-        var vaultType = VaultType.btVaultType
+        var vaultType = VaultType.vgsVaultType
         
         var tf: PINVaultTextField?
         

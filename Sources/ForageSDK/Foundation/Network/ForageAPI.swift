@@ -87,7 +87,7 @@ extension ForageAPI: ServiceProtocol {
                 "Merchant-Account": merchantID,
                 "authorization": "Bearer \(bearerToken)",
                 "accept": "application/json",
-                "API-VERSION": "2023-05-15"
+                "API-VERSION": "2023-02-01"
             ]
             
             return .requestParametersAndHeaders(

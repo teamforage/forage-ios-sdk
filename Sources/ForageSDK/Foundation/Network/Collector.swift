@@ -14,7 +14,7 @@ public protocol VaultCollector {
     func sendData(
         path: String,
         extraData: [String: Any],
-        completion: @escaping (VGSResponse) -> Void)
+        completion: @escaping (VaultResponse) -> Void)
     
 }
 
@@ -41,10 +41,33 @@ class VGSCollectWrapper: VaultCollector {
             vgsCollect.customHeaders = headers
         }
     
-    func sendData(path: String, extraData: [String: Any], completion: @escaping (VGSResponse) -> Void) {
-        vgsCollect.sendData(path: path, extraData: extraData, completion: completion)
+    func sendData(path: String, extraData: [String: Any], completion: @escaping (VaultResponse) -> Void) {
+        vgsCollect.sendData(path: path, extraData: extraData) { (response) in
+            switch response {
+            case .success(let code, let data, let urlResponse):
+                completion(VaultResponse(statusCode: code, urlResponse: urlResponse, data: data, error: nil))
+            case .failure(let code, let data, let urlResponse, let error):
+                completion(VaultResponse(statusCode: code, urlResponse: urlResponse, data: data, error: error))
+            }
+        }
     }
 }
+
+func convertJsonToDictionary(_ json: JSON) -> [String: Any] {
+    var result: [String: Any] = [:]
+    
+    if case .dictionaryValue(let dictionary) = json {
+        for (key, value) in dictionary {
+            if case .rawValue(let rawValue) = value {
+                result[key] = rawValue
+            } else {
+                result[key] = convertJsonToDictionary(value)
+            }
+        }
+    }
+    return result
+}
+
 
 // Wrapper class for BasisTheory
 class BasisTheoryWrapper: VaultCollector {
@@ -64,19 +87,30 @@ class BasisTheoryWrapper: VaultCollector {
         self.basisTheoryConfig = basisTheoryconfig
     }
     
-    func sendData(path: String, extraData: [String : Any], completion: @escaping (VGSCollectSDK.VGSResponse) -> Void) {
+    func sendData(path: String, extraData: [String : Any], completion: @escaping (VaultResponse) -> Void) {
         var body: [String: Any] = ["pin": textElement]
-            for (key, value) in extraData {
-                body[key] = value
-            }
+        for (key, value) in extraData {
+            body[key] = value
+        }
         let proxyHttpRequest = ProxyHttpRequest(method: .post, path: path, body: body, headers: self.customHeaders)
         
-        return BasisTheoryElements.proxy(
-            apiKey: basisTheoryConfig.publicKey,
-            proxyKey: basisTheoryConfig.proxyKey,
-
+        BasisTheoryElements.proxy(
+            apiKey: basisTheoryConfig.publicKey, proxyKey: basisTheoryConfig.proxyKey,
             proxyHttpRequest: proxyHttpRequest
-        ) { response, data, error in print(data, response, error) }
+        ) { response, data, error in
+            var rawData: Data? = nil
+            if let data = data {
+                let dataDictionary = convertJsonToDictionary(data)
+                rawData = try? JSONSerialization.data(withJSONObject: dataDictionary, options: [])
+            }
+            let vaultResponse = VaultResponse(
+                statusCode: (response as? HTTPURLResponse)?.statusCode,
+                urlResponse: response,
+                data: rawData,
+                error: error
+            )
+            completion(vaultResponse)
+        }
     }
 }
 
@@ -117,7 +151,7 @@ class CollectorFactory {
          BT public Keys
          */
         private enum PublicKey: String {
-            case sandbox = "R1CNiogSdhnHeNq6ZFWrG1"
+            case sandbox = "key_DQ5NfUAgiqzwX1pxqcrSzK"
             case cert = "tntpnht7psv"
             case prod = "tntbcrncmgi"
             case staging = "tnteykuh975"
@@ -148,7 +182,7 @@ class CollectorFactory {
          BT proxy Keys
      */
     private enum ProxyKey: String {
-        case sandbox = "key_DQ5NfUAgiqzwX1pxqcrSzK"
+        case sandbox = "R1CNiogSdhnHeNq6ZFWrG1"
         case cert = "cert-proxy-key"
         case prod = "prod-proxy-key"
         case staging = "staging-proxy-key"
@@ -163,7 +197,7 @@ class CollectorFactory {
     }
 
     static func createBasisTheory(environment: EnvironmentTarget, textElement: TextElementUITextField) -> BasisTheoryWrapper {
-        let publicKey = proxyKey(environment).rawValue
+        let publicKey = publicKey(environment).rawValue
         let proxyKey = proxyKey(environment).rawValue
         let config = BasisTheoryConfig(publicKey: publicKey, proxyKey: proxyKey)
         return BasisTheoryWrapper(textElement: textElement, basisTheoryconfig: config)

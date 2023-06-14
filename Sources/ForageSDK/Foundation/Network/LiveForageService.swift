@@ -171,12 +171,13 @@ extension LiveForageService: Polling {
     ///  - response: The *VGSResponse* which contains the result from VGS SDK.
     ///  - request: Model element with data to perform request.
     ///  - completion: Which will return the result.
-    internal func polling(response: VGSResponse, request: ForageRequestModel, completion: @escaping (Result<Data?, Error>) -> Void) {
+    internal func polling(response: VaultResponse, request: ForageRequestModel, completion: @escaping (Result<Data?, Error>) -> Void) {
         retryCount = 0
         
-        switch response {
-        case .success(_, let data, let response):
-            provider.processVGSData(model: MessageResponseModel.self, code: nil, data: data, response: response) { [weak self] messageResponse in
+        if let error = response.error {
+            completion(.failure(error))
+        } else if let data = response.data, let urlResponse = response.urlResponse {
+            provider.processVGSData(model: MessageResponseModel.self, code: response.statusCode, data: data, response: urlResponse) { [weak self] messageResponse in
                 switch messageResponse {
                 case .success(let message):
                     self?.pollingMessage(
@@ -193,28 +194,11 @@ extension LiveForageService: Polling {
                     completion(.failure(error))
                 }
             }
-
-        case .failure(let code, let data, let response, let error):
-            if let data = data {
-                self.provider.processVGSData(
-                    model: ForageServiceError.self,
-                    code: code,
-                    data: data,
-                    response: response) { errorResult in
-                    switch errorResult {
-                    case .success(let errorParsed):
-                        return completion(.failure(errorParsed))
-                    case .failure(let error):
-                        return completion(.failure(error))
-                    }
-                }
-            } else if let error = error {
-                return completion(.failure(error))
-            } else {
-                return completion(.failure(ServiceError.emptyError))
-            }
+        } else {
+            completion(.failure(ServiceError.emptyError))
         }
     }
+
     
     /// Polls message to check payment status
     ///

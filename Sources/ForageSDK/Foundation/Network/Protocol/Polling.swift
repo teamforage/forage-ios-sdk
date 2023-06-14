@@ -19,7 +19,7 @@ internal protocol Polling: AnyObject {
     ///  - request: Model composed with info to identify the polling.
     ///  - completion: Which will return a `Result` to be handle.
     func polling(
-        response: VGSResponse,
+        response: VaultResponse,
         request: ForageRequestModel,
         completion: @escaping (Result<Data?, Error>) -> Void)
     
