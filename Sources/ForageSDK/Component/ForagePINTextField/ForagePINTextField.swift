@@ -20,7 +20,7 @@ public class ForagePINTextField: UIView, Identifiable {
     public var pinType: PinType = .balance
     
     internal var collector: VaultCollector?
-
+    
     /// Placeholder for the text field
     @IBInspectable public var placeholder: String? {
         get { return textField.placeholder }
@@ -97,8 +97,7 @@ public class ForagePINTextField: UIView, Identifiable {
     }()
     
     private lazy var textField: PINVaultTextField = {
-        // Temporary forcing of vault type
-        var vaultType = VaultType.vgsVaultType
+        let vaultType = LDManager.shared.getVaultType()
         
         var tf: PINVaultTextField?
         
@@ -107,8 +106,7 @@ public class ForagePINTextField: UIView, Identifiable {
         } else if (vaultType == VaultType.btVaultType) {
             tf = BasisTheoryTextFieldWrapper()
         } else {
-            // Throw error
-            tf = VGSTextFieldWrapper()
+            fatalError("Unexpected vaultType: \(vaultType)")
         }
         
         tf?.translatesAutoresizingMaskIntoConstraints = false
@@ -124,7 +122,7 @@ public class ForagePINTextField: UIView, Identifiable {
         
         return tf ?? VGSTextFieldWrapper()
     }()
-
+    
     
     private lazy var imageView: UIImageView = {
         let imgView = UIImageView()
@@ -159,7 +157,7 @@ public class ForagePINTextField: UIView, Identifiable {
     
     private func commonInit() {
         addSubview(root)
-            
+        
         root.addSubview(container)
         
         textFieldContainer.addSubview(textField as UIView)
@@ -220,9 +218,9 @@ public class ForagePINTextField: UIView, Identifiable {
 extension ForagePINTextField: PINVaultTextFieldDelegate {
     /// Check active  textfield's state when editing the field
     public func textFieldDidChange(_ textField: PINVaultTextField) {
-           let isValid = textField.isValid()
-           delegate?.pinStatus(self, isValid: isValid, pinType: pinType)
-       }
+        let isValid = textField.isValid()
+        delegate?.pinStatus(self, isValid: isValid, pinType: pinType)
+    }
 }
 
 // MARK: - UIResponder methods

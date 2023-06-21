@@ -38,8 +38,8 @@ class VGSCollectWrapper: VaultCollector {
     }
     
     func setCustomHeaders(headers: [String: String]) {
-            vgsCollect.customHeaders = headers
-        }
+        vgsCollect.customHeaders = headers
+    }
     
     func sendData(path: String, extraData: [String: Any], completion: @escaping (VaultResponse) -> Void) {
         vgsCollect.sendData(path: path, extraData: extraData) { (response) in
@@ -76,7 +76,7 @@ class BasisTheoryWrapper: VaultCollector {
     
     private let basisTheoryConfig: BasisTheoryConfig
     
-        
+    
     func setCustomHeaders(headers: [String: String]) {
         self.customHeaders = headers
     }
@@ -115,71 +115,71 @@ class BasisTheoryWrapper: VaultCollector {
 }
 
 class CollectorFactory {
-        /**
-         VGS VaultId
-         */
-        private enum VaultId: String {
-            case sandbox = "tntagcot4b1"
-            case cert = "tntpnht7psv"
-            case prod = "tntbcrncmgi"
-            case staging = "tnteykuh975"
-            case dev = "tntlqkidhc6"
-        }
+    /**
+     VGS VaultId
+     */
+    private enum VaultId: String {
+        case sandbox = "tntagcot4b1"
+        case cert = "tntpnht7psv"
+        case prod = "tntbcrncmgi"
+        case staging = "tnteykuh975"
+        case dev = "tntlqkidhc6"
+    }
     
-        public static func CreateVGS() -> VGSCollect {
-            return VGSCollect(id: vaultID(ForageSDK.shared.environment).rawValue, environment: environmentVGS(ForageSDK.shared.environment))
-        }
+    public static func CreateVGS() -> VGSCollect {
+        return VGSCollect(id: vaultID(ForageSDK.shared.environment).rawValue, environment: environmentVGS(ForageSDK.shared.environment))
+    }
     
-        private static func vaultID(_ environment: EnvironmentTarget) -> VaultId {
-            switch environment {
-            case .sandbox: return .sandbox
-            case .cert: return .cert
-            case .prod: return .prod
-            case .staging: return .staging
-            case .dev: return .dev
-            }
+    private static func vaultID(_ environment: EnvironmentTarget) -> VaultId {
+        switch environment {
+        case .sandbox: return .sandbox
+        case .cert: return .cert
+        case .prod: return .prod
+        case .staging: return .staging
+        case .dev: return .dev
         }
+    }
     
-        private static func environmentVGS(_ environment: EnvironmentTarget) -> VGSCollectSDK.Environment {
-            switch environment {
-            case .cert, .sandbox, .staging, .dev: return .sandbox
-            case .prod: return .live
-            }
+    private static func environmentVGS(_ environment: EnvironmentTarget) -> VGSCollectSDK.Environment {
+        switch environment {
+        case .cert, .sandbox, .staging, .dev: return .sandbox
+        case .prod: return .live
         }
-    
-        /**
-         BT public Keys
-         */
-        private enum PublicKey: String {
-            case sandbox = "key_DQ5NfUAgiqzwX1pxqcrSzK"
-            case cert = "tntpnht7psv"
-            case prod = "tntbcrncmgi"
-            case staging = "tnteykuh975"
-            case dev = "tntlqkidhc6"
-        }
-    
-        private static func publicKey(_ environment: EnvironmentTarget) -> PublicKey {
-            switch environment {
-            case .sandbox: return .sandbox
-            case .cert: return .cert
-            case .prod: return .prod
-            case .staging: return .staging
-            case .dev: return .dev
-            }
-        }
-    
-        private static func proxyKey(_ environment: EnvironmentTarget) -> ProxyKey {
-                switch environment {
-                case .sandbox: return .sandbox
-                case .cert: return .cert
-                case .prod: return .prod
-                case .staging: return .staging
-                case .dev: return .dev
-                }
-            }
+    }
     
     /**
-         BT proxy Keys
+     BT public Keys
+     */
+    private enum PublicKey: String {
+        case sandbox = "key_DQ5NfUAgiqzwX1pxqcrSzK"
+        case cert = "tntpnht7psv"
+        case prod = "tntbcrncmgi"
+        case staging = "tnteykuh975"
+        case dev = "tntlqkidhc6"
+    }
+    
+    private static func publicKey(_ environment: EnvironmentTarget) -> PublicKey {
+        switch environment {
+        case .sandbox: return .sandbox
+        case .cert: return .cert
+        case .prod: return .prod
+        case .staging: return .staging
+        case .dev: return .dev
+        }
+    }
+    
+    private static func proxyKey(_ environment: EnvironmentTarget) -> ProxyKey {
+        switch environment {
+        case .sandbox: return .sandbox
+        case .cert: return .cert
+        case .prod: return .prod
+        case .staging: return .staging
+        case .dev: return .dev
+        }
+    }
+    
+    /**
+     BT proxy Keys
      */
     private enum ProxyKey: String {
         case sandbox = "R1CNiogSdhnHeNq6ZFWrG1"
@@ -188,19 +188,19 @@ class CollectorFactory {
         case staging = "staging-proxy-key"
         case dev = "dev-proxy-key"
     }
-
+    
     static func createVGS(environment: EnvironmentTarget) -> VGSCollectWrapper {
         let id = vaultID(environment).rawValue
         let environmentVGS = environmentVGS(environment)
         let config = VGSCollectConfig(id: id, environment: environmentVGS)
         return VGSCollectWrapper(config: config)
     }
-
+    
     static func createBasisTheory(environment: EnvironmentTarget, textElement: TextElementUITextField) -> BasisTheoryWrapper {
         let publicKey = publicKey(environment).rawValue
         let proxyKey = proxyKey(environment).rawValue
         let config = BasisTheoryConfig(publicKey: publicKey, proxyKey: proxyKey)
         return BasisTheoryWrapper(textElement: textElement, basisTheoryconfig: config)
     }
-
+    
 }

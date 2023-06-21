@@ -9,7 +9,7 @@ import Foundation
 import LaunchDarkly
 
 /**
-LD Public Keys
+ LD Public Keys
  */
 private enum LDMobileKey: String {
     case sandbox = "mob-22024b85-05b7-4e24-b290-a071310dfc3d"
@@ -20,7 +20,7 @@ private enum LDMobileKey: String {
 }
 
 /**
-Vault Types
+ Vault Types
  */
 public enum VaultType: String {
     case vgsVaultType = "VGS_VAULT_TYPE"
@@ -28,14 +28,14 @@ public enum VaultType: String {
 }
 
 /**
-Flag Types
-*/
+ Flag Types
+ */
 private enum FlagType: String {
     case vaultPrimaryTrafficPercentage = "vault-primary-traffic-percentage"
 }
 
 /**
-Contexts
+ Contexts
  */
 private enum Context: String {
     case anonymousUser = "anonymous-user"
@@ -57,7 +57,7 @@ public class LDManager {
             return internalVaultType
         }
     }
-
+    
     private init() {}
     
     internal func initialize(_ environment: EnvironmentTarget) {
@@ -78,9 +78,9 @@ public class LDManager {
         let vaultPercentage = ld.doubleVariation(forKey: FlagType.vaultPrimaryTrafficPercentage.rawValue, defaultValue: 100.0)
         let randomNum = Double.random(in: 0...100)
         if (randomNum < vaultPercentage) {
-            vaultType = VaultType.btVaultType
-        } else {
             vaultType = VaultType.vgsVaultType
+        } else {
+            vaultType = VaultType.btVaultType
         }
         
         return vaultType!
@@ -96,4 +96,3 @@ public class LDManager {
         }
     }
 }
-
