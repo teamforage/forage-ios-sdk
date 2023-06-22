@@ -87,8 +87,8 @@
         "repositoryURL": "https://github.com/verygoodsecurity/vgs-collect-ios.git",
         "state": {
           "branch": null,
-          "revision": "5206e5bc012e18850fc23d111b557f01f8021cb7",
-          "version": "1.13.0"
+          "revision": "a05fa24a4fd8d6b3d69bb99b59730c32a560ce5f",
+          "version": "1.12.0"
         }
       }
     ]

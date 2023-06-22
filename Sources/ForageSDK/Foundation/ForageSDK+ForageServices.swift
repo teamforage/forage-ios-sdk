@@ -100,7 +100,7 @@ extension ForageSDK: ForageSDKService {
                             paymentReference: "",
                             cardNumberToken: paymentMethod.card.token,
                             merchantID: merchantAccount,
-                            xKey: model.alias
+                            xKey: ["vgsXKey": model.alias, "btXKey": model.bt_alias]
                         )
                         self.service?.checkBalance(pinCollector: foragePinTextEdit.collector!, request: request, completion: completion)
                     case .failure(let error):
@@ -134,7 +134,7 @@ extension ForageSDK: ForageSDKService {
                                     paymentReference: paymentReference,
                                     cardNumberToken: paymentMethod.card.token,
                                     merchantID: merchantAccount,
-                                    xKey: model.alias
+                                    xKey: ["vgsXKey": model.alias, "btXKey": model.bt_alias]
                                 )
                                 
                                 self.service?.capturePayment(pinCollector: foragePinTextEdit.collector!, request: request, completion: completion)

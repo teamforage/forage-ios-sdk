@@ -190,7 +190,7 @@ final class ForageServiceTests: XCTestCase {
             paymentReference: "",
             cardNumberToken: "cardToken123",
             merchantID: "merchantID123",
-            xKey: "tok_sandbox_agCcwWZs8TMkkq89f8KHSx"
+            xKey: ["vgsXKey": "tok_sandbox_agCcwWZs8TMkkq89f8KHSx"]
         )
         
         service.checkBalance(pinCollector: vgs, request: forageRequestModel) { result in
@@ -218,7 +218,7 @@ final class ForageServiceTests: XCTestCase {
             paymentReference: "",
             cardNumberToken: "cardToken123",
             merchantID: "merchantID123",
-            xKey: "tok_sandbox_agCcwWZs8TMkkq89f8KHSx"
+            xKey: ["vgsXKey": "tok_sandbox_agCcwWZs8TMkkq89f8KHSx"]
         )
         
         service.checkBalance(pinCollector: vgs, request: forageRequestModel) { result in
@@ -244,7 +244,7 @@ final class ForageServiceTests: XCTestCase {
             paymentReference: "ref1234",
             cardNumberToken: "cardToken123",
             merchantID: "merchantID123",
-            xKey: "tok_sandbox_agCcwWZs8TMkkq89f8KHSx"
+            xKey: ["vgsXKey": "tok_sandbox_agCcwWZs8TMkkq89f8KHSx"]
         )
         
         service.capturePayment(pinCollector: vgs, request: forageRequestModel) { result in
@@ -276,7 +276,7 @@ final class ForageServiceTests: XCTestCase {
             paymentReference: "ref1234",
             cardNumberToken: "cardToken123",
             merchantID: "merchantID123",
-            xKey: "tok_sandbox_agCcwWZs8TMkkq89f8KHSx"
+            xKey: ["vgsXKey": "tok_sandbox_agCcwWZs8TMkkq89f8KHSx"]
         )
         
         service.checkBalance(pinCollector: vgs, request: forageRequestModel) { result in
