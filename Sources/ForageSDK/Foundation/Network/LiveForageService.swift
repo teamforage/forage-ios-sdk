@@ -59,10 +59,9 @@ internal class LiveForageService: ForageService {
         completion: @escaping (Result<BalanceModel, Error>) -> Void) -> Void
     {
         pinCollector.setCustomHeaders(headers: [
-            "X-KEY": request.xKey,
             "IDEMPOTENCY-KEY": UUID.init().uuidString,
             "Merchant-Account": request.merchantID
-        ])
+        ], xKey: request.xKey)
 
         let extraData = [
             "card_number_token": request.cardNumberToken
@@ -123,10 +122,9 @@ internal class LiveForageService: ForageService {
         completion: @escaping (Result<PaymentModel, Error>) -> Void)
     {
         pinCollector.setCustomHeaders(headers: [
-            "X-KEY": request.xKey,
             "IDEMPOTENCY-KEY": UUID.init().uuidString,
             "Merchant-Account": request.merchantID
-        ])
+        ], xKey: request.xKey)
 
         let extraData = [
             "card_number_token": request.cardNumberToken

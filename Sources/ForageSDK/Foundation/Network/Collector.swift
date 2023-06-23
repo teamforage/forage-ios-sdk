@@ -9,13 +9,17 @@ import Foundation
 import VGSCollectSDK
 import BasisTheoryElements
 
+let tokenDelimiter = ","
+let tokenKey = "card_number_token"
+
 public protocol VaultCollector {
-    func setCustomHeaders(headers: [String: String])
+    func setCustomHeaders(headers: [String: String], xKey: [String:String])
     func sendData(
         path: String,
         extraData: [String: Any],
         completion: @escaping (VaultResponse) -> Void)
-    
+    func getPaymentMethodToken(paymentMethodToken: String) throws -> String
+
 }
 
 struct VGSCollectConfig {
@@ -30,19 +34,26 @@ struct BasisTheoryConfig {
 
 // Wrapper class for VGSCollect
 class VGSCollectWrapper: VaultCollector {
-    
+
     public let vgsCollect: VGSCollect
-    
+
     init(config: VGSCollectConfig) {
         self.vgsCollect = VGSCollect(id: config.id, environment: config.environment)
     }
-    
-    func setCustomHeaders(headers: [String: String]) {
-        vgsCollect.customHeaders = headers
+
+    func setCustomHeaders(headers: [String: String], xKey: [String: String]) {
+        var mutableHeaders = headers
+        mutableHeaders["X-KEY"] = xKey["vgsXKey"]
+        vgsCollect.customHeaders = mutableHeaders
     }
-    
+
     func sendData(path: String, extraData: [String: Any], completion: @escaping (VaultResponse) -> Void) {
-        vgsCollect.sendData(path: path, extraData: extraData) { (response) in
+        var mutableExtraData = extraData
+        if let paymentMethodToken = extraData[tokenKey] as? String {
+            let token = getPaymentMethodToken(paymentMethodToken: paymentMethodToken)
+            mutableExtraData[tokenKey] = token
+        }
+        vgsCollect.sendData(path: path, extraData: mutableExtraData) { (response) in
             switch response {
             case .success(let code, let data, let urlResponse):
                 completion(VaultResponse(statusCode: code, urlResponse: urlResponse, data: data, error: nil))
@@ -51,11 +62,18 @@ class VGSCollectWrapper: VaultCollector {
             }
         }
     }
+
+    func getPaymentMethodToken(paymentMethodToken: String) -> String {
+        if paymentMethodToken.contains(tokenDelimiter) {
+            return paymentMethodToken.components(separatedBy: tokenDelimiter)[0]
+        }
+        return paymentMethodToken
+    }
 }
 
 func convertJsonToDictionary(_ json: JSON) -> [String: Any] {
     var result: [String: Any] = [:]
-    
+
     if case .dictionaryValue(let dictionary) = json {
         for (key, value) in dictionary {
             if case .rawValue(let rawValue) = value {
@@ -68,32 +86,54 @@ func convertJsonToDictionary(_ json: JSON) -> [String: Any] {
     return result
 }
 
-
 // Wrapper class for BasisTheory
 class BasisTheoryWrapper: VaultCollector {
+    func getPaymentMethodToken(paymentMethodToken: String) throws -> String {
+        if paymentMethodToken.contains(tokenDelimiter) {
+            return paymentMethodToken.components(separatedBy: tokenDelimiter)[1]
+        }
+        throw ServiceError.parseError
+    }
+
     var customHeaders: [String: String] = [:]
     let textElement: TextElementUITextField
-    
+
     private let basisTheoryConfig: BasisTheoryConfig
-    
-    
-    func setCustomHeaders(headers: [String: String]) {
+
+
+    func setCustomHeaders(headers: [String: String], xKey: [String: String]) {
         self.customHeaders = headers
+        self.customHeaders["X-KEY"] = xKey["btXKey"]
     }
-    
+
     init(textElement: TextElementUITextField, basisTheoryconfig: BasisTheoryConfig) {
         self.textElement = textElement
         self.customHeaders = [:]
         self.basisTheoryConfig = basisTheoryconfig
     }
-    
+
     func sendData(path: String, extraData: [String : Any], completion: @escaping (VaultResponse) -> Void) {
         var body: [String: Any] = ["pin": textElement]
         for (key, value) in extraData {
-            body[key] = value
+            if key == tokenKey, let paymentMethodToken = value as? String {
+                do {
+                    let token = try getPaymentMethodToken(paymentMethodToken: paymentMethodToken)
+                    body[key] = token
+                } catch {
+                    completion(VaultResponse(
+                        statusCode: nil,
+                        urlResponse: nil,
+                        data: nil,
+                        error: error
+                    ))
+                    return
+                }
+            } else {
+                body[key] = value
+            }
         }
         let proxyHttpRequest = ProxyHttpRequest(method: .post, path: path, body: body, headers: self.customHeaders)
-        
+
         BasisTheoryElements.proxy(
             apiKey: basisTheoryConfig.publicKey, proxyKey: basisTheoryConfig.proxyKey,
             proxyHttpRequest: proxyHttpRequest

@@ -36,16 +36,16 @@ internal struct MessageResponseModel: Codable {
     }
     
     init(from decoder: Decoder) throws {
-            let container = try decoder.container(keyedBy: CodingKeys.self)
-            contentId = try container.decode(String.self, forKey: .contentId)
-            messageType = try container.decode(String.self, forKey: .messageType)
-            status = try container.decode(String.self, forKey: .status)
-            failed = try container.decode(Bool.self, forKey: .failed)
-            
-            do {
-                errors = try container.decode([ForageSQSError].self, forKey: .errors)
-            } catch {
-                errors = []  // If the 'errors' field isn't an array, set it to an empty array
-            }
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        contentId = try container.decode(String.self, forKey: .contentId)
+        messageType = try container.decode(String.self, forKey: .messageType)
+        status = try container.decode(String.self, forKey: .status)
+        failed = try container.decode(Bool.self, forKey: .failed)
+        
+        do {
+            errors = try container.decode([ForageSQSError].self, forKey: .errors)
+        } catch {
+            errors = []  // If the 'errors' field isn't an array, set it to an empty array
         }
+    }
 }
