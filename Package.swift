@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "ForageSDK",
     platforms: [
-            .iOS(.v11),
+            .iOS(.v14),
         ],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
@@ -26,7 +26,8 @@ let package = Package(
             name: "LaunchDarkly",
             url: "https://github.com/launchdarkly/ios-client-sdk.git",
             from: "8.0.1"
-        )
+        ),
+        .package(name: "BasisTheoryElements", url: "https://github.com/Basis-Theory/basistheory-ios", from: "2.0.0"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -36,6 +37,7 @@ let package = Package(
             dependencies: [
                 "VGSCollectSDK",
                 "LaunchDarkly",
+                "BasisTheoryElements"
             ],
             path: "Sources", resources: [
                 .process("Resources/Media.xcassets")

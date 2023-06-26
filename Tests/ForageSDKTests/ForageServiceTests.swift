@@ -181,7 +181,7 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.data = forageMocks.getBalanceSuccess
         mockSession.response = forageMocks.mockSuccessResponse
-        let vgs = VGSCollect(id: "1234", environment: .sandbox)
+        let vgs = CollectorFactory.createVGS(environment: .sandbox)
         let service = LiveForageService(provider: Provider(mockSession))
         
         let forageRequestModel = ForageRequestModel(
@@ -190,7 +190,7 @@ final class ForageServiceTests: XCTestCase {
             paymentReference: "",
             cardNumberToken: "cardToken123",
             merchantID: "merchantID123",
-            xKey: "tok_sandbox_agCcwWZs8TMkkq89f8KHSx"
+            xKey: ["vgsXKey": "tok_sandbox_agCcwWZs8TMkkq89f8KHSx"]
         )
         
         service.checkBalance(pinCollector: vgs, request: forageRequestModel) { result in
@@ -209,7 +209,7 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.error = forageMocks.generalError
         mockSession.response = forageMocks.mockFailureResponse
-        let vgs = VGSCollect(id: "1234", environment: .sandbox)
+        let vgs = CollectorFactory.createVGS(environment: .sandbox)
         let service = LiveForageService(provider: Provider(mockSession))
         
         let forageRequestModel = ForageRequestModel(
@@ -218,7 +218,7 @@ final class ForageServiceTests: XCTestCase {
             paymentReference: "",
             cardNumberToken: "cardToken123",
             merchantID: "merchantID123",
-            xKey: "tok_sandbox_agCcwWZs8TMkkq89f8KHSx"
+            xKey: ["vgsXKey": "tok_sandbox_agCcwWZs8TMkkq89f8KHSx"]
         )
         
         service.checkBalance(pinCollector: vgs, request: forageRequestModel) { result in
@@ -235,7 +235,7 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.data = forageMocks.capturePaymentSuccess
         mockSession.response = forageMocks.mockSuccessResponse
-        let vgs = VGSCollect(id: "1234", environment: .sandbox)
+        let vgs = CollectorFactory.createVGS(environment: .sandbox)
         let service = LiveForageService(provider: Provider(mockSession))
         
         let forageRequestModel = ForageRequestModel(
@@ -244,7 +244,7 @@ final class ForageServiceTests: XCTestCase {
             paymentReference: "ref1234",
             cardNumberToken: "cardToken123",
             merchantID: "merchantID123",
-            xKey: "tok_sandbox_agCcwWZs8TMkkq89f8KHSx"
+            xKey: ["vgsXKey": "tok_sandbox_agCcwWZs8TMkkq89f8KHSx"]
         )
         
         service.capturePayment(pinCollector: vgs, request: forageRequestModel) { result in
@@ -267,7 +267,7 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.error = forageMocks.generalError
         mockSession.response = forageMocks.mockFailureResponse
-        let vgs = VGSCollect(id: "1234", environment: .sandbox)
+        let vgs = CollectorFactory.createVGS(environment: .sandbox)
         let service = LiveForageService(provider: Provider(mockSession))
         
         let forageRequestModel = ForageRequestModel(
@@ -276,7 +276,7 @@ final class ForageServiceTests: XCTestCase {
             paymentReference: "ref1234",
             cardNumberToken: "cardToken123",
             merchantID: "merchantID123",
-            xKey: "tok_sandbox_agCcwWZs8TMkkq89f8KHSx"
+            xKey: ["vgsXKey": "tok_sandbox_agCcwWZs8TMkkq89f8KHSx"]
         )
         
         service.checkBalance(pinCollector: vgs, request: forageRequestModel) { result in
