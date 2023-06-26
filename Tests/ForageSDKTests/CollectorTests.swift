@@ -21,7 +21,7 @@ class VaultCollectorTests: XCTestCase {
     func testVGSCollectWrapper_SetCustomHeaders_HeaderKey() {
         let vgsWrapper = CollectorFactory.createVGS(environment: EnvironmentTarget.sandbox)
         
-        var headers = ["HeaderKey": "HeaderValue"]
+        let headers = ["HeaderKey": "HeaderValue"]
         let xKey = ["vgsXKey": "VgsXKeyValue"]
         vgsWrapper.setCustomHeaders(headers: headers, xKey: xKey)
         
@@ -31,7 +31,7 @@ class VaultCollectorTests: XCTestCase {
     func testVGSCollectWrapper_SetCustomHeaders_XKey() {
         let vgsWrapper = CollectorFactory.createVGS(environment: EnvironmentTarget.sandbox)
         
-        var headers = ["HeaderKey": "HeaderValue"]
+        let headers = ["HeaderKey": "HeaderValue"]
         let xKey = ["vgsXKey": "VgsXKeyValue"]
         vgsWrapper.setCustomHeaders(headers: headers, xKey: xKey)
         
@@ -42,7 +42,7 @@ class VaultCollectorTests: XCTestCase {
         let textElement = TextElementUITextField()
         let basisTheoryWrapper = CollectorFactory.createBasisTheory(environment: EnvironmentTarget.sandbox, textElement: textElement)
         
-        var headers = ["HeaderKey": "HeaderValue"]
+        let headers = ["HeaderKey": "HeaderValue"]
         let xKey = ["btXKey": "btXKeyValue"]
         basisTheoryWrapper.setCustomHeaders(headers: headers, xKey: xKey)
         
@@ -53,7 +53,7 @@ class VaultCollectorTests: XCTestCase {
         let textElement = TextElementUITextField()
         let basisTheoryWrapper = CollectorFactory.createBasisTheory(environment: EnvironmentTarget.sandbox, textElement: textElement)
         
-        var headers = ["HeaderKey": "HeaderValue"]
+        let headers = ["HeaderKey": "HeaderValue"]
         let xKey = ["btXKey": "btXKeyValue"]
         basisTheoryWrapper.setCustomHeaders(headers: headers, xKey: xKey)
         
