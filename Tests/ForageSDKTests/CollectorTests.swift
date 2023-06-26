@@ -22,7 +22,7 @@ class VaultCollectorTests: XCTestCase {
         let vgsWrapper = CollectorFactory.createVGS(environment: EnvironmentTarget.sandbox)
         
         let headers = ["HeaderKey": "HeaderValue"]
-        let xKey = ["vgsXKey": "VgsXKeyValue", "btXKey": "btValue"]
+        let xKey = ["vgsXKey": "VgsXKeyValue"]
         vgsWrapper.setCustomHeaders(headers: headers, xKey: xKey)
         
         XCTAssertEqual(vgsWrapper.vgsCollect.customHeaders?["HeaderKey"], "HeaderValue")
