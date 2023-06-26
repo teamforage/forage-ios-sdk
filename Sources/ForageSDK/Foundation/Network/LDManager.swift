@@ -37,8 +37,12 @@ private enum FlagType: String {
 /**
  Contexts
  */
-private enum Context: String {
-    case anonymousUser = "anonymous-user"
+private enum ContextKey: String {
+    case iosSdk = "ios-sdk-service"
+}
+
+private enum ContextKind: String {
+    case service = "service"
 }
 
 public class LDManager {
@@ -62,7 +66,8 @@ public class LDManager {
     
     internal func initialize(_ environment: EnvironmentTarget) {
         let ldConfig = LDConfig(mobileKey: getLDMobileKey(environment).rawValue)
-        let ldContextBuilder = LDContextBuilder(key: Context.anonymousUser.rawValue)
+        var ldContextBuilder = LDContextBuilder(key: ContextKey.iosSdk.rawValue)
+        ldContextBuilder.kind(ContextKind.service.rawValue)
         guard case .success(let context) = ldContextBuilder.build()
         else { return }
         LDClient.start(config: ldConfig, context: context)
