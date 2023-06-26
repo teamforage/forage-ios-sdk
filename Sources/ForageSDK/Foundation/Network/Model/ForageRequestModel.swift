@@ -14,5 +14,5 @@ internal struct ForageRequestModel: Codable {
     let paymentReference: String
     let cardNumberToken: String
     let merchantID: String
-    let xKey: String
+    let xKey: [String: String]
 }

@@ -68,7 +68,7 @@ internal protocol ForageService: AnyObject {
     ///  - request: `ForageRequestModel` info to request balance.
     ///  - completion: Which will return the balance object.
     func checkBalance(
-        pinCollector: VGSCollect,
+        pinCollector: VaultCollector,
         request: ForageRequestModel,
         completion: @escaping (Result<BalanceModel, Error>) -> Void) -> Void
     
@@ -79,7 +79,7 @@ internal protocol ForageService: AnyObject {
     ///  - request: `ForageRequestModel` info to request balance.
     ///  - completion: Which will return the payment object.
     func capturePayment(
-        pinCollector: VGSCollect,
+        pinCollector: VaultCollector,
         request: ForageRequestModel,
         completion: @escaping (Result<PaymentModel, Error>) -> Void)
 }
