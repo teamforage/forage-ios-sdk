@@ -27,7 +27,11 @@ let package = Package(
             url: "https://github.com/launchdarkly/ios-client-sdk.git",
             from: "8.0.1"
         ),
-        .package(name: "BasisTheoryElements", url: "https://github.com/Basis-Theory/basistheory-ios", from: "2.0.0"),
+        .package(
+            name: "BasisTheoryElements",
+            url: "https://github.com/Basis-Theory/basistheory-ios",
+            from: "2.2.0"
+        ),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
