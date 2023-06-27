@@ -80,7 +80,8 @@ public class LDManager {
         }
         
         let ld = LDClient.get()!
-        let vaultPercentage = ld.doubleVariation(forKey: FlagType.vaultPrimaryTrafficPercentage.rawValue, defaultValue: 100.0)
+        // Defaulting to VGS for now! Will likely want to change this to BT in the future.
+        let vaultPercentage = ld.doubleVariation(forKey: FlagType.vaultPrimaryTrafficPercentage.rawValue, defaultValue: 0.0)
         let randomNum = Double.random(in: 0...100)
         if (randomNum < vaultPercentage) {
             vaultType = VaultType.btVaultType
