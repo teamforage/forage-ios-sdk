@@ -6,7 +6,7 @@
 //
 
 public protocol ForageDelegate: AnyObject {
-    func focusDidChange(_ textField: PINVaultTextField)
-    func textFieldDidChange(_ textField: PINVaultTextField)
-    func blurDidChange(_ textField: PINVaultTextField)
+    func focusDidChange(_ inputField: ForageUI)
+    func textFieldDidChange(_ inputField: ForageUI)
+    func blurDidChange(_ inputField: ForageUI)
 }
