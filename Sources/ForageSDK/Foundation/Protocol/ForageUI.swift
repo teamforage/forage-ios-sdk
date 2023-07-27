@@ -2,12 +2,12 @@
 //  File.swift
 //  
 //
-//  Created by Shardendu Gautam on 6/6/23.
+//  Created by Danny Leiser on 7/27/23.
 //
 
 import UIKit
 
-public protocol PINVaultTextField: UIView {
+public protocol ForageUI: UIView {
     var placeholder: String? { get set }
     var collector: VaultCollector { get set }
     var textColor: UIColor? { get set }
@@ -19,11 +19,12 @@ public protocol PINVaultTextField: UIView {
     var borderColor: UIColor? { get set }
     var padding: UIEdgeInsets { get set }
     var autocorrectionType: UITextAutocorrectionType { get set }
-    var delegate: PINVaultTextFieldDelegate? { get set }
+    var delegate: ForageDelegate? { get set }
     func isValid() -> Bool
     func setTranslatesAutoresizingMaskIntoConstraints(_ flag: Bool)
     func setAccessibilityIdentifier(_ identifier: String)
     func setIsAccessibilityElement(_ flag: Bool)
     func setPlaceholderText(_ text: String)
     func cleanText() -> Void
+    func becomeFirstResponder() -> Bool
 }
