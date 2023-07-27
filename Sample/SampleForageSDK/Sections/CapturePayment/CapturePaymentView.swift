@@ -34,7 +34,7 @@ class CapturePaymentView: UIView {
         return label
     }()
     
-    private let snapTextField: ForagePINTextField = {
+    public let snapTextField: ForagePINTextField = {
         let tf = ForagePINTextField()
         tf.placeholder = "PIN Snap Field"
         tf.pinType = .snap
