@@ -132,15 +132,13 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
         
         var tf: VaultWrapper?
         
-//        if (vaultType == VaultType.vgsVaultType) {
-//            tf = VGSTextFieldWrapper()
-//        } else if (vaultType == VaultType.btVaultType) {
-//            tf = BasisTheoryTextFieldWrapper()
-//        } else {
-//            tf = VGSTextFieldWrapper()
-//        }
-        
-        tf = VGSTextFieldWrapper()
+        if (vaultType == VaultType.vgsVaultType) {
+            tf = VGSTextFieldWrapper()
+        } else if (vaultType == VaultType.btVaultType) {
+            tf = BasisTheoryTextFieldWrapper()
+        } else {
+            tf = VGSTextFieldWrapper()
+        }
         
         tf?.textColor = UIColor.black
         tf?.font = UIFont.systemFont(ofSize: 14, weight: .regular)
@@ -278,7 +276,7 @@ extension ForagePINTextField {
     }
 
     /// Remove focus from `ForagePINTextField`.
-    @discardableResult public override func resignFirstResponder() -> Bool {
+    @discardableResult override public func resignFirstResponder() -> Bool {
         return textField.resignFirstResponder()
     }
 
