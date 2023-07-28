@@ -12,10 +12,11 @@ import BasisTheoryElements
 let tokenDelimiter = ","
 let tokenKey = "card_number_token"
 
-public protocol VaultCollector {
+internal protocol VaultCollector {
     func setCustomHeaders(headers: [String: String], xKey: [String:String])
     func sendData(
         path: String,
+        vaultAction: VaultAction,
         extraData: [String: Any],
         completion: @escaping (VaultResponse) -> Void)
     func getPaymentMethodToken(paymentMethodToken: String) throws -> String
@@ -30,6 +31,11 @@ struct VGSCollectConfig {
 struct BasisTheoryConfig {
     let publicKey: String
     let proxyKey: String
+}
+
+internal enum VaultAction: String {
+    case balanceCheck = "balance"
+    case capture
 }
 
 // Wrapper class for VGSCollect
@@ -49,7 +55,7 @@ class VGSCollectWrapper: VaultCollector {
         vgsCollect.customHeaders = mutableHeaders
     }
     
-    func sendData(path: String, extraData: [String: Any], completion: @escaping (VaultResponse) -> Void) {
+    func sendData(path: String, vaultAction: VaultAction, extraData: [String: Any], completion: @escaping (VaultResponse) -> Void) {
         var mutableExtraData = extraData
         if let paymentMethodToken = extraData[tokenKey] as? String {
             let token = getPaymentMethodToken(paymentMethodToken: paymentMethodToken)
@@ -62,13 +68,35 @@ class VGSCollectWrapper: VaultCollector {
             }
             mutableExtraData[tokenKey] = token
         }
+        
+        let proxyRequestStartTime = DispatchTime.now()
         vgsCollect.sendData(path: path, extraData: mutableExtraData) { (response) in
+            let roundTripMs = calculateTimeDifferenceInMilliseconds(
+                from: proxyRequestStartTime,
+                to: DispatchTime.now()
+            )
+            
+            var latencyAttributes = LatencyAttributes(
+                path: path,
+                method: HttpMethod.post,
+                roundTripMs: roundTripMs,
+                action: vaultAction
+            )
+            
             switch response {
             case .success(let code, let data, let urlResponse):
-                self.logger?.info("Successfully sent data to VGS proxy", attributes: nil)
+                latencyAttributes.httpStatusCode = code
+                logVaultProxyResponseMetrics(
+                    vaultType: VaultType.vgsVaultType,
+                    latencyAttributes: latencyAttributes
+                )
                 completion(VaultResponse(statusCode: code, urlResponse: urlResponse, data: data, error: nil))
             case .failure(let code, let data, let urlResponse, let error):
-                self.logger?.error("Failed to send data to VGS proxy", error: error, attributes: nil)
+                self.logger?.error("Failed to send data to VGS proxy", error: error, attributes: [
+                    "http_status": code
+                ])
+                latencyAttributes.httpStatusCode = code
+                logVaultProxyResponseMetrics(vaultType: VaultType.vgsVaultType, latencyAttributes: latencyAttributes)
                 completion(VaultResponse(statusCode: code, urlResponse: urlResponse, data: data, error: error))
             }
         }
@@ -124,7 +152,7 @@ class BasisTheoryWrapper: VaultCollector {
         self.logger = logger
     }
     
-    func sendData(path: String, extraData: [String : Any], completion: @escaping (VaultResponse) -> Void) {
+    func sendData(path: String, vaultAction: VaultAction, extraData: [String : Any], completion: @escaping (VaultResponse) -> Void) {
         var body: [String: Any] = ["pin": textElement]
         for (key, value) in extraData {
             if key == tokenKey, let paymentMethodToken = value as? String {
@@ -149,19 +177,42 @@ class BasisTheoryWrapper: VaultCollector {
                 body[key] = value
             }
         }
+        
+        let proxyRequestStartTime = DispatchTime.now()
         let proxyHttpRequest = ProxyHttpRequest(method: .post, path: path, body: body, headers: self.customHeaders)
         
         BasisTheoryElements.proxy(
             apiKey: basisTheoryConfig.publicKey, proxyKey: basisTheoryConfig.proxyKey,
             proxyHttpRequest: proxyHttpRequest
         ) { response, data, error in
+            let roundTripMs = calculateTimeDifferenceInMilliseconds(
+                from: proxyRequestStartTime,
+                to: DispatchTime.now()
+            )
+            let httpStatusCode = (response as? HTTPURLResponse)?.statusCode
+            logVaultProxyResponseMetrics(
+                vaultType: VaultType.btVaultType,
+                latencyAttributes: LatencyAttributes(
+                    path: path,
+                    method: HttpMethod.post,
+                    httpStatusCode: httpStatusCode,
+                    roundTripMs: roundTripMs,
+                    action: vaultAction
+                )
+            )
+            if error != nil {
+                self.logger?.error("Failed to send data to Basis Theory proxy", error: error, attributes: [
+                    "http_status": httpStatusCode
+                ])
+            }
+            
             var rawData: Data? = nil
             if let data = data {
                 let dataDictionary = convertJsonToDictionary(data)
                 rawData = try? JSONSerialization.data(withJSONObject: dataDictionary, options: [])
             }
             let vaultResponse = VaultResponse(
-                statusCode: (response as? HTTPURLResponse)?.statusCode,
+                statusCode: httpStatusCode,
                 urlResponse: response,
                 data: rawData,
                 error: error
