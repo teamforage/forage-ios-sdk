@@ -77,7 +77,7 @@ public class DatadogLogger: ForageLogger {
     }
 
     internal func notice(_ message: String, attributes: [String: Encodable]? = nil) {
-        DatadogLogger.logger?.info(message, error: nil, attributes: attributes)
+        DatadogLogger.logger?.notice(message, error: nil, attributes: attributes)
     }
 
     internal func info(_ message: String, attributes: [String: Encodable]? = nil) {
