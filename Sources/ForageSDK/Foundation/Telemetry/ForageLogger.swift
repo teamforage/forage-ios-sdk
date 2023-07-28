@@ -53,7 +53,6 @@ public class DatadogLogger: ForageLogger {
             .sendLogsToDatadog(true)
             .printLogsToConsole(true, usingFormat: .shortWith(prefix: "[forage-ios-sdk] "))
             .set(datadogReportingThreshold: .info)
-            .set(loggerName: "Forage")
             .build()
     }
 
