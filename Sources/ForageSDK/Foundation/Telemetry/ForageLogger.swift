@@ -33,8 +33,6 @@ public class DatadogLogger: ForageLogger {
             return
         }
 
-        // TODO: only initialize if not running locally?
-
         Datadog.initialize(
             appContext: .init(),
             trackingConsent: .granted,
@@ -51,7 +49,6 @@ public class DatadogLogger: ForageLogger {
             .sendNetworkInfo(true)
             // how do we decide whether we're in local dev or not?
             .sendLogsToDatadog(true)
-            .printLogsToConsole(true, usingFormat: .shortWith(prefix: "[forage-ios-sdk] "))
             .set(datadogReportingThreshold: .info)
             .build()
     }
