@@ -7,7 +7,6 @@
 
 import Foundation
 import VGSCollectSDK
-import Datadog
 
 /**
  Environment base URL
