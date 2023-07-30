@@ -38,11 +38,7 @@ public class ForageSDK {
             assertionFailure("ForageSDK missing Config setup")
             return
         }
-        
-        let environment = config.environment
-        self.environment = environment
-
-        DatadogLogger.shared.initialize(environment)
+        self.environment = config.environment
         LDManager.shared.initialize(self.environment)
         // TODO: Maybe move this shared logger call!
         VGSCollectLogger.shared.disableAllLoggers()
