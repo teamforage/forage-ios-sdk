@@ -160,8 +160,6 @@ class BasisTheoryTextFieldWrapper: UIView, UITextFieldDelegate, VaultWrapper {
     }
 }
 
-// MARK: - UIResponder methods
-
 extension BasisTheoryTextFieldWrapper {
 
     /// Make `ForagePINTextField` focused.
