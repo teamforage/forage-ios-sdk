@@ -12,9 +12,6 @@ internal protocol InternalObservableState {
     /// isFirstResponder is true if the input is focused, false otherwise.
     var isFirstResponder: Bool { get }
     
-    /// isBlured is true if the input is blured, false otherwise.
-    var isBlured: Bool { get }
-    
     /// isEmpty is true if the input is empty, false otherwise.
     var isEmpty: Bool { get }
     

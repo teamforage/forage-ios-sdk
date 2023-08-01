@@ -8,5 +8,4 @@
 public protocol ForageElementDelegate: AnyObject {
     func focusDidChange(_ state: ObservableState)
     func textFieldDidChange(_ state: ObservableState)
-    func blurDidChange(_ state: ObservableState)
 }

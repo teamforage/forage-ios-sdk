@@ -9,9 +9,6 @@ import UIKit
 import VGSCollectSDK
 
 class VGSTextFieldWrapper: UIView, VaultWrapper, VGSTextFieldDelegate {
-    @IBInspectable public var isBlured: Bool {
-        get { return false }
-    }
     
     @IBInspectable public var isEmpty: Bool {
         get { return false }

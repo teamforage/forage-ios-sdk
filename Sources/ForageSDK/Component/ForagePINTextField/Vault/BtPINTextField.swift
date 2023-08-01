@@ -9,9 +9,6 @@ import UIKit
 import BasisTheoryElements
 
 class BasisTheoryTextFieldWrapper: UIView, UITextFieldDelegate, VaultWrapper {
-    @IBInspectable public var isBlured: Bool {
-        get { return false }
-    }
     
     @IBInspectable public var isEmpty: Bool {
         get { return false }

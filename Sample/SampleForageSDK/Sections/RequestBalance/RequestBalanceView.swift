@@ -287,8 +287,4 @@ extension RequestBalanceView: ForageElementDelegate {
     func textFieldDidChange(_ state: ObservableState) {
         
     }
-    
-    func blurDidChange(_ state: ObservableState) {
-        
-    }
 }

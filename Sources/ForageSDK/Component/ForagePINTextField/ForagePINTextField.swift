@@ -13,10 +13,6 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
         
     }
     
-    @IBInspectable public var isBlured: Bool {
-        get { return false }
-    }
-    
     @IBInspectable public var isEmpty: Bool {
         get { return false }
     }
@@ -259,10 +255,6 @@ extension ForagePINTextField: ForageElementDelegate {
     /// Check active  textfield's state when editing the field
     public func textFieldDidChange(_ inputField: ObservableState) {
         
-    }
-
-    public func blurDidChange(_ inputField: ObservableState) {
-
     }
 }
 
