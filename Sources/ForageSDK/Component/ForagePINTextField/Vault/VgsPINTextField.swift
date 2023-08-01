@@ -9,7 +9,23 @@ import UIKit
 import VGSCollectSDK
 
 class VGSTextFieldWrapper: UIView, VaultWrapper, VGSTextFieldDelegate {
-    func cleanText() {
+    @IBInspectable public var isBlured: Bool {
+        get { return false }
+    }
+    
+    @IBInspectable public var isEmpty: Bool {
+        get { return false }
+    }
+    
+    @IBInspectable public var isValid: Bool {
+        get { return false }
+    }
+    
+    @IBInspectable public var isComplete: Bool {
+        get { return false }
+    }
+    
+    func clearText() {
         textField.cleanText()
     }
     
@@ -66,10 +82,6 @@ class VGSTextFieldWrapper: UIView, VaultWrapper, VGSTextFieldDelegate {
         textField.isSecureTextEntry = true
         
         textField.delegate = self
-    }
-    
-    func isValid() -> Bool {
-        return textField.state.inputLength == 4
     }
     
     func setPlaceholderText(_ text: String) {

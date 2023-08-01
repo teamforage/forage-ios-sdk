@@ -9,17 +9,29 @@ import UIKit
 import BasisTheoryElements
 
 class BasisTheoryTextFieldWrapper: UIView, UITextFieldDelegate, VaultWrapper {
-    func cleanText() {
+    @IBInspectable public var isBlured: Bool {
+        get { return false }
+    }
+    
+    @IBInspectable public var isEmpty: Bool {
+        get { return false }
+    }
+    
+    @IBInspectable public var isValid: Bool {
+        get { return false }
+    }
+    
+    @IBInspectable public var isComplete: Bool {
+        get { return false }
+    }
+    
+    func clearText() {
         textField.text = ""
     }
     
     var collector: VaultCollector
     
     weak var delegate: VaultWrapperDelegate?
-    
-    func isValid() -> Bool {
-        return textField.metadata.valid
-    }
     
     @objc func btTextFieldDidChange(_ textField: UITextField) {
         delegate?.textFieldDidChange(self)

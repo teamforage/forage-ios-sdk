@@ -17,15 +17,15 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
         get { return false }
     }
     
-    public var isEmpty: Bool {
+    @IBInspectable public var isEmpty: Bool {
         get { return false }
     }
     
-    public var isValid: Bool {
+    @IBInspectable public var isValid: Bool {
         get { return false }
     }
     
-    public var isComplete: Bool {
+    @IBInspectable public var isComplete: Bool {
         get { return false }
     }
     
@@ -241,7 +241,7 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
     }
 
     public func clearText() {
-        textField.cleanText()
+        textField.clearText()
     }
 }
 
