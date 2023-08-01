@@ -63,6 +63,7 @@ class VGSTextFieldWrapper: UIView, VaultWrapper, VGSTextFieldDelegate {
             centerXAnchor: nil,
             padding: UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         )
+        textField.isSecureTextEntry = true
         
         textField.delegate = self
     }

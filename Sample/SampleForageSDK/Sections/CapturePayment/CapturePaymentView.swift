@@ -11,11 +11,6 @@ import ForageSDK
 
 class CapturePaymentView: UIView {
     
-    // MARK: Public Properties
-    
-    var isSnapPINValid: Bool = false
-    var isNonSnapPINValid: Bool = false
-    
     // MARK: Private Components
     
     private let contentView: UIView = {
@@ -165,22 +160,20 @@ class CapturePaymentView: UIView {
     // MARK: Private Methods
     
     private func capturePayment(isEbtSnap: Bool) {
-        if isSnapPINValid || isNonSnapPINValid {
-            let paymentReference =
-                isEbtSnap
-                    ? ClientSharedData.shared.paymentReference[FundingType.ebtSnap] ?? ""
-                    : ClientSharedData.shared.paymentReference[FundingType.ebtCash] ?? ""
-            
-            let inputFieldReference = isEbtSnap ? snapTextField : nonSnapTextField
-            
-            ForageSDK.shared.capturePayment(
-                bearerToken: ClientSharedData.shared.bearerToken,
-                merchantAccount: ClientSharedData.shared.merchantID,
-                paymentReference: paymentReference,
-                foragePinTextEdit: inputFieldReference) { result in
-                    self.printResult(result: result)
-                }
-        }
+        let paymentReference =
+            isEbtSnap
+                ? ClientSharedData.shared.paymentReference[FundingType.ebtSnap] ?? ""
+                : ClientSharedData.shared.paymentReference[FundingType.ebtCash] ?? ""
+        
+        let inputFieldReference = isEbtSnap ? snapTextField : nonSnapTextField
+        
+        ForageSDK.shared.capturePayment(
+            bearerToken: ClientSharedData.shared.bearerToken,
+            merchantAccount: ClientSharedData.shared.merchantID,
+            paymentReference: paymentReference,
+            foragePinTextEdit: inputFieldReference) { result in
+                self.printResult(result: result)
+            }
     }
     
     private func printResult(result: Result<PaymentModel, Error>) {
@@ -351,14 +344,4 @@ extension CapturePaymentView: ForageElementDelegate {
     func blurDidChange(_ state: ObservableState) {
         
     }
-    
-//    func pinStatus(_ view: UIView, isValid: Bool, pinType: PinType) {
-//        if pinType == .snap {
-//            isSnapPINValid = isValid
-//        } else {
-//            isNonSnapPINValid = isValid
-//        }
-//        statusTypeLabel.text = "type=\(pinType.rawValue)"
-//        statusLabel.text = "isValid=\(isValid)"
-//    }
 }

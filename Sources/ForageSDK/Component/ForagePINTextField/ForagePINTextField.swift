@@ -246,7 +246,7 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
 }
 
 extension ForagePINTextField: VaultWrapperDelegate {
-    public func textFieldDidChange(_ textField: VaultWrapper) {
+    internal func textFieldDidChange(_ textField: VaultWrapper) {
         
     }
 }

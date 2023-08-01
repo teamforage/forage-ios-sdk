@@ -7,7 +7,7 @@
 
 import UIKit
 
-public protocol VaultWrapper: UIView {
+internal protocol VaultWrapper: UIView {
     var placeholder: String? { get set }
     var collector: VaultCollector { get set }
     var textColor: UIColor? { get set }
