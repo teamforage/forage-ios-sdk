@@ -38,10 +38,9 @@ class RequestBalanceView: UIView {
         return label
     }()
     
-    private let pinNumberTextField: ForagePINTextField = {
+    public let pinNumberTextField: ForagePINTextField = {
         let tf = ForagePINTextField()
         tf.placeholder = "PIN Field"
-        tf.isSecureTextEntry = true
         tf.pinType = .balance
         tf.accessibilityIdentifier = "tf_pin_balance"
         tf.isAccessibilityElement = true
@@ -280,16 +279,28 @@ class RequestBalanceView: UIView {
 
 // MARK: - ForagePINTextFieldDelegate
 
-extension RequestBalanceView: ForagePINTextFieldDelegate {
-    func pinStatus(_ view: UIView, isValid: Bool, pinType: PinType) {
-        if isValid {
-            statusLabel.text = "It is a VALID pin"
-            statusLabel.textColor = .green
-        } else {
-            statusLabel.text = "It is a NON VALID pin"
-            statusLabel.textColor = .red
-        }
-        updateButtonState(isEnabled: isValid, button: requestBalanceButton)
-        isPINValid = isValid
+extension RequestBalanceView: ForageElementDelegate {
+    func focusDidChange(_ state: ObservableState) {
+        
     }
+    
+    func textFieldDidChange(_ state: ObservableState) {
+        
+    }
+    
+    func blurDidChange(_ state: ObservableState) {
+        
+    }
+    
+//    func pinStatus(_ view: UIView, isValid: Bool, pinType: PinType) {
+//        if isValid {
+//            statusLabel.text = "It is a VALID pin"
+//            statusLabel.textColor = .green
+//        } else {
+//            statusLabel.text = "It is a NON VALID pin"
+//            statusLabel.textColor = .red
+//        }
+//        updateButtonState(isEnabled: isValid, button: requestBalanceButton)
+//        isPINValid = isValid
+//    }
 }

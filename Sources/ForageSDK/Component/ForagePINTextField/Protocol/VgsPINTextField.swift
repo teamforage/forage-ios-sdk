@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  VgsPINTextField.swift
 //  
 //
 //  Created by Danny Leiser on 7/27/23.
@@ -8,14 +8,14 @@
 import UIKit
 import VGSCollectSDK
 
-class VGSTextFieldWrapper: UIView, PINVaultTextField, VGSTextFieldDelegate{
+class VGSTextFieldWrapper: UIView, VaultWrapper, VGSTextFieldDelegate {
     func cleanText() {
         textField.cleanText()
     }
     
     var collector: VaultCollector
     
-    var delegate: PINVaultTextFieldDelegate?
+    var delegate: VaultWrapperDelegate?
     
     var placeholder: String?
     
@@ -75,20 +75,6 @@ class VGSTextFieldWrapper: UIView, PINVaultTextField, VGSTextFieldDelegate{
         textField.placeholder = text
     }
     
-    
-    func setTranslatesAutoresizingMaskIntoConstraints(_ flag: Bool) {
-        textField.translatesAutoresizingMaskIntoConstraints = flag
-    }
-    
-    var autocorrectionType: UITextAutocorrectionType {
-        get {
-            return textField.autocorrectionType
-        }
-        set {
-            textField.autocorrectionType = newValue
-        }
-    }
-    
     var borderWidth: CGFloat {
         get {
             return textField.borderWidth
@@ -116,15 +102,6 @@ class VGSTextFieldWrapper: UIView, PINVaultTextField, VGSTextFieldDelegate{
         }
     }
     
-    
-    func setAccessibilityIdentifier(_ identifier: String) {
-        textField.accessibilityIdentifier = identifier
-    }
-    
-    func setIsAccessibilityElement(_ flag: Bool) {
-        textField.isAccessibilityElement = flag
-    }
-    
     func setPlaceholder(_ text: String) {
         textField.placeholder = text
     }
@@ -139,13 +116,25 @@ class VGSTextFieldWrapper: UIView, PINVaultTextField, VGSTextFieldDelegate{
         set { textField.font = newValue }
     }
     
-    var isSecureTextEntry: Bool {
-        get { return textField.isSecureTextEntry }
-        set { textField.isSecureTextEntry = newValue }
-    }
-    
     var textAlignment: NSTextAlignment {
         get { return textField.textAlignment }
         set { textField.textAlignment = newValue }
+    }
+}
+
+extension VGSTextFieldWrapper {
+    /// Make `ForagePINTextField` focused.
+    @discardableResult override public func becomeFirstResponder() -> Bool {
+        return textField.becomeFirstResponder()
+    }
+
+    /// Remove focus from `ForagePINTextField`.
+    @discardableResult public override func resignFirstResponder() -> Bool {
+        return textField.resignFirstResponder()
+    }
+
+    /// Check if `ForagePINTextField` is focused.
+    override public var isFirstResponder: Bool {
+        return textField.isFirstResponder
     }
 }

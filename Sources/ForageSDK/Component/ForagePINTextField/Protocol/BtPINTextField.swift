@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  BtPINTextField.swift
 //  
 //
 //  Created by Danny Leiser on 7/27/23.
@@ -8,14 +8,14 @@
 import UIKit
 import BasisTheoryElements
 
-class BasisTheoryTextFieldWrapper: UIView, UITextFieldDelegate, PINVaultTextField{
+class BasisTheoryTextFieldWrapper: UIView, UITextFieldDelegate, VaultWrapper {
     func cleanText() {
         textField.text = ""
     }
     
     var collector: VaultCollector
     
-    weak var delegate: PINVaultTextFieldDelegate?
+    weak var delegate: VaultWrapperDelegate?
     
     func isValid() -> Bool {
         return textField.metadata.valid
@@ -33,7 +33,6 @@ class BasisTheoryTextFieldWrapper: UIView, UITextFieldDelegate, PINVaultTextFiel
     var horizontalConstraints: [NSLayoutConstraint]?
     
     private let textField: TextElementUITextField
-    
     
     override init(frame: CGRect) {
         textField = TextElementUITextField()
@@ -77,20 +76,6 @@ class BasisTheoryTextFieldWrapper: UIView, UITextFieldDelegate, PINVaultTextFiel
         textField.placeholder = text
     }
     
-
-    func setTranslatesAutoresizingMaskIntoConstraints(_ flag: Bool) {
-        textField.translatesAutoresizingMaskIntoConstraints = flag
-    }
-    
-    var autocorrectionType: UITextAutocorrectionType {
-        get {
-            return textField.autocorrectionType
-        }
-        set {
-            textField.autocorrectionType = newValue
-        }
-    }
-    
     var borderWidth: CGFloat {
         get {
             return textField.layer.borderWidth
@@ -114,15 +99,6 @@ class BasisTheoryTextFieldWrapper: UIView, UITextFieldDelegate, PINVaultTextFiel
         set {
             textField.layer.borderColor = newValue?.cgColor
         }
-    }
-    
-    
-    func setAccessibilityIdentifier(_ identifier: String) {
-        textField.accessibilityIdentifier = identifier
-    }
-    
-    func setIsAccessibilityElement(_ flag: Bool) {
-        textField.isAccessibilityElement = flag
     }
     
     func setPlaceholder(_ text: String) {
@@ -165,13 +141,28 @@ class BasisTheoryTextFieldWrapper: UIView, UITextFieldDelegate, PINVaultTextFiel
         set { textField.font = newValue }
     }
     
-    var isSecureTextEntry: Bool {
-        get { return textField.isSecureTextEntry }
-        set { textField.isSecureTextEntry = newValue }
-    }
-    
     var textAlignment: NSTextAlignment {
         get { return textField.textAlignment }
         set { textField.textAlignment = newValue }
+    }
+}
+
+// MARK: - UIResponder methods
+
+extension BasisTheoryTextFieldWrapper {
+
+    /// Make `ForagePINTextField` focused.
+    @discardableResult override public func becomeFirstResponder() -> Bool {
+        return textField.becomeFirstResponder()
+    }
+
+    /// Remove focus from `ForagePINTextField`.
+    @discardableResult public override func resignFirstResponder() -> Bool {
+        return textField.resignFirstResponder()
+    }
+
+    /// Check if `ForagePINTextField` is focused.
+    override public var isFirstResponder: Bool {
+        return textField.isFirstResponder
     }
 }

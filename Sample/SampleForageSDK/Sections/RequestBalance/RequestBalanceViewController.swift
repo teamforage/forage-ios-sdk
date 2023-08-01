@@ -17,6 +17,16 @@ class RequestBalanceViewController: BaseViewCodeViewController<RequestBalanceVie
         customView.render()
         customView.delegate = self
     }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        let pinView = self.customView.pinNumberTextField
+        
+        print("Is Input Frame Focused: \(pinView.isFirstResponder)")
+        let didFocus = self.customView.pinNumberTextField.becomeFirstResponder()
+        print("Is Input Frame Focused: \(pinView.isFirstResponder)")
+    }
 }
 
 // MARK: - RequestBalanceViewDelegate

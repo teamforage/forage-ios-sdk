@@ -37,7 +37,6 @@ class CapturePaymentView: UIView {
     private let snapTextField: ForagePINTextField = {
         let tf = ForagePINTextField()
         tf.placeholder = "PIN Snap Field"
-        tf.isSecureTextEntry = true
         tf.pinType = .snap
         tf.accessibilityIdentifier = "tf_pin_snap"
         tf.isAccessibilityElement = true
@@ -47,7 +46,6 @@ class CapturePaymentView: UIView {
     private let nonSnapTextField: ForagePINTextField = {
         let tf = ForagePINTextField()
         tf.placeholder = "PIN Snap Field"
-        tf.isSecureTextEntry = true
         tf.pinType = .nonSnap
         tf.accessibilityIdentifier = "tf_pin_non_snap"
         tf.isAccessibilityElement = true
@@ -341,14 +339,26 @@ class CapturePaymentView: UIView {
 
 // MARK: - ForagePINTextFieldDelegate
 
-extension CapturePaymentView: ForagePINTextFieldDelegate {
-    func pinStatus(_ view: UIView, isValid: Bool, pinType: PinType) {
-        if pinType == .snap {
-            isSnapPINValid = isValid
-        } else {
-            isNonSnapPINValid = isValid
-        }
-        statusTypeLabel.text = "type=\(pinType.rawValue)"
-        statusLabel.text = "isValid=\(isValid)"
+extension CapturePaymentView: ForageElementDelegate {
+    func focusDidChange(_ state: ObservableState) {
+        
     }
+    
+    func textFieldDidChange(_ state: ObservableState) {
+        
+    }
+    
+    func blurDidChange(_ state: ObservableState) {
+        
+    }
+    
+//    func pinStatus(_ view: UIView, isValid: Bool, pinType: PinType) {
+//        if pinType == .snap {
+//            isSnapPINValid = isValid
+//        } else {
+//            isNonSnapPINValid = isValid
+//        }
+//        statusTypeLabel.text = "type=\(pinType.rawValue)"
+//        statusLabel.text = "isValid=\(isValid)"
+//    }
 }

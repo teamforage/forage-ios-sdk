@@ -52,4 +52,7 @@ public protocol ForageElement: UIView, Appearance, ObservableState, Style {
     
     /// Request that the input field gain focus.
     func becomeFirstResponder() -> Bool
+    
+    /// Request that the input field resign focus.
+    func resignFirstResponder() -> Bool
 }
