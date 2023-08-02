@@ -8,7 +8,7 @@
 import UIKit
 import BasisTheoryElements
 
-class BasisTheoryTextFieldWrapper: UIView, UITextFieldDelegate, VaultWrapper {
+class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
     
     @IBInspectable public var isEmpty: Bool {
         get { return false }
@@ -28,11 +28,7 @@ class BasisTheoryTextFieldWrapper: UIView, UITextFieldDelegate, VaultWrapper {
     
     var collector: VaultCollector
     
-    weak var delegate: VaultWrapperDelegate?
-    
-    @objc func btTextFieldDidChange(_ textField: UITextField) {
-        delegate?.textFieldDidChange(self)
-    }
+    var delegate: VaultWrapperDelegate?
     
     var placeholder: String?
     
@@ -79,7 +75,7 @@ class BasisTheoryTextFieldWrapper: UIView, UITextFieldDelegate, VaultWrapper {
         
         try! textField.setConfig(options: TextElementOptions(mask: pinMask, validation: pinRegex))
         
-        textField.addTarget(self, action: #selector(btTextFieldDidChange(_:)), for: .editingChanged)
+//        textField.addTarget(self, action: #selector(btTextFieldDidChange(_:)), for: .editingChanged)
     }
     
     func setPlaceholderText(_ text: String) {
@@ -157,8 +153,19 @@ class BasisTheoryTextFieldWrapper: UIView, UITextFieldDelegate, VaultWrapper {
     }
 }
 
-extension BasisTheoryTextFieldWrapper {
+extension BasisTheoryTextFieldWrapper: UITextFieldDelegate {
+    /// This is the BT event for "field became first responder"
+    @objc func textFieldDidBeginEditing(_ textField: UITextField) {
+        delegate?.textFieldDidChange(self)
+    }
 
+    /// This is the VGS event for "field resigned first responder"
+    @objc func textFieldDidEndEditing(_ textField: UITextField) {
+        delegate?.textFieldDidChange(self)
+    }
+}
+
+extension BasisTheoryTextFieldWrapper {
     /// Make `ForagePINTextField` focused.
     @discardableResult override public func becomeFirstResponder() -> Bool {
         return textField.becomeFirstResponder()

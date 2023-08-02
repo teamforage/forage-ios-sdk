@@ -8,7 +8,7 @@
 import UIKit
 import VGSCollectSDK
 
-class VGSTextFieldWrapper: UIView, VaultWrapper, VGSTextFieldDelegate {
+class VGSTextFieldWrapper: UIView, VaultWrapper {
     
     @IBInspectable public var isEmpty: Bool {
         get { return false }
@@ -42,10 +42,6 @@ class VGSTextFieldWrapper: UIView, VaultWrapper, VGSTextFieldDelegate {
         super.init(frame: frame)
         
         commonInit()
-    }
-    
-    func vgsTextFieldDidChange(_ textField: VGSTextField) {
-        delegate?.textFieldDidChange(self)
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -129,6 +125,27 @@ class VGSTextFieldWrapper: UIView, VaultWrapper, VGSTextFieldDelegate {
     var textAlignment: NSTextAlignment {
         get { return textField.textAlignment }
         set { textField.textAlignment = newValue }
+    }
+}
+
+extension VGSTextFieldWrapper: VGSTextFieldDelegate {
+    @objc func vgsTextFieldDidChange(_ textField: VGSTextField) {
+        delegate?.textFieldDidChange(self)
+    }
+    
+    /// This is the VGS event for "field became first responder"
+    @objc func vgsTextFieldDidBeginEditing(_ textField: VGSTextField) {
+        delegate?.firstResponderDidChange(self)
+    }
+    
+    /// This is the VGS event for "field resigned first responder"
+    @objc func vgsTextFieldDidEndEditing(_ textField: VGSTextField) {
+        delegate?.firstResponderDidChange(self)
+    }
+    
+    /// This is the VGS event for "field resigned first responder" through button press
+    @objc func vgsTextFieldDidEndEditingOnReturn(_ textField: VGSTextField) {
+        delegate?.firstResponderDidChange(self)
     }
 }
 
