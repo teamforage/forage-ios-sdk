@@ -1,14 +1,14 @@
 //
-//  ForageElement.swift
+//  VaultWrapper.swift
 //  
 //
-//  Created by Danny Leiser on 7/27/23.
+//  Created by Shardendu Gautam on 6/6/23.
 //
 
 import UIKit
 
-/// The state of an input that Forage exposes during events or statically as input instance attributes.
-public protocol ObservableState {
+/// The state that the underlying vault exposes during events or statically as input instance attributes.
+internal protocol InternalObservableState {
     /// isFirstResponder is true if the input is focused, false otherwise.
     var isFirstResponder: Bool { get }
     
@@ -23,33 +23,25 @@ public protocol ObservableState {
     var isComplete: Bool { get }
 }
 
-/// The higher visual characteristics that apply to every Forage input and are not specific to a single input.
-public protocol Appearance {
+/// The higher visual characteristics that apply to every vault instance and are not specific to a single input.
+internal protocol InternalAppearance {
     var textColor: UIColor? { get set }
     var tfTintColor: UIColor? { get set }
     var borderWidth: CGFloat { get set }
     var borderColor: UIColor? { get set }
+    var font: UIFont? { get set }
 }
 
 /// The visual characteristics that require input-specific customization.
-public protocol Style {
+internal protocol InternalStyle {
     var padding: UIEdgeInsets { get set }
     var textAlignment: NSTextAlignment { get set }
+    var placeholder: String? { get set }
 }
 
-/// The interface that all of Forage’s input elements adhere to be it for PAN or PIN.
-public protocol ForageElement: UIView, Appearance, ObservableState, Style {
-    var delegate: ForageElementDelegate? { get set }
-    
-    /// Set the placeholder text of the input field.
+internal protocol VaultWrapper: UIView, InternalObservableState, InternalAppearance, InternalStyle {
+    var collector: VaultCollector { get set }
+    var delegate: VaultWrapperDelegate? { get set }
     func setPlaceholderText(_ text: String)
-    
-    /// Clear the value in the input field.
     func clearText() -> Void
-    
-    /// Request that the input field gain focus.
-    func becomeFirstResponder() -> Bool
-    
-    /// Request that the input field resign focus.
-    func resignFirstResponder() -> Bool
 }

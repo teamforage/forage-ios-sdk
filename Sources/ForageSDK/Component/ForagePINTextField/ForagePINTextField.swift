@@ -8,18 +8,51 @@
 import UIKit
 import VGSCollectSDK
 
-public class ForagePINTextField: UIView, Identifiable {
+public class ForagePINTextField: UIView, Identifiable, ForageElement {
+    public func setPlaceholderText(_ text: String) {
+        
+    }
+    
+    @IBInspectable public var isEmpty: Bool {
+        get { return false }
+    }
+    
+    @IBInspectable public var isValid: Bool {
+        get { return false }
+    }
+    
+    @IBInspectable public var isComplete: Bool {
+        get { return false }
+    }
     
     // MARK: Public Delegate
     
     /// Delegate that updates client's side about state of the entered pin
-    public weak var delegate: ForagePINTextFieldDelegate?
+    public weak var delegate: ForageElementDelegate?
     
     // MARK: Public Properties
     
     public var pinType: PinType = .balance
     
     internal var collector: VaultCollector?
+    
+    /// BorderWidth for the text field
+    @IBInspectable public var borderWidth: CGFloat {
+        get { return textField.borderWidth }
+        set { textField.borderWidth = newValue }
+    }
+    
+    /// BorderColor for the text field
+    @IBInspectable public var borderColor: UIColor? {
+        get { return textField.borderColor }
+        set { textField.borderColor = newValue }
+    }
+    
+    /// Padding for the text field
+    @IBInspectable public var padding: UIEdgeInsets {
+        get { return textField.padding }
+        set { textField.padding = newValue }
+    }
     
     /// Placeholder for the text field
     @IBInspectable public var placeholder: String? {
@@ -45,12 +78,6 @@ public class ForagePINTextField: UIView, Identifiable {
     @IBInspectable public var tfTintColor: UIColor? {
         get { return textField.tintColor }
         set { textField.tintColor = newValue }
-    }
-    
-    /// Hide text and disable copy when set `true`
-    /// `isSecureTextEntry` default value is `true`
-    @IBInspectable public var isSecureTextEntry: Bool = true {
-        didSet { textField.isSecureTextEntry = isSecureTextEntry }
     }
     
     /// Text alignment
@@ -96,10 +123,10 @@ public class ForagePINTextField: UIView, Identifiable {
         return sv
     }()
     
-    private lazy var textField: PINVaultTextField = {
+    private lazy var textField: VaultWrapper = {
         let vaultType = LDManager.shared.getVaultType()
         
-        var tf: PINVaultTextField?
+        var tf: VaultWrapper?
         
         if (vaultType == VaultType.vgsVaultType) {
             tf = VGSTextFieldWrapper()
@@ -109,20 +136,15 @@ public class ForagePINTextField: UIView, Identifiable {
             tf = VGSTextFieldWrapper()
         }
         
-        tf?.translatesAutoresizingMaskIntoConstraints = false
         tf?.textColor = UIColor.black
         tf?.font = UIFont.systemFont(ofSize: 14, weight: .regular)
-        tf?.autocorrectionType = .no
         tf?.borderWidth = 0.25
         tf?.borderColor = UIColor.lightGray
         tf?.padding = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 0)
-        tf?.accessibilityIdentifier = "tf_forage_pin_text_field"
-        tf?.isAccessibilityElement = true
         collector = tf?.collector
         
         return tf ?? VGSTextFieldWrapper()
     }()
-    
     
     private lazy var imageView: UIImageView = {
         let imgView = UIImageView()
@@ -213,35 +235,43 @@ public class ForagePINTextField: UIView, Identifiable {
     @objc fileprivate func requestFocus(_ gesture: UIGestureRecognizer) {
         becomeFirstResponder()
     }
-    
-    // Internal Methods
-    internal func clearText() {
-        textField.cleanText()
+
+    public func clearText() {
+        textField.clearText()
     }
 }
 
-extension ForagePINTextField: PINVaultTextFieldDelegate {
+extension ForagePINTextField: VaultWrapperDelegate {
+    internal func textFieldDidChange(_ textField: VaultWrapper) {
+        
+    }
+}
+
+extension ForagePINTextField: ForageElementDelegate {
+    public func focusDidChange(_ inputField: ObservableState) {
+
+    }
+
     /// Check active  textfield's state when editing the field
-    public func textFieldDidChange(_ textField: PINVaultTextField) {
-        let isValid = textField.isValid()
-        delegate?.pinStatus(self, isValid: isValid, pinType: pinType)
+    public func textFieldDidChange(_ inputField: ObservableState) {
+        
     }
 }
 
 // MARK: - UIResponder methods
 
 extension ForagePINTextField {
-    
+
     /// Make `ForagePINTextField` focused.
     @discardableResult override public func becomeFirstResponder() -> Bool {
         return textField.becomeFirstResponder()
     }
-    
-    /// Remove  focus from `ForagePINTextField`.
+
+    /// Remove focus from `ForagePINTextField`.
     @discardableResult override public func resignFirstResponder() -> Bool {
         return textField.resignFirstResponder()
     }
-    
+
     /// Check if `ForagePINTextField` is focused.
     override public var isFirstResponder: Bool {
         return textField.isFirstResponder
