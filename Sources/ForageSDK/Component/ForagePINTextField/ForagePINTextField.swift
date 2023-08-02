@@ -253,7 +253,6 @@ extension ForagePINTextField: VaultWrapperDelegate {
 
 // MARK: - UIResponder methods
 extension ForagePINTextField {
-
     /// Make `ForagePINTextField` focused.
     @discardableResult override public func becomeFirstResponder() -> Bool {
         return textField.becomeFirstResponder()

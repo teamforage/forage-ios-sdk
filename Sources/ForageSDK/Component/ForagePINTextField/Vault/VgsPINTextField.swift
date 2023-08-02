@@ -130,7 +130,7 @@ class VGSTextFieldWrapper: UIView, VaultWrapper {
 
 extension VGSTextFieldWrapper: VGSTextFieldDelegate {
     @objc func vgsTextFieldDidChange(_ textField: VGSTextField) {
-        delegate?.textFieldDidChange(self)
+        
     }
     
     /// This is the VGS event for "field became first responder"

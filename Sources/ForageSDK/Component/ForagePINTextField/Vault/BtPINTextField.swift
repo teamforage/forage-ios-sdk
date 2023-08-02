@@ -74,8 +74,6 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
         let pinRegex = try! NSRegularExpression(pattern: "^\\d{4}$")
         
         try! textField.setConfig(options: TextElementOptions(mask: pinMask, validation: pinRegex))
-        
-//        textField.addTarget(self, action: #selector(btTextFieldDidChange(_:)), for: .editingChanged)
     }
     
     func setPlaceholderText(_ text: String) {
@@ -150,18 +148,6 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
     var textAlignment: NSTextAlignment {
         get { return textField.textAlignment }
         set { textField.textAlignment = newValue }
-    }
-}
-
-extension BasisTheoryTextFieldWrapper: UITextFieldDelegate {
-    /// This is the BT event for "field became first responder"
-    @objc func textFieldDidBeginEditing(_ textField: UITextField) {
-        delegate?.textFieldDidChange(self)
-    }
-
-    /// This is the VGS event for "field resigned first responder"
-    @objc func textFieldDidEndEditing(_ textField: UITextField) {
-        delegate?.textFieldDidChange(self)
     }
 }
 
