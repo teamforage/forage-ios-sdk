@@ -17,6 +17,11 @@ class RequestBalanceViewController: BaseViewCodeViewController<RequestBalanceVie
         customView.render()
         customView.delegate = self
     }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        self.customView.pinNumberTextField.becomeFirstResponder()
+    }
 }
 
 // MARK: - RequestBalanceViewDelegate

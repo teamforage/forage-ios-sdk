@@ -16,4 +16,9 @@ class CapturePaymentViewController: BaseViewCodeViewController<CapturePaymentVie
         customView.backgroundColor = .white
         customView.render()
     }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        self.customView.snapTextField.becomeFirstResponder()
+    }
 }
