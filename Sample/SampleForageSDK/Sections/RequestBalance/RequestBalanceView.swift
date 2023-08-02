@@ -81,7 +81,7 @@ class RequestBalanceView: UIView {
     
     private let statusLabel: UILabel = {
         let label = UILabel()
-        label.text = "PIN status"
+        label.text = "PIN Not Focused"
         label.textColor = .red
         label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         label.accessibilityIdentifier = "lbl_status"
@@ -281,7 +281,11 @@ class RequestBalanceView: UIView {
 
 extension RequestBalanceView: ForageElementDelegate {
     func focusDidChange(_ state: ObservableState) {
-        
+        if (state.isFirstResponder) {
+            statusLabel.text = "PIN Focused"
+        } else {
+            statusLabel.text = "PIN Not Focused"
+        }
     }
     
     func textFieldDidChange(_ state: ObservableState) {

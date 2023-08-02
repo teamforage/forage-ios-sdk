@@ -8,7 +8,7 @@
 import UIKit
 import BasisTheoryElements
 
-class BasisTheoryTextFieldWrapper: UIView, UITextFieldDelegate, VaultWrapper {
+class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
     
     @IBInspectable public var isEmpty: Bool {
         get { return false }
@@ -28,11 +28,7 @@ class BasisTheoryTextFieldWrapper: UIView, UITextFieldDelegate, VaultWrapper {
     
     var collector: VaultCollector
     
-    weak var delegate: VaultWrapperDelegate?
-    
-    @objc func btTextFieldDidChange(_ textField: UITextField) {
-        delegate?.textFieldDidChange(self)
-    }
+    var delegate: VaultWrapperDelegate?
     
     var placeholder: String?
     
@@ -78,8 +74,6 @@ class BasisTheoryTextFieldWrapper: UIView, UITextFieldDelegate, VaultWrapper {
         let pinRegex = try! NSRegularExpression(pattern: "^\\d{4}$")
         
         try! textField.setConfig(options: TextElementOptions(mask: pinMask, validation: pinRegex))
-        
-        textField.addTarget(self, action: #selector(btTextFieldDidChange(_:)), for: .editingChanged)
     }
     
     func setPlaceholderText(_ text: String) {
@@ -158,7 +152,6 @@ class BasisTheoryTextFieldWrapper: UIView, UITextFieldDelegate, VaultWrapper {
 }
 
 extension BasisTheoryTextFieldWrapper {
-
     /// Make `ForagePINTextField` focused.
     @discardableResult override public func becomeFirstResponder() -> Bool {
         return textField.becomeFirstResponder()

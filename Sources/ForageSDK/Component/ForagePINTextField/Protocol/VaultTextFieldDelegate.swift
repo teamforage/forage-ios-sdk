@@ -6,4 +6,5 @@
 //
 internal protocol VaultWrapperDelegate: AnyObject {
     func textFieldDidChange(_ textField: VaultWrapper)
+    func firstResponderDidChange(_ textField: VaultWrapper)
 }

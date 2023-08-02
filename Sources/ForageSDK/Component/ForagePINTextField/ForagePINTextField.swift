@@ -245,23 +245,14 @@ extension ForagePINTextField: VaultWrapperDelegate {
     internal func textFieldDidChange(_ textField: VaultWrapper) {
         
     }
-}
-
-extension ForagePINTextField: ForageElementDelegate {
-    public func focusDidChange(_ inputField: ObservableState) {
-
-    }
-
-    /// Check active  textfield's state when editing the field
-    public func textFieldDidChange(_ inputField: ObservableState) {
-        
+    
+    internal func firstResponderDidChange(_ textField: VaultWrapper) {
+        delegate?.focusDidChange(self)
     }
 }
 
 // MARK: - UIResponder methods
-
 extension ForagePINTextField {
-
     /// Make `ForagePINTextField` focused.
     @discardableResult override public func becomeFirstResponder() -> Bool {
         return textField.becomeFirstResponder()
