@@ -13,6 +13,6 @@ internal struct ForagePANRequestModel: Codable {
     let merchantAccount: String
     let panNumber: String
     let type: String
-    let reusable: Bool
     let customerID: String
+    let reusable: Bool?
 }

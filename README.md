@@ -138,6 +138,7 @@ func tokenizeEBTCard(
     bearerToken: String,
     merchantAccount: String,
     customerID: String,
+    reusable: Bool?,
     completion: @escaping (Result<PaymentMethodModel, Error>) -> Void
 )
 ```
@@ -150,7 +151,8 @@ ForageSDK.shared.tokenizeEBTCard(
     merchantAccount: merchantID,
     // NOTE: The following line is for testing purposes only and should not be used in production.
     // Please replace this line with a real hashed customer ID value.
-    customerID: UUID.init().uuidString) { result in
+    customerID: UUID.init().uuidString,
+    reusable: true) { result in
         // handle callback here
     }
 ```

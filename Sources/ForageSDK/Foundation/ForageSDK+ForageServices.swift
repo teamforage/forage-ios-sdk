@@ -23,6 +23,7 @@ protocol ForageSDKService: AnyObject {
         bearerToken: String,
         merchantAccount: String,
         customerID: String,
+        reusable: Bool?,
         completion: @escaping (Result<PaymentMethodModel, Error>) -> Void)
     
     /// Check balance for a given EBT Card
@@ -62,6 +63,7 @@ extension ForageSDK: ForageSDKService {
         bearerToken: String,
         merchantAccount: String,
         customerID: String,
+        reusable: Bool? = true,
         completion: @escaping (Result<PaymentMethodModel, Error>) -> Void
     ) {
         let request = ForagePANRequestModel(
@@ -69,8 +71,8 @@ extension ForageSDK: ForageSDKService {
             merchantAccount: merchantAccount,
             panNumber: panNumber,
             type: CardType.EBT.rawValue,
-            reusable: true,
-            customerID: customerID
+            customerID: customerID,
+            reusable: reusable ?? true
         )
         service?.tokenizeEBTCard(request: request, completion: completion)
     }
