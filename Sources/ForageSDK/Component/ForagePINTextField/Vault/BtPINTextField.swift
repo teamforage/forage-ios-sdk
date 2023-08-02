@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  BtPINTextField.swift
 //  
 //
 //  Created by Danny Leiser on 7/27/23.
@@ -8,18 +8,27 @@
 import UIKit
 import BasisTheoryElements
 
-class BasisTheoryTextFieldWrapper: UIView, UITextFieldDelegate, PINVaultTextField{
-    func cleanText() {
+class BasisTheoryTextFieldWrapper: UIView, UITextFieldDelegate, VaultWrapper {
+    
+    @IBInspectable public var isEmpty: Bool {
+        get { return false }
+    }
+    
+    @IBInspectable public var isValid: Bool {
+        get { return false }
+    }
+    
+    @IBInspectable public var isComplete: Bool {
+        get { return false }
+    }
+    
+    func clearText() {
         textField.text = ""
     }
     
     var collector: VaultCollector
     
-    weak var delegate: PINVaultTextFieldDelegate?
-    
-    func isValid() -> Bool {
-        return textField.metadata.valid
-    }
+    weak var delegate: VaultWrapperDelegate?
     
     @objc func btTextFieldDidChange(_ textField: UITextField) {
         delegate?.textFieldDidChange(self)
@@ -33,7 +42,6 @@ class BasisTheoryTextFieldWrapper: UIView, UITextFieldDelegate, PINVaultTextFiel
     var horizontalConstraints: [NSLayoutConstraint]?
     
     private let textField: TextElementUITextField
-    
     
     override init(frame: CGRect) {
         textField = TextElementUITextField()
@@ -56,6 +64,7 @@ class BasisTheoryTextFieldWrapper: UIView, UITextFieldDelegate, PINVaultTextFiel
         addSubview(textField)
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.keyboardType = UIKeyboardType.phonePad
+        textField.isSecureTextEntry = true
         
         let regexDigit = try! NSRegularExpression(pattern: "\\d")
         
@@ -75,20 +84,6 @@ class BasisTheoryTextFieldWrapper: UIView, UITextFieldDelegate, PINVaultTextFiel
     
     func setPlaceholderText(_ text: String) {
         textField.placeholder = text
-    }
-    
-
-    func setTranslatesAutoresizingMaskIntoConstraints(_ flag: Bool) {
-        textField.translatesAutoresizingMaskIntoConstraints = flag
-    }
-    
-    var autocorrectionType: UITextAutocorrectionType {
-        get {
-            return textField.autocorrectionType
-        }
-        set {
-            textField.autocorrectionType = newValue
-        }
     }
     
     var borderWidth: CGFloat {
@@ -114,15 +109,6 @@ class BasisTheoryTextFieldWrapper: UIView, UITextFieldDelegate, PINVaultTextFiel
         set {
             textField.layer.borderColor = newValue?.cgColor
         }
-    }
-    
-    
-    func setAccessibilityIdentifier(_ identifier: String) {
-        textField.accessibilityIdentifier = identifier
-    }
-    
-    func setIsAccessibilityElement(_ flag: Bool) {
-        textField.isAccessibilityElement = flag
     }
     
     func setPlaceholder(_ text: String) {
@@ -165,13 +151,26 @@ class BasisTheoryTextFieldWrapper: UIView, UITextFieldDelegate, PINVaultTextFiel
         set { textField.font = newValue }
     }
     
-    var isSecureTextEntry: Bool {
-        get { return textField.isSecureTextEntry }
-        set { textField.isSecureTextEntry = newValue }
-    }
-    
     var textAlignment: NSTextAlignment {
         get { return textField.textAlignment }
         set { textField.textAlignment = newValue }
+    }
+}
+
+extension BasisTheoryTextFieldWrapper {
+
+    /// Make `ForagePINTextField` focused.
+    @discardableResult override public func becomeFirstResponder() -> Bool {
+        return textField.becomeFirstResponder()
+    }
+
+    /// Remove focus from `ForagePINTextField`.
+    @discardableResult public override func resignFirstResponder() -> Bool {
+        return textField.resignFirstResponder()
+    }
+
+    /// Check if `ForagePINTextField` is focused.
+    override public var isFirstResponder: Bool {
+        return textField.isFirstResponder
     }
 }
