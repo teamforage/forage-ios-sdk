@@ -161,15 +161,38 @@ public enum PinType: String {
 }
 ```
 
-ForagePINTextField uses a delegate `ForagePINTextFieldDelegate` to communicate the updates to the client side.
+ForagePINTextField uses a delegate `ForageElementDelegate` to communicate the updates to the client side.
 
 ```swift
 pinNumberTextField.delegate = self
 ```
 ```swift
-public protocol ForagePINTextFieldDelegate: AnyObject {
-    func pinStatus(_ view: UIView, isValid: Bool, pinType: PinType)
+public protocol ForageElementDelegate: AnyObject {
+    func focusDidChange(_ state: ObservableState)
 }
+```
+
+The ObservableState object has the values:
+```swift
+public protocol ObservableState {
+    /// isFirstResponder is true if the input is focused, false otherwise.
+    var isFirstResponder: Bool { get }
+    
+    /// isEmpty is true if the input is empty, false otherwise.
+    var isEmpty: Bool { get }
+    
+    /// isValid is true when the input text does not fail any validation checks with the exception of target length;
+    /// false if any of the validation checks other than target length fail.
+    var isValid: Bool { get }
+    
+    /// isComplete is true when all validation checks pass and the input is ready to be submitted.
+    var isComplete: Bool { get }
+}
+```
+
+The ForagePINTextField exposes a function to programmatically gain focus:
+```swift
+func becomeFirstResponder() -> Bool
 ```
 
 To send the PIN number, we can use the ForageSDK to perform the request.
