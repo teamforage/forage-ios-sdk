@@ -7,19 +7,30 @@
 
 import UIKit
 import BasisTheoryElements
+import Combine
 
 class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
+    /**
+     BT Event Types
+     */
+    private enum BTEventType: String {
+        case TEXT_CHANGE = "textChange"
+        case MASK_CHANGE = "maskChange"
+    }
     
+    private var _isEmpty: Bool = true
     @IBInspectable public var isEmpty: Bool {
-        get { return false }
+        get { return _isEmpty }
     }
     
+    private var _isValid: Bool = false
     @IBInspectable public var isValid: Bool {
-        get { return false }
+        get { return _isValid }
     }
     
+    private var _isComplete: Bool = false
     @IBInspectable public var isComplete: Bool {
-        get { return false }
+        get { return _isComplete }
     }
     
     func clearText() {
@@ -33,6 +44,8 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
     var placeholder: String?
     
     var tfTintColor: UIColor?
+    
+    private var cancellables = Set<AnyCancellable>()
     
     var verticalConstraint: [NSLayoutConstraint]?
     var horizontalConstraints: [NSLayoutConstraint]?
@@ -74,6 +87,16 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
         let pinRegex = try! NSRegularExpression(pattern: "^\\d{4}$")
         
         try! textField.setConfig(options: TextElementOptions(mask: pinMask, validation: pinRegex))
+        
+        textField.subject.sink { completion in
+        } receiveValue: { elementEvent in
+            if (elementEvent.type == BTEventType.TEXT_CHANGE.rawValue) {
+                self._isEmpty = elementEvent.empty
+                self._isValid = elementEvent.valid
+                self._isComplete = elementEvent.complete
+                self.delegate?.textFieldDidChange(self)
+            }
+        }.store(in: &cancellables)
     }
     
     func setPlaceholderText(_ text: String) {

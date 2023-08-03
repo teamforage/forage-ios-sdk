@@ -14,15 +14,15 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
     }
     
     @IBInspectable public var isEmpty: Bool {
-        get { return false }
+        get { return textField.isEmpty }
     }
     
     @IBInspectable public var isValid: Bool {
-        get { return false }
+        get { return textField.isValid }
     }
     
     @IBInspectable public var isComplete: Bool {
-        get { return false }
+        get { return textField.isComplete }
     }
     
     // MARK: Public Delegate
@@ -243,7 +243,7 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
 
 extension ForagePINTextField: VaultWrapperDelegate {
     internal func textFieldDidChange(_ textField: VaultWrapper) {
-        
+        delegate?.textFieldDidChange(self)
     }
     
     internal func firstResponderDidChange(_ textField: VaultWrapper) {
