@@ -77,6 +77,30 @@ final class ForagePINTextFieldTests: XCTestCase {
         XCTAssertEqual(expectedIsValid, observableState?.isValid)
         XCTAssertEqual(expectedIsComplete, observableState?.isComplete)
     }
+    
+    func test_forageElementDelegate_textFieldDidChange() {
+        let foragePinTextField = ForagePINTextField()
+        
+        let expectedIsFirstResponder = true
+        let expectedIsEmpty = false
+        let expectedIsValid = true
+        let expectedIsComplete = false
+        
+        foragePinTextField.delegate = self
+        foragePinTextField.delegate?.textFieldDidChange(
+            mockState(
+                isFirstResponder: expectedIsFirstResponder,
+                isEmpty: expectedIsEmpty,
+                isValid: expectedIsValid,
+                isComplete: expectedIsComplete
+            )
+        )
+        
+        XCTAssertEqual(expectedIsFirstResponder, observableState?.isFirstResponder)
+        XCTAssertEqual(expectedIsEmpty, observableState?.isEmpty)
+        XCTAssertEqual(expectedIsValid, observableState?.isValid)
+        XCTAssertEqual(expectedIsComplete, observableState?.isComplete)
+    }
 }
 
 extension ForagePINTextFieldTests: ForageElementDelegate {
