@@ -37,7 +37,7 @@ class CardNumberView: UIView {
         return label
     }()
     
-    private let panNumberTextField: ForagePANTextField = {
+    public let panNumberTextField: ForagePANTextField = {
         let tf = ForagePANTextField()
         tf.placeholder = "PAN Number"
         tf.accessibilityIdentifier = "tf_ebt_number"
