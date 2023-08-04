@@ -79,12 +79,42 @@ class RequestBalanceView: UIView {
         return button
     }()
     
-    private let statusLabel: UILabel = {
+    private let isFirstResponderLabel: UILabel = {
         let label = UILabel()
-        label.text = "PIN Not Focused"
+        label.text = "isFirstResponder: false"
         label.textColor = .red
         label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        label.accessibilityIdentifier = "lbl_status"
+        label.accessibilityIdentifier = "lbl_first_responder"
+        label.isAccessibilityElement = true
+        return label
+    }()
+    
+    private let isEmptyLabel: UILabel = {
+        let label = UILabel()
+        label.text = "isEmpty: true"
+        label.textColor = .red
+        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        label.accessibilityIdentifier = "lbl_empty"
+        label.isAccessibilityElement = true
+        return label
+    }()
+    
+    private let isValidLabel: UILabel = {
+        let label = UILabel()
+        label.text = "isValid: false"
+        label.textColor = .red
+        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        label.accessibilityIdentifier = "lbl_valid"
+        label.isAccessibilityElement = true
+        return label
+    }()
+    
+    private let isCompleteLabel: UILabel = {
+        let label = UILabel()
+        label.text = "isComplete: false"
+        label.textColor = .red
+        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        label.accessibilityIdentifier = "lbl_complete"
         label.isAccessibilityElement = true
         return label
     }()
@@ -172,7 +202,10 @@ class RequestBalanceView: UIView {
         self.addSubview(contentView)
         contentView.addSubview(titleLabel)
         contentView.addSubview(pinNumberTextField)
-        contentView.addSubview(statusLabel)
+        contentView.addSubview(isFirstResponderLabel)
+        contentView.addSubview(isEmptyLabel)
+        contentView.addSubview(isValidLabel)
+        contentView.addSubview(isCompleteLabel)
         contentView.addSubview(snapBalanceLabel)
         contentView.addSubview(nonSnapBalanceLabel)
         contentView.addSubview(errorLabel)
@@ -213,7 +246,7 @@ class RequestBalanceView: UIView {
             size: .init(width: 0, height: 60)
         )
         
-        statusLabel.anchor(
+        isFirstResponderLabel.anchor(
             top: pinNumberTextField.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
             bottom: nil,
@@ -222,8 +255,35 @@ class RequestBalanceView: UIView {
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
         )
         
+        isEmptyLabel.anchor(
+            top: isFirstResponderLabel.safeAreaLayoutGuide.bottomAnchor,
+            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
+            bottom: nil,
+            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
+            centerXAnchor: contentView.centerXAnchor,
+            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
+        )
+        
+        isValidLabel.anchor(
+            top: isEmptyLabel.safeAreaLayoutGuide.bottomAnchor,
+            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
+            bottom: nil,
+            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
+            centerXAnchor: contentView.centerXAnchor,
+            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
+        )
+        
+        isCompleteLabel.anchor(
+            top: isValidLabel.safeAreaLayoutGuide.bottomAnchor,
+            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
+            bottom: nil,
+            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
+            centerXAnchor: contentView.centerXAnchor,
+            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
+        )
+        
         snapBalanceLabel.anchor(
-            top: statusLabel.safeAreaLayoutGuide.bottomAnchor,
+            top: isCompleteLabel.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
             bottom: nil,
             trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
@@ -275,20 +335,23 @@ class RequestBalanceView: UIView {
         button.isUserInteractionEnabled = isEnabled
         button.alpha = isEnabled ? 1.0 : 0.5
     }
+    
+    private func updateState(state: ObservableState) {
+        isEmptyLabel.text = "isEmpty: \(state.isEmpty)"
+        isCompleteLabel.text = "isComplete: \(state.isComplete)"
+        isValidLabel.text = "isValid: \(state.isValid)"
+        isFirstResponderLabel.text = "isFirstResponder: \(state.isFirstResponder)"
+    }
 }
 
 // MARK: - ForagePINTextFieldDelegate
 
 extension RequestBalanceView: ForageElementDelegate {
     func focusDidChange(_ state: ObservableState) {
-        if (state.isFirstResponder) {
-            statusLabel.text = "PIN Focused"
-        } else {
-            statusLabel.text = "PIN Not Focused"
-        }
+        updateState(state: state)
     }
     
     func textFieldDidChange(_ state: ObservableState) {
-        
+        updateState(state: state)
     }
 }

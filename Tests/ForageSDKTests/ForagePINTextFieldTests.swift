@@ -15,6 +15,7 @@ final class ForagePINTextFieldTests: XCTestCase {
     
     override func setUp() {
         ForageSDK.setup(ForageSDK.Config(environment: .sandbox))
+        observableState = nil
     }
     
     class mockState: ObservableState {
@@ -64,6 +65,30 @@ final class ForagePINTextFieldTests: XCTestCase {
         
         foragePinTextField.delegate = self
         foragePinTextField.delegate?.focusDidChange(
+            mockState(
+                isFirstResponder: expectedIsFirstResponder,
+                isEmpty: expectedIsEmpty,
+                isValid: expectedIsValid,
+                isComplete: expectedIsComplete
+            )
+        )
+        
+        XCTAssertEqual(expectedIsFirstResponder, observableState?.isFirstResponder)
+        XCTAssertEqual(expectedIsEmpty, observableState?.isEmpty)
+        XCTAssertEqual(expectedIsValid, observableState?.isValid)
+        XCTAssertEqual(expectedIsComplete, observableState?.isComplete)
+    }
+    
+    func test_forageElementDelegate_textFieldDidChange() {
+        let foragePinTextField = ForagePINTextField()
+        
+        let expectedIsFirstResponder = false
+        let expectedIsEmpty = true
+        let expectedIsValid = false
+        let expectedIsComplete = true
+        
+        foragePinTextField.delegate = self
+        foragePinTextField.delegate?.textFieldDidChange(
             mockState(
                 isFirstResponder: expectedIsFirstResponder,
                 isEmpty: expectedIsEmpty,

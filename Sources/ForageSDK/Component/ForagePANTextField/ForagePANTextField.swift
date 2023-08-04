@@ -8,21 +8,61 @@
 import UIKit
 import VGSCollectSDK
 
-private enum CardType: String {
-    case ebt = "ebt"
+public enum CardType: String {
+    case EBT = "ebt"
 }
 
-public class ForagePANTextField: UIView, Identifiable {
+public class ForagePANTextField: UIView, Identifiable, ForageElement {
+    public func setPlaceholderText(_ text: String) {
+        
+    }
+    
+    public func clearText() {
+        ForageSDK.shared.panNumber = ""
+    }
+    
+    /// BorderWidth for the text field
+    private var _borderWidth: CGFloat = 0.1
+    @IBInspectable public var borderWidth: CGFloat {
+        get { return _borderWidth }
+        set { _borderWidth = newValue }
+    }
+    
+    /// BorderColor for the text field
+    private var _borderColor: UIColor? = .black
+    @IBInspectable public var borderColor: UIColor? {
+        get { return _borderColor }
+        set { _borderColor = newValue }
+    }
+    
+    /// Padding for the text field
+    private var _padding: UIEdgeInsets = UIEdgeInsets(top: 0.0, left: 0.0, bottom: 0.0, right: 0.0)
+    @IBInspectable public var padding: UIEdgeInsets {
+        get { return _padding }
+        set { _padding = newValue }
+    }
+    
+    @IBInspectable public var isEmpty: Bool {
+        get { return ForageSDK.shared.panNumber.isEmpty }
+    }
+    
+    private var _isValid: Bool = true
+    @IBInspectable public var isValid: Bool {
+        get { return _isValid }
+    }
+    
+    private var _isComplete: Bool = false
+    @IBInspectable public var isComplete: Bool {
+        get { return _isComplete }
+    }
     
     // MARK: Private Properties
-    
-    private var panNumber = ""
     private var stateIIN: StateIIN?
     
     // MARK: Public Delegate
     
     /// Delegate that updates client's side about state of the entered card number
-    public weak var delegate: ForagePANTextFieldDelegate?
+    public weak var delegate: ForageElementDelegate?
     
     // MARK: Public Properties
     
@@ -50,12 +90,6 @@ public class ForagePANTextField: UIView, Identifiable {
     @IBInspectable public var tfTintColor: UIColor? {
         get { return textField.tintColor }
         set { textField.tintColor = newValue }
-    }
-    
-    /// Hide text and disable copy when set `true`
-    /// `isSecureTextEntry` default value is `false`
-    @IBInspectable public var isSecureTextEntry: Bool = false {
-        didSet { textField.isSecureTextEntry = isSecureTextEntry }
     }
     
     /// Text alignment
@@ -218,54 +252,72 @@ public class ForagePANTextField: UIView, Identifiable {
 // MARK: - UITextFieldDelegate
 
 extension ForagePANTextField: UITextFieldDelegate {
+    public func textFieldDidBeginEditing(_ textField: UITextField) {
+        delegate?.focusDidChange(self)
+    }
+    
+    public func textFieldDidEndEditing(_ textField: UITextField) {
+        delegate?.focusDidChange(self)
+    }
+    
     public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        
         /// Only allow numbers to be entered into the input field!
         let invalidCharacters = CharacterSet(charactersIn: "0123456789").inverted
         if !(string.rangeOfCharacter(from: invalidCharacters) == nil) {
             return false
         }
-        
+
         let currentString = (textField.text ?? "") as NSString
         let newString = currentString.replacingCharacters(in: range, with: string)
         
-        if newString.count > 19 {
-            return false
+        /// Check if the current PAN is already at max length for a valid entry and cap the user there
+        if let stateIIN = ForagePANValidations.checkPANLength(newString) {
+            if (newString.count > stateIIN.panLength) {
+                return false
+            }
+        }
+        /// If the card is not valid, make sure to cap the random string of numbers at 19 digits
+        else {
+            if (newString.count > 19) {
+                return false
+            }
         }
 
         /// Set the Pan Number
         ForageSDK.shared.panNumber = newString
 
-        /// Until 6 digits are entered, we can't apply any validation
+        /// Prior to seeing 6 digits, the PAN is considered valid but incomplete.
         if newString.count < 6 {
-            delegate?.panNumberStatus(self, cardStatus: .identifying)
+            _isValid = true
+            _isComplete = false
+            delegate?.textFieldDidChange(self)
             return true
         }
 
         /// Check if the first 6 digits are valid
         if let stateIIN = ForagePANValidations.checkPANLength(newString) {
             /// If the first 6 digits are valid, then we know what the expected length of the card will be.
-            /// Set the status to invalid if we exceed that length.
-            if newString.count > stateIIN.panLength {
-                delegate?.panNumberStatus(self, cardStatus: .invalid)
+            /// If we haven't reached the max length yet, the PAN is considered valid but incomplete.
+            if newString.count < stateIIN.panLength {
+                _isValid = true
+                _isComplete = false
+                delegate?.textFieldDidChange(self)
+                return true
+            } else {
+                /// If the first 6 digits are correct and we have the correct length, the PAN is considered valid AND complete.
+                _isValid = true
+                _isComplete = true
+                delegate?.textFieldDidChange(self)
                 return true
             }
-
-            /// Until the expected length is seen, we are still "identifying" the card.
-            if newString.count < stateIIN.panLength {
-                delegate?.panNumberStatus(self, cardStatus: .identifying)
-            } else {
-                /// If the first 6 digits are correct and we have the correct length, we set status to valid.
-                delegate?.panNumberStatus(self, cardStatus: .valid)
-            }
         } else {
-            /// If 6 of more digits are included and the first 6 digits don't map to a known state, we set the
-            /// status to invalid.
-            delegate?.panNumberStatus(self, cardStatus: .invalid)
+            /// If 6 or more digits are included and the first 6 digits don't map to a known state, we set the
+            /// PAN to invalid and incomplete.
+            _isValid = false
+            _isComplete = false
+            delegate?.textFieldDidChange(self)
+            return true
         }
-
-        /// Default text field allowed digits
-        return newString.count <= 19
     }
 }
 

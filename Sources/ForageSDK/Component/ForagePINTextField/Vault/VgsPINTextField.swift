@@ -11,15 +11,15 @@ import VGSCollectSDK
 class VGSTextFieldWrapper: UIView, VaultWrapper {
     
     @IBInspectable public var isEmpty: Bool {
-        get { return false }
+        get { return textField.state.isEmpty }
     }
     
     @IBInspectable public var isValid: Bool {
-        get { return false }
+        get { return textField.state.inputLength == 4 }
     }
     
     @IBInspectable public var isComplete: Bool {
-        get { return false }
+        get { return textField.state.inputLength == 4 }
     }
     
     func clearText() {
@@ -130,7 +130,7 @@ class VGSTextFieldWrapper: UIView, VaultWrapper {
 
 extension VGSTextFieldWrapper: VGSTextFieldDelegate {
     @objc func vgsTextFieldDidChange(_ textField: VGSTextField) {
-        
+        delegate?.textFieldDidChange(self)
     }
     
     /// This is the VGS event for "field became first responder"
