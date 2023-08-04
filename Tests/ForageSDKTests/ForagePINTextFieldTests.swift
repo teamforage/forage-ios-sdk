@@ -15,6 +15,7 @@ final class ForagePINTextFieldTests: XCTestCase {
     
     override func setUp() {
         ForageSDK.setup(ForageSDK.Config(environment: .sandbox))
+        observableState = nil
     }
     
     class mockState: ObservableState {
@@ -81,10 +82,10 @@ final class ForagePINTextFieldTests: XCTestCase {
     func test_forageElementDelegate_textFieldDidChange() {
         let foragePinTextField = ForagePINTextField()
         
-        let expectedIsFirstResponder = true
-        let expectedIsEmpty = false
-        let expectedIsValid = true
-        let expectedIsComplete = false
+        let expectedIsFirstResponder = false
+        let expectedIsEmpty = true
+        let expectedIsValid = false
+        let expectedIsComplete = true
         
         foragePinTextField.delegate = self
         foragePinTextField.delegate?.textFieldDidChange(

@@ -17,7 +17,6 @@ class CardNumberView: UIView {
     
     // MARK: Public Properties
     
-    var isCardValid: Bool = false
     weak var delegate: CardNumberViewDelegate?
     
     // MARK: Private Components
@@ -38,7 +37,7 @@ class CardNumberView: UIView {
         return label
     }()
     
-    private let panNumberTextField: ForagePANTextField = {
+    public let panNumberTextField: ForagePANTextField = {
         let tf = ForagePANTextField()
         tf.placeholder = "PAN Number"
         tf.accessibilityIdentifier = "tf_ebt_number"
@@ -48,8 +47,8 @@ class CardNumberView: UIView {
     
     private let statusLabel: UILabel = {
         let label = UILabel()
-        label.text = "Card number status"
-        label.textColor = .red
+        label.text = "Enter Card Number"
+        label.textColor = .gray
         label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         label.accessibilityIdentifier = "lbl_status"
         label.isAccessibilityElement = true
@@ -64,9 +63,9 @@ class CardNumberView: UIView {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(sendInfo(_:)), for: .touchUpInside)
         button.backgroundColor = .systemBlue
-        button.isEnabled = false
-        button.isUserInteractionEnabled = false
-        button.alpha = 0.5
+        button.isEnabled = true
+        button.isUserInteractionEnabled = true
+        button.alpha = 1
         button.accessibilityIdentifier = "bt_send_ebt_number"
         button.isAccessibilityElement = true
         return button
@@ -157,14 +156,12 @@ class CardNumberView: UIView {
     // MARK: Fileprivate Methods
     
     @objc fileprivate func sendInfo(_ gesture: UIGestureRecognizer) {
-        if isCardValid {
-            ForageSDK.shared.tokenizeEBTCard(
-                bearerToken: ClientSharedData.shared.bearerToken,
-                merchantAccount: ClientSharedData.shared.merchantID,
-                customerID: ClientSharedData.shared.customerID) { result in
-                    self.printResult(result: result)
-                }
-        }
+        ForageSDK.shared.tokenizeEBTCard(
+            bearerToken: ClientSharedData.shared.bearerToken,
+            merchantAccount: ClientSharedData.shared.merchantID,
+            customerID: ClientSharedData.shared.customerID) { result in
+                self.printResult(result: result)
+            }
     }
     
     @objc fileprivate func goToBalance(_ gesture: UIGestureRecognizer) {
@@ -345,29 +342,32 @@ class CardNumberView: UIView {
         button.isUserInteractionEnabled = isEnabled
         button.alpha = isEnabled ? 1.0 : 0.5
     }
+    
+    private func updateState(state: ObservableState) {
+        if (state.isEmpty) {
+            statusLabel.text = "Enter Card Number"
+            statusLabel.textColor = .gray
+        } else if (state.isComplete && state.isValid) {
+            statusLabel.text = "Card Number Valid"
+            statusLabel.textColor = .green
+        } else if (state.isValid && !state.isComplete) {
+            statusLabel.text = "Identifying Card Number"
+            statusLabel.textColor = .gray
+        } else {
+            statusLabel.text = "Card Number Invalid"
+            statusLabel.textColor = .red
+        }
+    }
 }
 
 // MARK: - ForagePANTextFieldDelegate
 
-extension CardNumberView: ForagePANTextFieldDelegate {
-    func panNumberStatus(_ view: UIView, cardStatus: CardStatus) {
-        var isValid = false
-        switch cardStatus {
-        case .valid:
-            statusLabel.text = "It is a VALID card number"
-            statusLabel.textColor = .green
-            isValid = true
-        case .invalid:
-            statusLabel.text = "It is a NON VALID card number"
-            statusLabel.textColor = .red
-            isValid = true
-        case .identifying:
-            statusLabel.text = "It is IDENTIFYING card number"
-            statusLabel.textColor = .gray
-            isValid = true
-        }
-        
-        updateButtonState(isEnabled: isValid, button: sendPanButton)
-        isCardValid = isValid
+extension CardNumberView: ForageElementDelegate {
+    func focusDidChange(_ state: ObservableState) {
+        updateState(state: state)
+    }
+    
+    func textFieldDidChange(_ state: ObservableState) {
+        updateState(state: state)
     }
 }

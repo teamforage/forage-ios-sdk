@@ -17,6 +17,11 @@ class CardNumberViewController: BaseViewCodeViewController<CardNumberView> {
         customView.render()
         customView.delegate = self
     }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        self.customView.panNumberTextField.becomeFirstResponder()
+    }
 }
 
 // MARK: - CardNumberViewDelegate
