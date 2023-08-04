@@ -344,14 +344,14 @@ class CardNumberView: UIView {
     }
     
     private func updateState(state: ObservableState) {
-        if (state.isComplete && state.isValid) {
+        if (state.isEmpty) {
+            statusLabel.text = "Enter Card Number"
+            statusLabel.textColor = .gray
+        } else if (state.isComplete && state.isValid) {
             statusLabel.text = "Card Number Valid"
             statusLabel.textColor = .green
         } else if (state.isValid && !state.isComplete) {
             statusLabel.text = "Identifying Card Number"
-            statusLabel.textColor = .gray
-        } else if (state.isEmpty) {
-            statusLabel.text = "Enter Card Number"
             statusLabel.textColor = .gray
         } else {
             statusLabel.text = "Card Number Invalid"

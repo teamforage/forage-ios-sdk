@@ -15,6 +15,7 @@ final class ForagePINTextFieldTests: XCTestCase {
     
     override func setUp() {
         ForageSDK.setup(ForageSDK.Config(environment: .sandbox))
+        observableState = nil
     }
     
     class mockState: ObservableState {

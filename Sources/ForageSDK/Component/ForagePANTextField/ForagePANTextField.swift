@@ -270,9 +270,15 @@ extension ForagePANTextField: UITextFieldDelegate {
         let currentString = (textField.text ?? "") as NSString
         let newString = currentString.replacingCharacters(in: range, with: string)
         
-        /// Check if the current PAN is already at max length for a valid entry
+        /// Check if the current PAN is already at max length for a valid entry and cap the user there
         if let stateIIN = ForagePANValidations.checkPANLength(newString) {
             if (newString.count > stateIIN.panLength) {
+                return false
+            }
+        }
+        /// If the card is not valid, make sure to cap the random string of numbers at 19 digits
+        else {
+            if (newString.count > 19) {
                 return false
             }
         }
@@ -280,7 +286,7 @@ extension ForagePANTextField: UITextFieldDelegate {
         /// Set the Pan Number
         ForageSDK.shared.panNumber = newString
 
-        /// Until 6 digits are entered, we can't apply any validation
+        /// Prior to seeing 6 digits, the PAN is considered valid but incomplete.
         if newString.count < 6 {
             _isValid = true
             _isComplete = false
@@ -291,31 +297,22 @@ extension ForagePANTextField: UITextFieldDelegate {
         /// Check if the first 6 digits are valid
         if let stateIIN = ForagePANValidations.checkPANLength(newString) {
             /// If the first 6 digits are valid, then we know what the expected length of the card will be.
-            /// Set the status to invalid if we exceed that length.
-            if newString.count > stateIIN.panLength {
-                // TODO: Only allow someone to type in a card of maxLength based on BIN
-                _isValid = false
-                _isComplete = false
-                delegate?.textFieldDidChange(self)
-                return true
-            }
-
-            /// Until the expected length is seen, we are still "identifying" the card.
+            /// If we haven't reached the max length yet, the PAN is considered valid but incomplete.
             if newString.count < stateIIN.panLength {
                 _isValid = true
                 _isComplete = false
                 delegate?.textFieldDidChange(self)
                 return true
             } else {
-                /// If the first 6 digits are correct and we have the correct length, we set status to valid.
+                /// If the first 6 digits are correct and we have the correct length, the PAN is considered valid AND complete.
                 _isValid = true
                 _isComplete = true
                 delegate?.textFieldDidChange(self)
                 return true
             }
         } else {
-            /// If 6 of more digits are included and the first 6 digits don't map to a known state, we set the
-            /// status to invalid.
+            /// If 6 or more digits are included and the first 6 digits don't map to a known state, we set the
+            /// PAN to invalid and incomplete.
             _isValid = false
             _isComplete = false
             delegate?.textFieldDidChange(self)
