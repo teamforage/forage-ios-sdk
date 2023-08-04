@@ -9,13 +9,6 @@ import VGSCollectSDK
 import Foundation
 
 /**
- Card type
- */
-private enum CardType: String {
-    case ebt = "ebt"
-}
-
-/**
  Interface for Forage SDK Services
  */
 protocol ForageSDKService: AnyObject {
@@ -75,7 +68,7 @@ extension ForageSDK: ForageSDKService {
             authorization: bearerToken,
             merchantAccount: merchantAccount,
             panNumber: panNumber,
-            type: CardType.ebt.rawValue,
+            type: CardType.EBT.rawValue,
             reusable: true,
             customerID: customerID
         )
