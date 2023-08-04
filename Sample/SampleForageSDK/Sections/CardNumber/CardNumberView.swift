@@ -63,9 +63,9 @@ class CardNumberView: UIView {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(sendInfo(_:)), for: .touchUpInside)
         button.backgroundColor = .systemBlue
-        button.isEnabled = false
-        button.isUserInteractionEnabled = false
-        button.alpha = 0.5
+        button.isEnabled = true
+        button.isUserInteractionEnabled = true
+        button.alpha = 1
         button.accessibilityIdentifier = "bt_send_ebt_number"
         button.isAccessibilityElement = true
         return button
