@@ -156,8 +156,6 @@ class RequestBalanceView: UIView {
     
     @objc fileprivate func getBalanceInfo(_ gesture: UIGestureRecognizer) {
         ForageSDK.shared.checkBalance(
-            bearerToken: ClientSharedData.shared.bearerToken,
-            merchantAccount: ClientSharedData.shared.merchantID,
             paymentMethodReference: ClientSharedData.shared.paymentMethodReference,
             foragePinTextEdit: pinNumberTextField) { result in
                 self.printPINResult(result: result)

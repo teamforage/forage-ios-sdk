@@ -12,14 +12,14 @@ import VGSCollectSDK
  Interface for internal Forage SDK requests
  */
 internal protocol ForageService: AnyObject {
-    /// Provider provides the interface for perform url requests.
+    /// Provider provides the interface for performing HTTP requests.
     var provider: Provider { get }
     
     /// Retrieve X-key header for requests
     ///
     /// - Parameters:
     ///  - bearerToken: Authorization token.
-    ///  - merchantAccount: The merchant FNS number.
+    ///  - merchantAccount: merchant ID.
     ///  - completion: Which will return the x-key object.
     func getXKey(
         bearerToken: String,
@@ -30,7 +30,7 @@ internal protocol ForageService: AnyObject {
     ///
     /// - Parameters:
     ///  - bearerToken: Authorization token.
-    ///  - merchantAccount: The merchant FNS number.
+    ///  - merchantAccount: merchant ID.
     ///  - paymentMethodRef: The PaymentMethod ref.
     ///  - completion: Returns the PaymentMethod
     func getPaymentMethod(
@@ -43,7 +43,7 @@ internal protocol ForageService: AnyObject {
     ///
     /// - Parameters:
     ///  - bearerToken: Authorization token.
-    ///  - merchantAccount: The merchant FNS number.
+    ///  - merchantAccount: merchant ID.
     ///  - paymentRef: The Payment ref.
     ///  - completion: Returns the Payment
     func getPayment(
