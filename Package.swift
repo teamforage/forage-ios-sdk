@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "ForageSDK",
     platforms: [
-            .iOS(.v14),
+            .iOS(.v13),
         ],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
@@ -30,7 +30,7 @@ let package = Package(
         .package(
             name: "BasisTheoryElements",
             url: "https://github.com/Basis-Theory/basistheory-ios",
-            from: "2.2.0"
+            from: "2.5.0"
         ),
     ],
     targets: [
