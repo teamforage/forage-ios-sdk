@@ -27,8 +27,8 @@ public class ForageSDK {
     internal var service: ForageService?
     internal var panNumber: String = ""
     internal var environment: EnvironmentTarget = .sandbox
-    internal var merchantAccount: String = ""
-    internal var bearerToken: String = ""
+    internal var merchantID: String = ""
+    internal var sessionToken: String = ""
     
     public static let shared = ForageSDK()
     
@@ -40,8 +40,8 @@ public class ForageSDK {
             return
         }
         self.environment = config.environment
-        self.merchantAccount = config.merchantAccount
-        self.bearerToken = config.bearerToken
+        self.merchantID = config.merchantID
+        self.sessionToken = config.sessionToken
         
         LDManager.shared.initialize(self.environment)
         // TODO: Maybe move this shared logger call!
@@ -54,33 +54,33 @@ public class ForageSDK {
      
      - Parameters:
         - environment: *EnvironmentTarget* enum to set environment.
-        - merchantAccount: The unique merchant ID that Forage provides during onboarding preceded by `mid/`, as in `mid/<Merchant ID>`
-        - bearerToken: The [session token](https://docs.joinforage.app/docs/authentication#session-tokens) that your backend generates to authenticate your app against the Forage Payments API. The token expires after 15 minutes.
+        - merchantID: The unique merchant ID that Forage provides during onboarding preceded by `mid/`, as in `mid/<Merchant ID>`
+        - sessionToken: The [session token](https://docs.joinforage.app/docs/authentication#session-tokens) that your backend generates to authenticate your app against the Forage Payments API. The token expires after 15 minutes.
      */
     public struct Config {
         let environment: EnvironmentTarget
-        let merchantAccount: String
-        let bearerToken: String
+        let merchantID: String
+        let sessionToken: String
 
-        public init(environment: EnvironmentTarget = .sandbox, merchantAccount: String, bearerToken: String) {
+        public init(environment: EnvironmentTarget = .sandbox, merchantID: String, sessionToken: String) {
             self.environment = environment
-            self.merchantAccount = merchantAccount
-            self.bearerToken = bearerToken
+            self.merchantID = merchantID
+            self.sessionToken = sessionToken
         }
     }
     
     /**
-     Setup ForageSDK using Config struct.
+     Setup ForageSDK using ``Config`` struct.
      
      - Parameters:
-       - config: *Config* struct object to set environment, merchant ID, and session token
+       - config: ``Config`` struct object to set environment, merchant ID, and session token
      
     ````
      ForageSDK.setup(
          ForageSDK.Config(
              environment: .sandbox,
-             merchantAccount: "mid/abcd123",
-             bearerToken: "sandbox_eyJ0eXAiOiJKV1Qi..."
+             merchantID: "mid/abcd123",
+             sessionToken: "sandbox_eyJ0eXAiOiJKV1Qi..."
          )
      )
     ````

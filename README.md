@@ -77,8 +77,8 @@ To initialize a ForageSDK instance, you need to provide the environment.
 ForageSDK.setup(
     ForageSDK.Config(
         environment: .sandbox,
-        merchantAccount: "mid/abcd123",
-        bearerToken: "sandbox_eyJ0eXAiOiJKV1Qi..."
+        merchantID: "mid/abcd123",
+        sessionToken: "sandbox_eyJ0eXAiOiJKV1Qi..."
     )
 )
 ```
@@ -280,10 +280,11 @@ Demo application for using our components on iOS is <a href="https://github.com/
 To get the application running,
 
 1. Clone this repo and open the Sample Project in the Sample folder.
-2. Ensure that you have a valid FNS number for the Forage API, which can be found on the dashboard ([sandbox](https://dashboard.sandbox.joinforage.app/login/) | [prod](https://dashboard.joinforage.app/login/)).
-3. [Create a bearer token](https://docs.joinforage.app/recipes/generate-a-token) with `pinpad_only` scope.
-4. Run the Sample app project and provide your FNS number and bearer token on the first screen.
-5. These credentials will be passed through to all the SDK calls inside the sample app.
+2. Ensure that you have a valid Merchant ID for the Forage API, which can be found on the dashboard ([sandbox](https://dashboard.sandbox.joinforage.app/login/) | [prod](https://dashboard.joinforage.app/login/)).
+3. [Create an authentication token](https://docs.joinforage.app/docs/authentication#authentication-tokens) with `pinpad_only` scope.
+4. [Create a session token](https://docs.joinforage.app/docs/authentication#session-tokens).
+5. Run the Sample app project and provide your Merchant ID and session token on the first screen.
+6. These credentials will be passed through to all the SDK calls inside the sample app.
 
 ## Dependencies
 

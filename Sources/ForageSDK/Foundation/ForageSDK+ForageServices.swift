@@ -49,8 +49,8 @@ extension ForageSDK: ForageSDKService {
         completion: @escaping (Result<PaymentMethodModel, Error>) -> Void
     ) {
         let request = ForagePANRequestModel(
-            authorization: self.bearerToken,
-            merchantAccount: self.merchantAccount,
+            authorization: self.sessionToken,
+            merchantID: self.merchantID,
             panNumber: panNumber,
             type: CardType.EBT.rawValue,
             reusable: true,
@@ -63,21 +63,21 @@ extension ForageSDK: ForageSDKService {
         paymentMethodReference: String,
         foragePinTextEdit: ForagePINTextField,
         completion: @escaping (Result<BalanceModel, Error>) -> Void) {
-            let bearerToken = self.bearerToken
-            let merchantAccount = self.merchantAccount
+            let sessionToken = self.sessionToken
+            let merchantID = self.merchantID
             
-            service?.getXKey(bearerToken: bearerToken, merchantAccount: merchantAccount) { result in
+            service?.getXKey(sessionToken: sessionToken, merchantID: merchantID) { result in
                 switch result {
                 case .success(let model):
-                    self.service?.getPaymentMethod(bearerToken: bearerToken, merchantAccount: merchantAccount, paymentMethodRef: paymentMethodReference) { result in
+                    self.service?.getPaymentMethod(sessionToken: sessionToken, merchantID: merchantID, paymentMethodRef: paymentMethodReference) { result in
                         switch result {
                         case .success(let paymentMethod):
                             let request = ForageRequestModel(
-                                authorization: bearerToken,
+                                authorization: sessionToken,
                                 paymentMethodReference: paymentMethodReference,
                                 paymentReference: "",
                                 cardNumberToken: paymentMethod.card.token,
-                                merchantID: merchantAccount,
+                                merchantID: merchantID,
                                 xKey: ["vgsXKey": model.alias, "btXKey": model.bt_alias]
                             )
                             self.service?.checkBalance(pinCollector: foragePinTextEdit.collector!, request: request, completion: completion)
@@ -96,24 +96,24 @@ extension ForageSDK: ForageSDKService {
         paymentReference: String,
         foragePinTextEdit: ForagePINTextField,
         completion: @escaping (Result<PaymentModel, Error>) -> Void) {
-            let bearerToken = self.bearerToken
-            let merchantAccount = self.merchantAccount
+            let sessionToken = self.sessionToken
+            let merchantID = self.merchantID
             
-            service?.getXKey(bearerToken: bearerToken, merchantAccount: merchantAccount) { result in
+            service?.getXKey(sessionToken: sessionToken, merchantID: merchantID) { result in
                 switch result {
                 case .success(let model):
-                    self.service?.getPayment(bearerToken: bearerToken, merchantAccount: merchantAccount, paymentRef: paymentReference) { result in
+                    self.service?.getPayment(sessionToken: sessionToken, merchantID: merchantID, paymentRef: paymentReference) { result in
                         switch result {
                         case .success(let payment):
-                            self.service?.getPaymentMethod(bearerToken: bearerToken, merchantAccount: merchantAccount, paymentMethodRef: payment.paymentMethodRef) { result in
+                            self.service?.getPaymentMethod(sessionToken: sessionToken, merchantID: merchantID, paymentMethodRef: payment.paymentMethodRef) { result in
                                 switch result {
                                 case .success(let paymentMethod):
                                     let request = ForageRequestModel(
-                                        authorization: bearerToken,
+                                        authorization: sessionToken,
                                         paymentMethodReference: "",
                                         paymentReference: paymentReference,
                                         cardNumberToken: paymentMethod.card.token,
-                                        merchantID: merchantAccount,
+                                        merchantID: merchantID,
                                         xKey: ["vgsXKey": model.alias, "btXKey": model.bt_alias]
                                     )
                                     self.service?.capturePayment(pinCollector: foragePinTextEdit.collector!, request: request, completion: completion)
