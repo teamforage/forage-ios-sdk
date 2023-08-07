@@ -156,12 +156,9 @@ class CardNumberView: UIView {
     // MARK: Fileprivate Methods
     
     @objc fileprivate func sendInfo(_ gesture: UIGestureRecognizer) {
-        ForageSDK.shared.tokenizeEBTCard(
-            bearerToken: ClientSharedData.shared.bearerToken,
-            merchantAccount: ClientSharedData.shared.merchantID,
-            customerID: ClientSharedData.shared.customerID) { result in
-                self.printResult(result: result)
-            }
+        ForageSDK.shared.tokenizeEBTCard(customerID: ClientSharedData.shared.customerID) { result in
+            self.printResult(result: result)
+        }
     }
     
     @objc fileprivate func goToBalance(_ gesture: UIGestureRecognizer) {

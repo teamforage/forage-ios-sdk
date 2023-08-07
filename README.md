@@ -2,21 +2,27 @@
 
 The ForageSDK processes Electronic Benefits Transfer (EBT) payments in your e-commerce application. It provides secure user interfaces for collecting and tokenizing an EBT cardholder's PAN and accepting an EBT cardholder's PIN to execute a balance check and process a payment.
 
-Table of contents
-=================
+# Table of contents
 
 <!--ts-->
-   * [Integration](#integration)
-      * [CocoaPods](#cocoapods)
-      * [Swift Package Manager](#swift-package-manager) 
-   * [Usage](#usage)
-      * [Create ForageSDK instance](#create-foragesdk-instance)
-      * [Forage UI Elements](#forage-ui-elements)
-      * [ForagePANTextField](#foragepantextfield)
-      * [ForagePINTextField](#foragepintextfield)
-      * [Demo Application](#demo-application)
-   * [Dependencies](#dependencies)
-<!--te-->
+
+- [ForageSDK](#foragesdk)
+- [Table of contents](#table-of-contents)
+  - [Integration](#integration)
+    - [CocoaPods](#cocoapods)
+    - [Swift Package Manager](#swift-package-manager)
+    - [Step-by-step](#step-by-step)
+  - [Usage](#usage)
+    - [Import SDK into your file](#import-sdk-into-your-file)
+    - [Create ForageSDK instance](#create-foragesdk-instance)
+  - [Forage UI Elements](#forage-ui-elements)
+    - [ForagePANTextField](#foragepantextfield)
+    - [Tokenize card number](#tokenize-card-number)
+    - [ForagePINTextField](#foragepintextfield)
+    - [Balance](#balance)
+    - [Capture payment](#capture-payment)
+  - [Demo Application](#demo-application)
+  - [Dependencies](#dependencies)
 
 ## Integration
 
@@ -58,6 +64,7 @@ Click on `Add Package` button. And, on the next screen, select the package `Fora
 ## Usage
 
 ### Import SDK into your file
+
 ```swift
 import ForageSDK
 ```
@@ -68,7 +75,11 @@ To initialize a ForageSDK instance, you need to provide the environment.
 
 ```swift
 ForageSDK.setup(
-    ForageSDK.Config(environment: .sandbox)
+    ForageSDK.Config(
+        environment: .sandbox,
+        merchantAccount: "mid/abcd123",
+        bearerToken: "sandbox_eyJ0eXAiOiJKV1Qi..."
+    )
 )
 ```
 
@@ -81,7 +92,6 @@ ForageSDK provides two UI Elements to securely communicate with the Forage API.
 A component that securely accepts the PAN number. This field validates the PAN number based on the [StateIIN list](https://www.nacha.org/sites/default/files/2019-05/State-IINs-04-10-19.pdf)
 
 ![Screen Shot 2022-10-31 at 10 19 27](https://user-images.githubusercontent.com/115553362/199017253-ee05dcf0-01c8-41dc-9662-9da525e573c9.png)
-
 
 ```swift
 private let panNumberTextField: ForagePANTextField = {
@@ -96,6 +106,7 @@ ForagePANTextField uses a delegate `ForageElementDelegate` to communicate the up
 ```swift
 panNumberTextField.delegate = self
 ```
+
 ```swift
 public protocol ForageElementDelegate: AnyObject {
     func focusDidChange(_ state: ObservableState)
@@ -104,28 +115,29 @@ public protocol ForageElementDelegate: AnyObject {
 ```
 
 The ObservableState object has the values:
+
 ```swift
 public protocol ObservableState {
     /// isFirstResponder is true if the input is focused, false otherwise.
     var isFirstResponder: Bool { get }
-    
+
     /// isEmpty is true if the input is empty, false otherwise.
     var isEmpty: Bool { get }
-    
+
     /// isValid is true when the input text does not fail any validation checks with the exception of target length;
     /// false if any of the validation checks other than target length fail.
     var isValid: Bool { get }
-    
+
     /// isComplete is true when all validation checks pass and the input is ready to be submitted.
     var isComplete: Bool { get }
 }
 ```
 
 The ForagePINTextField exposes a function to programmatically gain focus:
+
 ```swift
 func becomeFirstResponder() -> Bool
 ```
-
 
 To send the PAN number, we can use ForageSDK to perform the request.
 
@@ -135,8 +147,6 @@ To send the PAN number, we can use ForageSDK to perform the request.
 // Signature
 
 func tokenizeEBTCard(
-    bearerToken: String,
-    merchantAccount: String,
     customerID: String,
     completion: @escaping (Result<PaymentMethodModel, Error>) -> Void
 )
@@ -146,8 +156,6 @@ func tokenizeEBTCard(
 // Usage
 
 ForageSDK.shared.tokenizeEBTCard(
-    bearerToken: bearerToken,
-    merchantAccount: merchantID,
     // NOTE: The following line is for testing purposes only and should not be used in production.
     // Please replace this line with a real hashed customer ID value.
     customerID: UUID.init().uuidString) { result in
@@ -172,6 +180,7 @@ private let pinNumberTextField: ForagePINTextField = {
 ```
 
 To identify the type of pin we are handling in the component, you can use the `pinType` property. We have support for these types:
+
 ```swift
 public enum PinType: String {
     case snap
@@ -185,6 +194,7 @@ ForagePINTextField uses a delegate `ForageElementDelegate` to communicate the up
 ```swift
 pinNumberTextField.delegate = self
 ```
+
 ```swift
 public protocol ForageElementDelegate: AnyObject {
     func focusDidChange(_ state: ObservableState)
@@ -193,24 +203,26 @@ public protocol ForageElementDelegate: AnyObject {
 ```
 
 The ObservableState object has the values:
+
 ```swift
 public protocol ObservableState {
     /// isFirstResponder is true if the input is focused, false otherwise.
     var isFirstResponder: Bool { get }
-    
+
     /// isEmpty is true if the input is empty, false otherwise.
     var isEmpty: Bool { get }
-    
+
     /// isValid is true when the input text does not fail any validation checks with the exception of target length;
     /// false if any of the validation checks other than target length fail.
     var isValid: Bool { get }
-    
+
     /// isComplete is true when all validation checks pass and the input is ready to be submitted.
     var isComplete: Bool { get }
 }
 ```
 
 The ForagePINTextField exposes a function to programmatically gain focus:
+
 ```swift
 func becomeFirstResponder() -> Bool
 ```
@@ -223,8 +235,6 @@ To send the PIN number, we can use the ForageSDK to perform the request.
 // Signature
 
 func checkBalance(
-    bearerToken: String,
-    merchantAccount: String,
     paymentMethodReference: String,
     foragePinTextEdit: ForagePINTextField,
     completion: @escaping (Result<BalanceModel, Error>) -> Void
@@ -235,8 +245,6 @@ func checkBalance(
 // Usage
 
 ForageSDK.shared.checkBalance(
-    bearerToken: bearerToken,
-    merchantAccount: merchantID,
     paymentMethodReference: paymentMethodReference,
     foragePinTextEdit: pinNumberTextField) { result in
         // handle callback here
@@ -249,8 +257,6 @@ ForageSDK.shared.checkBalance(
 // Signature
 
 func capturePayment(
-    bearerToken: String,
-    merchantAccount: String,
     paymentReference: String,
     foragePinTextEdit: ForagePINTextField,
     completion: @escaping (Result<PaymentModel, Error>) -> Void
@@ -261,8 +267,6 @@ func capturePayment(
 // Usage
 
 ForageSDK.shared.capturePayment(
-    bearerToken: bearerToken,
-    merchantAccount: merchantID,
     paymentReference: paymentReference,
     foragePinTextEdit: pinNumberTextField) { result in
         // handle callback here
@@ -270,17 +274,19 @@ ForageSDK.shared.capturePayment(
 ```
 
 ## Demo Application
+
 Demo application for using our components on iOS is <a href="https://github.com/teamforage/forage-ios-sdk/tree/main/Sample">here</a>.
 
 To get the application running,
 
 1. Clone this repo and open the Sample Project in the Sample folder.
 2. Ensure that you have a valid FNS number for the Forage API, which can be found on the dashboard ([sandbox](https://dashboard.sandbox.joinforage.app/login/) | [prod](https://dashboard.joinforage.app/login/)).
-3. [Create a bearer token](https://docs.joinforage.app/recipes/generate-a-token) with pinpad_only scope.
+3. [Create a bearer token](https://docs.joinforage.app/recipes/generate-a-token) with `pinpad_only` scope.
 4. Run the Sample app project and provide your FNS number and bearer token on the first screen.
-  1. These credentials will be passed through to all the SDK calls inside the sample app.
+5. These credentials will be passed through to all the SDK calls inside the sample app.
 
 ## Dependencies
+
 - iOS 10+
 - Swift 5
 - 3rd party libraries:

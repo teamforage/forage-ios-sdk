@@ -14,7 +14,11 @@ final class ForageServiceTests: XCTestCase {
     var forageMocks: ForageMocks!
     
     override func setUp() {
-        ForageSDK.setup(ForageSDK.Config(environment: .sandbox))
+        ForageSDK.setup(ForageSDK.Config(
+            environment: .sandbox,
+            merchantAccount: "merchantID123",
+            bearerToken: "authToken123"
+        ))
         ForageSDK.shared.service = nil
         forageMocks = ForageMocks()
     }

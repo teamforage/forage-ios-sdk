@@ -27,6 +27,8 @@ public class ForageSDK {
     internal var service: ForageService?
     internal var panNumber: String = ""
     internal var environment: EnvironmentTarget = .sandbox
+    internal var merchantAccount: String = ""
+    internal var bearerToken: String = ""
     
     public static let shared = ForageSDK()
     
@@ -38,6 +40,9 @@ public class ForageSDK {
             return
         }
         self.environment = config.environment
+        self.merchantAccount = config.merchantAccount
+        self.bearerToken = config.bearerToken
+        
         LDManager.shared.initialize(self.environment)
         // TODO: Maybe move this shared logger call!
         VGSCollectLogger.shared.disableAllLoggers()
@@ -45,16 +50,22 @@ public class ForageSDK {
     }
     
     /**
-     ``Config`` struct to set environment(``EnvironmentTarget``) on `ForageSDK` singleton
+     ``Config`` struct to set environment(``EnvironmentTarget``), merchant ID and session token on the ``ForageSDK`` singleton
      
      - Parameters:
         - environment: *EnvironmentTarget* enum to set environment.
+        - merchantAccount: The unique merchant ID that Forage provides during onboarding preceded by `mid/`, as in `mid/<Merchant ID>`
+        - bearerToken: The [session token](https://docs.joinforage.app/docs/authentication#session-tokens) that your backend generates to authenticate your app against the Forage Payments API. The token expires after 15 minutes.
      */
     public struct Config {
         let environment: EnvironmentTarget
+        let merchantAccount: String
+        let bearerToken: String
 
-        public init(environment: EnvironmentTarget = .sandbox) {
+        public init(environment: EnvironmentTarget = .sandbox, merchantAccount: String, bearerToken: String) {
             self.environment = environment
+            self.merchantAccount = merchantAccount
+            self.bearerToken = bearerToken
         }
     }
     
@@ -62,12 +73,16 @@ public class ForageSDK {
      Setup ForageSDK using Config struct.
      
      - Parameters:
-       - config: *Config* struct object to set environment.
+       - config: *Config* struct object to set environment, merchant ID, and session token
      
     ````
-      ForageSDK.setup(
-         ForageSDK.Config(environment: .sandbox)
-      )
+     ForageSDK.setup(
+         ForageSDK.Config(
+             environment: .sandbox,
+             merchantAccount: "mid/abcd123",
+             bearerToken: "sandbox_eyJ0eXAiOiJKV1Qi..."
+         )
+     )
     ````
      */
     public class func setup(_ config: Config) {

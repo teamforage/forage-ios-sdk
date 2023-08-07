@@ -50,7 +50,11 @@ final class ForagePANTextFieldTests: XCTestCase {
     }
     
     override func setUp() {
-        ForageSDK.setup(ForageSDK.Config(environment: .sandbox))
+        ForageSDK.setup(ForageSDK.Config(
+            environment: .sandbox,
+            merchantAccount: "merchantID123",
+            bearerToken: "authToken123"
+        ))
         observableState = nil
     }
     
