@@ -1,7 +1,7 @@
 Pod::Spec.new do |spec|
 
   spec.name         = "ForageSDK"
-  spec.version      = "3.0.1"
+  spec.version      = "3.0.2"
   spec.summary      = "ForageSDK"
   spec.description  = "The ForageSDK process Electronic Benefit Transfer (EBT) payments in your e-commerce application."
   spec.homepage     = "https://github.com/teamforage/forage-ios-sdk"
