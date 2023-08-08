@@ -38,9 +38,9 @@ class VGSCollectWrapper: VaultCollector {
     public let vgsCollect: VGSCollect
     private let logger: ForageLogger?
     
-    init(config: VGSCollectConfig, logger: ForageLogger? = nil) {
+    init(config: VGSCollectConfig, logger: ForageLogger? = DatadogLogger(ForageLoggerConfig(prefix: "VGS"))) {
         self.vgsCollect = VGSCollect(id: config.id, environment: config.environment)
-        self.logger = logger?.setPrefix("VGS")
+        self.logger = logger
     }
     
     func setCustomHeaders(headers: [String: String], xKey: [String: String]) {
@@ -117,11 +117,11 @@ class BasisTheoryWrapper: VaultCollector {
         self.customHeaders["X-KEY"] = xKey["btXKey"]
     }
     
-    init(textElement: TextElementUITextField, basisTheoryconfig: BasisTheoryConfig, logger: ForageLogger? = nil) {
+    init(textElement: TextElementUITextField, basisTheoryconfig: BasisTheoryConfig, logger: ForageLogger? = DatadogLogger(ForageLoggerConfig(prefix: "BasisTheory"))) {
         self.textElement = textElement
         self.customHeaders = [:]
         self.basisTheoryConfig = basisTheoryconfig
-        self.logger = logger?.setPrefix("BasisTheory")
+        self.logger = logger
     }
     
     func sendData(path: String, extraData: [String : Any], completion: @escaping (VaultResponse) -> Void) {
@@ -246,18 +246,18 @@ class CollectorFactory {
         case dev = "N31FZgKpYZpo3oQ6XiM6M6"
     }
     
-    static func createVGS(environment: EnvironmentTarget, logger: ForageLogger? = nil) -> VGSCollectWrapper {
+    static func createVGS(environment: EnvironmentTarget) -> VGSCollectWrapper {
         let id = vaultID(environment).rawValue
         let environmentVGS = environmentVGS(environment)
         let config = VGSCollectConfig(id: id, environment: environmentVGS)
-        return VGSCollectWrapper(config: config, logger: logger)
+        return VGSCollectWrapper(config: config)
     }
     
-    static func createBasisTheory(environment: EnvironmentTarget, textElement: TextElementUITextField, logger: ForageLogger? = nil) -> BasisTheoryWrapper {
+    static func createBasisTheory(environment: EnvironmentTarget, textElement: TextElementUITextField) -> BasisTheoryWrapper {
         let publicKey = publicKey(environment).rawValue
         let proxyKey = proxyKey(environment).rawValue
         let config = BasisTheoryConfig(publicKey: publicKey, proxyKey: proxyKey)
-        return BasisTheoryWrapper(textElement: textElement, basisTheoryconfig: config, logger: logger)
+        return BasisTheoryWrapper(textElement: textElement, basisTheoryconfig: config)
     }
     
 }
