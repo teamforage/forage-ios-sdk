@@ -48,6 +48,7 @@ class ForageMocks {
               "created":"2022-11-29T03:31:52.349193-08:00",
               "token":"tok_sandbox_72VEC9LasHbMYiiVWP9zms"
            },
+           "reusable":true,
            "customer_id":"test-ios-customer-id"
         }
 """
@@ -90,7 +91,8 @@ class ForageMocks {
                 "created": "2023-02-23T14:25:37.531327-08:00",
                 "token": "tok_sandbox_vJp2BwDc6R6Z16mgzCxuXk",
                 "state": "PA"
-            }
+            },
+            "reusable":true
         }
 """
         return Data(response.utf8)

@@ -171,7 +171,7 @@ class CardNumberView: UIView {
             bearerToken: ClientSharedData.shared.bearerToken,
             merchantAccount: ClientSharedData.shared.merchantID,
             customerID: ClientSharedData.shared.customerID,
-            reusable: ClientSharedData.shared.reusable) { result in
+            reusable: ClientSharedData.shared.isReusablePaymentMethod) { result in
                 self.printResult(result: result)
             }
     }
@@ -199,8 +199,11 @@ class CardNumberView: UIView {
                 self.tokenLabel.text = "token=\(response.card.token)"
                 self.last4Label.text = "last4=\(response.card.last4)"
                 self.customerIDLabel.text = "customerID=\(response.customerID ?? "NO CUST ID")"
-                self.reusableLabel.text = "reusable=\(response.reusable)"
-
+                if let reusable = response.reusable {
+                    self.reusableLabel.text = "reusable=\(String(describing: reusable))"
+                } else {
+                    self.reusableLabel.text = "reusable not in response"
+                }
                 self.errorLabel.text = ""
                 ClientSharedData.shared.paymentMethodReference = response.paymentMethodIdentifier
                 self.updateButtonState(isEnabled: true, button: self.nextButton)

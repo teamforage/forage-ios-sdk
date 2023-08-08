@@ -30,8 +30,8 @@ final class ForageServiceTests: XCTestCase {
             merchantAccount: "merchantID123",
             panNumber: "5076801234123412",
             type: "ebt",
-            reusable: true,
-            customerID: "test-ios-customer-id"
+            customerID: "test-ios-customer-id",
+            reusable: true
         )
         
         let expectation = XCTestExpectation(description: "Tokenize EBT Card - should succeed")
@@ -62,8 +62,8 @@ final class ForageServiceTests: XCTestCase {
             merchantAccount: "merchantID123",
             panNumber: "5076801234123412",
             type: "ebt",
-            reusable: true,
-            customerID: "test-ios-customer-id"
+            customerID: "test-ios-customer-id",
+            reusable: true
         )
         
         let expectation = XCTestExpectation(description: "Tokenize EBT Card - result should be failure")
@@ -133,6 +133,7 @@ final class ForageServiceTests: XCTestCase {
                 XCTAssertEqual(paymentMethod.balance?.snap, "100.00")
                 XCTAssertEqual(paymentMethod.balance?.cash, "100.00")
                 XCTAssertEqual(paymentMethod.card.token, "tok_sandbox_vJp2BwDc6R6Z16mgzCxuXk")
+                XCTAssertEqual(paymentMethod.reusable, true)
                 expectation.fulfill()
             case .failure:
                 XCTFail("Expected success")
