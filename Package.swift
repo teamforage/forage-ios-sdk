@@ -33,8 +33,9 @@ let package = Package(
             from: "2.6.0"
         ),
         .package(
+            name: "Datadog",
             url: "https://github.com/Datadog/dd-sdk-ios.git",
-            .upToNextMajor(from: "1.0.0")
+            from: "1.16.0"
         )
     ],
     targets: [
@@ -45,7 +46,8 @@ let package = Package(
             dependencies: [
                 "VGSCollectSDK",
                 "LaunchDarkly",
-                "BasisTheoryElements"
+                "BasisTheoryElements",
+                "Datadog"
             ],
             path: "Sources", resources: [
                 .process("Resources/Media.xcassets")

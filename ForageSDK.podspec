@@ -13,6 +13,7 @@ Pod::Spec.new do |spec|
   spec.dependency 'VGSCollectSDK', '~> 1.11.2'
   spec.dependency 'LaunchDarkly', '~> 8.0.1'
   spec.dependency 'BasisTheoryElements', '~> 2.6.0'
+  spec.dependency 'Datadog', '~> 1.16.0'
   spec.resource_bundles = {
     'ForageIcon' => ['Sources/Resources/*']
   }
