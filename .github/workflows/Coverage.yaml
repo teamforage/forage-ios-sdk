@@ -35,10 +35,10 @@ jobs:
             -enableCodeCoverage YES
 
       - name: Generate XML coverage report (Cobertura)
-        run: slather coverage -x --scheme ForageSDK Sample/SampleForageSDK.xcodeproj
+        run: slather coverage -x
 
       - name: Print coverage report to logs
-        run: slather coverage -s --scheme ForageSDK Sample/SampleForageSDK.xcodeproj
+        run: slather coverage -s
 
       - name: Verify coverage
         run: |
