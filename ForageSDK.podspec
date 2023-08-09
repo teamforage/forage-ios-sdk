@@ -8,7 +8,7 @@ Pod::Spec.new do |spec|
   spec.license      = { :type => "MIT", :file => "LICENSE" }
   spec.author       = { "Rob Gormisky" => "rob@joinforage.com" }
   spec.platform     = :ios, "13.0"
-  spec.source       = { :git => "https://github.com/teamforage/forage-ios-sdk.git", :tag => "2.0.2" }
+  spec.source       = { :git => "https://github.com/teamforage/forage-ios-sdk.git", :tag => "3.0.2" }
   spec.source_files = "Sources/ForageSDK/**/*.swift"
   spec.dependency 'VGSCollectSDK', '~> 1.11.2'
   spec.dependency 'LaunchDarkly', '~> 8.0.1'
