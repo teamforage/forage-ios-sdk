@@ -1,0 +1,48 @@
+name: Coverage
+
+on: [pull_request]
+
+jobs:
+  coverage:
+    runs-on: macos-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v4 
+        with:
+          python-version: '3.9'
+          cache: 'pip'
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install Slather
+        run: gem install slather
+
+      - name: Run tests and generate coverage report (XCode)
+        run: |
+          xcodebuild test \
+            -project Sample/SampleForageSDK.xcodeproj \
+            -scheme ForageSDK \
+            -destination 'platform=iOS Simulator,name=iPhone 14 Pro,OS=latest' \
+            -enableCodeCoverage YES
+
+      - name: Generate XML coverage report (Cobertura)
+        run: slather coverage -x
+
+      - name: Print coverage report to logs
+        run: slather coverage -s
+
+      - name: Verify coverage
+        run: |
+          diff-cover \
+            cobertura.xml \
+            --compare-branch origin/${{ github.event.pull_request.base.ref }} \
+            --fail-under 80
