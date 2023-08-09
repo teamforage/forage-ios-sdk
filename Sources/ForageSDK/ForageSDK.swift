@@ -25,7 +25,6 @@ public class ForageSDK {
     
     private static var config: Config?
     internal var service: ForageService?
-    internal var panNumber: String = ""
     internal var environment: EnvironmentTarget = .sandbox
     
     public static let shared = ForageSDK()

@@ -159,7 +159,8 @@ class CardNumberView: UIView {
         ForageSDK.shared.tokenizeEBTCard(
             bearerToken: ClientSharedData.shared.bearerToken,
             merchantAccount: ClientSharedData.shared.merchantID,
-            customerID: ClientSharedData.shared.customerID) { result in
+            customerID: ClientSharedData.shared.customerID,
+            foragePanTextEdit: panNumberTextField) { result in
                 self.printResult(result: result)
             }
     }

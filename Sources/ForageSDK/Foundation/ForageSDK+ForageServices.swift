@@ -23,6 +23,7 @@ protocol ForageSDKService: AnyObject {
         bearerToken: String,
         merchantAccount: String,
         customerID: String,
+        foragePanTextEdit: ForagePANTextField,
         completion: @escaping (Result<PaymentMethodModel, Error>) -> Void)
     
     /// Check balance for a given EBT Card
@@ -62,12 +63,13 @@ extension ForageSDK: ForageSDKService {
         bearerToken: String,
         merchantAccount: String,
         customerID: String,
+        foragePanTextEdit: ForagePANTextField,
         completion: @escaping (Result<PaymentMethodModel, Error>) -> Void
     ) {
         let request = ForagePANRequestModel(
             authorization: bearerToken,
             merchantAccount: merchantAccount,
-            panNumber: panNumber,
+            panNumber: foragePanTextEdit.actualPan,
             type: CardType.EBT.rawValue,
             reusable: true,
             customerID: customerID

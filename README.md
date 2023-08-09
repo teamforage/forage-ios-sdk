@@ -138,6 +138,7 @@ func tokenizeEBTCard(
     bearerToken: String,
     merchantAccount: String,
     customerID: String,
+    foragePanTextEdit: ForagePANTextField,
     completion: @escaping (Result<PaymentMethodModel, Error>) -> Void
 )
 ```

@@ -18,7 +18,9 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement {
     }
     
     public func clearText() {
-        ForageSDK.shared.panNumber = ""
+        self.actualPan = ""
+        self.maskedPan = ""
+        self.textField.text = ""
     }
     
     /// BorderWidth for the text field
@@ -43,7 +45,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement {
     }
     
     @IBInspectable public var isEmpty: Bool {
-        get { return ForageSDK.shared.panNumber.isEmpty }
+        get { return self.actualPan.isEmpty }
     }
     
     private var _isValid: Bool = true
@@ -248,8 +250,8 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement {
         becomeFirstResponder()
     }
     
-    internal var actualText: String = ""
-    internal var maskedText: String = ""
+    internal var actualPan: String = ""
+    internal var maskedPan: String = ""
 }
 
 // MARK: - UITextFieldDelegate
@@ -325,7 +327,7 @@ extension ForagePANTextField: UITextFieldDelegate {
     }
     
     public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        var newString = (maskedText as NSString).replacingCharacters(in: range, with: string) // Apply new text
+        var newString = (maskedPan as NSString).replacingCharacters(in: range, with: string) // Apply new text
 
         // Remove all whitespaces
         newString = newString.replacingOccurrences(of: " ", with: "").filter("0123456789".contains)
@@ -338,8 +340,8 @@ extension ForagePANTextField: UITextFieldDelegate {
         // If the string is less than 6 digits, apply no mask.
         // Prior to seeing 6 digits, the PAN is considered valid but incomplete.
         if newString.count < 6 {
-            self.actualText = newString
-            self.maskedText = newString
+            self.actualPan = newString
+            self.maskedPan = newString
             textField.text = newString
             _isValid = true
             _isComplete = false
@@ -373,13 +375,11 @@ extension ForagePANTextField: UITextFieldDelegate {
         }
         
         // Store the string's actual value for submitting later
-        // TODO: Stop sharing the PAN state and instead have each PAN hold it's own state
-        ForageSDK.shared.panNumber = newString
-        self.actualText = newString
+        self.actualPan = newString
         // Get the masked version of the string
         newString = formatText(text: newString, maskToApply: maskToApply)
         // Store the visual string for reference on next input
-        self.maskedText = newString
+        self.maskedPan = newString
         // And show the masked string to the user
         textField.text = newString
         return false
