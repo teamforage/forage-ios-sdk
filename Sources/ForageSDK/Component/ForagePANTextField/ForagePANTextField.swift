@@ -247,6 +247,9 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement {
     @objc fileprivate func requestFocus(_ gesture: UIGestureRecognizer) {
         becomeFirstResponder()
     }
+    
+    internal var actualText: String = ""
+    internal var maskedText: String = ""
 }
 
 // MARK: - UITextFieldDelegate
@@ -260,64 +263,126 @@ extension ForagePANTextField: UITextFieldDelegate {
         delegate?.focusDidChange(self)
     }
     
-    public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        /// Only allow numbers to be entered into the input field!
-        let invalidCharacters = CharacterSet(charactersIn: "0123456789").inverted
-        if !(string.rangeOfCharacter(from: invalidCharacters) == nil) {
+    private func validateNewInput(text: String) -> Bool {
+        if (text.count > 19) {
             return false
         }
-
-        let currentString = (textField.text ?? "") as NSString
-        let newString = currentString.replacingCharacters(in: range, with: string)
+        if let stateIIN = ForagePANValidations.checkPANLength(text) {
+            if (text.count > stateIIN.panLength) {
+                return false
+            }
+        }
+        return true
+    }
+    
+    private func formatText(text: String, maskToApply: Int) -> String {
+        var components: [String] = []
+        if (maskToApply == 16) {
+            // Mask of #### #### #### ####
+            let maxSectionLength = 4
+            components = {
+                var toDeplete = text
+                var components: [String] = []
+                while !toDeplete.isEmpty {
+                    let length = min(toDeplete.count, maxSectionLength)
+                    components.append(String(toDeplete.prefix(length)))
+                    toDeplete.removeFirst(length)
+                }
+                return components
+            }()
+        } else if (maskToApply == 18) {
+            // Mask of ###### #### ##### ## #
+            var maskComponentLengthsInReverse = [1, 2, 5, 4, 6]
+            components = {
+                var toDeplete = text
+                var components: [String] = []
+                while !toDeplete.isEmpty {
+                    let maxSectionLength = maskComponentLengthsInReverse.popLast()
+                    let length = min(toDeplete.count, maxSectionLength!)
+                    components.append(String(toDeplete.prefix(length)))
+                    toDeplete.removeFirst(length)
+                }
+                return components
+            }()
+        } else {
+            // Mask of ###### #### #### ### ##
+            var maskComponentLengthsInReverse = [2, 3, 4, 4, 6]
+            components = {
+                var toDeplete = text
+                var components: [String] = []
+                while !toDeplete.isEmpty {
+                    let maxSectionLength = maskComponentLengthsInReverse.popLast()
+                    let length = min(toDeplete.count, maxSectionLength!)
+                    components.append(String(toDeplete.prefix(length)))
+                    toDeplete.removeFirst(length)
+                }
+                return components
+            }()
+        }
         
-        /// Check if the current PAN is already at max length for a valid entry and cap the user there
-        if let stateIIN = ForagePANValidations.checkPANLength(newString) {
-            if (newString.count > stateIIN.panLength) {
-                return false
-            }
-        }
-        /// If the card is not valid, make sure to cap the random string of numbers at 19 digits
-        else {
-            if (newString.count > 19) {
-                return false
-            }
-        }
+        // Add spaces
+        return components.joined(separator: " ")
+    }
+    
+    public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        var newString = (maskedText as NSString).replacingCharacters(in: range, with: string) // Apply new text
 
-        /// Set the Pan Number
-        ForageSDK.shared.panNumber = newString
-
-        /// Prior to seeing 6 digits, the PAN is considered valid but incomplete.
+        // Remove all whitespaces
+        newString = newString.replacingOccurrences(of: " ", with: "").filter("0123456789".contains)
+        
+        // Check if the current PAN is already at max length for a valid entry and cap the user there
+        if (!validateNewInput(text: newString)) {
+            return false
+        }
+        
+        // If the string is less than 6 digits, apply no mask.
+        // Prior to seeing 6 digits, the PAN is considered valid but incomplete.
         if newString.count < 6 {
+            self.actualText = newString
+            self.maskedText = newString
+            textField.text = newString
             _isValid = true
             _isComplete = false
             delegate?.textFieldDidChange(self)
-            return true
+            return false
         }
-
-        /// Check if the first 6 digits are valid
+        
+        var maskToApply = 16
+        
+        // Check if the first 6 digits are valid
         if let stateIIN = ForagePANValidations.checkPANLength(newString) {
-            /// If the first 6 digits are valid, then we know what the expected length of the card will be.
-            /// If we haven't reached the max length yet, the PAN is considered valid but incomplete.
+            maskToApply = stateIIN.panLength
+            // If the first 6 digits are valid, then we know what the expected length of the card will be.
+            // If we haven't reached the max length yet, the PAN is considered valid but incomplete.
             if newString.count < stateIIN.panLength {
                 _isValid = true
                 _isComplete = false
                 delegate?.textFieldDidChange(self)
-                return true
             } else {
                 /// If the first 6 digits are correct and we have the correct length, the PAN is considered valid AND complete.
                 _isValid = true
                 _isComplete = true
                 delegate?.textFieldDidChange(self)
-                return true
             }
         } else {
-            /// If 6 or more digits are included and the first 6 digits don't map to a known state, we set the
-            /// PAN to invalid and incomplete.
+            // If 6 or more digits are included and the first 6 digits don't map to a known state, we set the
+            // PAN to invalid and incomplete.
             _isValid = false
             _isComplete = false
             delegate?.textFieldDidChange(self)
-            return true
         }
+        
+        // Store the string's actual value for submitting later
+        // TODO: Stop sharing the PAN state and instead have each PAN hold it's own state
+        ForageSDK.shared.panNumber = newString
+        self.actualText = newString
+        // Get the masked version of the string
+        newString = formatText(text: newString, maskToApply: maskToApply)
+        // Store the visual string for reference on next input
+        self.maskedText = newString
+        // And show the masked string to the user
+        textField.text = newString
+        return false
     }
 }
 

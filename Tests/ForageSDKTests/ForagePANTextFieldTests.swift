@@ -54,8 +54,6 @@ final class ForagePANTextFieldTests: XCTestCase {
         observableState = nil
     }
     
-    
-    
     func test_givenValidCard_shouldReturnValid() {
         let foragePanTextField = ForagePANTextField()
         foragePanTextField.delegate = self
@@ -176,6 +174,55 @@ final class ForagePANTextFieldTests: XCTestCase {
         XCTAssertEqual(expectedIsEmpty, observableState?.isEmpty)
         XCTAssertEqual(expectedIsValid, observableState?.isValid)
         XCTAssertEqual(expectedIsComplete, observableState?.isComplete)
+    }
+    
+    func test_maskNotAppliedLessThan6Digits() {
+        let foragePanTextField = ForagePANTextField()
+        let numLessThan6Digits = "12345"
+        _ = foragePanTextField.textField(UITextField(), shouldChangeCharactersIn: NSRange(), replacementString: numLessThan6Digits)
+
+        XCTAssertEqual(numLessThan6Digits, foragePanTextField.maskedText)
+        XCTAssertEqual(numLessThan6Digits, foragePanTextField.actualText)
+    }
+    
+    func test_16DigitMaskAppliedInvalidNum() {
+        let foragePanTextField = ForagePANTextField()
+        let invalidNum = "1234567890123456789"
+        let invalidNumWithMask = "1234 5678 9012 3456 789"
+        _ = foragePanTextField.textField(UITextField(), shouldChangeCharactersIn: NSRange(), replacementString: invalidNum)
+
+        XCTAssertEqual(invalidNumWithMask, foragePanTextField.maskedText)
+        XCTAssertEqual(invalidNum, foragePanTextField.actualText)
+    }
+    
+    func test_16DigitMaskAppliedValidNum() {
+        let foragePanTextField = ForagePANTextField()
+        let validNum = "5076801234567890"
+        let validNumWithMask = "5076 8012 3456 7890"
+        _ = foragePanTextField.textField(UITextField(), shouldChangeCharactersIn: NSRange(), replacementString: validNum)
+
+        XCTAssertEqual(validNumWithMask, foragePanTextField.maskedText)
+        XCTAssertEqual(validNum, foragePanTextField.actualText)
+    }
+    
+    func test_18DigitMaskAppliedValidNum() {
+        let foragePanTextField = ForagePANTextField()
+        let validNum = "600890123456789012"
+        let validNumWithMask = "600890 1234 56789 01 2"
+        _ = foragePanTextField.textField(UITextField(), shouldChangeCharactersIn: NSRange(), replacementString: validNum)
+
+        XCTAssertEqual(validNumWithMask, foragePanTextField.maskedText)
+        XCTAssertEqual(validNum, foragePanTextField.actualText)
+    }
+    
+    func test_19DigitMaskAppliedValidNum() {
+        let foragePanTextField = ForagePANTextField()
+        let validNum = "5077031234567890123"
+        let validNumWithMask = "507703 1234 5678 901 23"
+        _ = foragePanTextField.textField(UITextField(), shouldChangeCharactersIn: NSRange(), replacementString: validNum)
+
+        XCTAssertEqual(validNumWithMask, foragePanTextField.maskedText)
+        XCTAssertEqual(validNum, foragePanTextField.actualText)
     }
 }
 
