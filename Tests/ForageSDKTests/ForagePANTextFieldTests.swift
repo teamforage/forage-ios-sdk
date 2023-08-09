@@ -185,6 +185,16 @@ final class ForagePANTextFieldTests: XCTestCase {
         XCTAssertEqual(numLessThan6Digits, foragePanTextField.actualText)
     }
     
+    func test_maskAppliedAt6Digits() {
+        let foragePanTextField = ForagePANTextField()
+        let sixDigitNum = "123456"
+        let sixDigitNumWithMask = "1234 56"
+        _ = foragePanTextField.textField(UITextField(), shouldChangeCharactersIn: NSRange(), replacementString: sixDigitNum)
+
+        XCTAssertEqual(sixDigitNumWithMask, foragePanTextField.maskedText)
+        XCTAssertEqual(sixDigitNum, foragePanTextField.actualText)
+    }
+    
     func test_16DigitMaskAppliedInvalidNum() {
         let foragePanTextField = ForagePANTextField()
         let invalidNum = "1234567890123456789"
