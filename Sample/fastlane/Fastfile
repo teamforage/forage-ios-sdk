@@ -1,0 +1,59 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Description of what the lane does"
+  lane :build_ci_app do
+    setup_ci if ENV['CI']
+
+    api_key = app_store_connect_api_key(
+      key_id: ENV["MATCH_KEY_ID"],
+      issuer_id: ENV["MATCH_ISSUER_ID"],
+      key_content: ENV["MATCH_P8"],
+    )
+
+    match(
+      api_key: api_key,
+      type: "development",
+      team_id: "3D54TBBRF3",
+      readonly: is_ci
+    )
+
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      team_id: "3D54TBBRF3",
+      sdk: "iphoneos*",
+      code_sign_identity: "iPhone Developer",
+      bundle_identifier: "com.forage.ios-qa-sample-app",
+    )
+
+    build_app(
+      scheme: "SampleForageSDK",
+      export_method: "development",
+      export_team_id: "3D54TBBRF3",
+      xcargs: "-allowProvisioningUpdates",
+      output_name: "CI_APP.ipa",
+    )
+
+    upload_to_browserstack_app_automate(
+      browserstack_username: ENV["BROWSERSTACK_USERNAME"],
+      browserstack_access_key: ENV["BROWSERSTACK_ACCESS_KEY"],
+      file_path: "CI_APP.ipa",
+      custom_id: "iOSApp",
+    )
+  end
+end

@@ -1,0 +1,47 @@
+name: QA Tests
+
+on:
+  push:
+    branches:
+      - owen/pop-85-be-able-to-build-sample-ios-app-to-upload-to-browserstack
+
+env:
+  DEVELOPER_DIR: '/Applications/Xcode_14.3.1.app/Contents/Developer'
+
+jobs:
+  CI:
+    runs-on: macos-13
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Set up env
+        run: |
+          cd Sample/
+          brew install xcodesorg/made/xcodes
+          bundle install
+      - name: Install the Apple certificate and provisioning profile and build app
+        env:
+          MATCH_KEY_ID: ${{ secrets.MATCH_KEY_ID }}
+          MATCH_ISSUER_ID: ${{ secrets.MATCH_ISSUER_ID }}
+          MATCH_P8: ${{ secrets.MATCH_P8 }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_PRIVATE_KEY: ${{ secrets.MATCH_GIT_PRIVATE_KEY }}
+          BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
+          BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+        run: |
+          cd Sample/
+          bundle exec fastlane build_ci_app
+      - name: Checkout Integration Test Repo
+        uses: actions/checkout@v3
+        with:
+          repository: teamforage/mobile-qa-tests
+          ref: main
+          ssh-key: ${{ secrets.MOBILE_QA_DEPLOY_KEY }}
+          path: 'mobile-qa-tests/'
+      - name: Run Integration Tests
+        run: |
+          cd mobile-qa-tests
+          pip3 install -r requirements.txt
+          pytest ios/tests/test_basic_flow.py
+  
