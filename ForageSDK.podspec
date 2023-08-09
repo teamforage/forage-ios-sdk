@@ -1,7 +1,7 @@
 Pod::Spec.new do |spec|
 
   spec.name         = "ForageSDK"
-  spec.version      = "3.0.2"
+  spec.version      = "3.0.3"
   spec.summary      = "ForageSDK"
   spec.description  = "The ForageSDK process Electronic Benefit Transfer (EBT) payments in your e-commerce application."
   spec.homepage     = "https://github.com/teamforage/forage-ios-sdk"
@@ -12,7 +12,7 @@ Pod::Spec.new do |spec|
   spec.source_files = "Sources/ForageSDK/**/*.swift"
   spec.dependency 'VGSCollectSDK', '~> 1.11.2'
   spec.dependency 'LaunchDarkly', '~> 8.0.1'
-  spec.dependency 'BasisTheoryElements', '~> 2.5.0'
+  spec.dependency 'BasisTheoryElements', '~> 2.6.0'
   spec.resource_bundles = {
     'ForageIcon' => ['Sources/Resources/*']
   }
