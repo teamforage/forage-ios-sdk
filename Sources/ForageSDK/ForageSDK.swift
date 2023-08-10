@@ -99,5 +99,8 @@ public class ForageSDK {
      */
     public class func setup(_ config: Config) {
         ForageSDK.config = config
+        ForageSDK.shared.environment = config.environment
+        ForageSDK.shared.merchantAccount = config.merchantAccount
+        ForageSDK.shared.bearerToken = config.bearerToken
     }
 }
