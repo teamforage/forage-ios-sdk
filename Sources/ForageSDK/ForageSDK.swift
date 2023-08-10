@@ -27,7 +27,7 @@ public class ForageSDK {
     internal var service: ForageService?
     internal var environment: EnvironmentTarget = .sandbox
     
-    public static let shared = ForageSDK()
+    public static var shared = ForageSDK()
     
     // MARK: Init
     
@@ -71,5 +71,6 @@ public class ForageSDK {
      */
     public class func setup(_ config: Config) {
         ForageSDK.config = config
+        ForageSDK.shared = ForageSDK()
     }
 }
