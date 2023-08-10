@@ -40,6 +40,7 @@ public struct PaymentMethodModel: Codable {
     public let balance: BalanceModel?
     public let card: ForageCard
     public let customerID: String?
+    public let reusable: Bool?
     
     private enum CodingKeys : String, CodingKey {
         case paymentMethodIdentifier = "ref"
@@ -47,5 +48,6 @@ public struct PaymentMethodModel: Codable {
         case card
         case balance
         case customerID = "customer_id"
+        case reusable
     }
 }

@@ -101,7 +101,7 @@ internal class Provider {
                 completion(.failure(error))
             }
         }
-        
+                
         processData(model: model, data: data, response: httpResponse, error: error) { (result) in
             switch result {
             case .success(let data):
