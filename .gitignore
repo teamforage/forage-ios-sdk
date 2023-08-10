@@ -58,3 +58,6 @@ fastlane/test_output
 
 # Code Coverage
 cobertura.xml
+
+# macOS
+.DS_Store
