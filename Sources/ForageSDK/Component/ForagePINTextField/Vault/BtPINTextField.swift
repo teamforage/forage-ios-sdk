@@ -16,6 +16,8 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
     private enum BTEventType: String {
         case TEXT_CHANGE = "textChange"
         case MASK_CHANGE = "maskChange"
+        case BLUR = "blur"
+        case FOCUS = "focus"
     }
     
     private var _isEmpty: Bool = true
@@ -84,13 +86,24 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
             regexDigit
         ] as [Any]
         
-        let pinRegex = try! NSRegularExpression(pattern: "^\\d{4}$")
+        let pinRegex = try! NSRegularExpression(pattern: "\\d{4}$")
         
         try! textField.setConfig(options: TextElementOptions(mask: pinMask, validation: pinRegex))
         
         textField.subject.sink { completion in
         } receiveValue: { elementEvent in
             if (elementEvent.type == BTEventType.TEXT_CHANGE.rawValue) {
+                self._isEmpty = elementEvent.empty
+                self._isValid = elementEvent.valid
+                self._isComplete = elementEvent.complete
+                self.delegate?.textFieldDidChange(self)
+            } else if (
+                elementEvent.type == BTEventType.FOCUS.rawValue ||
+                elementEvent.type == BTEventType.BLUR.rawValue
+            ) {
+                print("isEmpty: \(elementEvent.empty)")
+                print("isValid: \(elementEvent.valid)")
+                print("isComplete: \(elementEvent.complete)")
                 self._isEmpty = elementEvent.empty
                 self._isValid = elementEvent.valid
                 self._isComplete = elementEvent.complete
