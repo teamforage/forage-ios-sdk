@@ -41,6 +41,7 @@ public class ForageSDK {
         LDManager.shared.initialize(self.environment)
         // TODO: Maybe move this shared logger call!
         VGSCollectLogger.shared.disableAllLoggers()
+        // print("Env_print:", self.environment, type(of: self.environment))
         self.service = LiveForageService()
         SentrySDK.start { options in
             options.dsn = "https://8fcdd8dc94aa892ed8fd4cdb20db90ee@o921422.ingest.sentry.io/4505665631813632"
