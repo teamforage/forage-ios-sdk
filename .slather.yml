@@ -2,5 +2,7 @@ coverage_service: cobertura_xml
 xcodeproj: Sample/SampleForageSDK.xcodeproj
 scheme: ForageSDK
 ignore:
+  - ../Library/*
+  - ../../Library/*
   - ../../../Library/*
   - Tests/*
