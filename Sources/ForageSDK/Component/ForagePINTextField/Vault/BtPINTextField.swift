@@ -101,12 +101,17 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
                 elementEvent.type == BTEventType.FOCUS.rawValue ||
                 elementEvent.type == BTEventType.BLUR.rawValue
             ) {
-                print("isEmpty: \(elementEvent.empty)")
-                print("isValid: \(elementEvent.valid)")
-                print("isComplete: \(elementEvent.complete)")
-                self._isEmpty = elementEvent.empty
-                self._isValid = elementEvent.valid
-                self._isComplete = elementEvent.complete
+                // Note: This is custom logic to unblock us while BT makes changes on their
+                // end. They had the incorrect initial state logic for their input field.
+                if (elementEvent.empty) {
+                    self._isEmpty = elementEvent.empty
+                    self._isValid = false
+                    self._isComplete = false
+                } else {
+                    self._isEmpty = elementEvent.empty
+                    self._isValid = elementEvent.valid
+                    self._isComplete = elementEvent.complete
+                }
                 self.delegate?.textFieldDidChange(self)
             }
         }.store(in: &cancellables)
