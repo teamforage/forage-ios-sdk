@@ -41,33 +41,33 @@ public class ForageSDK {
         LDManager.shared.initialize(self.environment)
         // TODO: Maybe move this shared logger call!
         VGSCollectLogger.shared.disableAllLoggers()
-       
+        
         self.service = LiveForageService()
         let isUnitTesting = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
-
+        
         if !isUnitTesting {
-        SentrySDK.start { options in
-            options.dsn = "https://8fcdd8dc94aa892ed8fd4cdb20db90ee@o921422.ingest.sentry.io/4505665631813632"
-            options.debug = false
-            options.environment = String(describing: self.environment)
-            let httpStatusCodeRange = HttpStatusCodeRange(min: 400, max: 599)
-            options.failedRequestStatusCodes = [ httpStatusCodeRange ]
-            options.tracesSampleRate = 1.0
-            options.enableTracing = true
-        }
+            SentrySDK.start { options in
+                options.dsn = "https://8fcdd8dc94aa892ed8fd4cdb20db90ee@o921422.ingest.sentry.io/4505665631813632"
+                options.debug = false
+                options.environment = String(describing: self.environment)
+                let httpStatusCodeRange = HttpStatusCodeRange(min: 400, max: 599)
+                options.failedRequestStatusCodes = [ httpStatusCodeRange ]
+                options.tracesSampleRate = 1.0
+                options.enableTracing = true
+            }
         }
     }
-        
+    
     
     /**
      ``Config`` struct to set environment(``EnvironmentTarget``) on `ForageSDK` singleton
      
      - Parameters:
-        - environment: *EnvironmentTarget* enum to set environment.
+     - environment: *EnvironmentTarget* enum to set environment.
      */
     public struct Config {
         let environment: EnvironmentTarget
-
+        
         public init(environment: EnvironmentTarget = .sandbox) {
             self.environment = environment
         }
@@ -77,13 +77,13 @@ public class ForageSDK {
      Setup ForageSDK using Config struct.
      
      - Parameters:
-       - config: *Config* struct object to set environment.
+     - config: *Config* struct object to set environment.
      
-    ````
-      ForageSDK.setup(
-         ForageSDK.Config(environment: .sandbox)
-      )
-    ````
+     ````
+     ForageSDK.setup(
+     ForageSDK.Config(environment: .sandbox)
+     )
+     ````
      */
     public class func setup(_ config: Config) {
         ForageSDK.config = config
