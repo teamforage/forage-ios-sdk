@@ -43,12 +43,14 @@ public class ForageSDK {
         VGSCollectLogger.shared.disableAllLoggers()
        
         self.service = LiveForageService()
+        if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil {
         SentrySDK.start { options in
             options.dsn = "https://8fcdd8dc94aa892ed8fd4cdb20db90ee@o921422.ingest.sentry.io/4505665631813632"
             options.debug = true 
             options.environment = String(describing: self.environment)
             options.tracesSampleRate = 1.0
             options.enableTracing = true
+        }
         }
     }
         
