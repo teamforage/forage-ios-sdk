@@ -112,7 +112,7 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
                     self._isValid = elementEvent.valid
                     self._isComplete = elementEvent.complete
                 }
-                self.delegate?.textFieldDidChange(self)
+                self.delegate?.firstResponderDidChange(self)
             }
         }.store(in: &cancellables)
     }
