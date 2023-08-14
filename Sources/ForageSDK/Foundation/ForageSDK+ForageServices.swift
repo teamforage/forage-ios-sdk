@@ -5,7 +5,6 @@
 //  Created by Symphony on 22/11/22.
 //
 
-import VGSCollectSDK
 import Foundation
 
 /**
