@@ -140,6 +140,15 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         return sv
     }()
     
+    private lazy var logger: ForageLogger = {
+        let ddLogger = DatadogLogger(
+            ForageLoggerConfig(
+                prefix: "UIView"
+            )
+        )
+        return ddLogger
+    }()
+    
     private lazy var textField: MaskedUITextField = {
         let tf = MaskedUITextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
@@ -237,6 +246,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
             action: #selector(requestFocus(_:))
         )
         addGestureRecognizer(tapGesture)
+        self.logger.notice("ForagePANTextField was initialized successfully", attributes: nil)
     }
     
     @objc fileprivate func requestFocus(_ gesture: UIGestureRecognizer) {

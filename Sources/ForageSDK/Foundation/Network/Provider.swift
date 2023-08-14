@@ -10,13 +10,22 @@ import Foundation
 internal class Provider {
     var urlSession: URLSessionProtocol!
     var task: URLSessionDataTask?
+    private var logger: ForageLogger?
     
-    init(_ urlSession: URLSessionProtocol = URLSession.shared) {
+    init(_ urlSession: URLSessionProtocol = URLSession.shared, logger: ForageLogger? = nil) {
         self.urlSession = urlSession
+        self.logger = logger
     }
     
     internal func execute<T: Decodable>(model: T.Type, endpoint: ServiceProtocol, completion: @escaping (Result<T, Error>) -> Void) throws {
         do {
+            self.logger?
+                .setPrefix("HTTP")
+                .info("Sending \(endpoint.method.rawValue.uppercased()) request to \(endpoint.host)\(endpoint.path)",
+                             attributes: [
+                                "endpoint": endpoint.path
+                             ]
+            )
             let request = try endpoint.urlRequest()
             task = urlSession.dataTask(with: request) { (data, response, error) in
                 DispatchQueue.main.async {
@@ -52,13 +61,13 @@ internal class Provider {
                                     code: nil,
                                     data: data,
                                     response: response) { errorResult in
-                                    switch errorResult {
-                                    case .success(let errorParsed):
-                                        return completion(.failure(errorParsed))
-                                    case .failure(let error):
-                                        return completion(.failure(error))
+                                        switch errorResult {
+                                        case .success(let errorParsed):
+                                            return completion(.failure(errorParsed))
+                                        case .failure(let error):
+                                            return completion(.failure(error))
+                                        }
                                     }
-                                }
                             } else if let error = error {
                                 return completion(.failure(error))
                             } else {
@@ -87,8 +96,13 @@ internal class Provider {
         processResponse(response: response) { (result) in
             switch result {
             case .success(let response):
+                self.logger?.info(
+                    "Received \(response.statusCode) response from \(self.getResponseUrlPath(response))",
+                    attributes: ["endpoint": httpResponse?.url?.path ?? nil]
+                )
                 httpResponse = response
             case .failure(let error):
+                self.logger?.error("Failed to process response", error: error, attributes: nil)
                 return completion(.failure(error))
             }
         }
@@ -98,6 +112,7 @@ internal class Provider {
             case .success():
                 break
             case .failure(let error):
+                self.logger?.error("Failed to process error for \(self.getResponseUrlPath(httpResponse))", error: error, attributes: nil)
                 completion(.failure(error))
             }
         }
@@ -107,6 +122,7 @@ internal class Provider {
             case .success(let data):
                 return completion(.success(data))
             case .failure(let error):
+                self.logger?.error("Failed to process data", error: error, attributes: nil)
                 return completion(.failure(error))
             }
         }
@@ -116,7 +132,7 @@ internal class Provider {
         guard let httpResponse = response as? HTTPURLResponse else {
             return completion(.failure(ForageError(errors:[ForageErrorObj(httpStatusCode:500, code:"invalid_response", message:"Invalid Response")])))
         }
-
+        
         return completion(.success(httpResponse))
     }
     
@@ -147,6 +163,12 @@ internal class Provider {
         return completion(.success(result))
     }
     
+    private func getResponseUrlPath(_ httpResponse: HTTPURLResponse?) -> String {
+        let host = httpResponse?.url?.host ?? ""
+        let path = httpResponse?.url?.path ?? "N/A"
+        return "\(host)\(path)"
+    }
+    
     internal func processVGSData<T: Decodable>(model: T.Type, code: Int?, data: Data?, response: URLResponse?, completion: @escaping (Result<T, Error>) -> Void) {
         var httpResponse: HTTPURLResponse?
         
@@ -173,7 +195,7 @@ internal class Provider {
             let message = forageServiceError.errors[0].message
             return completion(.failure(ForageError(errors:[ForageErrorObj(httpStatusCode:httpResponse?.statusCode ?? 500, code:code, message:message)])))
         }
-
+        
         return completion(.success(result))
     }
 }

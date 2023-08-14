@@ -123,6 +123,15 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
         return sv
     }()
     
+    private lazy var logger: ForageLogger = {
+        let ddLogger = DatadogLogger(
+            ForageLoggerConfig(
+                prefix: "UIView"
+            )
+        )
+        return ddLogger
+    }()
+    
     private lazy var textField: VaultWrapper = {
         let vaultType = LDManager.shared.getVaultType()
         
@@ -230,6 +239,7 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
             action: #selector(requestFocus(_:))
         )
         addGestureRecognizer(tapGesture)
+        self.logger.notice("ForagePINTextField was initialized successfully", attributes: nil)
     }
     
     @objc fileprivate func requestFocus(_ gesture: UIGestureRecognizer) {

@@ -19,7 +19,7 @@ public protocol VaultCollector {
         extraData: [String: Any],
         completion: @escaping (VaultResponse) -> Void)
     func getPaymentMethodToken(paymentMethodToken: String) throws -> String
-
+    
 }
 
 struct VGSCollectConfig {
@@ -34,35 +34,46 @@ struct BasisTheoryConfig {
 
 // Wrapper class for VGSCollect
 class VGSCollectWrapper: VaultCollector {
-
+    
     public let vgsCollect: VGSCollect
-
-    init(config: VGSCollectConfig) {
+    private let logger: ForageLogger?
+    
+    init(config: VGSCollectConfig, logger: ForageLogger? = DatadogLogger(ForageLoggerConfig(prefix: "VGS"))) {
         self.vgsCollect = VGSCollect(id: config.id, environment: config.environment)
+        self.logger = logger
     }
-
+    
     func setCustomHeaders(headers: [String: String], xKey: [String: String]) {
         var mutableHeaders = headers
         mutableHeaders["X-KEY"] = xKey["vgsXKey"]
         vgsCollect.customHeaders = mutableHeaders
     }
-
+    
     func sendData(path: String, extraData: [String: Any], completion: @escaping (VaultResponse) -> Void) {
         var mutableExtraData = extraData
         if let paymentMethodToken = extraData[tokenKey] as? String {
             let token = getPaymentMethodToken(paymentMethodToken: paymentMethodToken)
+            if token.isEmpty {
+                self.logger?.error(
+                    "Failed to send data. VGS token not found on card",
+                    error: nil,
+                    attributes: nil
+                )
+            }
             mutableExtraData[tokenKey] = token
         }
         vgsCollect.sendData(path: path, extraData: mutableExtraData) { (response) in
             switch response {
             case .success(let code, let data, let urlResponse):
+                self.logger?.info("Successfully sent data to VGS proxy", attributes: nil)
                 completion(VaultResponse(statusCode: code, urlResponse: urlResponse, data: data, error: nil))
             case .failure(let code, let data, let urlResponse, let error):
+                self.logger?.error("Failed to send data to VGS proxy", error: error, attributes: nil)
                 completion(VaultResponse(statusCode: code, urlResponse: urlResponse, data: data, error: error))
             }
         }
     }
-
+    
     func getPaymentMethodToken(paymentMethodToken: String) -> String {
         if paymentMethodToken.contains(tokenDelimiter) {
             return paymentMethodToken.components(separatedBy: tokenDelimiter)[0]
@@ -73,7 +84,7 @@ class VGSCollectWrapper: VaultCollector {
 
 func convertJsonToDictionary(_ json: JSON) -> [String: Any] {
     var result: [String: Any] = [:]
-
+    
     if case .dictionaryValue(let dictionary) = json {
         for (key, value) in dictionary {
             if case .rawValue(let rawValue) = value {
@@ -94,24 +105,25 @@ class BasisTheoryWrapper: VaultCollector {
         }
         throw ServiceError.parseError
     }
-
+    
     var customHeaders: [String: String] = [:]
     let textElement: TextElementUITextField
-
+    
     private let basisTheoryConfig: BasisTheoryConfig
-
-
+    private let logger: ForageLogger?
+    
     func setCustomHeaders(headers: [String: String], xKey: [String: String]) {
         self.customHeaders = headers
         self.customHeaders["X-KEY"] = xKey["btXKey"]
     }
-
-    init(textElement: TextElementUITextField, basisTheoryconfig: BasisTheoryConfig) {
+    
+    init(textElement: TextElementUITextField, basisTheoryconfig: BasisTheoryConfig, logger: ForageLogger? = DatadogLogger(ForageLoggerConfig(prefix: "BasisTheory"))) {
         self.textElement = textElement
         self.customHeaders = [:]
         self.basisTheoryConfig = basisTheoryconfig
+        self.logger = logger
     }
-
+    
     func sendData(path: String, extraData: [String : Any], completion: @escaping (VaultResponse) -> Void) {
         var body: [String: Any] = ["pin": textElement]
         for (key, value) in extraData {
@@ -120,6 +132,11 @@ class BasisTheoryWrapper: VaultCollector {
                     let token = try getPaymentMethodToken(paymentMethodToken: paymentMethodToken)
                     body[key] = token
                 } catch {
+                    self.logger?.error(
+                        "Failed to send data to Basis Theory proxy. BT token not found on card",
+                        error: error,
+                        attributes: nil
+                    )
                     completion(VaultResponse(
                         statusCode: nil,
                         urlResponse: nil,
@@ -133,7 +150,7 @@ class BasisTheoryWrapper: VaultCollector {
             }
         }
         let proxyHttpRequest = ProxyHttpRequest(method: .post, path: path, body: body, headers: self.customHeaders)
-
+        
         BasisTheoryElements.proxy(
             apiKey: basisTheoryConfig.publicKey, proxyKey: basisTheoryConfig.proxyKey,
             proxyHttpRequest: proxyHttpRequest

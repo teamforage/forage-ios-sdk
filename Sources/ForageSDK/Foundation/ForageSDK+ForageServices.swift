@@ -65,6 +65,13 @@ extension ForageSDK: ForageSDKService {
         reusable: Bool? = true,
         completion: @escaping (Result<PaymentMethodModel, Error>) -> Void
     ) {
+        _ = self.logger?
+            .setPrefix("tokenizeEBTCard")
+            .addContext(ForageLogContext(
+                customerID: customerID,
+                merchantRef: merchantAccount
+            ))
+            .notice("Called ForageSDK.shared.tokenizeEBTCard", attributes: nil)
         let request = ForagePANRequestModel(
             authorization: bearerToken,
             merchantAccount: merchantAccount,
@@ -83,6 +90,13 @@ extension ForageSDK: ForageSDKService {
         foragePinTextEdit: ForagePINTextField,
         completion: @escaping (Result<BalanceModel, Error>) -> Void) {
             foragePinTextEdit.disable()
+            _ = self.logger?
+                .setPrefix("checkBalance")
+                .addContext(ForageLogContext(
+                    merchantRef: merchantAccount,
+                    paymentMethodRef: paymentMethodReference
+                ))
+                .notice("Called ForageSDK.shared.checkBalance for Payment Method \(paymentMethodReference)", attributes: nil)
             
             service?.getXKey(bearerToken: bearerToken, merchantAccount: merchantAccount) { result in
                 switch result {
@@ -123,6 +137,14 @@ extension ForageSDK: ForageSDKService {
         completion: @escaping (Result<PaymentModel, Error>) -> Void) {
             foragePinTextEdit.disable()
 
+            _ = self.logger?
+                .setPrefix("capturePayment")
+                .addContext(ForageLogContext(
+                    merchantRef: merchantAccount,
+                    paymentRef: paymentReference
+                ))
+                .notice("Called ForageSDK.shared.capturePayment for Payment \(paymentReference)", attributes: nil)
+            
             service?.getXKey(bearerToken: bearerToken, merchantAccount: merchantAccount) { result in
                 switch result {
                 case .success(let model):
