@@ -15,8 +15,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         ForageSDK.setup(
             ForageSDK.Config(
                 environment: ClientSharedData.shared.environment,
-                merchantAccount: ClientSharedData.shared.merchantID,
-                bearerToken: ClientSharedData.shared.bearerToken
+                merchantID: ClientSharedData.shared.merchantID,
+                sessionToken: ClientSharedData.shared.sessionToken
             )
         )
 

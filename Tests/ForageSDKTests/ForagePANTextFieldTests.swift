@@ -14,8 +14,8 @@ final class ForagePANTextFieldTests: XCTestCase {
     override func setUp() {
          ForageSDK.setup(ForageSDK.Config(
             environment: .sandbox,
-            merchantAccount: "merchantID123",
-            bearerToken: "authToken123"
+            merchantID: "merchantID123",
+            sessionToken: "authToken123"
         ))
         ForageSDK.shared.service = nil
         ForageSDK.shared.panNumber = ""

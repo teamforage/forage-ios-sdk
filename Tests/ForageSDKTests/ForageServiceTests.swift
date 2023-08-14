@@ -16,8 +16,8 @@ final class ForageServiceTests: XCTestCase {
     override func setUp() {
         ForageSDK.setup(ForageSDK.Config(
             environment: .sandbox,
-            merchantAccount: "merchantID123",
-            bearerToken: "authToken123"
+            merchantID: "merchantID123",
+            sessionToken: "authToken123"
         ))
         ForageSDK.shared.service = nil
         forageMocks = ForageMocks()
@@ -31,7 +31,7 @@ final class ForageServiceTests: XCTestCase {
         
         let foragePANRequestModel = ForagePANRequestModel(
             authorization: "authToken123",
-            merchantAccount: "merchantID123",
+            merchantID: "merchantID123",
             panNumber: "5076801234123412",
             type: "ebt",
             customerID: "test-ios-customer-id",
@@ -63,7 +63,7 @@ final class ForageServiceTests: XCTestCase {
         
         let foragePANRequestModel = ForagePANRequestModel(
             authorization: "authToken123",
-            merchantAccount: "merchantID123",
+            merchantID: "merchantID123",
             panNumber: "5076801234123412",
             type: "ebt",
             customerID: "test-ios-customer-id",
@@ -90,7 +90,7 @@ final class ForageServiceTests: XCTestCase {
         let service = LiveForageService(provider: Provider(mockSession))
         
         let expectation = XCTestExpectation(description: "Get the X-Key header - should succeed")
-        service.getXKey(bearerToken: "auth1234", merchantAccount: "1234567") { result in
+        service.getXKey(sessionToken: "auth1234", merchantID: "1234567") { result in
             switch result {
             case .success(let model):
                 XCTAssertEqual(model.alias, "tok_sandbox_agCcwWZs8TMkkq89f8KHSx")
@@ -110,7 +110,7 @@ final class ForageServiceTests: XCTestCase {
         let service = LiveForageService(provider: Provider(mockSession))
         
         let expectation = XCTestExpectation(description: "Get the X-Key header - result should be failure")
-        service.getXKey(bearerToken: "auth1234", merchantAccount: "1234567") { result in
+        service.getXKey(sessionToken: "auth1234", merchantID: "1234567") { result in
             switch result {
             case .success:
                 XCTFail("Expected failure")
@@ -129,7 +129,7 @@ final class ForageServiceTests: XCTestCase {
         let service = LiveForageService(provider: Provider(mockSession))
         
         let expectation = XCTestExpectation(description: "Get the Payment Method - should succeed")
-        service.getPaymentMethod(bearerToken: "auth1234", merchantAccount: "1234567", paymentMethodRef: "ca29d3443f") { result in
+        service.getPaymentMethod(sessionToken: "auth1234", merchantID: "1234567", paymentMethodRef: "ca29d3443f") { result in
             switch result {
             case .success(let paymentMethod):
                 XCTAssertEqual(paymentMethod.paymentMethodIdentifier, "ca29d3443f")
@@ -153,7 +153,7 @@ final class ForageServiceTests: XCTestCase {
         let service = LiveForageService(provider: Provider(mockSession))
         
         let expectation = XCTestExpectation(description: "Get the Payment Method - result should be failure")
-        service.getPaymentMethod(bearerToken: "auth1234", merchantAccount: "1234567", paymentMethodRef: "ca29d3443f") { result in
+        service.getPaymentMethod(sessionToken: "auth1234", merchantID: "1234567", paymentMethodRef: "ca29d3443f") { result in
             switch result {
             case .success:
                 XCTFail("Expected failure")
@@ -172,7 +172,7 @@ final class ForageServiceTests: XCTestCase {
         let service = LiveForageService(provider: Provider(mockSession))
         
         let expectation = XCTestExpectation(description: "Get the Payment - should succeed")
-        service.getPayment(bearerToken: "auth1234", merchantAccount: "1234567", paymentRef: "11767381fd") { result in
+        service.getPayment(sessionToken: "auth1234", merchantID: "1234567", paymentRef: "11767381fd") { result in
             switch result {
             case .success(let payment):
                 XCTAssertEqual(payment.paymentMethodRef, "81dab02290")
@@ -195,7 +195,7 @@ final class ForageServiceTests: XCTestCase {
         let service = LiveForageService(provider: Provider(mockSession))
         
         let expectation = XCTestExpectation(description: "Get the Payment - result should be failure")
-        service.getPayment(bearerToken: "auth1234", merchantAccount: "1234567", paymentRef: "11767381fd") { result in
+        service.getPayment(sessionToken: "auth1234", merchantID: "1234567", paymentRef: "11767381fd") { result in
             switch result {
             case .success:
                 XCTFail("Expected failure")

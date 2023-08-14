@@ -61,7 +61,7 @@ public struct Receipt: Codable {
 /// `PaymentModel` used to represent a tokenized EBT Card
 public struct PaymentModel: Codable {
     public let paymentRef: String
-    public let merchantAccount: String
+    public let merchantID: String
     public let fundingType: String
     public let amount: String
     public let description: String
@@ -82,7 +82,7 @@ public struct PaymentModel: Codable {
     
     private enum CodingKeys : String, CodingKey {
         case paymentRef = "ref"
-        case merchantAccount = "merchant"
+        case merchantID = "merchant"
         case fundingType = "funding_type"
         case amount
         case description

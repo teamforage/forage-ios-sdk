@@ -42,9 +42,9 @@ extension SampleAPI: ServiceProtocol {
             ]
 
             let httpHeaders: HTTPHeaders = [
-                "Merchant-Account": model.merchantAccount,
+                "Merchant-Account": model.merchantID,
                 "IDEMPOTENCY-KEY": UUID.init().uuidString,
-                "authorization": "Bearer \(ClientSharedData.shared.bearerToken)",
+                "authorization": "Bearer \(ClientSharedData.shared.sessionToken)",
                 "API-VERSION": "2023-05-15"
             ]
 
