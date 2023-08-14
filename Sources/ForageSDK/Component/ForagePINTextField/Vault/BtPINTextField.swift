@@ -86,7 +86,7 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
             regexDigit
         ] as [Any]
         
-        let pinRegex = try! NSRegularExpression(pattern: "\\d{4}$")
+        let pinRegex = try! NSRegularExpression(pattern: "^\\d{4}$")
         
         try! textField.setConfig(options: TextElementOptions(mask: pinMask, validation: pinRegex))
         
