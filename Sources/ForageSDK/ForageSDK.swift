@@ -28,6 +28,8 @@ public class ForageSDK {
     internal var panNumber: String = ""
     internal var environment: EnvironmentTarget = .sandbox
     
+    // Don't update! Only updated when releasing.
+    public static let version = "3.0.3"
     public static let shared = ForageSDK()
     
     // MARK: Init
