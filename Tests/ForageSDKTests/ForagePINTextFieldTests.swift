@@ -102,6 +102,39 @@ final class ForagePINTextFieldTests: XCTestCase {
         XCTAssertEqual(expectedIsValid, observableState?.isValid)
         XCTAssertEqual(expectedIsComplete, observableState?.isComplete)
     }
+    
+    func test_disable() {
+        let foragePinTextField = ForagePINTextField()
+        foragePinTextField.disable()
+        
+        XCTAssertEqual(foragePinTextField.isUserInteractionEnabled, false)
+        XCTAssertEqual(foragePinTextField.textColor, .lightGray)
+    }
+    
+    func test_enable() {
+        let foragePinTextField = ForagePINTextField()
+        foragePinTextField.enable()
+        
+        XCTAssertEqual(foragePinTextField.isUserInteractionEnabled, true)
+        XCTAssertEqual(foragePinTextField.textColor, .black)
+    }
+    
+    class TestForagePINTextField: ForagePINTextField {
+        var didCallClearText = false
+        
+        override public func clearText() {
+            didCallClearText = true
+        }
+    }
+    
+    func test_handleSubmissionCompletion_shouldEnableAndClearText() {
+        let foragePinTextField = TestForagePINTextField(frame: CGRect())
+        foragePinTextField.handleSubmissionCompletion()
+        
+        XCTAssertEqual(foragePinTextField.textColor, .black)
+        XCTAssertEqual(foragePinTextField.isUserInteractionEnabled, true)
+        XCTAssertTrue(foragePinTextField.didCallClearText, "clearText method should be called")
+    }
 }
 
 extension ForagePINTextFieldTests: ForageElementDelegate {
