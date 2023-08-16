@@ -260,6 +260,17 @@ extension ForagePANTextField: UITextFieldDelegate {
         delegate?.focusDidChange(self)
     }
     
+    func doesStringMatchPattern(_ input: String) -> Bool {
+        let errorCardPaymentCapture = try! NSRegularExpression(pattern: "^4{14}.*")
+        let errorCardBalanceCheck = try! NSRegularExpression(pattern: "^5{14}.*")
+        let nonProdValidEbtCard = try! NSRegularExpression(pattern: "^9{4}.*")
+        let range = NSRange(input.startIndex..., in: input)
+        let balanceCard = errorCardBalanceCheck.firstMatch(in: input, options: [], range: range)
+        let paymentCard = errorCardPaymentCapture.firstMatch(in: input, options: [], range: range)
+        let successCard = nonProdValidEbtCard.firstMatch(in: input, options: [], range: range)
+        return balanceCard != nil || paymentCard != nil || successCard != nil
+    }
+    
     public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         /// Only allow numbers to be entered into the input field!
         let invalidCharacters = CharacterSet(charactersIn: "0123456789").inverted
@@ -285,6 +296,8 @@ extension ForagePANTextField: UITextFieldDelegate {
 
         /// Set the Pan Number
         ForageSDK.shared.panNumber = newString
+        
+        let overrideValidation = ForageSDK.shared.environment != .prod && doesStringMatchPattern(newString)
 
         /// Prior to seeing 6 digits, the PAN is considered valid but incomplete.
         if newString.count < 6 {
@@ -311,6 +324,18 @@ extension ForagePANTextField: UITextFieldDelegate {
                 return true
             }
         } else {
+            // If we need to override validation, run custom validation here
+            if (overrideValidation) {
+                _isValid = true
+                if (newString.count >= 16 && newString.count <= 19) {
+                    _isComplete = true
+                } else {
+                    _isComplete = false
+                }
+                delegate?.textFieldDidChange(self)
+                return true
+            }
+            
             /// If 6 or more digits are included and the first 6 digits don't map to a known state, we set the
             /// PAN to invalid and incomplete.
             _isValid = false
