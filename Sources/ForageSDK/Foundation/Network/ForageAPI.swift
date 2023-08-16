@@ -50,7 +50,7 @@ extension ForageAPI: ServiceProtocol {
 
             let bodyParameters: Parameters = [
                 "type": model.type,
-                "reusable": model.reusable,
+                "reusable": model.reusable ?? true,
                 "card": card,
                 "customer_id": model.customerID
             ]

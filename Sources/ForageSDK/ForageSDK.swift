@@ -7,7 +7,7 @@
 
 import Foundation
 import VGSCollectSDK
-
+import Sentry
 /**
  Environment base URL
  */
@@ -28,6 +28,8 @@ public class ForageSDK {
     internal var panNumber: String = ""
     internal var environment: EnvironmentTarget = .sandbox
     
+    // Don't update! Only updated when releasing.
+    public static let version = "3.0.4"
     public static let shared = ForageSDK()
     
     // MARK: Init
@@ -41,7 +43,21 @@ public class ForageSDK {
         LDManager.shared.initialize(self.environment)
         // TODO: Maybe move this shared logger call!
         VGSCollectLogger.shared.disableAllLoggers()
+        
         self.service = LiveForageService()
+        let isUnitTesting = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
+        
+        if !isUnitTesting {
+            SentrySDK.start { options in
+                options.dsn = "https://8fcdd8dc94aa892ed8fd4cdb20db90ee@o921422.ingest.sentry.io/4505665631813632"
+                options.debug = false
+                options.environment = String(describing: self.environment)
+                let httpStatusCodeRange = HttpStatusCodeRange(min: 400, max: 599)
+                options.failedRequestStatusCodes = [ httpStatusCodeRange ]
+                options.tracesSampleRate = 1.0
+                options.enableTracing = true
+            }
+        }
     }
     
     /**
