@@ -14,7 +14,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         ForageSDK.setup(
             ForageSDK.Config(
-                environment: ClientSharedData.shared.environment,
                 merchantID: ClientSharedData.shared.merchantID,
                 sessionToken: ClientSharedData.shared.sessionToken
             )

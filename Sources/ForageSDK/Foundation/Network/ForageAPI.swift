@@ -21,7 +21,7 @@ enum ForageAPI {
 extension ForageAPI: ServiceProtocol {
     var scheme: String { return "https" }
 
-    var host: String { return ForageSDK.shared.environment.rawValue }
+    var host: String { return ForageSDK.shared.environment.hostname }
 
     var path: String {
         switch self {

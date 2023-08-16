@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import ForageSDK
 
 enum SampleAPI {
     case createPayment(request: CreatePaymentRequest)
@@ -14,7 +15,7 @@ enum SampleAPI {
 extension SampleAPI: ServiceProtocol {
     var scheme: String { return "https" }
 
-    var host: String { return "api.sandbox.joinforage.app" }
+    var host: String { return ForageSDK.shared.environment.hostname }
 
     var path: String { return "/api/payments/" }
 
