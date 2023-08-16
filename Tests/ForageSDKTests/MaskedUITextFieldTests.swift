@@ -64,7 +64,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertEqual(ForageSDK.shared.panNumber, "123412")
     }
     
-    func testValidation_validCardWithExtraDigits_shouldReturnInvalid() {
+    func testValidation_validCardWithExtraDigits_shouldBeInvalid() {
         let expectedPAN = "5077081234567890"
         maskedTextField.text = expectedPAN
         maskedTextField.textFieldDidChange()
@@ -85,6 +85,59 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertTrue(maskedTextField.isComplete)
         XCTAssertEqual(ForageSDK.shared.panNumber, expectedPAN)
     }
+    
+    // MARK: - Validation with special cards
+    
+    func testValidation_specialInsufficientFundsCard_shouldBeValid() {
+        maskedTextField.text = "4444444444444451"
+        maskedTextField.textFieldDidChange()
+        
+        XCTAssertFalse(maskedTextField.isEmpty)
+        XCTAssertTrue(maskedTextField.isValid)
+        XCTAssertTrue(maskedTextField.isComplete)
+        XCTAssertEqual(ForageSDK.shared.panNumber, "4444444444444451")
+    }
+    
+    func testValidation_specialInvalidCardNum_shouldBeValid() {
+        maskedTextField.text = "5555555555555514"
+        maskedTextField.textFieldDidChange()
+        
+        XCTAssertFalse(maskedTextField.isEmpty)
+        XCTAssertTrue(maskedTextField.isValid)
+        XCTAssertTrue(maskedTextField.isComplete)
+        XCTAssertEqual(ForageSDK.shared.panNumber, "5555555555555514")
+    }
+    
+    func testValidation_specialExpiredCardNum_shouldBeValid() {
+        maskedTextField.text = "5555555555555554"
+        maskedTextField.textFieldDidChange()
+        
+        XCTAssertFalse(maskedTextField.isEmpty)
+        XCTAssertTrue(maskedTextField.isValid)
+        XCTAssertTrue(maskedTextField.isComplete)
+        XCTAssertEqual(ForageSDK.shared.panNumber, "5555555555555554")
+    }
+    
+    func testValidation_completeSpecial9999Card_shouldBeValid() {
+        maskedTextField.text = "9999 1234 1111 1111"
+        maskedTextField.textFieldDidChange()
+        
+        XCTAssertFalse(maskedTextField.isEmpty)
+        XCTAssertTrue(maskedTextField.isValid)
+        XCTAssertTrue(maskedTextField.isComplete)
+        XCTAssertEqual(ForageSDK.shared.panNumber, "9999123411111111")
+    }
+    
+    func testValidation_partialSpecial9999Card_shouldBeValidButIncomplete() {
+        maskedTextField.text = "9999 1234"
+        maskedTextField.textFieldDidChange()
+        
+        XCTAssertFalse(maskedTextField.isEmpty)
+        XCTAssertTrue(maskedTextField.isValid)
+        XCTAssertFalse(maskedTextField.isComplete)
+        XCTAssertEqual(ForageSDK.shared.panNumber, "99991234")
+    }
+
     
     // MARK: Masking
     

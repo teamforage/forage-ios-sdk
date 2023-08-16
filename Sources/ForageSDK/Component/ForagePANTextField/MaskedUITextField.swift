@@ -92,6 +92,12 @@ internal class MaskedUITextField : UITextField, ObservableState {
             forageDelegate?.textFieldDidChange(self) // notify client about latest validation status.
         }
         
+        if isSpecialCard(newUnmaskedText) {
+            isValid = true
+            isComplete = newUnmaskedText.count >= 16 && newUnmaskedText.count <= 19
+            return
+        }
+        
         // Prior to seeing 6 digits, the PAN is considered valid but incomplete.
         if newUnmaskedText.count < 6 {
             isValid = true
@@ -198,5 +204,28 @@ internal class MaskedUITextField : UITextField, ObservableState {
             }
         }
         return result
+    }
+    
+    /// Determines whether to disable validation for specific card numbers used to trigger exceptions.
+    ///
+    /// - Parameter newUnmaskedText: The unmasked card number to be checked.
+    /// - Returns: `true` if validation should be disabled for the given card number, `false` otherwise.
+    private func isSpecialCard(_ newUnmaskedText: String) -> Bool {
+        // Special error cards that fail at PIN entry for capture
+        if newUnmaskedText.hasPrefix("44444444444444") {
+            return true
+        }
+        
+        // Special error cards that fail at PIN entry for balance check
+        if newUnmaskedText.hasPrefix("55555555555555") {
+            return true
+        }
+        
+        // Special cards that pass validation checks without causing any errors
+        if newUnmaskedText.hasPrefix("9999") {
+            return true
+        }
+        
+        return false
     }
 }
