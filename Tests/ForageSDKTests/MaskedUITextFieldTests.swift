@@ -13,6 +13,8 @@ final class MaskedUITextFieldTests: XCTestCase {
     
     override func setUp() {
         ForageSDK.setup(ForageSDK.Config(environment: .sandbox))
+        // .setup() currently doesn't allow us to update the environment
+        ForageSDK.shared.environment = .sandbox
         ForageSDK.shared.service = nil
         ForageSDK.shared.panNumber = ""
         maskedTextField = MaskedUITextField()
@@ -20,7 +22,6 @@ final class MaskedUITextFieldTests: XCTestCase {
     
     override func tearDown() {
         maskedTextField = nil
-        ForageSDK.shared.environment = .sandbox
     }
     
     // MARK: - Initialization Tests
@@ -162,7 +163,7 @@ final class MaskedUITextFieldTests: XCTestCase {
     func testValidation_zeroEbtCashCard() {
         maskedTextField.text = "6543 2123 1234 1234"
         maskedTextField.textFieldDidChange()
-        
+
         XCTAssertFalse(maskedTextField.isEmpty)
         XCTAssertTrue(maskedTextField.isValid)
         XCTAssertTrue(maskedTextField.isComplete)
