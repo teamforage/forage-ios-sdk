@@ -33,8 +33,7 @@ internal class MaskedUITextField : UITextField, ObservableState {
     }
     
     @IBInspectable private(set) public var isEmpty = true
-    // TODO: default to isValid = true on initialization
-    @IBInspectable private(set) public var isValid = false
+    @IBInspectable private(set) public var isValid = true
     @IBInspectable private(set) public var isComplete = false
     
     // MARK: - Initialization
@@ -92,7 +91,8 @@ internal class MaskedUITextField : UITextField, ObservableState {
             forageDelegate?.textFieldDidChange(self) // notify client about latest validation status.
         }
         
-        if isSpecialCard(newUnmaskedText) {
+        let isProdEnvironment = ForageSDK.shared.environment == EnvironmentTarget.prod
+        if !isProdEnvironment && isSpecialCard(newUnmaskedText) {
             isValid = true
             isComplete = newUnmaskedText.count >= 16 && newUnmaskedText.count <= 19
             return
@@ -223,6 +223,10 @@ internal class MaskedUITextField : UITextField, ObservableState {
         
         // Special cards that pass validation checks without causing any errors
         if newUnmaskedText.hasPrefix("9999") {
+            return true
+        }
+        
+        if newUnmaskedText.hasPrefix("654321") {
             return true
         }
         

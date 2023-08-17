@@ -24,11 +24,10 @@ final class ForagePANTextFieldTests: XCTestCase {
     
     // MARK: - Initialization Tests
     
-    // TODO: default to isValid = true on initialization
-    func test_initialization_shouldBeEmptyAndInvalid() {
+    func test_initialization_shouldBeEmptyAndValid() {
         XCTAssertNotNil(foragePANTextField)
         XCTAssertTrue(foragePANTextField.isEmpty)
-        XCTAssertFalse(foragePANTextField.isValid)
+        XCTAssertTrue(foragePANTextField.isValid)
         XCTAssertFalse(foragePANTextField.isComplete)
     }
     

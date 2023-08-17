@@ -20,15 +20,15 @@ final class MaskedUITextFieldTests: XCTestCase {
     
     override func tearDown() {
         maskedTextField = nil
+        ForageSDK.shared.environment = .sandbox
     }
     
     // MARK: - Initialization Tests
     
-    // TODO: default to isValid = true on initialization
-    func test_initialization_shouldBeEmptyAndInvalid() {
+    func test_initialization_shouldBeEmptyAndValid() {
         XCTAssertNotNil(maskedTextField)
         XCTAssertTrue(maskedTextField.isEmpty)
-        XCTAssertFalse(maskedTextField.isValid)
+        XCTAssertTrue(maskedTextField.isValid)
         XCTAssertFalse(maskedTextField.isComplete)
     }
     
@@ -54,7 +54,17 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertEqual(ForageSDK.shared.panNumber, "50770812345678")
     }
     
-    func testValidation_invalidCard_shouldBeInvalid() {
+    func testValidation_identifyingIIN_shouldBeValid() {
+        maskedTextField.text = "12345"
+        maskedTextField.textFieldDidChange()
+        
+        XCTAssertFalse(maskedTextField.isEmpty)
+        XCTAssertTrue(maskedTextField.isValid)
+        XCTAssertFalse(maskedTextField.isComplete)
+        XCTAssertEqual(ForageSDK.shared.panNumber, "12345")
+    }
+    
+    func testValidation_invalidIIN_shouldBeInvalid() {
         maskedTextField.text = "123412"
         maskedTextField.textFieldDidChange()
         
@@ -87,6 +97,17 @@ final class MaskedUITextFieldTests: XCTestCase {
     }
     
     // MARK: - Validation with special cards
+    
+    func testValidation_specialButProd_shouldBeInvalidAndIncomplete() {
+        ForageSDK.shared.environment = .prod
+        maskedTextField.text = "4444444444444454"
+        maskedTextField.textFieldDidChange()
+        
+        XCTAssertFalse(maskedTextField.isEmpty)
+        XCTAssertFalse(maskedTextField.isValid)
+        XCTAssertFalse(maskedTextField.isComplete)
+        XCTAssertEqual(ForageSDK.shared.panNumber, "4444444444444454")
+    }
     
     func testValidation_specialInsufficientFundsCard_shouldBeValid() {
         maskedTextField.text = "4444444444444451"
@@ -136,6 +157,16 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertTrue(maskedTextField.isValid)
         XCTAssertFalse(maskedTextField.isComplete)
         XCTAssertEqual(ForageSDK.shared.panNumber, "99991234")
+    }
+    
+    func testValidation_zeroEbtCashCard() {
+        maskedTextField.text = "6543 2123 1234 1234"
+        maskedTextField.textFieldDidChange()
+        
+        XCTAssertFalse(maskedTextField.isEmpty)
+        XCTAssertTrue(maskedTextField.isValid)
+        XCTAssertTrue(maskedTextField.isComplete)
+        XCTAssertEqual(ForageSDK.shared.panNumber, "6543212312341234")
     }
 
     
