@@ -12,7 +12,7 @@ public enum CardType: String {
     case EBT = "ebt"
 }
 
-public class ForagePANTextField: UIView, Identifiable, ForageElement {
+public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElementDelegate {
     public func setPlaceholderText(_ text: String) {
         
     }
@@ -43,25 +43,20 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement {
     }
     
     @IBInspectable public var isEmpty: Bool {
-        get { return ForageSDK.shared.panNumber.isEmpty }
+        textField.isEmpty
     }
-    
-    private var _isValid: Bool = true
+
     @IBInspectable public var isValid: Bool {
-        get { return _isValid }
+        textField.isValid
     }
-    
-    private var _isComplete: Bool = false
+
     @IBInspectable public var isComplete: Bool {
-        get { return _isComplete }
+        textField.isComplete
     }
-    
-    // MARK: Private Properties
-    private var stateIIN: StateIIN?
     
     // MARK: Public Delegate
     
-    /// Delegate that updates client's side about state of the entered card number
+    /// A delegate that informs the client about the state of the entered card number (validation, focus).
     public weak var delegate: ForageElementDelegate?
     
     // MARK: Public Properties
@@ -145,8 +140,8 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement {
         return sv
     }()
     
-    private lazy var textField: UITextField = {
-        let tf = UITextField()
+    private lazy var textField: MaskedUITextField = {
+        let tf = MaskedUITextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
         tf.textColor = UIColor.black
         tf.font = UIFont.systemFont(ofSize: 14, weight: .regular)
@@ -199,8 +194,8 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement {
         container.addArrangedSubview(textFieldContainer)
         container.addArrangedSubview(imageViewContainer)
         
-        textField.delegate = self
-
+        textField.forageDelegate = self
+        
         root.anchor(
             top: self.topAnchor,
             leading: self.leadingAnchor,
@@ -236,7 +231,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement {
             centerXAnchor: nil,
             padding: UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         )
-
+        
         let tapGesture = UITapGestureRecognizer(
             target: self,
             action: #selector(requestFocus(_:))
@@ -251,7 +246,15 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement {
 
 // MARK: - UITextFieldDelegate
 
-extension ForagePANTextField: UITextFieldDelegate {
+extension ForagePANTextField : UITextFieldDelegate {
+    public func focusDidChange(_ state: ObservableState) {
+        delegate?.focusDidChange(self)
+    }
+    
+    public func textFieldDidChange(_ state: ObservableState) {
+        delegate?.textFieldDidChange(self)
+    }
+    
     public func textFieldDidBeginEditing(_ textField: UITextField) {
         delegate?.focusDidChange(self)
     }
@@ -259,90 +262,26 @@ extension ForagePANTextField: UITextFieldDelegate {
     public func textFieldDidEndEditing(_ textField: UITextField) {
         delegate?.focusDidChange(self)
     }
-    
-    func doesStringMatchPattern(_ input: String) -> Bool {
-        let errorCardPaymentCapture = try! NSRegularExpression(pattern: "^4{14}.*")
-        let errorCardBalanceCheck = try! NSRegularExpression(pattern: "^5{14}.*")
-        let nonProdValidEbtCard = try! NSRegularExpression(pattern: "^9{4}.*")
-        let range = NSRange(input.startIndex..., in: input)
-        let balanceCard = errorCardBalanceCheck.firstMatch(in: input, options: [], range: range)
-        let paymentCard = errorCardPaymentCapture.firstMatch(in: input, options: [], range: range)
-        let successCard = nonProdValidEbtCard.firstMatch(in: input, options: [], range: range)
-        return balanceCard != nil || paymentCard != nil || successCard != nil
-    }
-    
-    public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        /// Only allow numbers to be entered into the input field!
-        let invalidCharacters = CharacterSet(charactersIn: "0123456789").inverted
-        if !(string.rangeOfCharacter(from: invalidCharacters) == nil) {
+
+    /// Determines whether the text field should allow a change of characters within the specified range.
+    /// This method is called when the user attempts to change the content of the text field.
+    /// - Parameters:
+    ///   - textField: The text field containing the text.
+    ///   - range: The range of characters to be replaced.
+    ///   - replacementString: The replacement string.
+    /// - Returns: `true` if the changes should be allowed; otherwise, `false`.
+    public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString: String) -> Bool {
+        let isBackspace = replacementString.isEmpty
+        if isBackspace {
+            return true
+        }
+        
+        // Only allow the user to enter numeric strings
+        if !replacementString.allSatisfy({ $0.isNumber }) {
             return false
         }
-
-        let currentString = (textField.text ?? "") as NSString
-        let newString = currentString.replacingCharacters(in: range, with: string)
         
-        /// Check if the current PAN is already at max length for a valid entry and cap the user there
-        if let stateIIN = ForagePANValidations.checkPANLength(newString) {
-            if (newString.count > stateIIN.panLength) {
-                return false
-            }
-        }
-        /// If the card is not valid, make sure to cap the random string of numbers at 19 digits
-        else {
-            if (newString.count > 19) {
-                return false
-            }
-        }
-
-        /// Set the Pan Number
-        ForageSDK.shared.panNumber = newString
-        
-        let overrideValidation = ForageSDK.shared.environment != .prod && doesStringMatchPattern(newString)
-
-        /// Prior to seeing 6 digits, the PAN is considered valid but incomplete.
-        if newString.count < 6 {
-            _isValid = true
-            _isComplete = false
-            delegate?.textFieldDidChange(self)
-            return true
-        }
-
-        /// Check if the first 6 digits are valid
-        if let stateIIN = ForagePANValidations.checkPANLength(newString) {
-            /// If the first 6 digits are valid, then we know what the expected length of the card will be.
-            /// If we haven't reached the max length yet, the PAN is considered valid but incomplete.
-            if newString.count < stateIIN.panLength {
-                _isValid = true
-                _isComplete = false
-                delegate?.textFieldDidChange(self)
-                return true
-            } else {
-                /// If the first 6 digits are correct and we have the correct length, the PAN is considered valid AND complete.
-                _isValid = true
-                _isComplete = true
-                delegate?.textFieldDidChange(self)
-                return true
-            }
-        } else {
-            // If we need to override validation, run custom validation here
-            if (overrideValidation) {
-                _isValid = true
-                if (newString.count >= 16 && newString.count <= 19) {
-                    _isComplete = true
-                } else {
-                    _isComplete = false
-                }
-                delegate?.textFieldDidChange(self)
-                return true
-            }
-            
-            /// If 6 or more digits are included and the first 6 digits don't map to a known state, we set the
-            /// PAN to invalid and incomplete.
-            _isValid = false
-            _isComplete = false
-            delegate?.textFieldDidChange(self)
-            return true
-        }
+        return true
     }
 }
 
