@@ -82,6 +82,8 @@ extension ForageSDK: ForageSDKService {
         paymentMethodReference: String,
         foragePinTextEdit: ForagePINTextField,
         completion: @escaping (Result<BalanceModel, Error>) -> Void) {
+            foragePinTextEdit.disable()
+            
             service?.getXKey(bearerToken: bearerToken, merchantAccount: merchantAccount) { result in
                 switch result {
                 case .success(let model):
@@ -96,13 +98,18 @@ extension ForageSDK: ForageSDKService {
                                 merchantID: merchantAccount,
                                 xKey: ["vgsXKey": model.alias, "btXKey": model.bt_alias]
                             )
-                            self.service?.checkBalance(pinCollector: foragePinTextEdit.collector!, request: request, completion: completion)
+                            self.service?.checkBalance(pinCollector: foragePinTextEdit.collector!, request: request) { result in
+                                foragePinTextEdit.handleSubmissionCompletion()
+                                completion(result)
+                            }
                             
                         case .failure(let error):
+                            foragePinTextEdit.handleSubmissionCompletion()
                             completion(.failure(error))
                         }
                     }
                 case .failure(let error):
+                    foragePinTextEdit.handleSubmissionCompletion()
                     completion(.failure(error))
                 }
             }
@@ -114,6 +121,8 @@ extension ForageSDK: ForageSDKService {
         paymentReference: String,
         foragePinTextEdit: ForagePINTextField,
         completion: @escaping (Result<PaymentModel, Error>) -> Void) {
+            foragePinTextEdit.disable()
+
             service?.getXKey(bearerToken: bearerToken, merchantAccount: merchantAccount) { result in
                 switch result {
                 case .success(let model):
@@ -131,16 +140,22 @@ extension ForageSDK: ForageSDKService {
                                         merchantID: merchantAccount,
                                         xKey: ["vgsXKey": model.alias, "btXKey": model.bt_alias]
                                     )
-                                    self.service?.capturePayment(pinCollector: foragePinTextEdit.collector!, request: request, completion: completion)
+                                    self.service?.capturePayment(pinCollector: foragePinTextEdit.collector!, request: request) { result in
+                                        foragePinTextEdit.handleSubmissionCompletion()
+                                        completion(result)
+                                    }
                                 case .failure(let error):
+                                    foragePinTextEdit.handleSubmissionCompletion()
                                     completion(.failure(error))
                                 }
                             }
                         case .failure(let error):
+                            foragePinTextEdit.handleSubmissionCompletion()
                             completion(.failure(error))
                         }
                     }
                 case .failure(let error):
+                    foragePinTextEdit.handleSubmissionCompletion()
                     completion(.failure(error))
                 }
             }
