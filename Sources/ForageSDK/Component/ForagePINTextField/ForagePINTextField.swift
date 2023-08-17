@@ -240,12 +240,12 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
         textField.clearText()
     }
     
-    public func enable() {
+    internal func enable() {
         self.textColor = .black
         self.isUserInteractionEnabled = true
     }
     
-    public func disable() {
+    internal func disable() {
         self.textColor = .lightGray
         self.isUserInteractionEnabled = false
     }
