@@ -16,6 +16,8 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
     private enum BTEventType: String {
         case TEXT_CHANGE = "textChange"
         case MASK_CHANGE = "maskChange"
+        case BLUR = "blur"
+        case FOCUS = "focus"
     }
     
     private var _isEmpty: Bool = true
@@ -95,6 +97,22 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
                 self._isValid = elementEvent.valid
                 self._isComplete = elementEvent.complete
                 self.delegate?.textFieldDidChange(self)
+            } else if (
+                elementEvent.type == BTEventType.FOCUS.rawValue ||
+                elementEvent.type == BTEventType.BLUR.rawValue
+            ) {
+                // Note: This is custom logic to unblock us while BT makes changes on their
+                // end. They had the incorrect initial state logic for their input field.
+                if (elementEvent.empty) {
+                    self._isEmpty = elementEvent.empty
+                    self._isValid = false
+                    self._isComplete = false
+                } else {
+                    self._isEmpty = elementEvent.empty
+                    self._isValid = elementEvent.valid
+                    self._isComplete = elementEvent.complete
+                }
+                self.delegate?.firstResponderDidChange(self)
             }
         }.store(in: &cancellables)
     }
