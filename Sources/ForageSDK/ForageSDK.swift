@@ -29,7 +29,7 @@ public class ForageSDK {
     internal var environment: EnvironmentTarget = .sandbox
     
     // Don't update! Only updated when releasing.
-    public static let version = "3.0.4"
+    public static let version = "3.0.5"
     public static let shared = ForageSDK()
     
     // MARK: Init
