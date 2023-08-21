@@ -76,6 +76,7 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.keyboardType = UIKeyboardType.phonePad
         textField.isSecureTextEntry = true
+        textField.textAlignment = .center
         
         let regexDigit = try! NSRegularExpression(pattern: "\\d")
         
