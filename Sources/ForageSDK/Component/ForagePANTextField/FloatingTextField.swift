@@ -26,7 +26,7 @@ public class FloatingTextField: UITextField {
     private var isFloatLabelShowing: Bool = false
     private var animateFloatPlaceholder: Bool = true
     
-    public var borderWidth: CGFloat = 0.5 {
+    public var borderWidth: CGFloat = 0.1 {
         didSet { layer.borderWidth = borderWidth }
     }
     
@@ -34,7 +34,8 @@ public class FloatingTextField: UITextField {
         didSet { layer.borderColor = borderColor.cgColor }
     }
     
-    public var borderCornerRadius: CGFloat = 8 {
+    public var borderCornerRadius: CGFloat = 4
+    {
         didSet { layer.cornerRadius = borderCornerRadius }
     }
     
