@@ -22,7 +22,7 @@ internal enum MaskPattern : String {
     case noIINmatch = "#### #### #### #### ###"
 }
 
-internal class MaskedUITextField : UITextField, ObservableState {
+internal class MaskedUITextField : FloatingTextField, ObservableState {
     // MARK: - Properties
     private var wasBackspacePressed = false
     
