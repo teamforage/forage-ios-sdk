@@ -5,7 +5,7 @@
 */
 
 #import <Foundation/Foundation.h>
-#import "ObjcExceptionHandler.h"
+#import "ObjcExceptionHandlerFork.h"
 
 @implementation __fork_dd_private_ObjcExceptionHandler
 

@@ -8,7 +8,7 @@
 #import <pthread.h>
 #import <sys/sysctl.h>
 
-#import "ObjcAppLaunchHandler.h"
+#import "ObjcAppLaunchHandlerFork.h"
 
 // A very long application launch time is most-likely the result of a pre-warmed process.
 // We consider 30s as a threshold for pre-warm detection.
