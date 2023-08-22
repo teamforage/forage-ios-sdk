@@ -63,6 +63,7 @@ class VGSTextFieldWrapper: UIView, VaultWrapper {
         configuration.validationRules = rules
         textField.configuration = configuration
         textField.translatesAutoresizingMaskIntoConstraints = false
+        textField.textAlignment = .center
 
         textField.anchor(
             top: self.topAnchor,
