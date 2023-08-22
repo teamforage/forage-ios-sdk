@@ -72,6 +72,7 @@ extension ForageSDK: ForageSDKService {
                 merchantRef: merchantAccount
             ))
             .notice("Called ForageSDK.shared.tokenizeEBTCard", attributes: nil)
+        
         let request = ForagePANRequestModel(
             authorization: bearerToken,
             merchantAccount: merchantAccount,
@@ -89,7 +90,6 @@ extension ForageSDK: ForageSDKService {
         paymentMethodReference: String,
         foragePinTextEdit: ForagePINTextField,
         completion: @escaping (Result<BalanceModel, Error>) -> Void) {
-            foragePinTextEdit.disable()
             _ = self.logger?
                 .setPrefix("checkBalance")
                 .addContext(ForageLogContext(
@@ -97,6 +97,8 @@ extension ForageSDK: ForageSDKService {
                     paymentMethodRef: paymentMethodReference
                 ))
                 .notice("Called ForageSDK.shared.checkBalance for Payment Method \(paymentMethodReference)", attributes: nil)
+            
+            foragePinTextEdit.disable()
             
             service?.getXKey(bearerToken: bearerToken, merchantAccount: merchantAccount) { result in
                 switch result {
@@ -135,8 +137,6 @@ extension ForageSDK: ForageSDKService {
         paymentReference: String,
         foragePinTextEdit: ForagePINTextField,
         completion: @escaping (Result<PaymentModel, Error>) -> Void) {
-            foragePinTextEdit.disable()
-
             _ = self.logger?
                 .setPrefix("capturePayment")
                 .addContext(ForageLogContext(
@@ -144,6 +144,8 @@ extension ForageSDK: ForageSDKService {
                     paymentRef: paymentReference
                 ))
                 .notice("Called ForageSDK.shared.capturePayment for Payment \(paymentReference)", attributes: nil)
+            
+            foragePinTextEdit.disable()
             
             service?.getXKey(bearerToken: bearerToken, merchantAccount: merchantAccount) { result in
                 switch result {
