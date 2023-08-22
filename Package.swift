@@ -33,12 +33,12 @@ let package = Package(
             from: "2.7.0"
         ),
         .package(
-            name: "Sentry", 
-            url: "https://github.com/getsentry/sentry-cocoa", 
-            from: "8.8.0"),
+            name: "Sentry",
+            url: "https://github.com/getsentry/sentry-cocoa",
+            from: "8.8.0"
+        ),
     ],
     targets: [
- 
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
@@ -47,7 +47,7 @@ let package = Package(
                 "VGSCollectSDK",
                 "LaunchDarkly",
                 "BasisTheoryElements",
-                "Sentry"
+                "Sentry",
                 "DatadogPrivateFork"
             ],
             path: "Sources",
