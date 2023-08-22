@@ -1,11 +1,17 @@
 //
-//  File.swift
+//  ForageLogger.swift
 //
 //
 //  Created by Danilo Joksimovic on 2023-07-26.
 //
 
-import Datadog
+// NOTE: This logger is built upon a "stripped" version of the Datadog package v2.1.0, found in the Sources/ForageSDK/Vendor directory.
+// "Stripped" refers to the inclusion of only the DatadogCore and DatadogLogs modules, which are essential for emitting logs as described at https://docs.datadoghq.com/logs/log_collection/ios/.
+// Initially, we decided against forking the Datadog package due to the complexity of resolving name clashes and other integration challenges.
+// This decision was a temporary measure to expedite the implementation of logging changes.
+// For further information and context, please refer to the following issue: https://linear.app/joinforage/issue/FX-460/spike-figure-out-new-ios-sdk-logging-approach
+
+
 import Foundation
 
 internal struct ForageLogContext {
@@ -69,29 +75,37 @@ internal protocol ForageLogger {
     func critical(_ message: String, error: Error?, attributes: [String: Encodable]?)
 }
 
+
 internal class DatadogLogger : ForageLogger {
     private static let DD_CLIENT_TOKEN: String = "pub1e4572ba0f5e53df108c333d5ec66c02"
-    private var logger: Logger? = nil
+    private static let DD_SERVICE_NAME: String = "ios-sdk"
+    private static let DD_SDK_INSTANCE_NAME: String = "forage"
+
+    private var logger: LoggerProtocol? = nil
     private var config: ForageLoggerConfig? = nil
-        
+    
     required internal init(_ config: ForageLoggerConfig? = ForageLoggerConfig()) {
         self.config = config
         guard let forageEnvironment = config?.forageEnvironment else {
-              print("forageEnvironment must be set to initialize the logger")
-              return
-          }
-        self.initDatadog(forageEnvironment)
-
-        let newLogger = Logger.builder
-            .sendNetworkInfo(true)
-        // we want to always emit to Datadog
-        // but we don't want to spam the client's console with our logs.
-            .sendLogsToDatadog(true)
-            .set(datadogReportingThreshold: .info)
-            .set(serviceName: "ios-sdk")
-            .build()
-
-        self.logger = newLogger
+            print("forageEnvironment must be set to initialize the logger")
+            return
+        }
+        
+        let datadogInstance = self.initDatadog(forageEnvironment)
+        self.logger = Logger.create(
+            with: Logger.Configuration(
+                service: "ios-sdk",
+                networkInfoEnabled: true,
+                bundleWithRumEnabled: false,
+                bundleWithTraceEnabled: false,
+                remoteLogThreshold: .info,
+                // we want to always emit to Datadog
+                // but we don't want to spam the client's console with our logs.
+                consoleLogFormat: .short
+            ),
+            in: datadogInstance
+        )
+        
         _ = self.addContext(config?.context ?? ForageLogContext())
     }
     
@@ -138,19 +152,27 @@ internal class DatadogLogger : ForageLogger {
         return self
     }
     
-    private func initDatadog(_ environment: EnvironmentTarget) {
-        if Datadog.isInitialized {
-            return
+    /// Initializes and returns a Datadog instance for the given environment. If an instance with the specified name already exists,
+    /// it returns the existing instance.
+    private func initDatadog(_ environment: EnvironmentTarget) -> DatadogCoreProtocol {
+        let instanceName = DatadogLogger.DD_SDK_INSTANCE_NAME
+        
+        if Datadog.isInitialized(instanceName: instanceName) {
+            return Datadog.sdkInstance(named: instanceName)
         }
-        Datadog.initialize(
-            appContext: .init(),
+        
+        let datadogInstance = Datadog.initialize(
+            with: Datadog.Configuration(
+                clientToken: DatadogLogger.DD_CLIENT_TOKEN,
+                env: String(describing: environment),
+                service: DatadogLogger.DD_SERVICE_NAME
+            ),
             trackingConsent: .granted,
-            configuration: Datadog.Configuration
-                .builderUsing(clientToken: DatadogLogger.DD_CLIENT_TOKEN, environment: String(describing: environment))
-                .set(serviceName: "ios-sdk")
-                .set(endpoint: .us1)
-                .build()
+            instanceName: instanceName
         )
+    
+        Logs.enable(in: datadogInstance)
+        return datadogInstance
     }
     
     private func getMessageWithPrefix(_ message: String) -> String {
