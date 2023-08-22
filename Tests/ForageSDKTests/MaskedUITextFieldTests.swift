@@ -205,12 +205,36 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertEqual(ForageSDK.shared.panNumber, "5077081")
     }
     
-    func testMasking_invalid16Digit_shouldApply16Mask() {
+    func testMasking_invalid16Digit_shouldApplyNoIINMatchMask() {
         maskedTextField.text = "1234567812345678"
         maskedTextField.textFieldDidChange()
         
         XCTAssertEqual(maskedTextField.text, "1234 5678 1234 5678")
         XCTAssertEqual(ForageSDK.shared.panNumber, "1234567812345678")
+    }
+    
+    func testMasking_invalid17Digit_shouldApplyNoIINMatchMask() {
+        maskedTextField.text = "12345678123456781"
+        maskedTextField.textFieldDidChange()
+        
+        XCTAssertEqual(maskedTextField.text, "1234 5678 1234 5678 1")
+        XCTAssertEqual(ForageSDK.shared.panNumber, "12345678123456781")
+    }
+    
+    func testMasking_invalid18Digit_shouldApplyNoIINMatchMask() {
+        maskedTextField.text = "123456781234567812"
+        maskedTextField.textFieldDidChange()
+        
+        XCTAssertEqual(maskedTextField.text, "1234 5678 1234 5678 12")
+        XCTAssertEqual(ForageSDK.shared.panNumber, "123456781234567812")
+    }
+    
+    func testMasking_invalid19Digit_shouldApplyNoIINMatchMask() {
+        maskedTextField.text = "1234567812345678123"
+        maskedTextField.textFieldDidChange()
+        
+        XCTAssertEqual(maskedTextField.text, "1234 5678 1234 5678 123")
+        XCTAssertEqual(ForageSDK.shared.panNumber, "1234567812345678123")
     }
     
     func testMasking_valid18Digit_shouldApply18Mask() {
@@ -227,6 +251,14 @@ final class MaskedUITextFieldTests: XCTestCase {
         
         XCTAssertEqual(maskedTextField.text, "507703 1234 5678 901 23")
         XCTAssertEqual(ForageSDK.shared.panNumber, "5077031234567890123")
+    }
+    
+    func testMasking_validSpecialCard_shouldApplyNoIINMatchMask() {
+        maskedTextField.text = "9999123412341234123"
+        maskedTextField.textFieldDidChange()
+        
+        XCTAssertEqual(maskedTextField.text, "9999 1234 1234 1234 123")
+        XCTAssertEqual(ForageSDK.shared.panNumber, "9999123412341234123")
     }
     
     // MARK: Masking with backspace

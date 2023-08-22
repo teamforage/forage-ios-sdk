@@ -19,6 +19,7 @@ internal enum MaskPattern : String {
     case sixteenDigits = "#### #### #### ####"
     case eighteenDigits = "###### #### ##### ## #"
     case nineteenDigits = "###### #### #### ### ##"
+    case noIINmatch = "#### #### #### #### ###"
 }
 
 internal class MaskedUITextField : UITextField, ObservableState {
@@ -80,7 +81,7 @@ internal class MaskedUITextField : UITextField, ObservableState {
     
     // MARK: - Text Handling
     private func trimTrailingDigits(_ newUnmaskedText: String, stateIIN: StateIIN?) -> String {
-        let maxPanLength = min(newUnmaskedText.count, stateIIN?.panLength ?? 16)
+        let maxPanLength = min(newUnmaskedText.count, stateIIN?.panLength ?? 19)
         
         return String(newUnmaskedText.prefix(maxPanLength))
     }
@@ -130,7 +131,7 @@ internal class MaskedUITextField : UITextField, ObservableState {
                 return MaskPattern.nineteenDigits
             }
         }
-        return MaskPattern.sixteenDigits
+        return MaskPattern.noIINmatch
     }
     
     private func applyMask(_ newUnmaskedText: String, maskPattern: MaskPattern) {
