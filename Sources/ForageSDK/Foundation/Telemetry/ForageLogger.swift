@@ -78,6 +78,11 @@ internal class DatadogLogger : ForageLogger {
     private var config: ForageLoggerConfig? = nil
     
     required internal init(_ config: ForageLoggerConfig? = ForageLoggerConfig()) {
+        if isUnitTesting() {
+            // avoid emitting logs when running unit tests
+            return
+        }
+        
         self.config = config
         guard let forageEnvironment = config?.forageEnvironment else {
             print("forageEnvironment must be set to initialize the logger")
