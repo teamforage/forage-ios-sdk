@@ -5,13 +5,6 @@
 //  Created by Danilo Joksimovic on 2023-07-26.
 //
 
-// NOTE: This logger is built upon a "stripped" version of the Datadog package v2.1.0, found in the Sources/ForageSDK/Vendor directory.
-// "Stripped" refers to the inclusion of only the DatadogCore and DatadogLogs modules, which are essential for emitting logs as described at https://docs.datadoghq.com/logs/log_collection/ios/.
-// Initially, we decided against forking the Datadog package due to the complexity of resolving name clashes and other integration challenges.
-// This decision was a temporary measure to expedite the implementation of logging changes.
-// For further information and context, please refer to the following issue: https://linear.app/joinforage/issue/FX-460/spike-figure-out-new-ios-sdk-logging-approach
-
-
 import Foundation
 
 internal struct ForageLogContext {
@@ -75,7 +68,7 @@ internal protocol ForageLogger {
     func critical(_ message: String, error: Error?, attributes: [String: Encodable]?)
 }
 
-
+/// Read this [document](https://docs.google.com/document/d/1BU609qv7qSDN-tdNaJP-sAyrgeM6REe9tvcMk5CxN3c/edit#bookmark=id.w44b8kk07o7o) for to learn more about how DatadogLogger works
 internal class DatadogLogger : ForageLogger {
     private static let DD_CLIENT_TOKEN: String = "pub1e4572ba0f5e53df108c333d5ec66c02"
     private static let DD_SERVICE_NAME: String = "ios-sdk"
