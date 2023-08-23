@@ -77,6 +77,13 @@ internal class MaskedUITextField : FloatingTextField, ObservableState {
         
         // TODO: Stop sharing the PAN state and instead have each PAN hold it's own state
         ForageSDK.shared.panNumber = newUnmaskedText
+        
+        if text.count > 0 {
+            self.addClearButton(isVisible: true)
+        } else {
+            self.addClearButton(isVisible: false)
+            self.becomeFirstResponder()
+        }
     }
     
     // MARK: - Text Handling

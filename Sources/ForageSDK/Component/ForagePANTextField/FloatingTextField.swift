@@ -17,6 +17,7 @@ public class FloatingTextField: UITextField {
     
     // MARK: - Properties
     
+    private var clearButton: UIButton = UIButton()
     private var floatingPlaceholderLabel: UILabel = UILabel()
     private var floatPlaceholderColor: UIColor = UIColor.gray
     private var floatPlaceholderActiveColor: UIColor = UIColor.gray
@@ -46,7 +47,7 @@ public class FloatingTextField: UITextField {
         }
     }
     
-    public var paddingYFloatLabel: CGFloat = 4 {
+    public var paddingYFloatLabel: CGFloat = 5 {
         didSet { invalidateIntrinsicContentSize() }
     }
     
@@ -104,13 +105,32 @@ public class FloatingTextField: UITextField {
         floatingPlaceholderLabel.text = placeholderFinal
         
         font = UIFont.systemFont(ofSize: 14, weight: .regular)
-        clearButtonMode = .whileEditing
-        
+                
         layer.borderWidth = borderWidth
         layer.cornerRadius = borderCornerRadius
         layer.borderColor = borderColor.cgColor
         
         addSubview(floatingPlaceholderLabel)
+    }
+    
+    // MARK: - Public API
+    
+    func addClearButton(isVisible: Bool = false) {
+        clearButton = UIButton(type: .custom)
+        clearButton.setImage(UIImage(systemName: "xmark",
+                                     withConfiguration: UIImage.SymbolConfiguration(pointSize: 10,
+                                                                                    weight: .heavy)), for: .normal)
+        clearButton.tintColor = .black
+        clearButton.contentMode = .scaleAspectFit
+        clearButton.addTarget(self, action: #selector(clear(sender:)), for: .touchUpInside)
+
+        self.rightView = clearButton
+        self.rightViewMode = isVisible ? .whileEditing : .never
+    }
+    
+    @objc func clear(sender: AnyObject) {
+        self.text = ""
+        sendActions(for: .editingChanged)
     }
     
     // MARK: - Private API
@@ -156,7 +176,7 @@ public class FloatingTextField: UITextField {
         }
     }
     
-    private func hideFlotingLabel(_ animated: Bool) {
+    private func hideFloatingLabel(_ animated: Bool) {
         let animations: (() -> Void) = {
             self.floatingPlaceholderLabel.alpha = 0.0
             self.floatingPlaceholderLabel.frame = CGRect(x: self.floatingPlaceholderLabel.frame.origin.x,
@@ -185,7 +205,6 @@ public class FloatingTextField: UITextField {
     
     private func insetForSideView(forBounds bounds: CGRect) -> CGRect {
         var rect = bounds
-        rect.origin.y = 0
         rect.size.height = bounds.height
         return rect
     }
@@ -207,7 +226,7 @@ public class FloatingTextField: UITextField {
                 
                 if textY < 0 { textY = topInset }
                 
-                return CGRect(x: x, y: ceil(textY), width: rect.size.width - x - paddingX, height: rect.height - topInset)
+                return CGRect(x: x, y: ceil(textY) - 2, width: rect.size.width - x - paddingX, height: rect.height - topInset)
             }
         }
     }
@@ -259,7 +278,9 @@ public class FloatingTextField: UITextField {
     }
     
     override public func rightViewRect(forBounds bounds: CGRect) -> CGRect {
-        let rect = super.rightViewRect(forBounds: bounds)
+        var rect = super.rightViewRect(forBounds: bounds)
+        rect.origin.y += 0
+        rect.origin.x -= 8
         return insetForSideView(forBounds: rect)
     }
     
@@ -297,17 +318,17 @@ public class FloatingTextField: UITextField {
         
         setFloatLabelAlignment()
         floatingPlaceholderLabel.textColor = isFirstResponder ? floatPlaceholderActiveColor : floatPlaceholderColor
-        
+                
         switch floatingDisplayStatus {
         case .never:
-            hideFlotingLabel(isFirstResponder)
+            hideFloatingLabel(isFirstResponder)
         case .always:
             showFloatingLabel(isFirstResponder)
         default:
-            if let enteredText = text,!enteredText.isEmptyString {
+            if let enteredText = text, !enteredText.isEmptyString {
                 showFloatingLabel(isFirstResponder)
             } else {
-                hideFlotingLabel(isFirstResponder)
+                hideFloatingLabel(isFirstResponder)
             }
         }
     }
