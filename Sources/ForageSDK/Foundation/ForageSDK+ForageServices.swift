@@ -65,6 +65,14 @@ extension ForageSDK: ForageSDKService {
         reusable: Bool? = true,
         completion: @escaping (Result<PaymentMethodModel, Error>) -> Void
     ) {
+        _ = self.logger?
+            .setPrefix("tokenizeEBTCard")
+            .addContext(ForageLogContext(
+                customerID: customerID,
+                merchantRef: merchantAccount
+            ))
+            .notice("Called ForageSDK.shared.tokenizeEBTCard", attributes: nil)
+        
         let request = ForagePANRequestModel(
             authorization: bearerToken,
             merchantAccount: merchantAccount,
@@ -82,6 +90,14 @@ extension ForageSDK: ForageSDKService {
         paymentMethodReference: String,
         foragePinTextEdit: ForagePINTextField,
         completion: @escaping (Result<BalanceModel, Error>) -> Void) {
+            _ = self.logger?
+                .setPrefix("checkBalance")
+                .addContext(ForageLogContext(
+                    merchantRef: merchantAccount,
+                    paymentMethodRef: paymentMethodReference
+                ))
+                .notice("Called ForageSDK.shared.checkBalance for Payment Method \(paymentMethodReference)", attributes: nil)
+            
             foragePinTextEdit.disable()
             
             service?.getXKey(bearerToken: bearerToken, merchantAccount: merchantAccount) { result in
@@ -121,8 +137,16 @@ extension ForageSDK: ForageSDKService {
         paymentReference: String,
         foragePinTextEdit: ForagePINTextField,
         completion: @escaping (Result<PaymentModel, Error>) -> Void) {
+            _ = self.logger?
+                .setPrefix("capturePayment")
+                .addContext(ForageLogContext(
+                    merchantRef: merchantAccount,
+                    paymentRef: paymentReference
+                ))
+                .notice("Called ForageSDK.shared.capturePayment for Payment \(paymentReference)", attributes: nil)
+            
             foragePinTextEdit.disable()
-
+            
             service?.getXKey(bearerToken: bearerToken, merchantAccount: merchantAccount) { result in
                 switch result {
                 case .success(let model):

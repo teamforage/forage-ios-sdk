@@ -12,12 +12,15 @@ internal class LiveForageService: ForageService {
     // MARK: Properties
     
     internal var provider: Provider
+    
+    private var logger: ForageLogger?
     private var maxAttempts: Int = 10
     private var intervalBetweenAttempts: Double = 1.0
     private var retryCount = 0
     
-    init(provider: Provider = Provider()) {
+    init(provider: Provider = Provider(), logger: ForageLogger? = nil) {
         self.provider = provider
+        self.logger = logger?.setPrefix("")
     }
     
     // MARK: Tokenize EBT card
@@ -58,6 +61,9 @@ internal class LiveForageService: ForageService {
         request: ForageRequestModel,
         completion: @escaping (Result<BalanceModel, Error>) -> Void) -> Void
     {
+        let paymentMethodRef = request.paymentMethodReference
+        self.logger?.info("Polling for balance check response for Payment Method \(paymentMethodRef)", attributes: nil)
+        
         pinCollector.setCustomHeaders(headers: [
             "IDEMPOTENCY-KEY": UUID.init().uuidString,
             "Merchant-Account": request.merchantID
@@ -81,9 +87,20 @@ internal class LiveForageService: ForageService {
                                 switch paymentMethodResult {
                                 case .success(let paymentMethod):
                                     if (paymentMethod.balance == nil) {
-                                        completion(.failure(ForageError(errors:[ForageErrorObj(httpStatusCode: 500, code:"invalid_data", message:"Invalid Data")])))
+                                        let forageError = ForageError(errors:[ForageErrorObj(httpStatusCode: 500, code:"invalid_data", message:"Invalid Data")])
+                                        self?.logger?.error(
+                                            "Balance check failed for Payment Method \(paymentMethodRef). Balance not attached",
+                                            error: forageError,
+                                            attributes: nil
+                                        )
+                                        
+                                        completion(.failure(forageError))
                                         return
                                     }
+                                    self?.logger?.notice(
+                                        "Balance check succeeded for Payment Method \(paymentMethodRef)",
+                                        attributes: nil
+                                    )
                                     completion(.success(paymentMethod.balance!))
                                 case .failure(let error):
                                     completion(.failure(error))
@@ -92,6 +109,11 @@ internal class LiveForageService: ForageService {
                             }
                         )
                     case .failure(let error):
+                        self?.logger?.error(
+                            "Balance check failed for Payment Method \(paymentMethodRef)",
+                            error: error,
+                            attributes: nil
+                        )
                         completion(.failure(error))
                     }
                 })
@@ -140,9 +162,23 @@ internal class LiveForageService: ForageService {
                             bearerToken: request.authorization,
                             merchantAccount: request.merchantID,
                             paymentRef: request.paymentReference,
-                            completion: completion
+                            completion: { [weak self] paymentResult in
+                                switch paymentResult {
+                                case .success(let payment):
+                                    self?.logger?.notice("Capture succeeded for Payment \(request.paymentReference)", attributes: nil)
+                                    completion(.success(payment))
+                                case .failure(let error):
+                                    self?.logger?.error("Capture failed for Payment \(request.paymentReference)", error: error, attributes: nil)
+                                    completion(.failure(error))
+                                }
+                            }
                         )
                     case .failure(let error):
+                        self?.logger?.error(
+                            "Capture failed for Payment \(request.paymentReference)",
+                            error: error,
+                            attributes: nil
+                        )
                         completion(.failure(error))
                     }
                 })
@@ -189,11 +225,14 @@ extension LiveForageService: Polling {
                             }
                         }
                 case .failure(let error):
+                    self?.logger?.error("Failed to process vault proxy response for \(self?.getLogSuffix(request) ?? "N/A")", error: error, attributes: nil)
                     completion(.failure(error))
                 }
             }
         } else {
-            completion(.failure(ServiceError.emptyError))
+            let emptyError = ServiceError.emptyError
+            logger?.error(emptyError.rawValue, error: emptyError, attributes: nil)
+            completion(.failure(emptyError))
         }
     }
 
@@ -224,8 +263,14 @@ extension LiveForageService: Polling {
                         let statusCode = error.statusCode
                         let forageErrorCode = error.forageCode
                         let message = error.message
-                        completion(.failure(ForageError(errors:[ForageErrorObj(httpStatusCode:statusCode, code:forageErrorCode, message:message)])))
-                    /// check maxAttempts to retry
+                        let forageError = ForageError(errors: [ForageErrorObj(httpStatusCode: statusCode, code: forageErrorCode, message: message)])
+                        
+                        self.logger?.error(
+                            "Received SQS Error message for \(self.getLogSuffix(request))",
+                            error: forageError,
+                            attributes: nil)
+                        completion(.failure(forageError))
+                        /// check maxAttempts to retry
                     } else if self.retryCount < self.maxAttempts {
                         self.waitNextAttempt {
                             self.pollingMessage(
@@ -236,7 +281,12 @@ extension LiveForageService: Polling {
                         }
                     /// in case run out of attempts
                     } else {
-                        completion(.failure(ForageError(errors:[ForageErrorObj(httpStatusCode:500, code:"unknown_server_error", message:"Unknown Server Error")])))
+                        self.logger?.error(
+                            "Max polling attempts reached for \(self.getLogSuffix(request))",
+                            error: nil,
+                            attributes: nil
+                        )
+                        completion(.failure(ForageError(errors: [ForageErrorObj(httpStatusCode: 500, code: "unknown_server_error", message: "Unknown Server Error")])))
                     }
                     
                 case .failure(let error):
@@ -257,5 +307,17 @@ extension LiveForageService: Polling {
         DispatchQueue.main.asyncAfter(deadline: .now() + self.intervalBetweenAttempts) {
             completion()
         }
+    }
+    
+    // get the log suffix (action + resource name + resource ref)
+    // using the given ForageRequestModel
+    private func getLogSuffix(_ request: ForageRequestModel) -> String {
+        let paymentReference = request.paymentMethodReference
+        let paymentMethodReference = request.paymentMethodReference
+        
+        if !paymentReference.isEmpty {
+            return "capture of Payment \(paymentReference)"
+        }
+        return "balance check of Payment Method \(paymentMethodReference)"
     }
 }

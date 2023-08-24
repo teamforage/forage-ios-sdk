@@ -9,7 +9,7 @@ Pod::Spec.new do |spec|
   spec.author       = { "Rob Gormisky" => "rob@joinforage.com" }
   spec.platform     = :ios, "13.0"
   spec.source       = { :git => "https://github.com/teamforage/forage-ios-sdk.git", :tag => "3.0.6" }
-  spec.source_files = "Sources/ForageSDK/**/*.swift"
+  spec.source_files = ["Sources/ForageSDK/**/*.swift", "DatadogPrivate-Objc/**/*.{h,m}"]
   spec.dependency 'VGSCollectSDK', '~> 1.11.2'
   spec.dependency 'LaunchDarkly', '~> 8.0.1'
   spec.dependency 'BasisTheoryElements', '~> 2.7.0'

@@ -27,6 +27,7 @@ public class ForageSDK {
     internal var service: ForageService?
     internal var panNumber: String = ""
     internal var environment: EnvironmentTarget = .sandbox
+    internal var logger: ForageLogger? = nil
     
     // Don't update! Only updated when releasing.
     public static let version = "3.0.6"
@@ -40,14 +41,20 @@ public class ForageSDK {
             return
         }
         self.environment = config.environment
-        LDManager.shared.initialize(self.environment)
-        // TODO: Maybe move this shared logger call!
+        // ForageSDK.shared.environment is not set
+        // until the end of this initialization
+        // so we have to provide the environment from the config
+        let logger = DatadogLogger(
+            ForageLoggerConfig(
+                environment: config.environment,
+                prefix: ""
+            )
+        )
+        self.logger = logger
+        LDManager.shared.initialize(self.environment, logger: logger)
         VGSCollectLogger.shared.disableAllLoggers()
-        
-        self.service = LiveForageService()
-        let isUnitTesting = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
-        
-        if !isUnitTesting {
+                
+        if !isUnitTesting() {
             SentrySDK.start { options in
                 options.dsn = "https://8fcdd8dc94aa892ed8fd4cdb20db90ee@o921422.ingest.sentry.io/4505665631813632"
                 options.debug = false
@@ -58,6 +65,8 @@ public class ForageSDK {
                 options.enableTracing = true
             }
         }
+        let provider = Provider(logger: logger)
+        self.service = LiveForageService(provider: provider, logger: logger)
     }
     
     /**

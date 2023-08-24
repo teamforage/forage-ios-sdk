@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Danny Leiser on 5/11/23.
 //
@@ -23,8 +23,8 @@ private enum LDMobileKey: String {
  Vault Types
  */
 public enum VaultType: String {
-    case vgsVaultType = "VGS_VAULT_TYPE"
-    case btVaultType = "BT_VAULT_TYPE"
+    case vgsVaultType = "vgs"
+    case btVaultType = "basis_theory"
 }
 
 /**
@@ -48,23 +48,26 @@ private enum ContextKind: String {
 public class LDManager {
     static let shared = LDManager()
     private var internalVaultType: VaultType?
-    
+    private var logger: ForageLogger?
+
     private var vaultType: VaultType? {
         set(newValue) {
             if (internalVaultType == nil) {
                 internalVaultType = newValue
             } else {
-                // Log a warning here when we have logging!
+                self.logger?.error("Invalid vaultType provided!", error: nil, attributes: nil)
             }
         }
         get {
             return internalVaultType
         }
     }
-    
-    private init() {}
-    
-    internal func initialize(_ environment: EnvironmentTarget) {
+
+    private init() {
+    }
+
+    internal func initialize(_ environment: EnvironmentTarget, logger: ForageLogger? = nil) {
+        self.logger = logger
         let ldConfig = LDConfig(mobileKey: getLDMobileKey(environment).rawValue)
         var ldContextBuilder = LDContextBuilder(key: ContextKey.iosSdk.rawValue)
         ldContextBuilder.kind(ContextKind.service.rawValue)
@@ -82,14 +85,28 @@ public class LDManager {
         let ld = LDClient.get()!
         // Defaulting to VGS for now! Will likely want to change this to BT in the future.
         let vaultPercentage = ld.doubleVariation(forKey: FlagType.vaultPrimaryTrafficPercentage.rawValue, defaultValue: 0.0)
+        self.logger = self.logger?.setPrefix("LaunchDarkly")
+        self.logger?.info("Evaluated \(FlagType.vaultPrimaryTrafficPercentage) = \(vaultPercentage)%", attributes: nil)
         let randomNum = Double.random(in: 0...100)
         if (randomNum < vaultPercentage) {
             vaultType = VaultType.btVaultType
         } else {
             vaultType = VaultType.vgsVaultType
         }
-        
+        self.logVaultType(vaultType)
         return vaultType!
+    }
+    
+    private func logVaultType(_ vaultType: VaultType? = nil) {
+        guard let vaultType = vaultType else {
+            return // Exit early if vaultType is nil or vaultTypeName is nil
+        }
+        
+        _ = self.logger?
+            .addContext(ForageLogContext(
+                vaultType: vaultType
+            ))
+            .notice("Using \(vaultType.rawValue)", attributes: nil)
     }
     
     private func getLDMobileKey(_ environment: EnvironmentTarget) -> LDMobileKey {
