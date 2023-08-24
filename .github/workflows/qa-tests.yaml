@@ -36,7 +36,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: teamforage/mobile-qa-tests
-          ref: main
+          ref: owen/set-ios-to-run-remote
           ssh-key: ${{ secrets.MOBILE_QA_DEPLOY_KEY }}
           path: 'mobile-qa-tests/'
       - name: Run Integration Tests
