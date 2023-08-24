@@ -6,8 +6,8 @@ import PackageDescription
 let package = Package(
     name: "ForageSDK",
     platforms: [
-            .iOS(.v13),
-        ],
+        .iOS(.v13),
+    ],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
@@ -33,9 +33,10 @@ let package = Package(
             from: "2.7.0"
         ),
         .package(
-            name: "Sentry", 
-            url: "https://github.com/getsentry/sentry-cocoa", 
-            from: "8.8.0"),
+            name: "Sentry",
+            url: "https://github.com/getsentry/sentry-cocoa",
+            from: "8.8.0"
+        ),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -46,13 +47,24 @@ let package = Package(
                 "VGSCollectSDK",
                 "LaunchDarkly",
                 "BasisTheoryElements",
-                "Sentry"
+                "Sentry",
+                "DatadogPrivateFork"
             ],
-            path: "Sources", resources: [
+            path: "Sources",
+            resources: [
                 .process("Resources/Media.xcassets")
-            ]),
+            ],
+            swiftSettings: [.define("SPM_BUILD")]
+        ),
         .testTarget(
             name: "ForageSDKTests",
-            dependencies: ["ForageSDK"]),
+            dependencies: ["ForageSDK"]
+        ),
+        
+        // Bridge Datadog's "Private" Objective C code with our Swift code.
+        .target(
+            name: "DatadogPrivateFork",
+            path: "DatadogPrivate-Objc"
+        ),
     ]
 )

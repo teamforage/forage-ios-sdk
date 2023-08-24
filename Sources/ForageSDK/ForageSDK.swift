@@ -53,10 +53,8 @@ public class ForageSDK {
         self.logger = logger
         LDManager.shared.initialize(self.environment, logger: logger)
         VGSCollectLogger.shared.disableAllLoggers()
-        
-        let isUnitTesting = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
-        
-        if !isUnitTesting {
+                
+        if !isUnitTesting() {
             SentrySDK.start { options in
                 options.dsn = "https://8fcdd8dc94aa892ed8fd4cdb20db90ee@o921422.ingest.sentry.io/4505665631813632"
                 options.debug = false
