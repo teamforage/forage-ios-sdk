@@ -48,6 +48,12 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
         set { textField.borderColor = newValue }
     }
     
+    /// BorderRadius for the text field
+    @IBInspectable public var borderRadius: CGFloat {
+        get { return textField.borderRadius }
+        set { textField.borderRadius = newValue }
+    }
+    
     /// Padding for the text field
     @IBInspectable public var padding: UIEdgeInsets {
         get { return textField.padding }
@@ -65,6 +71,12 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
     @IBInspectable public var textColor: UIColor? {
         get { return textField.textColor }
         set { textField.textColor = newValue }
+    }
+    
+    /// BackgroundColor for the text field
+    @IBInspectable public override var backgroundColor: UIColor? {
+        get { return textField.backgroundColor }
+        set { textField.backgroundColor = newValue }
     }
     
     /// Size of the text for the text field
@@ -139,7 +151,9 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
         tf?.textColor = UIColor.black
         tf?.font = UIFont.systemFont(ofSize: 14, weight: .regular)
         tf?.borderWidth = 0.25
+        tf?.borderRadius = 4
         tf?.borderColor = UIColor.lightGray
+        tf?.backgroundColor = UIColor.white
         tf?.padding = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 0)
         collector = tf?.collector
         

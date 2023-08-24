@@ -29,6 +29,8 @@ internal protocol InternalAppearance {
     var tfTintColor: UIColor? { get set }
     var borderWidth: CGFloat { get set }
     var borderColor: UIColor? { get set }
+    var borderRadius: CGFloat { get set }
+    var backgroundColor: UIColor? { get set }
     var font: UIFont? { get set }
 }
 
