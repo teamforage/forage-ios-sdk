@@ -58,7 +58,7 @@ class VGSTextFieldWrapper: UIView, VaultWrapper {
         rules.add(rule: VGSValidationRulePattern(pattern: "^[0-9]+$", error: VGSValidationErrorType.pattern.rawValue))
         let configuration = VGSConfiguration(collector: (collector as! VGSCollectWrapper).vgsCollect, fieldName: "pin")
         configuration.type = .none
-        configuration.keyboardType = .numberPad
+        configuration.keyboardType = .phonePad
         configuration.maxInputLength = 4
         configuration.validationRules = rules
         textField.configuration = configuration

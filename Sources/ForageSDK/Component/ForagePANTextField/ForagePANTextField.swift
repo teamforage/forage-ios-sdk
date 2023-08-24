@@ -147,7 +147,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         tf.font = UIFont.systemFont(ofSize: 14, weight: .regular)
         tf.borderStyle = .roundedRect
         tf.autocorrectionType = .no
-        tf.keyboardType = UIKeyboardType.phonePad
+        tf.keyboardType = UIKeyboardType.numberPad
         tf.accessibilityIdentifier = "tf_forage_ebt_text_field"
         tf.isAccessibilityElement = true
         return tf
