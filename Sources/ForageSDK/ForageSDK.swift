@@ -30,7 +30,7 @@ public class ForageSDK {
     internal var logger: ForageLogger? = nil
     
     // Don't update! Only updated when releasing.
-    public static let version = "3.0.6"
+    public static let version = "3.0.7"
     public static let shared = ForageSDK()
     
     // MARK: Init
