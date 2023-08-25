@@ -131,6 +131,15 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
         }
     }
     
+    var borderRadius: CGFloat {
+        get {
+            return textField.layer.cornerRadius
+        }
+        set {
+            textField.layer.cornerRadius = newValue
+        }
+    }
+    
     var padding = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0) {
             didSet { setMainPaddings() }
     }
@@ -144,6 +153,18 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
         }
         set {
             textField.layer.borderColor = newValue?.cgColor
+        }
+    }
+    
+    override var backgroundColor: UIColor? {
+        get {
+            guard let cgcolor = textField.layer.backgroundColor else {
+                return nil
+            }
+            return UIColor(cgColor: cgcolor)
+        }
+        set {
+            textField.layer.backgroundColor = newValue?.cgColor
         }
     }
     

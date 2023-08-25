@@ -91,6 +91,15 @@ class VGSTextFieldWrapper: UIView, VaultWrapper {
         }
     }
     
+    var borderRadius: CGFloat {
+        get {
+            return textField.cornerRadius
+        }
+        set {
+            textField.cornerRadius = newValue
+        }
+    }
+    
     var padding: UIEdgeInsets {
         get {
             return textField.padding
@@ -106,6 +115,15 @@ class VGSTextFieldWrapper: UIView, VaultWrapper {
         }
         set {
             textField.borderColor = newValue
+        }
+    }
+    
+    override var backgroundColor: UIColor? {
+        get {
+            return textField.backgroundColor
+        }
+        set {
+            textField.backgroundColor = newValue
         }
     }
     
