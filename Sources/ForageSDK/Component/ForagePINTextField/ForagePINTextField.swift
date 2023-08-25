@@ -263,21 +263,6 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
     public func clearText() {
         textField.clearText()
     }
-    
-    internal func enable() {
-        self.textColor = .black
-        self.isUserInteractionEnabled = true
-    }
-    
-    internal func disable() {
-        self.textColor = .lightGray
-        self.isUserInteractionEnabled = false
-    }
-    
-    internal func handleSubmissionCompletion() {
-        self.clearText()
-        self.enable()
-    }
 }
 
 extension ForagePINTextField: VaultWrapperDelegate {
