@@ -119,7 +119,7 @@ final class ForagePINTextFieldTests: XCTestCase {
         XCTAssertEqual(foragePinTextField.textColor, .black)
     }
     
-    func test_backgroundColor() {
+    func test_BackgroundColor() {
         // Test ForagePINTextField background color
         let foragePinTextField = ForagePINTextField()
         foragePinTextField.backgroundColor = .lightGray
@@ -140,7 +140,7 @@ final class ForagePINTextFieldTests: XCTestCase {
         XCTAssertEqual(btTextFieldWrapper.backgroundColor, nil)
     }
     
-    func test_cornerRadius() {
+    func test_CornerRadius() {
         // Test ForagePINTextField border radius
         let foragePinTextField = ForagePINTextField()
         foragePinTextField.borderRadius = 10
