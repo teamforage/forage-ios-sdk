@@ -124,6 +124,18 @@ final class FloatingTextFieldTests: XCTestCase {
         XCTAssertEqual(resultRect, expectedRect)
     }
     
+    func test_leftViewRect() {
+        let bounds = CGRect(x: 0, y: 0, width: 100, height: 100)
+        
+        let expectedRect = CGRect(x: floatingTextField.floatingPlaceholderLabel.frame.origin.x,
+                                  y: (bounds.height - floatingTextField.bounds.size.height) / 2,
+                                  width: bounds.origin.x,
+                                  height: bounds.origin.y)
+        
+        let resultRect = floatingTextField.leftViewRect(forBounds: bounds)
+        XCTAssertEqual(resultRect, expectedRect)
+    }
+    
     func test_clearButtonRect() {
         let paddingX: CGFloat = 8
         let bounds = CGRect(x: 0, y: 0, width: 342, height: 37)
@@ -199,5 +211,12 @@ final class FloatingTextFieldTests: XCTestCase {
         let currentPaddingYFloatLabel = floatingTextField.paddingYFloatLabel
         floatingTextField.paddingYFloatLabel = 12
         XCTAssertNotEqual(floatingTextField.paddingYFloatLabel, currentPaddingYFloatLabel)
+    }
+    
+    func test_clear() {
+        floatingTextField.placeholder = "PAN number"
+        floatingTextField.clear(sender: floatingTextField)
+        
+        XCTAssertEqual(floatingTextField.text, "")
     }
 }
