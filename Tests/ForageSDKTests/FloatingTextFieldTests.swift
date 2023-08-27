@@ -170,4 +170,34 @@ final class FloatingTextFieldTests: XCTestCase {
         floatingTextField.layoutSubviews()
         XCTAssertEqual(centerAlignment, floatingTextField.floatingPlaceholderLabel.frame.origin.x.rounded(.awayFromZero))
     }
+    
+    func test_borderWidth() {
+        let currentBorderWidth = floatingTextField.borderWidth
+        floatingTextField.borderWidth = 10
+        XCTAssertNotEqual(floatingTextField.borderWidth, currentBorderWidth)
+    }
+    
+    func test_borderColor() {
+        let currentBorderColor = floatingTextField.borderColor
+        floatingTextField.borderColor = .red
+        XCTAssertNotEqual(floatingTextField.borderColor, currentBorderColor)
+    }
+    
+    func test_borderCornerRadius() {
+        let currentBorderRadius = floatingTextField.borderCornerRadius
+        floatingTextField.borderCornerRadius = 10
+        XCTAssertNotEqual(floatingTextField.borderCornerRadius, currentBorderRadius)
+    }
+    
+    func test_floatPlaceholderFont() {
+        let currentPlaceholderFont = floatingTextField.floatPlaceholderFont
+        floatingTextField.floatPlaceholderFont = UIFont.systemFont(ofSize: 4)
+        XCTAssertNotEqual(floatingTextField.floatPlaceholderFont, currentPlaceholderFont)
+    }
+    
+    func test_paddingYFloatLabel() {
+        let currentPaddingYFloatLabel = floatingTextField.paddingYFloatLabel
+        floatingTextField.paddingYFloatLabel = 12
+        XCTAssertNotEqual(floatingTextField.paddingYFloatLabel, currentPaddingYFloatLabel)
+    }
 }
