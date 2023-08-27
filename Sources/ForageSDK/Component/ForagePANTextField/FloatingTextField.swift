@@ -18,12 +18,12 @@ public class FloatingTextField: UITextField {
     // MARK: - Properties
     
     private var clearButton: UIButton = UIButton()
-    private var floatingPlaceholderLabel: UILabel = UILabel()
+    private(set) var floatingPlaceholderLabel: UILabel = UILabel()
     private var floatPlaceholderColor: UIColor = UIColor.gray
     private var floatPlaceholderActiveColor: UIColor = UIColor.gray
     private var floatingLabelShowAnimationDuration = 0.3
     private var floatingDisplayStatus: FloatingDisplayStatus = .defaults
-    private var paddingX: CGFloat = 10
+    private var paddingX: CGFloat = 8
     private var isFloatLabelShowing: Bool = false
     private var animateFloatPlaceholder: Bool = true
     
@@ -35,8 +35,7 @@ public class FloatingTextField: UITextField {
         didSet { layer.borderColor = borderColor.cgColor }
     }
     
-    public var borderCornerRadius: CGFloat = 4
-    {
+    public var borderCornerRadius: CGFloat = 4 {
         didSet { layer.cornerRadius = borderCornerRadius }
     }
     
@@ -65,20 +64,6 @@ public class FloatingTextField: UITextField {
         }
         
         return paddingX
-    }
-    
-    private var floatLabelWidth: CGFloat {
-        var width = bounds.size.width
-        
-        if let leftViewWidth = leftView?.bounds.size.width {
-            width -= leftViewWidth
-        }
-        
-        if let rightViewWidth = rightView?.bounds.size.width {
-            width -= rightViewWidth
-        }
-        
-        return width - (self.x * 2)
     }
     
     private var placeholderFinal: String {
@@ -279,8 +264,7 @@ public class FloatingTextField: UITextField {
     
     override public func rightViewRect(forBounds bounds: CGRect) -> CGRect {
         var rect = super.rightViewRect(forBounds: bounds)
-        rect.origin.y += 0
-        rect.origin.x -= 8
+        rect.origin.x -= paddingX
         return insetForSideView(forBounds: rect)
     }
     
