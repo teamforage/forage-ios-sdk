@@ -13,6 +13,7 @@ internal struct ForageLogContext {
     var paymentRef: String? = nil
     var paymentMethodRef: String? = nil
     var vaultType: VaultType? = nil
+    var sdkVersion: String = ForageSDK.version
 }
 
 internal struct ForageLoggerConfig {
@@ -134,7 +135,8 @@ internal class DatadogLogger : ForageLogger {
             ("merchant_ref", newContext.merchantRef),
             ("payment_method_ref", newContext.paymentMethodRef),
             ("payment_ref", newContext.paymentRef),
-            ("vault_type", newContext.vaultType?.rawValue)
+            ("vault_type", newContext.vaultType?.rawValue),
+            ("sdk_version", newContext.sdkVersion)
         ]
         
         for (key, value) in attributeMappings {
