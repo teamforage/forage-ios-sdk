@@ -49,6 +49,14 @@ final class FloatingTextFieldTests: XCTestCase {
         XCTAssertEqual(resultAttributedPlaceholder, attributedString)
     }
     
+    func test_placeholderWithoutColor() {
+        let placeholder = "PAN number"
+        floatingTextField.placeholder = placeholder
+        floatingTextField.placeholderColor = nil
+        
+        XCTAssertNil(floatingTextField.placeholderColor)
+    }
+    
     func test_textRect_insetRectForEmptyBounds() {
         let x: CGFloat = 8
         let paddingX: CGFloat = 8
@@ -218,5 +226,13 @@ final class FloatingTextFieldTests: XCTestCase {
         floatingTextField.clear(sender: floatingTextField)
         
         XCTAssertEqual(floatingTextField.text, "")
+    }
+    
+    func test_showFloatingLabel() {
+        floatingTextField.placeholder = "PAN number"
+        floatingTextField.text = "1111 1111"
+
+        floatingTextField.layoutSubviews()
+        XCTAssertEqual(floatingTextField.paddingYFloatLabel, 5)
     }
 }

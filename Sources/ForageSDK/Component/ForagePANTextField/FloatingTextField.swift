@@ -19,13 +19,13 @@ public class FloatingTextField: UITextField {
     
     private var clearButton: UIButton = UIButton()
     private(set) var floatingPlaceholderLabel: UILabel = UILabel()
+    private(set) var animateFloatPlaceholder: Bool = true
     private var floatPlaceholderColor: UIColor = UIColor.gray
     private var floatPlaceholderActiveColor: UIColor = UIColor.gray
     private var floatingLabelShowAnimationDuration = 0.3
     private var floatingDisplayStatus: FloatingDisplayStatus = .defaults
     private var paddingX: CGFloat = 8
     private var isFloatLabelShowing: Bool = false
-    private var animateFloatPlaceholder: Bool = true
     
     public var borderWidth: CGFloat = 0.1 {
         didSet { layer.borderWidth = borderWidth }
