@@ -22,8 +22,12 @@ internal class ResponseMonitor: NetworkMonitor {
     private var responseAttributes: ResponseAttributes = ResponseAttributes()
     private var metricsLogger: ForageLogger?
     
-    init(metricsLogger: ForageLogger? = DatadogLogger(ForageLoggerConfig(prefix: "Metrics"))) {
-        self.metricsLogger = metricsLogger
+    init(
+        metricsLogger: ForageLogger? = DatadogLogger(
+            ForageLoggerConfig(prefix: "Metrics")
+        )
+    ) {
+        self.metricsLogger = metricsLogger?.setLogKind(ForageLogKind.metric)
     }
     
     internal func start() {
@@ -54,7 +58,7 @@ internal class ResponseMonitor: NetworkMonitor {
     
     internal func logResult() {
         guard let startTime = self.startTime, let endTime = self.endTime else {
-            metricsLogger?.error("Missing startTime or endTime. Could not capture metric log.", error: nil, attributes: nil)
+            metricsLogger?.error("Missing startTime or endTime. Could not log metric.", error: nil, attributes: nil)
             return
         }
         responseAttributes.responseTimeMs = calculateDurationMs(from: startTime, to: endTime)
@@ -97,7 +101,7 @@ internal final class VaultProxyResponseMonitor: ResponseMonitor {
               let path = responseAttributes.path,
               let httpStatus = responseAttributes.code,
               let responseTimeMs = responseAttributes.responseTimeMs else {
-            metricsLogger?.error("Incomplete or missing response attributes. Could not log metrics.", error: nil, attributes: nil)
+            metricsLogger?.error("Incomplete or missing response attributes. Could not log metric.", error: nil, attributes: nil)
             return
         }
         
