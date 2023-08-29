@@ -53,7 +53,6 @@ final class FloatingTextFieldTests: XCTestCase {
         let placeholder = "PAN number"
         floatingTextField.placeholder = placeholder
         floatingTextField.placeholderColor = nil
-        
         XCTAssertNil(floatingTextField.placeholderColor)
     }
     
@@ -71,49 +70,25 @@ final class FloatingTextFieldTests: XCTestCase {
     }
     
     func test_textRect_insetRectForBounds() {
-        let x: CGFloat = 8
         let paddingX: CGFloat = 8
-        let paddingYFloatLabel: CGFloat = 5
         let bounds = CGRect(x: 0, y: 0, width: 100, height: 100)
         
         floatingTextField.text = "0000 0000"
         floatingTextField.placeholder = "PAN number"
         
-        let topInset = paddingYFloatLabel + floatingTextField.bounds.size.height
-        let textOriginalY = floatingTextField.frame.height / 2.0
-        var textY = topInset - textOriginalY
-        
-        if textY < 0 { textY = topInset }
-        
-        let expectedRect = CGRect(x: x,
-                                  y: ceil(textY) - 2,
-                                  width: bounds.size.width - x - paddingX,
-                                  height: bounds.height - topInset)
-        
+        let expectedRect = CGRect(x: paddingX, y: 3, width: 84, height: 95)
         let resultRect = floatingTextField.textRect(forBounds: bounds)
         XCTAssertEqual(resultRect, expectedRect)
     }
     
     func test_editingRect_insetRectForBounds() {
-        let x: CGFloat = 8
         let paddingX: CGFloat = 8
-        let paddingYFloatLabel: CGFloat = 5
-        let bounds = CGRect(x: 0, y: 0, width: 342, height: 37)
+        let bounds = CGRect(x: 0, y: 0, width: 100, height: 100)
         
         floatingTextField.text = "1111"
         floatingTextField.placeholder = "PAN number"
         
-        let topInset = paddingYFloatLabel + floatingTextField.bounds.size.height
-        let textOriginalY = floatingTextField.frame.height / 2.0
-        var textY = topInset - textOriginalY
-        
-        if textY < 0 { textY = topInset }
-        
-        let expectedRect = CGRect(x: x,
-                                  y: ceil(textY) - 2,
-                                  width: bounds.size.width - x - paddingX,
-                                  height: bounds.height - topInset)
-        
+        let expectedRect = CGRect(x: paddingX, y: 3, width: 84, height: 95)
         let resultRect = floatingTextField.editingRect(forBounds: bounds)
         XCTAssertEqual(resultRect, expectedRect)
     }
@@ -224,14 +199,12 @@ final class FloatingTextFieldTests: XCTestCase {
     func test_clear() {
         floatingTextField.placeholder = "PAN number"
         floatingTextField.clear(sender: floatingTextField)
-        
         XCTAssertEqual(floatingTextField.text, "")
     }
     
     func test_showFloatingLabel() {
         floatingTextField.placeholder = "PAN number"
         floatingTextField.text = "1111 1111"
-
         floatingTextField.layoutSubviews()
         XCTAssertEqual(floatingTextField.paddingYFloatLabel, 5)
     }
