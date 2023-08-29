@@ -49,7 +49,7 @@ final class ResponseMonitorTests: XCTestCase {
     
     func testInit_shouldSetLogKind() {
         let mockMetricsLogger = MockMetricsLogger()
-        let testableMonitor = TestableResponseMonitor(metricsLogger: mockMetricsLogger)
+        _ = TestableResponseMonitor(metricsLogger: mockMetricsLogger)
 
         XCTAssertEqual(mockMetricsLogger.logKind!.rawValue, "metric")
     }
@@ -96,7 +96,7 @@ final class ResponseMonitorTests: XCTestCase {
         XCTAssertEqual(mockMetricsLogger.loggedInfos.count, 0, "There should be no logged infos")
 
         let loggedError = mockMetricsLogger.loggedErrors.first!
-        XCTAssertEqual(loggedError.message, "Incomplete or missing response attributes. Could not log metric")
+        XCTAssertEqual(loggedError.message, "Incomplete or missing response attributes. Could not log metric.")
     }
     
     func testLogWithResponseAttributes_shouldLogWithAttributes() {
