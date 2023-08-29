@@ -16,6 +16,11 @@ internal struct ForageLogContext {
     var sdkVersion: String = ForageSDK.version
 }
 
+internal enum ForageLogKind: String {
+    case metric = "metric" // Used for logging metrics and performance data
+    case trace = "trace" // Used for tracing or logging of execution flow.
+}
+
 internal struct ForageLoggerConfig {
     var forageEnvironment: EnvironmentTarget?
     var prefix: String?
@@ -35,6 +40,12 @@ internal protocol ForageLogger {
     /// - Parameter newContext: The ForageLogContext to be added to the logger.
     /// - Returns: The instance of the ForageLogger with the additional context applied. Useful for method chaining.
     func addContext(_ newContext: ForageLogContext) -> ForageLogger
+    
+    /// Set the kind of logging to be performed and return a ForageLogger instance.
+    ///
+    /// - Parameter logKind: The desired log kind to be used.
+    /// - Returns: The instance of the ForageLogger with the log kind applied.
+    func setLogKind(_ logKind: ForageLogKind) -> ForageLogger
     
     /// Sets a prefix that will be added to each log message, useful for distinguishing log sources.
     /// - Parameter prefix: The prefix string to be added to log messages.
@@ -144,6 +155,11 @@ internal class DatadogLogger : ForageLogger {
                 self.logger?.addAttribute(forKey: key, value: attributeValue)
             }
         }
+        return self
+    }
+    
+    internal func setLogKind(_ logKind: ForageLogKind) -> ForageLogger {
+        self.logger?.addTag(withKey: "log_kind", value: logKind.rawValue)
         return self
     }
     

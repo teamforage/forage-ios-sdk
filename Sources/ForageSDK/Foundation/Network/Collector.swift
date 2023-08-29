@@ -12,10 +12,11 @@ import BasisTheoryElements
 let tokenDelimiter = ","
 let tokenKey = "card_number_token"
 
-public protocol VaultCollector {
+internal protocol VaultCollector {
     func setCustomHeaders(headers: [String: String], xKey: [String:String])
     func sendData(
         path: String,
+        vaultAction: VaultAction,
         extraData: [String: Any],
         completion: @escaping (VaultResponse) -> Void)
     func getPaymentMethodToken(paymentMethodToken: String) throws -> String
@@ -30,6 +31,11 @@ struct VGSCollectConfig {
 struct BasisTheoryConfig {
     let publicKey: String
     let proxyKey: String
+}
+
+internal enum VaultAction: String {
+    case balanceCheck = "balance"
+    case capture
 }
 
 // Wrapper class for VGSCollect
@@ -49,7 +55,7 @@ class VGSCollectWrapper: VaultCollector {
         vgsCollect.customHeaders = mutableHeaders
     }
     
-    func sendData(path: String, extraData: [String: Any], completion: @escaping (VaultResponse) -> Void) {
+    func sendData(path: String, vaultAction: VaultAction, extraData: [String: Any], completion: @escaping (VaultResponse) -> Void) {
         var mutableExtraData = extraData
         if let paymentMethodToken = extraData[tokenKey] as? String {
             let token = getPaymentMethodToken(paymentMethodToken: paymentMethodToken)
@@ -62,13 +68,24 @@ class VGSCollectWrapper: VaultCollector {
             }
             mutableExtraData[tokenKey] = token
         }
+        
+        let measurement = VaultProxyResponseMonitor.newMeasurement(vault: VaultType.vgsVaultType, action: vaultAction)
+            .setPath(path)
+            .setMethod(.post)
+
+        measurement.start()
         vgsCollect.sendData(path: path, extraData: mutableExtraData) { (response) in
             switch response {
             case .success(let code, let data, let urlResponse):
-                self.logger?.info("Successfully sent data to VGS proxy", attributes: nil)
+                measurement.end()
+                measurement.setHttpStatusCode(code).logResult()
                 completion(VaultResponse(statusCode: code, urlResponse: urlResponse, data: data, error: nil))
             case .failure(let code, let data, let urlResponse, let error):
-                self.logger?.error("Failed to send data to VGS proxy", error: error, attributes: nil)
+                measurement.end()
+                self.logger?.error("Failed to send data to VGS proxy", error: error, attributes: [
+                    "http_status": code
+                ])
+                measurement.setHttpStatusCode(code).logResult()
                 completion(VaultResponse(statusCode: code, urlResponse: urlResponse, data: data, error: error))
             }
         }
@@ -124,7 +141,7 @@ class BasisTheoryWrapper: VaultCollector {
         self.logger = logger
     }
     
-    func sendData(path: String, extraData: [String : Any], completion: @escaping (VaultResponse) -> Void) {
+    func sendData(path: String, vaultAction: VaultAction, extraData: [String : Any], completion: @escaping (VaultResponse) -> Void) {
         var body: [String: Any] = ["pin": textElement]
         for (key, value) in extraData {
             if key == tokenKey, let paymentMethodToken = value as? String {
@@ -149,19 +166,36 @@ class BasisTheoryWrapper: VaultCollector {
                 body[key] = value
             }
         }
+        
+        let measurement = VaultProxyResponseMonitor.newMeasurement(vault: VaultType.btVaultType, action: vaultAction)
+            .setPath(path)
+            .setMethod(.post)
+        
         let proxyHttpRequest = ProxyHttpRequest(method: .post, path: path, body: body, headers: self.customHeaders)
         
+        measurement.start()
         BasisTheoryElements.proxy(
             apiKey: basisTheoryConfig.publicKey, proxyKey: basisTheoryConfig.proxyKey,
             proxyHttpRequest: proxyHttpRequest
         ) { response, data, error in
+            measurement.end()
+            
+            let httpStatusCode = (response as? HTTPURLResponse)?.statusCode
+            measurement.setHttpStatusCode(httpStatusCode).logResult()
+
+            if error != nil {
+                self.logger?.error("Failed to send data to Basis Theory proxy", error: error, attributes: [
+                    "http_status": httpStatusCode
+                ])
+            }
+            
             var rawData: Data? = nil
             if let data = data {
                 let dataDictionary = convertJsonToDictionary(data)
                 rawData = try? JSONSerialization.data(withJSONObject: dataDictionary, options: [])
             }
             let vaultResponse = VaultResponse(
-                statusCode: (response as? HTTPURLResponse)?.statusCode,
+                statusCode: httpStatusCode,
                 urlResponse: response,
                 data: rawData,
                 error: error
