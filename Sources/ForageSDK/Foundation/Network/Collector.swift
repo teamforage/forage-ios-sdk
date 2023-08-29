@@ -69,34 +69,23 @@ class VGSCollectWrapper: VaultCollector {
             mutableExtraData[tokenKey] = token
         }
         
-        let proxyRequestStartTime = DispatchTime.now()
+        let measurement = VaultProxyResponseMonitor.newMeasurement(vault: VaultType.vgsVaultType, action: vaultAction)
+            .setPath(path)
+            .setMethod(.post)
+
+        measurement.start()
         vgsCollect.sendData(path: path, extraData: mutableExtraData) { (response) in
-            let roundTripMs = calculateTimeDifferenceInMilliseconds(
-                from: proxyRequestStartTime,
-                to: DispatchTime.now()
-            )
-            
-            var latencyAttributes = LatencyAttributes(
-                path: path,
-                method: HttpMethod.post,
-                roundTripMs: roundTripMs,
-                action: vaultAction
-            )
-            
             switch response {
             case .success(let code, let data, let urlResponse):
-                latencyAttributes.httpStatusCode = code
-                logVaultProxyResponseMetrics(
-                    vaultType: VaultType.vgsVaultType,
-                    latencyAttributes: latencyAttributes
-                )
+                measurement.end()
+                measurement.setHttpStatusCode(code).logResult()
                 completion(VaultResponse(statusCode: code, urlResponse: urlResponse, data: data, error: nil))
             case .failure(let code, let data, let urlResponse, let error):
+                measurement.end()
                 self.logger?.error("Failed to send data to VGS proxy", error: error, attributes: [
                     "http_status": code
                 ])
-                latencyAttributes.httpStatusCode = code
-                logVaultProxyResponseMetrics(vaultType: VaultType.vgsVaultType, latencyAttributes: latencyAttributes)
+                measurement.setHttpStatusCode(code).logResult()
                 completion(VaultResponse(statusCode: code, urlResponse: urlResponse, data: data, error: error))
             }
         }
@@ -178,28 +167,22 @@ class BasisTheoryWrapper: VaultCollector {
             }
         }
         
-        let proxyRequestStartTime = DispatchTime.now()
+        let measurement = VaultProxyResponseMonitor.newMeasurement(vault: VaultType.btVaultType, action: vaultAction)
+            .setPath(path)
+            .setMethod(.post)
+        
         let proxyHttpRequest = ProxyHttpRequest(method: .post, path: path, body: body, headers: self.customHeaders)
         
+        measurement.start()
         BasisTheoryElements.proxy(
             apiKey: basisTheoryConfig.publicKey, proxyKey: basisTheoryConfig.proxyKey,
             proxyHttpRequest: proxyHttpRequest
         ) { response, data, error in
-            let roundTripMs = calculateTimeDifferenceInMilliseconds(
-                from: proxyRequestStartTime,
-                to: DispatchTime.now()
-            )
+            measurement.end()
+            
             let httpStatusCode = (response as? HTTPURLResponse)?.statusCode
-            logVaultProxyResponseMetrics(
-                vaultType: VaultType.btVaultType,
-                latencyAttributes: LatencyAttributes(
-                    path: path,
-                    method: HttpMethod.post,
-                    httpStatusCode: httpStatusCode,
-                    roundTripMs: roundTripMs,
-                    action: vaultAction
-                )
-            )
+            measurement.setHttpStatusCode(httpStatusCode).logResult()
+
             if error != nil {
                 self.logger?.error("Failed to send data to Basis Theory proxy", error: error, attributes: [
                     "http_status": httpStatusCode
