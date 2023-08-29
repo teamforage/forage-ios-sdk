@@ -112,7 +112,6 @@ final class ResponseMonitorTests: XCTestCase {
         
         monitor.logWithResponseAttributes(metricsLogger: mockMetricsLogger, responseAttributes: attributes)
         
-        // Add assertions
         XCTAssertEqual(mockMetricsLogger.loggedErrors.count, 0, "There should be no logged errors")
         XCTAssertEqual(mockMetricsLogger.loggedInfos.count, 1, "There should be one logged info")
         
