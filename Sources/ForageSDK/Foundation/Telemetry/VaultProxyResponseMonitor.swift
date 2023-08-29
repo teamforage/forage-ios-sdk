@@ -20,9 +20,11 @@ internal class ResponseMonitor: NetworkMonitor {
     private var endTime: DispatchTime?
     
     private var responseAttributes: ResponseAttributes = ResponseAttributes()
+    private var metricsLogger: ForageLogger?
     
-    fileprivate let metricsLogger: ForageLogger? = DatadogLogger(ForageLoggerConfig(prefix: "Metrics"))
-        .setLogKind(ForageLogKind.metric)
+    init(metricsLogger: ForageLogger? = DatadogLogger(ForageLoggerConfig(prefix: "Metrics"))) {
+        self.metricsLogger = metricsLogger
+    }
     
     internal func start() {
         startTime = DispatchTime.now()
@@ -58,7 +60,10 @@ internal class ResponseMonitor: NetworkMonitor {
         responseAttributes.responseTimeMs = calculateDurationMs(from: startTime, to: endTime)
         
         // handled by subclass
-        logWithResponseAttributes(responseAttributes)
+        logWithResponseAttributes(
+            metricsLogger: self.metricsLogger,
+            responseAttributes: responseAttributes
+        )
     }
     
     /// Calculates the time in milliseconds between the start and end time
@@ -68,7 +73,7 @@ internal class ResponseMonitor: NetworkMonitor {
     }
     
     // Do nothing here; meant to be overridden by subclasses
-    internal func logWithResponseAttributes(_ responseAttributes: ResponseAttributes) {}
+    internal func logWithResponseAttributes(metricsLogger: ForageLogger?, responseAttributes: ResponseAttributes) {}
 }
 
 /// `VaultProxyResponseMonitor` is a specialized `ResponseMonitor` for handling Vault-related network metrics
@@ -87,7 +92,7 @@ internal final class VaultProxyResponseMonitor: ResponseMonitor {
         return VaultProxyResponseMonitor(vaultType: vault, vaultAction: action)
     }
     
-    internal override func logWithResponseAttributes(_ responseAttributes: ResponseAttributes) {
+    internal override func logWithResponseAttributes(metricsLogger: ForageLogger?, responseAttributes: ResponseAttributes) {
         guard let httpMethod = responseAttributes.method?.rawValue,
               let path = responseAttributes.path,
               let httpStatus = responseAttributes.code,
@@ -99,7 +104,7 @@ internal final class VaultProxyResponseMonitor: ResponseMonitor {
         let vaultName = self.vaultType.rawValue
         let vaultAction = self.vaultAction.rawValue
         
-        self.metricsLogger?.info("Received response from \(vaultName) proxy", attributes: [
+        metricsLogger?.info("Received response from \(vaultName) proxy", attributes: [
             "vault_type": vaultName,
             "action": vaultAction,
             "path": path,
