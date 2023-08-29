@@ -333,6 +333,16 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertEqual(ForageSDK.shared.panNumber, removeWhitespace(from: expectedPAN))
     }
     
+    func test_clearButton() {
+        maskedTextField.text = ""
+        maskedTextField.textFieldDidChange()
+        XCTAssertEqual(maskedTextField.rightViewMode.rawValue, 0)
+        
+        maskedTextField.text = "1111 1111"
+        maskedTextField.textFieldDidChange()
+        XCTAssertEqual(maskedTextField.rightViewMode.rawValue, 1)
+    }
+    
     func moveCursor(by offset: Int) {
         var cursorOffset = maskedTextField.offset(from: maskedTextField.beginningOfDocument, to: maskedTextField.selectedTextRange!.start)
         cursorOffset += offset
