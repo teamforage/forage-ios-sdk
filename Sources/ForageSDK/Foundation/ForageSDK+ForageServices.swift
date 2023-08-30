@@ -16,7 +16,7 @@ protocol ForageSDKService: AnyObject {
     /// - Parameters:
     ///  - foragePanTextField: A text field capturing the PAN (Primary Account Number) of the EBT card.
     ///  - customerID: A unique ID for the end customer making the payment. We recommend that you hash this value.
-    ///  - completion: Which will return the result. See more [here](https://docs.joinforage.app/reference/create-payment-method-1)
+    ///  - completion: The closure returns a `Result` containing either a `PaymentMethodModel` or an `Error`. [Read more](https://docs.joinforage.app/reference/create-payment-method)
     func tokenizeEBTCard(
         foragePanTextField: ForagePANTextField,
         customerID: String,
@@ -26,21 +26,23 @@ protocol ForageSDKService: AnyObject {
     /// Check balance for a given EBT Card
     ///
     /// - Parameters:
+    ///  - foragePinTextField: A specialized text field for securely capturing the PIN to check the balance of the EBT card.
     ///  - paymentMethodReference: PaymentMethod's unique reference hash
-    ///  - completion: Which will return the result. (See more [here](https://docs.joinforage.app/reference/check-balance))
+    ///  - completion: The closure returns a `Result` containing either a `BalanceModel` or an `Error`.
     func checkBalance(
-        paymentMethodReference: String,
         foragePinTextField: ForagePINTextField,
+        paymentMethodReference: String,
         completion: @escaping (Result<BalanceModel, Error>) -> Void)
     
     /// Capture a payment for a given payment reference
     ///
     /// - Parameters:
-    ///  - paymentReference: The reference hash of the payment
-    ///  - completion: Which will return the result. (See more [here](https://docs.joinforage.app/reference/capture-payment))
+    ///  - foragePinTextField: A specialized text field  for securely capturing the PIN to capture the EBT payment.
+    ///  - paymentReference: The reference hash of the Payment
+    ///  - completion: The closure returns a `Result` containing either a `PaymentModel` or an `Error`. [Read more](https://docs.joinforage.app/reference/capture-payment))
     func capturePayment(
-        paymentReference: String,
         foragePinTextField: ForagePINTextField,
+        paymentReference: String,
         completion: @escaping (Result<PaymentModel, Error>) -> Void)
 }
 
@@ -72,8 +74,8 @@ extension ForageSDK: ForageSDKService {
     }
     
     public func checkBalance(
-        paymentMethodReference: String,
         foragePinTextField: ForagePINTextField,
+        paymentMethodReference: String,
         completion: @escaping (Result<BalanceModel, Error>) -> Void) {
             _ = self.logger?
                 .setPrefix("checkBalance")
@@ -113,8 +115,8 @@ extension ForageSDK: ForageSDKService {
         }
     
     public func capturePayment(
-        paymentReference: String,
         foragePinTextField: ForagePINTextField,
+        paymentReference: String,
         completion: @escaping (Result<PaymentModel, Error>) -> Void) {
             _ = self.logger?
                 .setPrefix("capturePayment")
