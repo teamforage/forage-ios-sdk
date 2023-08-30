@@ -14,7 +14,6 @@ public class ForageSDK {
     
     private static var config: Config?
     internal var service: ForageService?
-    internal var panNumber: String = ""
     internal var logger: ForageLogger? = nil
     internal var merchantID: String = ""
     internal var sessionToken: String = ""
