@@ -16,7 +16,6 @@ final class ForagePANTextFieldTests: XCTestCase {
             merchantID: "merchantID123",
             sessionToken: "authToken123"
         ))
-        ForageSDK.shared.service = nil
         foragePANTextField = ForagePANTextField()       
     }
     
