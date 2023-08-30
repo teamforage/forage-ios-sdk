@@ -39,7 +39,7 @@ protocol ForageSDKService: AnyObject {
     /// - Parameters:
     ///  - foragePinTextField: A specialized text field  for securely capturing the PIN to capture the EBT payment.
     ///  - paymentReference: The reference hash of the Payment
-    ///  - completion: The closure returns a `Result` containing either a `PaymentModel` or an `Error`. [Read more](https://docs.joinforage.app/reference/capture-payment))
+    ///  - completion: The closure returns a `Result` containing either a `PaymentModel` or an `Error`. [Read more](https://docs.joinforage.app/reference/capture-payment)
     func capturePayment(
         foragePinTextField: ForagePINTextField,
         paymentReference: String,
