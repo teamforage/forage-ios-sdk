@@ -96,7 +96,6 @@ A component that securely accepts the PAN number. This field validates the PAN n
 private let panTextField: ForagePANTextField = {
     let tf = ForagePANTextField()
     tf.borderColor = .black
-    tf.accessibilityIdentifier = "tf_ebt_card_number"
     tf.placeholder = "EBT Card Number"
     return tf
 }()
