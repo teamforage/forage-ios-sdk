@@ -53,7 +53,7 @@ extension ForageSDK: ForageSDKService {
             .setPrefix("tokenizeEBTCard")
             .addContext(ForageLogContext(
                 customerID: customerID,
-                merchantRef: merchantAccount
+                merchantRef: merchantID
             ))
             .notice("Called ForageSDK.shared.tokenizeEBTCard", attributes: nil)
         
@@ -75,7 +75,7 @@ extension ForageSDK: ForageSDKService {
             _ = self.logger?
                 .setPrefix("checkBalance")
                 .addContext(ForageLogContext(
-                    merchantRef: merchantAccount,
+                    merchantRef: merchantID,
                     paymentMethodRef: paymentMethodReference
                 ))
                 .notice("Called ForageSDK.shared.checkBalance for Payment Method \(paymentMethodReference)", attributes: nil)
@@ -116,7 +116,7 @@ extension ForageSDK: ForageSDKService {
             _ = self.logger?
                 .setPrefix("capturePayment")
                 .addContext(ForageLogContext(
-                    merchantRef: merchantAccount,
+                    merchantRef: merchantID,
                     paymentRef: paymentReference
                 ))
                 .notice("Called ForageSDK.shared.capturePayment for Payment \(paymentReference)", attributes: nil)
