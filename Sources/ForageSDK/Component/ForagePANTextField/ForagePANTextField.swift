@@ -18,6 +18,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
     }
     
     public func clearText() {
+        self.enhancedTextField.text = ""
         self.enhancedTextField.actualPAN = ""
     }
     
