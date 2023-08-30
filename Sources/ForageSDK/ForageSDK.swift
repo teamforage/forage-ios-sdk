@@ -34,6 +34,7 @@ public class ForageSDK {
         self.environment = Environment(sessionToken: config.sessionToken)
         self.merchantID = config.merchantID
         self.sessionToken = config.sessionToken
+        
         // ForageSDK.shared.environment is not set
         // until the end of this initialization
         // so we have to provide the environment from the config

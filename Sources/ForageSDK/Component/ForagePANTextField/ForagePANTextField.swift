@@ -18,7 +18,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
     }
     
     public func clearText() {
-        ForageSDK.shared.panNumber = ""
+        self.enhancedTextField.actualPAN = ""
     }
     
     /// BorderWidth for the text field
@@ -43,15 +43,15 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
     }
     
     @IBInspectable public var isEmpty: Bool {
-        textField.isEmpty
+        enhancedTextField.isEmpty
     }
 
     @IBInspectable public var isValid: Bool {
-        textField.isValid
+        enhancedTextField.isValid
     }
 
     @IBInspectable public var isComplete: Bool {
-        textField.isComplete
+        enhancedTextField.isComplete
     }
     
     // MARK: Public Delegate
@@ -63,47 +63,47 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
     
     /// Placeholder for the text field
     @IBInspectable public var placeholder: String? {
-        get { return textField.placeholder }
-        set { textField.placeholder = newValue }
+        get { return enhancedTextField.placeholder }
+        set { enhancedTextField.placeholder = newValue }
     }
     
     /// Text color for the text field
     /// `textColor` default value is `black`
     @IBInspectable public var textColor: UIColor? {
-        get { return textField.textColor }
-        set { textField.textColor = newValue }
+        get { return enhancedTextField.textColor }
+        set { enhancedTextField.textColor = newValue }
     }
     
     /// Size of the text for the text field
     /// `size` default value is `24`
     @IBInspectable public var size: Double = 24.0 {
-        didSet { textField.font = UIFont.systemFont(ofSize: size) }
+        didSet { enhancedTextField.font = UIFont.systemFont(ofSize: size) }
     }
     
     /// Tint color for the text field
     /// `tfTintColor` default value is `black`
     @IBInspectable public var tfTintColor: UIColor? {
-        get { return textField.tintColor }
-        set { textField.tintColor = newValue }
+        get { return enhancedTextField.tintColor }
+        set { enhancedTextField.tintColor = newValue }
     }
     
     /// Text alignment
     /// `textAlignment` default value is `natural`
     @IBInspectable public var textAlignment: NSTextAlignment = .natural {
-        didSet { textField.textAlignment = textAlignment }
+        didSet { enhancedTextField.textAlignment = textAlignment }
     }
     
     /// Allow user to clear text field
     /// `clearButtonMode` default value is `never`
     @IBInspectable public var clearButtonMode: UITextField.ViewMode = .never {
-        didSet { textField.clearButtonMode = clearButtonMode }
+        didSet { enhancedTextField.clearButtonMode = clearButtonMode }
     }
     
     /// Change UIFont
     /// `UITextField` text font
     @IBInspectable public var font: UIFont? {
-        get { return textField.font }
-        set { textField.font = newValue }
+        get { return enhancedTextField.font }
+        set { enhancedTextField.font = newValue }
     }
     
     override public var intrinsicContentSize: CGSize {
@@ -149,7 +149,8 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         return ddLogger
     }()
     
-    private lazy var textField: MaskedUITextField = {
+    /// UITextField with masking and floating placeholder label functionality.
+    internal lazy var enhancedTextField: MaskedUITextField = {
         let tf = MaskedUITextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
         tf.textColor = UIColor.black
@@ -199,12 +200,12 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         
         root.addSubview(container)
         
-        textFieldContainer.addSubview(textField)
+        textFieldContainer.addSubview(enhancedTextField)
         imageViewContainer.addSubview(imageView)
         container.addArrangedSubview(textFieldContainer)
         container.addArrangedSubview(imageViewContainer)
         
-        textField.forageDelegate = self
+        enhancedTextField.forageDelegate = self
         
         root.anchor(
             top: self.topAnchor,
@@ -224,7 +225,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
             padding: UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         )
         
-        textField.anchor(
+        enhancedTextField.anchor(
             top: textFieldContainer.topAnchor,
             leading: textFieldContainer.leadingAnchor,
             bottom: textFieldContainer.bottomAnchor,
@@ -252,6 +253,10 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
     
     @objc fileprivate func requestFocus(_ gesture: UIGestureRecognizer) {
         becomeFirstResponder()
+    }
+    
+    internal func getActualPAN() -> String {
+        return enhancedTextField.actualPAN
     }
 }
 
@@ -302,16 +307,16 @@ extension ForagePANTextField {
     
     /// Make `ForagePANTextField` focused.
     @discardableResult override public func becomeFirstResponder() -> Bool {
-        return textField.becomeFirstResponder()
+        return enhancedTextField.becomeFirstResponder()
     }
     
     /// Remove  focus from `ForagePANTextField`.
     @discardableResult override public func resignFirstResponder() -> Bool {
-        return textField.resignFirstResponder()
+        return enhancedTextField.resignFirstResponder()
     }
     
     /// Check if `ForagePANTextField` is focused.
     override public var isFirstResponder: Bool {
-        return textField.isFirstResponder
+        return enhancedTextField.isFirstResponder
     }
 }

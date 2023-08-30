@@ -16,7 +16,6 @@ final class MaskedUITextFieldTests: XCTestCase {
         // .setup() currently doesn't allow us to update the environment
         ForageSDK.shared.environment = .sandbox
         ForageSDK.shared.service = nil
-        ForageSDK.shared.panNumber = ""
         maskedTextField = MaskedUITextField()
     }
     
@@ -42,7 +41,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertFalse(maskedTextField.isEmpty)
         XCTAssertTrue(maskedTextField.isValid)
         XCTAssertTrue(maskedTextField.isComplete)
-        XCTAssertEqual(ForageSDK.shared.panNumber, "5077081234567890")
+        XCTAssertEqual(maskedTextField.actualPAN, "5077081234567890")
     }
     
     func testValidation_partiallyIdentifying16DigitCard_shouldBeValid() {
@@ -52,7 +51,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertFalse(maskedTextField.isEmpty)
         XCTAssertTrue(maskedTextField.isValid)
         XCTAssertFalse(maskedTextField.isComplete)
-        XCTAssertEqual(ForageSDK.shared.panNumber, "50770812345678")
+        XCTAssertEqual(maskedTextField.actualPAN, "50770812345678")
     }
     
     func testValidation_identifyingIIN_shouldBeValid() {
@@ -62,7 +61,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertFalse(maskedTextField.isEmpty)
         XCTAssertTrue(maskedTextField.isValid)
         XCTAssertFalse(maskedTextField.isComplete)
-        XCTAssertEqual(ForageSDK.shared.panNumber, "12345")
+        XCTAssertEqual(maskedTextField.actualPAN, "12345")
     }
     
     func testValidation_invalidIIN_shouldBeInvalid() {
@@ -72,7 +71,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertFalse(maskedTextField.isEmpty)
         XCTAssertFalse(maskedTextField.isValid)
         XCTAssertFalse(maskedTextField.isComplete)
-        XCTAssertEqual(ForageSDK.shared.panNumber, "123412")
+        XCTAssertEqual(maskedTextField.actualPAN, "123412")
     }
     
     func testValidation_validCardWithExtraDigits_shouldBeInvalid() {
@@ -94,7 +93,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertFalse(maskedTextField.isFirstResponder)
         XCTAssertTrue(maskedTextField.isValid)
         XCTAssertTrue(maskedTextField.isComplete)
-        XCTAssertEqual(ForageSDK.shared.panNumber, expectedPAN)
+        XCTAssertEqual(maskedTextField.actualPAN, expectedPAN)
     }
     
     // MARK: - Validation with special cards
@@ -107,7 +106,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertFalse(maskedTextField.isEmpty)
         XCTAssertFalse(maskedTextField.isValid)
         XCTAssertFalse(maskedTextField.isComplete)
-        XCTAssertEqual(ForageSDK.shared.panNumber, "4444444444444454")
+        XCTAssertEqual(maskedTextField.actualPAN, "4444444444444454")
     }
     
     func testValidation_specialInsufficientFundsCard_shouldBeValid() {
@@ -117,7 +116,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertFalse(maskedTextField.isEmpty)
         XCTAssertTrue(maskedTextField.isValid)
         XCTAssertTrue(maskedTextField.isComplete)
-        XCTAssertEqual(ForageSDK.shared.panNumber, "4444444444444451")
+        XCTAssertEqual(maskedTextField.actualPAN, "4444444444444451")
     }
     
     func testValidation_specialInvalidCardNum_shouldBeValid() {
@@ -127,7 +126,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertFalse(maskedTextField.isEmpty)
         XCTAssertTrue(maskedTextField.isValid)
         XCTAssertTrue(maskedTextField.isComplete)
-        XCTAssertEqual(ForageSDK.shared.panNumber, "5555555555555514")
+        XCTAssertEqual(maskedTextField.actualPAN, "5555555555555514")
     }
     
     func testValidation_specialExpiredCardNum_shouldBeValid() {
@@ -137,7 +136,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertFalse(maskedTextField.isEmpty)
         XCTAssertTrue(maskedTextField.isValid)
         XCTAssertTrue(maskedTextField.isComplete)
-        XCTAssertEqual(ForageSDK.shared.panNumber, "5555555555555554")
+        XCTAssertEqual(maskedTextField.actualPAN, "5555555555555554")
     }
     
     func testValidation_completeSpecial9999Card_shouldBeValid() {
@@ -147,7 +146,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertFalse(maskedTextField.isEmpty)
         XCTAssertTrue(maskedTextField.isValid)
         XCTAssertTrue(maskedTextField.isComplete)
-        XCTAssertEqual(ForageSDK.shared.panNumber, "9999123411111111")
+        XCTAssertEqual(maskedTextField.actualPAN, "9999123411111111")
     }
     
     func testValidation_partialSpecial9999Card_shouldBeValidButIncomplete() {
@@ -157,7 +156,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertFalse(maskedTextField.isEmpty)
         XCTAssertTrue(maskedTextField.isValid)
         XCTAssertFalse(maskedTextField.isComplete)
-        XCTAssertEqual(ForageSDK.shared.panNumber, "99991234")
+        XCTAssertEqual(maskedTextField.actualPAN, "99991234")
     }
     
     func testValidation_zeroEbtCashCard() {
@@ -167,7 +166,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertFalse(maskedTextField.isEmpty)
         XCTAssertTrue(maskedTextField.isValid)
         XCTAssertTrue(maskedTextField.isComplete)
-        XCTAssertEqual(ForageSDK.shared.panNumber, "6543212312341234")
+        XCTAssertEqual(maskedTextField.actualPAN, "6543212312341234")
     }
 
     
@@ -178,7 +177,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         maskedTextField.textFieldDidChange()
         
         XCTAssertEqual(maskedTextField.text, "5077 0812 3456 7890")
-        XCTAssertEqual(ForageSDK.shared.panNumber, "5077081234567890")
+        XCTAssertEqual(maskedTextField.actualPAN, "5077081234567890")
     }
     
     func testMasking_sixDigits_shouldApply16Mask() {
@@ -186,7 +185,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         maskedTextField.textFieldDidChange()
         
         XCTAssertEqual(maskedTextField.text, "1234 56")
-        XCTAssertEqual(ForageSDK.shared.panNumber, "123456")
+        XCTAssertEqual(maskedTextField.actualPAN, "123456")
     }
     
     func testMasking_lessThanSixDigits_shouldNotApplyMask() {
@@ -194,7 +193,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         maskedTextField.textFieldDidChange()
         
         XCTAssertEqual(maskedTextField.text, "12345")
-        XCTAssertEqual(ForageSDK.shared.panNumber, "12345")
+        XCTAssertEqual(maskedTextField.actualPAN, "12345")
     }
     
     func testMasking_16DigitInProgress_shouldApply16Mask() {
@@ -202,7 +201,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         maskedTextField.textFieldDidChange()
         
         XCTAssertEqual(maskedTextField.text, "5077 081")
-        XCTAssertEqual(ForageSDK.shared.panNumber, "5077081")
+        XCTAssertEqual(maskedTextField.actualPAN, "5077081")
     }
     
     func testMasking_invalid16Digit_shouldApplyNoIINMatchMask() {
@@ -210,7 +209,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         maskedTextField.textFieldDidChange()
         
         XCTAssertEqual(maskedTextField.text, "1234 5678 1234 5678")
-        XCTAssertEqual(ForageSDK.shared.panNumber, "1234567812345678")
+        XCTAssertEqual(maskedTextField.actualPAN, "1234567812345678")
     }
     
     func testMasking_invalid17Digit_shouldApplyNoIINMatchMask() {
@@ -218,7 +217,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         maskedTextField.textFieldDidChange()
         
         XCTAssertEqual(maskedTextField.text, "1234 5678 1234 5678 1")
-        XCTAssertEqual(ForageSDK.shared.panNumber, "12345678123456781")
+        XCTAssertEqual(maskedTextField.actualPAN, "12345678123456781")
     }
     
     func testMasking_invalid18Digit_shouldApplyNoIINMatchMask() {
@@ -226,7 +225,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         maskedTextField.textFieldDidChange()
         
         XCTAssertEqual(maskedTextField.text, "1234 5678 1234 5678 12")
-        XCTAssertEqual(ForageSDK.shared.panNumber, "123456781234567812")
+        XCTAssertEqual(maskedTextField.actualPAN, "123456781234567812")
     }
     
     func testMasking_invalid19Digit_shouldApplyNoIINMatchMask() {
@@ -234,7 +233,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         maskedTextField.textFieldDidChange()
         
         XCTAssertEqual(maskedTextField.text, "1234 5678 1234 5678 123")
-        XCTAssertEqual(ForageSDK.shared.panNumber, "1234567812345678123")
+        XCTAssertEqual(maskedTextField.actualPAN, "1234567812345678123")
     }
     
     func testMasking_valid18Digit_shouldApply18Mask() {
@@ -242,7 +241,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         maskedTextField.textFieldDidChange()
         
         XCTAssertEqual(maskedTextField.text, "600890 1234 56789 01 2")
-        XCTAssertEqual(ForageSDK.shared.panNumber, "600890123456789012")
+        XCTAssertEqual(maskedTextField.actualPAN, "600890123456789012")
     }
     
     func testMasking_valid19Digit_shouldApply19Mask() {
@@ -250,7 +249,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         maskedTextField.textFieldDidChange()
         
         XCTAssertEqual(maskedTextField.text, "507703 1234 5678 901 23")
-        XCTAssertEqual(ForageSDK.shared.panNumber, "5077031234567890123")
+        XCTAssertEqual(maskedTextField.actualPAN, "5077031234567890123")
     }
     
     func testMasking_validSpecialCard_shouldApplyNoIINMatchMask() {
@@ -258,7 +257,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         maskedTextField.textFieldDidChange()
         
         XCTAssertEqual(maskedTextField.text, "9999 1234 1234 1234 123")
-        XCTAssertEqual(ForageSDK.shared.panNumber, "9999123412341234123")
+        XCTAssertEqual(maskedTextField.actualPAN, "9999123412341234123")
     }
     
     // MARK: Masking with backspace
@@ -275,7 +274,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         
         XCTAssertEqual(maskedTextField.text, expectedPAN)
         XCTAssertEqual(precedingChar, "2")
-        XCTAssertEqual(ForageSDK.shared.panNumber, removeWhitespace(from: expectedPAN))
+        XCTAssertEqual(maskedTextField.actualPAN, removeWhitespace(from: expectedPAN))
     }
     
     func testMasking_backspaceChangeIIN_shouldChangeMask() {
@@ -291,7 +290,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         // Now uses New Hampshire 16-digit mask
         XCTAssertEqual(maskedTextField.text, "5077 0100 0000 0000")
         XCTAssertEqual(precedingChar, " ")
-        XCTAssertEqual(ForageSDK.shared.panNumber, removeWhitespace(from: expectedPAN))
+        XCTAssertEqual(maskedTextField.actualPAN, removeWhitespace(from: expectedPAN))
     }
     
     func testMasking_backspaceChangeIntermediateDigit_shouldShiftPAN() {
@@ -311,7 +310,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertEqual(precedingChar, "9")
         // did remove the "2" character and shift the PAN
         XCTAssertEqual(maskedTextField.text, expectedPAN)
-        XCTAssertEqual(ForageSDK.shared.panNumber, removeWhitespace(from: expectedPAN))
+        XCTAssertEqual(maskedTextField.actualPAN, removeWhitespace(from: expectedPAN))
     }
     
     func testMasking_backspaceOnGap_shouldOnlyMoveCursor() {
@@ -330,7 +329,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertEqual(precedingChar, "3")
         // did not change display text, only moved the cursor
         XCTAssertEqual(maskedTextField.text, expectedPAN)
-        XCTAssertEqual(ForageSDK.shared.panNumber, removeWhitespace(from: expectedPAN))
+        XCTAssertEqual(maskedTextField.actualPAN, removeWhitespace(from: expectedPAN))
     }
     
     func test_clearButton() {

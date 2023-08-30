@@ -17,7 +17,6 @@ final class ForagePANTextFieldTests: XCTestCase {
             sessionToken: "authToken123"
         ))
         ForageSDK.shared.service = nil
-        ForageSDK.shared.panNumber = ""
         foragePANTextField = ForagePANTextField()       
     }
     
