@@ -19,9 +19,7 @@ final class ForagePANTextFieldTests: XCTestCase {
         ))
         ForageSDK.shared.service = nil
         ForageSDK.shared.panNumber = ""
-        foragePANTextField = ForagePANTextField()
-       
-        observableState = nil
+        foragePANTextField = ForagePANTextField()       
     }
     
     override func tearDown() {
