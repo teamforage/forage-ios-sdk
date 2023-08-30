@@ -45,16 +45,6 @@ class CardNumberView: UIView {
         return tf
     }()
     
-//    private let statusLabel: UILabel = {
-//        let label = UILabel()
-//        label.text = "Enter Card Number"
-//        label.textColor = .gray
-//        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-//        label.accessibilityIdentifier = "lbl_status"
-//        label.isAccessibilityElement = true
-//        return label
-//    }()
-    
     private let firstResponderLabel: UILabel = {
         let label = UILabel()
         label.text = "isFirstResponder: false"
@@ -314,15 +304,6 @@ class CardNumberView: UIView {
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
         )
         
-//        statusLabel.anchor(
-//            top: panNumberTextField.safeAreaLayoutGuide.bottomAnchor,
-//            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
-//            bottom: nil,
-//            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
-//            centerXAnchor: contentView.centerXAnchor,
-//            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
-//        )
-        
         firstResponderLabel.anchor(
             top: panNumberTextField.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
@@ -454,19 +435,6 @@ class CardNumberView: UIView {
         completeLabel.text = "isComplete: \(state.isComplete)"
         emptyLabel.text = "isEmpty: \(state.isEmpty)"
         validLabel.text = "isValid: \(state.isValid)"
-//        if (state.isEmpty) {
-//            statusLabel.text = "Enter Card Number"
-//            statusLabel.textColor = .gray
-//        } else if (state.isComplete && state.isValid) {
-//            statusLabel.text = "Card Number Valid"
-//            statusLabel.textColor = .green
-//        } else if (state.isValid && !state.isComplete) {
-//            statusLabel.text = "Identifying Card Number"
-//            statusLabel.textColor = .gray
-//        } else {
-//            statusLabel.text = "Card Number Invalid"
-//            statusLabel.textColor = .red
-//        }
     }
 }
 
