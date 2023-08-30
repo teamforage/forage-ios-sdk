@@ -30,7 +30,7 @@ protocol ForageSDKService: AnyObject {
     ///  - completion: Which will return the result. (See more [here](https://docs.joinforage.app/reference/check-balance))
     func checkBalance(
         paymentMethodReference: String,
-        foragePinTextEdit: ForagePINTextField,
+        foragePinTextField: ForagePINTextField,
         completion: @escaping (Result<BalanceModel, Error>) -> Void)
     
     /// Capture a payment for a given payment reference
@@ -40,7 +40,7 @@ protocol ForageSDKService: AnyObject {
     ///  - completion: Which will return the result. (See more [here](https://docs.joinforage.app/reference/capture-payment))
     func capturePayment(
         paymentReference: String,
-        foragePinTextEdit: ForagePINTextField,
+        foragePinTextField: ForagePINTextField,
         completion: @escaping (Result<PaymentModel, Error>) -> Void)
 }
 
@@ -73,7 +73,7 @@ extension ForageSDK: ForageSDKService {
     
     public func checkBalance(
         paymentMethodReference: String,
-        foragePinTextEdit: ForagePINTextField,
+        foragePinTextField: ForagePINTextField,
         completion: @escaping (Result<BalanceModel, Error>) -> Void) {
             _ = self.logger?
                 .setPrefix("checkBalance")
@@ -100,7 +100,7 @@ extension ForageSDK: ForageSDKService {
                                 merchantID: merchantID,
                                 xKey: ["vgsXKey": model.alias, "btXKey": model.bt_alias]
                             )
-                            self.service?.checkBalance(pinCollector: foragePinTextEdit.collector!, request: request, completion: completion)
+                            self.service?.checkBalance(pinCollector: foragePinTextField.collector!, request: request, completion: completion)
                             
                         case .failure(let error):
                             completion(.failure(error))
@@ -114,7 +114,7 @@ extension ForageSDK: ForageSDKService {
     
     public func capturePayment(
         paymentReference: String,
-        foragePinTextEdit: ForagePINTextField,
+        foragePinTextField: ForagePINTextField,
         completion: @escaping (Result<PaymentModel, Error>) -> Void) {
             _ = self.logger?
                 .setPrefix("capturePayment")
@@ -144,7 +144,7 @@ extension ForageSDK: ForageSDKService {
                                         merchantID: merchantID,
                                         xKey: ["vgsXKey": model.alias, "btXKey": model.bt_alias]
                                     )
-                                    self.service?.capturePayment(pinCollector: foragePinTextEdit.collector!, request: request, completion: completion)
+                                    self.service?.capturePayment(pinCollector: foragePinTextField.collector!, request: request, completion: completion)
                                 case .failure(let error):
                                     completion(.failure(error))
                                 }

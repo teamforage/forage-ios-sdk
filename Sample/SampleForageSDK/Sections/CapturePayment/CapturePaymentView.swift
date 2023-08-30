@@ -169,7 +169,7 @@ class CapturePaymentView: UIView {
         
         ForageSDK.shared.capturePayment(
             paymentReference: paymentReference,
-            foragePinTextEdit: inputFieldReference) { result in
+            foragePinTextField: inputFieldReference) { result in
                 self.printResult(result: result)
             }
     }

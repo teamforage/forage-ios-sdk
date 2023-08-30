@@ -93,7 +93,7 @@ A component that securely accepts the PAN number. This field validates the PAN n
 ![Screen Shot 2022-10-31 at 10 19 27](https://user-images.githubusercontent.com/115553362/199017253-ee05dcf0-01c8-41dc-9662-9da525e573c9.png)
 
 ```swift
-private let panTextField: ForagePANTextField = {
+private let foragePanTextField: ForagePANTextField = {
     let tf = ForagePANTextField()
     tf.borderColor = .black
     tf.placeholder = "EBT Card Number"
@@ -104,7 +104,7 @@ private let panTextField: ForagePANTextField = {
 ForagePANTextField uses a delegate `ForageElementDelegate` to communicate the updates to the client side.
 
 ```swift
-panTextField.delegate = self
+foragePanTextField.delegate = self
 ```
 
 ```swift
@@ -158,7 +158,7 @@ func tokenizeEBTCard(
 // Usage
 
 ForageSDK.shared.tokenizeEBTCard(
-    foragePanTextField: panTextField,
+    foragePanTextField: foragePanTextField,
     // NOTE: The following line is for testing purposes only and should not be used in production.
     // Please replace this line with a real hashed customer ID value.
     customerID: UUID.init().uuidString,
@@ -174,7 +174,7 @@ A component the securely accepts an EBT PIN for balance requests and payment cap
 ![Screen Shot 2022-10-31 at 10 21 32](https://user-images.githubusercontent.com/115553362/199017609-33b2094c-339c-4117-8124-00b5ce130dac.png)
 
 ```swift
-private let pinNumberTextField: ForagePINTextField = {
+private let foragePinTextField: ForagePINTextField = {
     let tf = ForagePINTextField()
     tf.borderRadius = 10
     tf.backgroundColor = .lightGray
@@ -196,7 +196,7 @@ public enum PinType: String {
 ForagePINTextField uses a delegate `ForageElementDelegate` to communicate the updates to the client side.
 
 ```swift
-pinNumberTextField.delegate = self
+foragePinTextField.delegate = self
 ```
 
 ```swift
@@ -240,7 +240,7 @@ To send the PIN number, we can use the ForageSDK to perform the request.
 
 func checkBalance(
     paymentMethodReference: String,
-    foragePinTextEdit: ForagePINTextField,
+    foragePinTextField: ForagePINTextField,
     completion: @escaping (Result<BalanceModel, Error>) -> Void
 )
 ```
@@ -250,7 +250,7 @@ func checkBalance(
 
 ForageSDK.shared.checkBalance(
     paymentMethodReference: paymentMethodReference,
-    foragePinTextEdit: pinNumberTextField) { result in
+    foragePinTextField: ebtPinTextField) { result in
         // handle callback here
     }
 ```
@@ -262,7 +262,7 @@ ForageSDK.shared.checkBalance(
 
 func capturePayment(
     paymentReference: String,
-    foragePinTextEdit: ForagePINTextField,
+    foragePinTextField: ForagePINTextField,
     completion: @escaping (Result<PaymentModel, Error>) -> Void
 )
 ```
@@ -272,7 +272,7 @@ func capturePayment(
 
 ForageSDK.shared.capturePayment(
     paymentReference: paymentReference,
-    foragePinTextEdit: pinNumberTextField) { result in
+    foragePinTextField: foragePinTextField) { result in
         // handle callback here
     }
 ```
