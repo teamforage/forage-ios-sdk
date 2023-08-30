@@ -77,7 +77,7 @@ To initialize a ForageSDK instance, you need to provide the environment.
 ForageSDK.setup(
     ForageSDK.Config(
         environment: .sandbox,
-        merchantID: "mid/abcd123",
+        merchantID: "1234567",
         sessionToken: "sandbox_eyJ0eXAiOiJKV1Qi..."
     )
 )
