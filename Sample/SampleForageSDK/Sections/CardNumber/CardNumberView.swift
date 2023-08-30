@@ -274,6 +274,10 @@ class CardNumberView: UIView {
     
     private func setupConstraints() {
         setupContentViewConstraints()
+        firstResponderLabel.text = "isFirstResponder: \(panNumberTextField.isFirstResponder)"
+        completeLabel.text = "isComplete: \(panNumberTextField.isComplete)"
+        emptyLabel.text = "isEmpty: \(panNumberTextField.isEmpty)"
+        validLabel.text = "isValid: \(panNumberTextField.isValid)"
     }
     
     private func setupContentViewConstraints() {
