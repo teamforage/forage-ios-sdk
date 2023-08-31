@@ -162,9 +162,10 @@ ForageSDK.shared.tokenizeEBTCard(
     // NOTE: The following line is for testing purposes only and should not be used in production.
     // Please replace this line with a real hashed customer ID value.
     customerID: UUID.init().uuidString,
-    reusable: true) { result in
-        // handle callback here
-    }
+    reusable: true
+) { result in
+    // Handle result and error here
+}
 ```
 
 ### ForagePINTextField
@@ -250,10 +251,10 @@ func checkBalance(
 
 ForageSDK.shared.checkBalance(
     foragePinTextField: foragePinTextField,
-    paymentMethodReference: paymentMethodReference,
-   ) { result in
-        // handle callback here
-    }
+    paymentMethodReference: paymentMethodReference
+) { result in
+    // Handle result and error here
+}
 ```
 
 ### Capture payment
@@ -273,9 +274,10 @@ func capturePayment(
 
 ForageSDK.shared.capturePayment(
     foragePinTextField: foragePinTextField,
-    paymentReference: paymentReference) { result in
-        // handle callback here
-    }
+    paymentReference: paymentReference
+) { result in
+    // Handle result and error here
+}
 ```
 
 ## Demo Application
