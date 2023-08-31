@@ -31,7 +31,7 @@ public class ForageSDK {
             assertionFailure("ForageSDK missing Config setup")
             return
         }
-        self.environment = sessionTokenToEnv(config.sessionToken)
+        self.environment = Environment(sessionToken: config.sessionToken)
         self.merchantID = config.merchantID
         self.sessionToken = config.sessionToken
         // ForageSDK.shared.environment is not set
@@ -85,7 +85,7 @@ public class ForageSDK {
      */
     public class func setup(_ config: Config) {
         ForageSDK.config = config
-        ForageSDK.shared.environment = sessionTokenToEnv(config.sessionToken)
+        ForageSDK.shared.environment = Environment(sessionToken: config.sessionToken)
         ForageSDK.shared.merchantID = config.merchantID
         ForageSDK.shared.sessionToken = config.sessionToken
     }

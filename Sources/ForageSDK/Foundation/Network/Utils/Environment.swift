@@ -28,6 +28,14 @@ public enum Environment: String {
         case .prod: return "api.joinforage.app"
         }
     }
+    
+    /// Maps a session token to the corresponding environment.
+    /// Defaults to `Environment.sandbox` if the token is invalid.
+    ///
+    /// - Parameter sessionToken: The session token to be converted.
+    init(sessionToken: String? = "") {
+        self = sessionTokenToEnv(sessionToken)
+    }
 }
 
 /// Maps a session token to the corresponding environment.
@@ -35,7 +43,7 @@ public enum Environment: String {
 ///
 /// - Parameter sessionToken: The session token to be converted.
 /// - Returns: The corresponding `Environment` value.
-public func sessionTokenToEnv(_ sessionToken: String?) -> Environment {
+fileprivate func sessionTokenToEnv(_ sessionToken: String?) -> Environment {
     guard let sessionToken = sessionToken, !sessionToken.isEmpty else {
         return Environment.sandbox
     }
