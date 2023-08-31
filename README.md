@@ -239,8 +239,8 @@ To send the PIN number, we can use the ForageSDK to perform the request.
 // Signature
 
 func checkBalance(
-    paymentMethodReference: String,
     foragePinTextField: ForagePINTextField,
+    paymentMethodReference: String,
     completion: @escaping (Result<BalanceModel, Error>) -> Void
 )
 ```
@@ -271,8 +271,8 @@ func capturePayment(
 // Usage
 
 ForageSDK.shared.capturePayment(
-    paymentReference: paymentReference,
-    foragePinTextField: foragePinTextField) { result in
+    foragePinTextField: foragePinTextField,
+    paymentReference: paymentReference) { result in
         // handle callback here
     }
 ```
