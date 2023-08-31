@@ -249,8 +249,9 @@ func checkBalance(
 // Usage
 
 ForageSDK.shared.checkBalance(
+    foragePinTextField: foragePinTextField,
     paymentMethodReference: paymentMethodReference,
-    foragePinTextField: ebtPinTextField) { result in
+   ) { result in
         // handle callback here
     }
 ```
@@ -261,8 +262,8 @@ ForageSDK.shared.checkBalance(
 // Signature
 
 func capturePayment(
-    paymentReference: String,
     foragePinTextField: ForagePINTextField,
+    paymentReference: String,
     completion: @escaping (Result<PaymentModel, Error>) -> Void
 )
 ```
