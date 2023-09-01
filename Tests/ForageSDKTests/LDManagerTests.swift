@@ -36,11 +36,9 @@ class MockLDClient : LDClientProtocol {
     
     init(vaultType: VaultType) {
         self.vaultPercentage = vaultType == VaultType.vgsVaultType ? 0 : 100
-        print("Setting vault percentage to: \(self.vaultPercentage)")
     }
     
     func doubleVariationWrapper(forKey key: String, defaultValue: Double) -> Double {
-        print("Evalutate fake vault percentage \(vaultPercentage)!")
         return vaultPercentage
     }
 }
@@ -54,7 +52,6 @@ final class LDManagerTests: XCTestCase {
     }
     
     func testGetVaultType_WhenVaultTypeIsAlreadySet_ShouldReturnCachedValue() {
-        print("Testing \(self.name)...")
         let mockLDClient = MockLDClient(vaultType: VaultType.btVaultType)
         let firstVaultType = LDManager.shared.getVaultType(ldClient: mockLDClient, fromCache: false)
         
@@ -69,14 +66,10 @@ final class LDManagerTests: XCTestCase {
         XCTAssertEqual(secondVaultType, VaultType.btVaultType)
     }
     
-    func testGetVaultType_VariationGreaterThanRandom_ShouldReturnBTVaultType() {
-        print("Testing \(self.name)...")
-        
+    func testGetVaultType_VariationGreaterThanRandom_ShouldReturnBTVaultType() {        
         let mockLDClient = MockLDClient(vaultPercentage: 2)
         let mockRandomGenerator = { return 1.00 }
-        
-        print("Moss: \(mockRandomGenerator() < 2)")
-        
+                
         let result = LDManager.shared.getVaultType(
             ldClient: mockLDClient,
             genRandomDouble: mockRandomGenerator,
