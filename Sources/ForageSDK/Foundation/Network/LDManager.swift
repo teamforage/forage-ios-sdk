@@ -55,14 +55,27 @@ private enum ContextKind: String {
     case service = "service"
 }
 
+/// `LDManager` is responsible for managing interactions with the LaunchDarkly service.
+///
+/// - Note: This class is a singleton and should be accessed via `LDManager.shared`.
 internal class LDManager {
+    // MARK: - Properties
+    
     static let shared = LDManager()
     private var logger: ForageLogger?
     
     internal private(set) var vaultType: VaultType?
     
+    // MARK: - Initialization
+    
     private init() {}
     
+    /// Initializes the LaunchDarkly client with a given environment and optional logger.
+    ///
+    /// - Parameters:
+    ///   - environment: The `EnvironmentTarget` to be used for initialization.
+    ///   - logger: An optional `ForageLogger` for logging purposes.
+    ///   - startLdClient: A closure to start the LaunchDarkly client. Defaults to `LDClient.start`.
     internal func initialize(
         _ environment: EnvironmentTarget,
         logger: ForageLogger? = nil,
@@ -82,6 +95,14 @@ internal class LDManager {
         })
     }
     
+    /// Determines the type of vault to be used based on the "vault-primary-traffic-percentage" feature flag.
+    ///
+    /// - Parameters:
+    ///   - ldClient: An optional `LDClientProtocol` object used to fetch feature flags. Defaults to `getDefaultLDClient()`.
+    ///   - genRandomDouble: A closure that returns a random double between 0 and 100. Defaults to `generateRandomDouble`.
+    ///   - fromCache: A Boolean flag indicating whether to return the cached vault type if available. Defaults to `true`.
+    ///
+    /// - Returns: The determined `VaultType`.
     internal func getVaultType(
         ldClient: LDClientProtocol? = getDefaultLDClient(),
         genRandomDouble: () -> Double = generateRandomDouble,
