@@ -8,6 +8,16 @@
 import Foundation
 import LaunchDarkly
 
+internal protocol LDClientProtocol {
+    func doubleVariationWrapper(forKey key: String, defaultValue: Double) -> Double
+}
+
+extension LDClient: LDClientProtocol {
+    func doubleVariationWrapper(forKey key: String, defaultValue: Double) -> Double {
+        return self.doubleVariation(forKey: key, defaultValue: defaultValue)
+    }
+}
+
 /**
  LD Public Keys
  */
@@ -45,60 +55,94 @@ private enum ContextKind: String {
     case service = "service"
 }
 
-public class LDManager {
+internal class LDManager {
     static let shared = LDManager()
-    private var internalVaultType: VaultType?
     private var logger: ForageLogger?
-
-    private var vaultType: VaultType? {
-        set(newValue) {
-            if (internalVaultType == nil) {
-                internalVaultType = newValue
-            } else {
-                self.logger?.error("Invalid vaultType provided!", error: nil, attributes: nil)
-            }
-        }
-        get {
-            return internalVaultType
-        }
-    }
-        
+    
+    internal private(set) var vaultType: VaultType?
+    
     private init() {}
     
-    internal func initialize(_ environment: Environment, logger: ForageLogger? = nil) {
+    internal func initialize(
+        _ environment: EnvironmentTarget,
+        logger: ForageLogger? = nil,
+        startLdClient: (LDConfig, LDContext?, (() -> Void)?) -> Void = LDClient.start
+    ) {
         self.logger = logger
-        let ldConfig = LDConfig(mobileKey: getLDMobileKey(environment).rawValue)
-        var ldContextBuilder = LDContextBuilder(key: ContextKey.iosSdk.rawValue)
-        ldContextBuilder.kind(ContextKind.service.rawValue)
-        guard case .success(let context) = ldContextBuilder.build()
-        else { return }
-        LDClient.start(config: ldConfig, context: context)
-    }
-    
-    internal func getVaultType() -> VaultType {
-        // Once this value is set, we don't want to change it!
-        if (vaultType != nil) {
-            return vaultType!
+        
+        let ldConfig = createLDConfig(for: environment)
+        
+        guard let ldContext = createLDContext() else {
+            self.logger?.error("Failed to create LaunchDarkly context", error: nil, attributes: nil)
+            return
         }
         
-        let ld = LDClient.get()!
-        // Defaulting to VGS for now! Will likely want to change this to BT in the future.
-        let vaultPercentage = ld.doubleVariation(forKey: FlagType.vaultPrimaryTrafficPercentage.rawValue, defaultValue: 0.0)
-        self.logger = self.logger?.setPrefix("LaunchDarkly")
-        self.logger?.info("Evaluated \(FlagType.vaultPrimaryTrafficPercentage) = \(vaultPercentage)%", attributes: nil)
-        let randomNum = Double.random(in: 0...100)
-        if (randomNum < vaultPercentage) {
-            vaultType = VaultType.btVaultType
-        } else {
-            vaultType = VaultType.vgsVaultType
+        startLdClient(ldConfig, ldContext, { [weak self] in
+            self?.logger?.info("Initialized LaunchDarkly client", attributes: nil)
+        })
+    }
+    
+    internal func getVaultType(
+        ldClient: LDClientProtocol? = getDefaultLDClient(),
+        genRandomDouble: () -> Double = generateRandomDouble,
+        fromCache: Bool = true
+    ) -> VaultType {
+        logger = logger?.setPrefix("LaunchDarkly")
+        
+        if fromCache, let existingVaultType = vaultType {
+            return existingVaultType
         }
-        self.logVaultType(vaultType)
-        return vaultType!
+        
+        guard let ld = ldClient else {
+            logger?.error("Defaulting to VGS. LDClient.get() was called before init()!",
+                          error: nil,
+                          attributes: nil)
+            return .vgsVaultType
+        }
+        
+        // Fetch the vault percentage from LaunchDarkly
+        let vaultPercentage = ld.doubleVariationWrapper(
+            forKey: FlagType.vaultPrimaryTrafficPercentage.rawValue,
+            defaultValue: 0.0
+        )
+        
+        logger?.info("Evaluated \(FlagType.vaultPrimaryTrafficPercentage) = \(vaultPercentage)%",
+                     attributes: nil)
+        
+        let randomNum = genRandomDouble()
+        vaultType = (randomNum < vaultPercentage) ? .btVaultType : .vgsVaultType
+        
+        logVaultType(vaultType)
+        
+        return vaultType ?? .vgsVaultType
+    }
+
+    private func createLDConfig(for environment: EnvironmentTarget) -> LDConfig {
+        return LDConfig(mobileKey: getLDMobileKey(environment).rawValue)
+    }
+    
+    private func createLDContext() -> LDContext? {
+        var ldContextBuilder = LDContextBuilder(key: ContextKey.iosSdk.rawValue)
+        ldContextBuilder.kind(ContextKind.service.rawValue)
+        guard case .success(let context) = ldContextBuilder.build() else {
+            return nil
+        }
+        return context
+    }
+    
+    private static func getDefaultLDClient() -> LDClientProtocol? {
+        return LDClient.get()
+    }
+    
+    private static func generateRandomDouble() -> Double {
+        return Double.random(in: 0...100)
     }
     
     private func logVaultType(_ vaultType: VaultType? = nil) {
         guard let vaultType = vaultType else {
-            return // Exit early if vaultType is nil or vaultTypeName is nil
+            // this shouldn't happen, but we log here in case something went really wrong
+            self.logger?.error("Vault type was not set!", error: nil, attributes: nil)
+            return
         }
         
         _ = self.logger?

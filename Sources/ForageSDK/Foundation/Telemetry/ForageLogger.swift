@@ -139,6 +139,7 @@ internal class DatadogLogger : ForageLogger {
         self.logger?.critical(self.getMessageWithPrefix(message), error: error, attributes: attributes)
     }
     
+    @discardableResult
     internal func addContext(_ newContext: ForageLogContext) -> ForageLogger {
         self.config?.context = newContext
         let attributeMappings: [(key: String, value: Encodable?)] = [
@@ -158,11 +159,13 @@ internal class DatadogLogger : ForageLogger {
         return self
     }
     
+    @discardableResult
     internal func setLogKind(_ logKind: ForageLogKind) -> ForageLogger {
         self.logger?.addTag(withKey: "log_kind", value: logKind.rawValue)
         return self
     }
     
+    @discardableResult
     internal func setPrefix(_ newPrefix: String) -> ForageLogger {
         self.config?.prefix = newPrefix
         return self
