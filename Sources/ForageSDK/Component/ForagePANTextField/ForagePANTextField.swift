@@ -106,6 +106,16 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         set { textField.font = newValue }
     }
     
+    /// ElementHeight for the text field
+    private var _elementHeight: CGFloat = 0
+    @IBInspectable public var elementHeight: CGFloat {
+        get { return _elementHeight }
+        set {
+            _elementHeight = newValue
+            self.changeElementHeight(value: _elementHeight)
+        }
+    }
+    
     override public var intrinsicContentSize: CGSize {
         return CGSize(width: frame.width, height: 83)
     }
@@ -252,6 +262,11 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
     
     @objc fileprivate func requestFocus(_ gesture: UIGestureRecognizer) {
         becomeFirstResponder()
+    }
+    
+    private func changeElementHeight(value: CGFloat) {
+        container.distribution = .equalCentering
+        container.heightAnchor.constraint(equalToConstant: value).isActive = true
     }
 }
 

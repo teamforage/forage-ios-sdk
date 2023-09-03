@@ -47,6 +47,9 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
     
     var tfTintColor: UIColor?
     
+    var inputWidthConstraint: NSLayoutConstraint?
+    var inputHeightConstraint: NSLayoutConstraint?
+    
     private var cancellables = Set<AnyCancellable>()
     
     var verticalConstraint: [NSLayoutConstraint]?
@@ -77,6 +80,12 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
         textField.keyboardType = UIKeyboardType.phonePad
         textField.isSecureTextEntry = true
         textField.textAlignment = .center
+        
+        inputHeightConstraint = textField.heightAnchor.constraint(equalToConstant: inputHeight)
+        inputHeightConstraint?.isActive = true
+        
+        inputWidthConstraint = textField.widthAnchor.constraint(equalToConstant: inputWidth)
+        inputWidthConstraint?.isActive = true
         
         let regexDigit = try! NSRegularExpression(pattern: "\\d")
         
@@ -211,6 +220,22 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
     var textAlignment: NSTextAlignment {
         get { return textField.textAlignment }
         set { textField.textAlignment = newValue }
+    }
+    
+    var inputWidth: CGFloat {
+        get { return inputWidthConstraint?.constant ?? 0 }
+        set {
+            inputWidthConstraint?.constant = newValue
+            inputWidthConstraint?.isActive = true
+        }
+    }
+ 
+    var inputHeight: CGFloat {
+        get { return inputHeightConstraint?.constant ?? 0 }
+        set {
+            inputHeightConstraint?.constant = newValue
+            inputHeightConstraint?.isActive = true
+        }
     }
 }
 

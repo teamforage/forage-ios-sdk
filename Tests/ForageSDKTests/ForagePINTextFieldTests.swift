@@ -12,10 +12,12 @@ import VGSCollectSDK
 final class ForagePINTextFieldTests: XCTestCase {
     
     var observableState: ObservableState?
+    var foragePinTextField: ForagePINTextField!
     
     override func setUp() {
         ForageSDK.setup(ForageSDK.Config(environment: .sandbox))
         observableState = nil
+        foragePinTextField = ForagePINTextField()
     }
     
     class mockState: ObservableState {
@@ -56,8 +58,6 @@ final class ForagePINTextFieldTests: XCTestCase {
     }
     
     func test_forageElementDelegate_focusDidChange() {
-        let foragePinTextField = ForagePINTextField()
-        
         let expectedIsFirstResponder = true
         let expectedIsEmpty = false
         let expectedIsValid = true
@@ -80,8 +80,6 @@ final class ForagePINTextFieldTests: XCTestCase {
     }
     
     func test_forageElementDelegate_textFieldDidChange() {
-        let foragePinTextField = ForagePINTextField()
-        
         let expectedIsFirstResponder = false
         let expectedIsEmpty = true
         let expectedIsValid = false
@@ -105,7 +103,6 @@ final class ForagePINTextFieldTests: XCTestCase {
     
     func test_BackgroundColor() {
         // Test ForagePINTextField background color
-        let foragePinTextField = ForagePINTextField()
         foragePinTextField.backgroundColor = .lightGray
         XCTAssertEqual(foragePinTextField.backgroundColor, .lightGray)
         
@@ -126,7 +123,6 @@ final class ForagePINTextFieldTests: XCTestCase {
     
     func test_CornerRadius() {
         // Test ForagePINTextField border radius
-        let foragePinTextField = ForagePINTextField()
         foragePinTextField.borderRadius = 10
         XCTAssertEqual(foragePinTextField.borderRadius, 10)
         
@@ -139,6 +135,86 @@ final class ForagePINTextFieldTests: XCTestCase {
         let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
         btTextFieldWrapper.borderRadius = 10
         XCTAssertEqual(btTextFieldWrapper.borderRadius, 10)
+    }
+    
+    func test_borderColor() {
+        let borderColor = UIColor.black
+        foragePinTextField.borderColor = borderColor
+        
+        let color = foragePinTextField.borderColor
+        XCTAssertEqual(color, borderColor)
+    }
+    
+    func test_borderWidth() {
+        let borderWidth = 0.1
+        foragePinTextField.borderWidth = borderWidth
+        
+        let width = foragePinTextField.borderWidth
+        XCTAssertEqual(width, borderWidth)
+    }
+    
+    func test_elementHeight() {
+        let newHeight = 200.0
+        foragePinTextField.elementHeight = newHeight
+        
+        let height = foragePinTextField.elementHeight
+        XCTAssertEqual(newHeight, height)
+    }
+    
+    func test_inputWidth() {
+        let newWidth = 300.0
+        foragePinTextField.inputWidth = newWidth
+
+        let width = foragePinTextField.inputWidth
+        XCTAssertEqual(newWidth, width)
+    }
+
+    func test_inputHeight() {
+        let newHeight = 100.0
+        foragePinTextField.inputHeight = newHeight
+
+        let height = foragePinTextField.inputHeight
+        XCTAssertEqual(newHeight, height)
+    }
+    
+    func test_tintColor() {
+        let tintColor = UIColor.red
+        foragePinTextField.tfTintColor = tintColor
+        
+        let tint = foragePinTextField.tfTintColor
+        XCTAssertEqual(tintColor, tint)
+    }
+    
+    func test_textAlignment() {
+        let alignment = NSTextAlignment.center
+        foragePinTextField.textAlignment = alignment
+        
+        let textAlignment = foragePinTextField.textAlignment
+        XCTAssertEqual(alignment, textAlignment)
+    }
+    
+    func test_font() {
+        let newFont = UIFont.systemFont(ofSize: 14, weight: .regular)
+        foragePinTextField.font = newFont
+        
+        let font = foragePinTextField.font
+        XCTAssertEqual(newFont, font)
+    }
+    
+    func test_textColor() {
+        let color = UIColor.red
+        foragePinTextField.textColor = color
+        
+        let textColor = foragePinTextField.textColor
+        XCTAssertEqual(color, textColor)
+    }
+    
+    func test_placeholder() {
+        let placeholder = "Test placeholder"
+        foragePinTextField.placeholder = placeholder
+        
+        let textPlaceholder = foragePinTextField.placeholder
+        XCTAssertEqual(textPlaceholder, placeholder)
     }
 }
 

@@ -105,6 +105,34 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
         set { textField.font = newValue }
     }
     
+    /// InputWidth for the text field
+    @IBInspectable public var inputWidth: CGFloat {
+        get { return textField.inputWidth }
+        set {
+            container.alignment = .center
+            textField.inputWidth = newValue
+        }
+    }
+    
+    /// InputHeight for the text field
+    @IBInspectable public var inputHeight: CGFloat {
+        get { return textField.inputHeight }
+        set {
+            container.alignment = .center
+            textField.inputHeight = newValue
+        }
+    }
+    
+    /// ElementHeight for the text field
+    private var _elementHeight: CGFloat = 0
+    @IBInspectable public var elementHeight: CGFloat {
+        get { return _elementHeight }
+        set {
+            _elementHeight = newValue
+            self.changeElementHeight(value: _elementHeight)
+        }
+    }
+    
     // MARK: Private components
     
     private lazy var root: UIView = {
@@ -163,7 +191,9 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
         tf?.borderRadius = 4
         tf?.borderColor = UIColor.lightGray
         tf?.backgroundColor = UIColor.white
-        tf?.padding = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 0)
+        tf?.inputWidth = 342
+        tf?.inputHeight = 36
+        tf?.padding = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         collector = tf?.collector
         
         return tf ?? VGSTextFieldWrapper()
@@ -262,6 +292,11 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
 
     public func clearText() {
         textField.clearText()
+    }
+    
+    private func changeElementHeight(value: CGFloat) {
+        container.distribution = .equalCentering
+        container.heightAnchor.constraint(equalToConstant: value).isActive = true
     }
 }
 

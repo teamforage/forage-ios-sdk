@@ -34,6 +34,9 @@ class VGSTextFieldWrapper: UIView, VaultWrapper {
     
     var tfTintColor: UIColor?
     
+    var inputWidthConstraint: NSLayoutConstraint?
+    var inputHeightConstraint: NSLayoutConstraint?
+    
     private let textField: VGSTextField
     
     override init(frame: CGRect) {
@@ -73,6 +76,13 @@ class VGSTextFieldWrapper: UIView, VaultWrapper {
             centerXAnchor: nil,
             padding: UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         )
+        
+        inputHeightConstraint = textField.heightAnchor.constraint(equalToConstant: inputHeight)
+        inputHeightConstraint?.isActive = true
+        
+        inputWidthConstraint = textField.widthAnchor.constraint(equalToConstant: inputWidth)
+        inputWidthConstraint?.isActive = true
+        
         textField.isSecureTextEntry = true
         
         textField.delegate = self
@@ -144,6 +154,22 @@ class VGSTextFieldWrapper: UIView, VaultWrapper {
     var textAlignment: NSTextAlignment {
         get { return textField.textAlignment }
         set { textField.textAlignment = newValue }
+    }
+    
+    var inputWidth: CGFloat {
+        get { return inputWidthConstraint?.constant ?? 0 }
+        set {
+            inputWidthConstraint?.constant = newValue
+            inputWidthConstraint?.isActive = true
+        }
+    }
+ 
+    var inputHeight: CGFloat {
+        get { return inputHeightConstraint?.constant ?? 0 }
+        set {
+            inputHeightConstraint?.constant = newValue
+            inputHeightConstraint?.isActive = true
+        }
     }
 }
 
