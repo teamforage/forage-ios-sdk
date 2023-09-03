@@ -45,12 +45,42 @@ class CardNumberView: UIView {
         return tf
     }()
     
-    private let statusLabel: UILabel = {
+    private let firstResponderLabel: UILabel = {
         let label = UILabel()
-        label.text = "Enter Card Number"
+        label.text = "isFirstResponder: false"
         label.textColor = .gray
         label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        label.accessibilityIdentifier = "lbl_status"
+        label.accessibilityIdentifier = "lbl_first_responder"
+        label.isAccessibilityElement = true
+        return label
+    }()
+    
+    private let completeLabel: UILabel = {
+        let label = UILabel()
+        label.text = "isComplete: false"
+        label.textColor = .gray
+        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        label.accessibilityIdentifier = "lbl_complete"
+        label.isAccessibilityElement = true
+        return label
+    }()
+    
+    private let emptyLabel: UILabel = {
+        let label = UILabel()
+        label.text = "isEmpty: true"
+        label.textColor = .gray
+        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        label.accessibilityIdentifier = "lbl_empty"
+        label.isAccessibilityElement = true
+        return label
+    }()
+    
+    private let validLabel: UILabel = {
+        let label = UILabel()
+        label.text = "isValid: true"
+        label.textColor = .gray
+        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        label.accessibilityIdentifier = "lbl_valid"
         label.isAccessibilityElement = true
         return label
     }()
@@ -227,7 +257,10 @@ class CardNumberView: UIView {
         self.addSubview(contentView)
         contentView.addSubview(titleLabel)
         contentView.addSubview(panNumberTextField)
-        contentView.addSubview(statusLabel)
+        contentView.addSubview(firstResponderLabel)
+        contentView.addSubview(completeLabel)
+        contentView.addSubview(emptyLabel)
+        contentView.addSubview(validLabel)
         contentView.addSubview(refLabel)
         contentView.addSubview(typeLabel)
         contentView.addSubview(tokenLabel)
@@ -241,6 +274,10 @@ class CardNumberView: UIView {
     
     private func setupConstraints() {
         setupContentViewConstraints()
+        firstResponderLabel.text = "isFirstResponder: \(panNumberTextField.isFirstResponder)"
+        completeLabel.text = "isComplete: \(panNumberTextField.isComplete)"
+        emptyLabel.text = "isEmpty: \(panNumberTextField.isEmpty)"
+        validLabel.text = "isValid: \(panNumberTextField.isValid)"
     }
     
     private func setupContentViewConstraints() {
@@ -271,7 +308,7 @@ class CardNumberView: UIView {
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
         )
         
-        statusLabel.anchor(
+        firstResponderLabel.anchor(
             top: panNumberTextField.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
             bottom: nil,
@@ -280,8 +317,35 @@ class CardNumberView: UIView {
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
         )
         
+        completeLabel.anchor(
+            top: firstResponderLabel.safeAreaLayoutGuide.bottomAnchor,
+            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
+            bottom: nil,
+            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
+            centerXAnchor: contentView.centerXAnchor,
+            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
+        )
+        
+        emptyLabel.anchor(
+            top: completeLabel.safeAreaLayoutGuide.bottomAnchor,
+            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
+            bottom: nil,
+            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
+            centerXAnchor: contentView.centerXAnchor,
+            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
+        )
+        
+        validLabel.anchor(
+            top: emptyLabel.safeAreaLayoutGuide.bottomAnchor,
+            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
+            bottom: nil,
+            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
+            centerXAnchor: contentView.centerXAnchor,
+            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
+        )
+        
         refLabel.anchor(
-            top: statusLabel.safeAreaLayoutGuide.bottomAnchor,
+            top: validLabel.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
             bottom: nil,
             trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
@@ -371,19 +435,10 @@ class CardNumberView: UIView {
     }
     
     private func updateState(state: ObservableState) {
-        if (state.isEmpty) {
-            statusLabel.text = "Enter Card Number"
-            statusLabel.textColor = .gray
-        } else if (state.isComplete && state.isValid) {
-            statusLabel.text = "Card Number Valid"
-            statusLabel.textColor = .green
-        } else if (state.isValid && !state.isComplete) {
-            statusLabel.text = "Identifying Card Number"
-            statusLabel.textColor = .gray
-        } else {
-            statusLabel.text = "Card Number Invalid"
-            statusLabel.textColor = .red
-        }
+        firstResponderLabel.text = "isFirstResponder: \(state.isFirstResponder)"
+        completeLabel.text = "isComplete: \(state.isComplete)"
+        emptyLabel.text = "isEmpty: \(state.isEmpty)"
+        validLabel.text = "isValid: \(state.isValid)"
     }
 }
 
