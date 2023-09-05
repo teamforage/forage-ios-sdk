@@ -168,8 +168,8 @@ class CapturePaymentView: UIView {
         let inputFieldReference = isEbtSnap ? snapTextField : nonSnapTextField
         
         ForageSDK.shared.capturePayment(
-            paymentReference: paymentReference,
-            foragePinTextEdit: inputFieldReference) { result in
+            foragePinTextField: inputFieldReference,
+            paymentReference: paymentReference) { result in
                 self.printResult(result: result)
             }
     }
