@@ -77,7 +77,7 @@ internal class LDManager {
     ///   - logger: An optional `ForageLogger` for logging purposes.
     ///   - startLdClient: A closure to start the LaunchDarkly client. Defaults to `LDClient.start`.
     internal func initialize(
-        _ environment: EnvironmentTarget,
+        _ environment: Environment,
         logger: ForageLogger? = nil,
         startLdClient: (LDConfig, LDContext?, (() -> Void)?) -> Void = LDClient.start
     ) {
@@ -139,7 +139,7 @@ internal class LDManager {
         return vaultType ?? .vgsVaultType
     }
 
-    private func createLDConfig(for environment: EnvironmentTarget) -> LDConfig {
+    private func createLDConfig(for environment: Environment) -> LDConfig {
         return LDConfig(mobileKey: getLDMobileKey(environment).rawValue)
     }
     
