@@ -11,7 +11,7 @@ struct CreatePaymentRequest {
     let amount: Double
     let fundingType: String
     let paymentMethodIdentifier: String
-    let merchantAccount: String
+    let merchantID: String
     let description: String
     let metadata: [String:String]
     let deliveryAddress: Address

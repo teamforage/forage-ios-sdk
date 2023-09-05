@@ -12,43 +12,43 @@ import VGSCollectSDK
  Interface for internal Forage SDK requests
  */
 internal protocol ForageService: AnyObject {
-    /// Provider provides the interface for perform url requests.
+    /// Provider provides the interface for performing HTTP requests.
     var provider: Provider { get }
     
     /// Retrieve X-key header for requests
     ///
     /// - Parameters:
-    ///  - bearerToken: Authorization token.
-    ///  - merchantAccount: The merchant FNS number.
+    ///  - sessionToken: Authorization token.
+    ///  - merchantID: merchant ID.
     ///  - completion: Which will return the x-key object.
     func getXKey(
-        bearerToken: String,
-        merchantAccount: String,
+        sessionToken: String,
+        merchantID: String,
         completion: @escaping (Result<ForageXKeyModel, Error>) -> Void) -> Void
     
     /// Perform a GET request for the PaymentMethod
     ///
     /// - Parameters:
-    ///  - bearerToken: Authorization token.
-    ///  - merchantAccount: The merchant FNS number.
+    ///  - sessionToken: Authorization token.
+    ///  - merchantID: merchant ID.
     ///  - paymentMethodRef: The PaymentMethod ref.
     ///  - completion: Returns the PaymentMethod
     func getPaymentMethod(
-        bearerToken: String,
-        merchantAccount: String,
+        sessionToken: String,
+        merchantID: String,
         paymentMethodRef: String,
         completion: @escaping (Result<PaymentMethodModel, Error>) -> Void) -> Void
     
     /// Perform a GET request for the Payment
     ///
     /// - Parameters:
-    ///  - bearerToken: Authorization token.
-    ///  - merchantAccount: The merchant FNS number.
+    ///  - sessionToken: Authorization token.
+    ///  - merchantID: merchant ID.
     ///  - paymentRef: The Payment ref.
     ///  - completion: Returns the Payment
     func getPayment(
-        bearerToken: String,
-        merchantAccount: String,
+        sessionToken: String,
+        merchantID: String,
         paymentRef: String,
         completion: @escaping (Result<PaymentModel, Error>) -> Void)
     

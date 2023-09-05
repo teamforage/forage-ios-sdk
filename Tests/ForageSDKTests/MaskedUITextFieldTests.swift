@@ -12,7 +12,7 @@ final class MaskedUITextFieldTests: XCTestCase {
     var maskedTextField: MaskedUITextField!
     
     override func setUp() {
-        ForageSDK.setup(ForageSDK.Config(environment: .sandbox))
+        ForageSDK.setup(ForageSDK.Config(merchantID: "merchant123", sessionToken: "sandbox_auth123"))
         // .setup() currently doesn't allow us to update the environment
         ForageSDK.shared.environment = .sandbox
         ForageSDK.shared.service = nil

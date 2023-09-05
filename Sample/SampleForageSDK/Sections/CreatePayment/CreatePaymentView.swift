@@ -131,7 +131,7 @@ class CreatePaymentView: UIView {
         return label
     }()
     
-    private let merchantAccountLabel: UILabel = {
+    private let merchantIDLabel: UILabel = {
         let label = UILabel()
         label.text = ""
         label.textColor = .black
@@ -208,7 +208,7 @@ class CreatePaymentView: UIView {
             amount: paymentAmount,
             fundingType: isEbtSnap ? "ebt_snap" : "ebt_cash",
             paymentMethodIdentifier: ClientSharedData.shared.paymentMethodReference,
-            merchantAccount: ClientSharedData.shared.merchantID,
+            merchantID: ClientSharedData.shared.merchantID,
             description: "desc",
             metadata: [:],
             deliveryAddress: Address(
@@ -235,7 +235,7 @@ class CreatePaymentView: UIView {
                 self.fundingTypeLabel.text = "fundingType=\(response.fundingType.rawValue)"
                 self.paymentMethodIdentifierLabel.text = "paymentMethodIdentifier=\(response.paymentMethodIdentifier)"
                 self.paymentIdentifierLabel.text = "paymentIdentifier=\(response.paymentIdentifier)"
-                self.merchantAccountLabel.text = "merchantAccount=\(response.merchantAccount)"
+                self.merchantIDLabel.text = "merchantID=\(response.merchantID)"
                 self.amountLabel.text = "amount=\(response.amount)"
                 self.errorLabel.text = ""
                 ClientSharedData.shared.paymentReference[response.fundingType] = response.paymentIdentifier
@@ -245,7 +245,7 @@ class CreatePaymentView: UIView {
                 self.fundingTypeLabel.text = ""
                 self.paymentMethodIdentifierLabel.text = ""
                 self.paymentIdentifierLabel.text = ""
-                self.merchantAccountLabel.text = ""
+                self.merchantIDLabel.text = ""
                 self.amountLabel.text = ""
             }
             
@@ -264,7 +264,7 @@ class CreatePaymentView: UIView {
         contentView.addSubview(fundingTypeLabel)
         contentView.addSubview(paymentMethodIdentifierLabel)
         contentView.addSubview(paymentIdentifierLabel)
-        contentView.addSubview(merchantAccountLabel)
+        contentView.addSubview(merchantIDLabel)
         contentView.addSubview(amountLabel)
         contentView.addSubview(errorLabel)
         contentView.addSubview(nextButton)
@@ -360,7 +360,7 @@ class CreatePaymentView: UIView {
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
         )
         
-        merchantAccountLabel.anchor(
+        merchantIDLabel.anchor(
             top: paymentIdentifierLabel.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
             bottom: nil,
@@ -370,7 +370,7 @@ class CreatePaymentView: UIView {
         )
         
         amountLabel.anchor(
-            top: merchantAccountLabel.safeAreaLayoutGuide.bottomAnchor,
+            top: merchantIDLabel.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
             bottom: nil,
             trailing: contentView.safeAreaLayoutGuide.trailingAnchor,

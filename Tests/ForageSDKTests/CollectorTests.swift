@@ -14,7 +14,11 @@ import BasisTheoryElements
 class VaultCollectorTests: XCTestCase {
 
     override func setUp() {
-        ForageSDK.setup(ForageSDK.Config(environment: .sandbox))
+        ForageSDK.setup(ForageSDK.Config(
+            environment: .sandbox,
+            merchantID: "merchantID123",
+            sessionToken: "authToken123"
+        ))
         ForageSDK.shared.service = nil
     }
     
