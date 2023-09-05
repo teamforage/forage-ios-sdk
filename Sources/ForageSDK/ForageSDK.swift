@@ -85,8 +85,5 @@ public class ForageSDK {
      */
     public class func setup(_ config: Config) {
         ForageSDK.config = config
-        ForageSDK.shared.environment = Environment(sessionToken: config.sessionToken)
-        ForageSDK.shared.merchantID = config.merchantID
-        ForageSDK.shared.sessionToken = config.sessionToken
     }
 }
