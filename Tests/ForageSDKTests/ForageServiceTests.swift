@@ -18,7 +18,6 @@ final class ForageServiceTests: XCTestCase {
             merchantID: "merchantID123",
             sessionToken: "authToken123"
         ))
-        ForageSDK.shared.service = nil
         forageMocks = ForageMocks()
     }
     

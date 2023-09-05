@@ -18,7 +18,6 @@ class VaultCollectorTests: XCTestCase {
             merchantID: "merchantID123",
             sessionToken: "authToken123"
         ))
-        ForageSDK.shared.service = nil
     }
     
     func testVGSCollectWrapper_SetCustomHeaders_HeaderKey() {

@@ -49,7 +49,6 @@ final class ForageElementDelegateTests: XCTestCase {
     
     override func setUp() {
         ForageSDK.setup(ForageSDK.Config(merchantID: "merchant123", sessionToken: "sandbox_auth123"))
-        ForageSDK.shared.service = nil
         observableState = nil
     }
     
