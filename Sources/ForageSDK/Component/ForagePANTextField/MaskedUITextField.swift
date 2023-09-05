@@ -24,6 +24,8 @@ internal enum MaskPattern : String {
 
 internal class MaskedUITextField : FloatingTextField, ObservableState {
     // MARK: - Properties
+    internal var actualPAN: String = ""
+    
     private var wasBackspacePressed = false
     
     /// A delegate that informs the client about the state of the entered card number (validation, focus)
@@ -75,8 +77,7 @@ internal class MaskedUITextField : FloatingTextField, ObservableState {
         let maskPattern = determineMaskPattern(for: newUnmaskedText, stateIIN: matchedStateIIN)
         self.applyMask(newUnmaskedText, maskPattern: maskPattern)
         
-        // TODO: Stop sharing the PAN state and instead have each PAN hold it's own state
-        ForageSDK.shared.panNumber = newUnmaskedText
+        actualPAN = newUnmaskedText
         
         if text.count > 0 {
             self.addClearButton(isVisible: true)

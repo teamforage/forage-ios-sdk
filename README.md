@@ -93,9 +93,10 @@ A component that securely accepts the PAN number. This field validates the PAN n
 ![Screen Shot 2022-10-31 at 10 19 27](https://user-images.githubusercontent.com/115553362/199017253-ee05dcf0-01c8-41dc-9662-9da525e573c9.png)
 
 ```swift
-private let panNumberTextField: ForagePANTextField = {
+private let panTextField: ForagePANTextField = {
     let tf = ForagePANTextField()
-    tf.placeholder = "PAN Number"
+    tf.borderColor = .black
+    tf.placeholder = "EBT Card Number"
     return tf
 }()
 ```
@@ -103,7 +104,7 @@ private let panNumberTextField: ForagePANTextField = {
 ForagePANTextField uses a delegate `ForageElementDelegate` to communicate the updates to the client side.
 
 ```swift
-panNumberTextField.delegate = self
+panTextField.delegate = self
 ```
 
 ```swift
@@ -146,6 +147,7 @@ To send the PAN number, we can use ForageSDK to perform the request.
 // Signature
 
 func tokenizeEBTCard(
+    foragePanTextField: ForagePANTextField,
     customerID: String,
     reusable: Bool?,
     completion: @escaping (Result<PaymentMethodModel, Error>) -> Void
@@ -156,6 +158,7 @@ func tokenizeEBTCard(
 // Usage
 
 ForageSDK.shared.tokenizeEBTCard(
+    foragePanTextField: panTextField,
     // NOTE: The following line is for testing purposes only and should not be used in production.
     // Please replace this line with a real hashed customer ID value.
     customerID: UUID.init().uuidString,
@@ -173,8 +176,8 @@ A component the securely accepts an EBT PIN for balance requests and payment cap
 ```swift
 private let pinNumberTextField: ForagePINTextField = {
     let tf = ForagePINTextField()
-    tf.placeholder = "PIN Field"
-    tf.isSecureTextEntry = true
+    tf.borderRadius = 10
+    tf.backgroundColor = .lightGray
     tf.pinType = .balance
     return tf
 }()

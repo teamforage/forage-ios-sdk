@@ -14,9 +14,11 @@ protocol ForageSDKService: AnyObject {
     /// Tokenize a given EBT Card
     ///
     /// - Parameters:
+    ///  - foragePanTextField: A text field capturing the PAN (Primary Account Number) of the EBT card.
     ///  - customerID: A unique ID for the end customer making the payment. We recommend that you hash this value.
     ///  - completion: Which will return the result. See more [here](https://docs.joinforage.app/reference/create-payment-method-1)
     func tokenizeEBTCard(
+        foragePanTextField: ForagePANTextField,
         customerID: String,
         reusable: Bool?,
         completion: @escaping (Result<PaymentMethodModel, Error>) -> Void)
@@ -45,6 +47,7 @@ protocol ForageSDKService: AnyObject {
 extension ForageSDK: ForageSDKService {
     
     public func tokenizeEBTCard(
+        foragePanTextField: ForagePANTextField,
         customerID: String,
         reusable: Bool? = true,
         completion: @escaping (Result<PaymentMethodModel, Error>) -> Void
@@ -60,7 +63,7 @@ extension ForageSDK: ForageSDKService {
         let request = ForagePANRequestModel(
             authorization: self.sessionToken,
             merchantID: self.merchantID,
-            panNumber: panNumber,
+            panNumber: foragePanTextField.getActualPAN(),
             type: CardType.EBT.rawValue,
             customerID: customerID,
             reusable: reusable ?? true
