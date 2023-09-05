@@ -32,7 +32,7 @@
                                             </label>
                                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="2Jp-Qt-zxc">
                                                 <rect key="frame" x="24" y="53" width="366" height="42"/>
-                                                <accessibility key="accessibilityConfiguration" identifier="tf_session_token" label="Session token text field"/>
+                                                <accessibility key="accessibilityConfiguration" identifier="tf_bearer_token" label="Session token text field"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="42" id="jkn-Le-Frm"/>
                                                 </constraints>

@@ -71,12 +71,11 @@ import ForageSDK
 
 ### Create ForageSDK instance
 
-To initialize a ForageSDK instance, you need to provide the environment.
+To initialize a ForageSDK instance, you need to provide the merchantID and sessionToken.
 
 ```swift
 ForageSDK.setup(
     ForageSDK.Config(
-        environment: .sandbox,
         merchantID: "1234567",
         sessionToken: "sandbox_eyJ0eXAiOiJKV1Qi..."
     )

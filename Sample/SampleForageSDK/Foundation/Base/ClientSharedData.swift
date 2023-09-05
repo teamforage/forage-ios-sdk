@@ -11,7 +11,6 @@ import ForageSDK
 class ClientSharedData {
     static let shared = ClientSharedData()
     
-    var environment: EnvironmentTarget = .sandbox
     var paymentMethodReference: String = ""
     var merchantID: String = ""
     var sessionToken: String = ""

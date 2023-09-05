@@ -34,7 +34,6 @@ class ViewController: UIViewController {
         
         ForageSDK.setup(
             ForageSDK.Config(
-                environment: ClientSharedData.shared.environment,
                 merchantID: merchantID,
                 sessionToken: sessionToken
             )

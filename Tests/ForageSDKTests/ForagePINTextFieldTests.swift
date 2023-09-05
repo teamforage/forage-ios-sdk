@@ -15,7 +15,6 @@ final class ForagePINTextFieldTests: XCTestCase {
     
     override func setUp() {
         ForageSDK.setup(ForageSDK.Config(
-            environment: .sandbox,
             merchantID: "merchantID123",
             sessionToken: "authToken123"
         ))        

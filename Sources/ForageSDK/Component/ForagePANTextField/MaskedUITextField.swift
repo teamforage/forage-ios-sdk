@@ -99,7 +99,7 @@ internal class MaskedUITextField : FloatingTextField, ObservableState {
             forageDelegate?.textFieldDidChange(self) // notify client about latest validation status.
         }
         
-        let isProdEnvironment = ForageSDK.shared.environment == EnvironmentTarget.prod
+        let isProdEnvironment = ForageSDK.shared.environment == Environment.prod
         if !isProdEnvironment && isSpecialCard(newUnmaskedText) {
             isValid = true
             isComplete = newUnmaskedText.count >= 16 && newUnmaskedText.count <= 19
