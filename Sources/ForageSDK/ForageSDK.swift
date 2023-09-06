@@ -27,7 +27,7 @@ public class ForageSDK {
     
     private init() {
         guard let config = ForageSDK.config else {
-            assertionFailure("ForageSDK missing Config setup")
+            assertionFailure("ForageSDK unconfigured - call ForageSDK.setup() before accessing ForageSDK.shared")
             return
         }
         self.environment = Environment(sessionToken: config.sessionToken)
@@ -59,8 +59,8 @@ public class ForageSDK {
         - sessionToken: The [session token](https://docs.joinforage.app/docs/authentication#session-tokens) that your backend generates to authenticate your app against the Forage Payments API. The token expires after 15 minutes.
      */
     public struct Config {
-        let merchantID: String
-        let sessionToken: String
+        var merchantID: String
+        var sessionToken: String
 
         public init(merchantID: String, sessionToken: String) {
             self.merchantID = merchantID
@@ -68,22 +68,46 @@ public class ForageSDK {
         }
     }
     
-    /**
-     Setup ForageSDK using ``Config`` struct.
-     
-     - Parameters:
-       - config: ``Config`` struct object to set merchant ID, and session token
-     
-    ````
-     ForageSDK.setup(
-         ForageSDK.Config(
-             merchantID: "1234567",
-             sessionToken: "sandbox_eyJ0eXAiOiJKV1Qi..."
-         )
-     )
-    ````
-     */
+    /// Configures the Forage SDK with the given configuration.
+    ///
+    /// This sets up the merchant ID, session token, and other internal state needed to make API calls.
+    /// It must be called before using the SDK.
+    ///
+    /// - Parameter config: The configuration used to setup the SDK.
+    ///
+    /// - Use ``updateMerchantID(_:)`` to update the merchant ID after configuring.
+    /// - Use ``updateSessionToken(_:)`` to udpate the session token after token expiration.
     public class func setup(_ config: Config) {
         ForageSDK.config = config
+    }
+    
+    /// Updates the merchant ID to use for subsequent API calls.
+    /// Use this method to change the active merchant ID if your app supports multiple merchants.
+    ///
+    /// - Parameter newMerchantID: The new merchant ID to set.
+    public static func updateMerchantID(_ newMerchantID: String) {
+        guard ForageSDK.config != nil else {
+            assertionFailure("ForageSDK must be configured before setting merchant ID")
+            return
+        }
+        // config is guarented to be non-nil because of the guard above.
+        ForageSDK.config!.merchantID = newMerchantID
+        ForageSDK.shared.merchantID = newMerchantID
+    }
+    
+    /// Updates the session token to use for subsequent API calls.
+    ///
+    /// Session tokens expire after 15 minutes. Use this method to set a new session token
+    /// after refreshing it from your backend.
+    ///
+    /// - Parameter newSessionToken: The new session token to use for subsequent API calls
+    public static func updateSessionToken(_ newSessionToken: String) {
+        guard ForageSDK.config != nil else {
+            assertionFailure("ForageSDK must be configured before updating the session token")
+            return
+        }
+        // config is guarented to be non-nil because of the guard above.
+        ForageSDK.config!.sessionToken = newSessionToken
+        ForageSDK.shared.sessionToken = newSessionToken
     }
 }

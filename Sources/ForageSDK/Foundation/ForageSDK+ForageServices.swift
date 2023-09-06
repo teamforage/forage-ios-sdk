@@ -63,8 +63,8 @@ extension ForageSDK: ForageSDKService {
             .notice("Called ForageSDK.shared.tokenizeEBTCard", attributes: nil)
         
         let request = ForagePANRequestModel(
-            authorization: self.sessionToken,
-            merchantID: self.merchantID,
+            authorization: ForageSDK.shared.sessionToken,
+            merchantID: ForageSDK.shared.merchantID,
             panNumber: foragePanTextField.getActualPAN(),
             type: CardType.EBT.rawValue,
             customerID: customerID,
@@ -85,8 +85,8 @@ extension ForageSDK: ForageSDKService {
                 ))
                 .notice("Called ForageSDK.shared.checkBalance for Payment Method \(paymentMethodReference)", attributes: nil)
                         
-            let sessionToken = self.sessionToken
-            let merchantID = self.merchantID
+            let sessionToken = ForageSDK.shared.sessionToken
+            let merchantID = ForageSDK.shared.merchantID
             
             service?.getXKey(sessionToken: sessionToken, merchantID: merchantID) { result in
                 switch result {
@@ -126,8 +126,8 @@ extension ForageSDK: ForageSDKService {
                 ))
                 .notice("Called ForageSDK.shared.capturePayment for Payment \(paymentReference)", attributes: nil)
 
-            let sessionToken = self.sessionToken
-            let merchantID = self.merchantID
+            let sessionToken = ForageSDK.shared.sessionToken
+            let merchantID = ForageSDK.shared.merchantID
             
             service?.getXKey(sessionToken: sessionToken, merchantID: merchantID) { result in
                 switch result {
