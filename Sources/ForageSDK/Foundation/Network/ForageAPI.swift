@@ -12,10 +12,10 @@ import Foundation
  */
 enum ForageAPI {
     case tokenizeNumber(request: ForagePANRequestModel)
-    case xKey(sessionToken: String, merchantID: String)
-    case message(request: MessageResponseModel, sessionToken: String, merchantID: String)
-    case getPaymentMethod(sessionToken: String, merchantID: String, paymentMethodRef: String)
-    case getPayment(sessionToken: String, merchantID: String, paymentRef: String)
+    case xKey(sessionToken: String, merchantID: String, traceId: String)
+    case message(request: MessageResponseModel, sessionToken: String, merchantID: String, traceId: String)
+    case getPaymentMethod(sessionToken: String, merchantID: String, paymentMethodRef: String, traceId: String)
+    case getPayment(sessionToken: String, merchantID: String, paymentRef: String, traceId: String)
 }
 
 extension ForageAPI: ServiceProtocol {
@@ -27,7 +27,7 @@ extension ForageAPI: ServiceProtocol {
         switch self {
         case .tokenizeNumber: return "/api/payment_methods/"
         case .xKey: return "/iso_server/encryption_alias/"
-        case .message(request: let response, _, _): return "/api/message/\(response.contentId)/"
+        case .message(request: let response, _, _, _): return "/api/message/\(response.contentId)/"
         case .getPaymentMethod(request: let request): return "/api/payment_methods/\(request.paymentMethodRef)/"
         case .getPayment(request: let request): return "/api/payments/\(request.paymentRef)/"
         }
@@ -60,7 +60,8 @@ extension ForageAPI: ServiceProtocol {
                 "authorization": "Bearer \(model.authorization)",
                 "content-type": "application/json",
                 "accept": "application/json",
-                "API-VERSION": "2023-05-15"
+                "API-VERSION": "2023-05-15",
+                "x-datadog-trace-id": model.traceId ?? ""
             ]
 
             return .requestParametersAndHeaders(
@@ -69,11 +70,12 @@ extension ForageAPI: ServiceProtocol {
                 additionalHeaders: httpHeaders
             )
 
-        case .xKey(sessionToken: let sessionToken, merchantID: let merchantID):
+        case .xKey(sessionToken: let sessionToken, merchantID: let merchantID, traceId: let traceId):
             let httpHeaders: HTTPHeaders = [
                 "authorization": "Bearer \(sessionToken)",
                 "accept": "application/json",
                 "Merchant-Account": merchantID,
+                "x-datadog-trace-id": traceId
             ]
 
             return .requestParametersAndHeaders(
@@ -82,12 +84,13 @@ extension ForageAPI: ServiceProtocol {
                 additionalHeaders: httpHeaders
             )
 
-        case .message(_, sessionToken: let sessionToken, merchantID: let merchantID):
+        case .message(_, sessionToken: let sessionToken, merchantID: let merchantID, traceId: let traceId):
             let httpHeaders: HTTPHeaders = [
                 "Merchant-Account": merchantID,
                 "authorization": "Bearer \(sessionToken)",
                 "accept": "application/json",
-                "API-VERSION": "2023-02-01"
+                "API-VERSION": "2023-02-01",
+                "x-datadog-trace-id": traceId
             ]
 
             return .requestParametersAndHeaders(
@@ -100,7 +103,8 @@ extension ForageAPI: ServiceProtocol {
             let httpHeaders: HTTPHeaders = [
                 "Merchant-Account": request.merchantID,
                 "authorization": "Bearer \(request.sessionToken)",
-                "API-VERSION": "2023-05-15"
+                "API-VERSION": "2023-05-15",
+                "x-datadog-trace-id": request.traceId
             ]
 
             return .requestParametersAndHeaders(
@@ -113,7 +117,8 @@ extension ForageAPI: ServiceProtocol {
             let httpHeaders: HTTPHeaders = [
                 "Merchant-Account": request.merchantID,
                 "authorization": "Bearer \(request.sessionToken)",
-                "API-VERSION": "2023-05-15"
+                "API-VERSION": "2023-05-15",
+                "x-datadog-trace-id": request.traceId
             ]
 
             return .requestParametersAndHeaders(

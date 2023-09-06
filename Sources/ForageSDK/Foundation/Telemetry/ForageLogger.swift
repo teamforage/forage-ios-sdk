@@ -14,6 +14,7 @@ internal struct ForageLogContext {
     var paymentMethodRef: String? = nil
     var vaultType: VaultType? = nil
     var sdkVersion: String = ForageSDK.version
+    var traceId: String? = nil
 }
 
 internal enum ForageLogKind: String {
@@ -24,12 +25,14 @@ internal enum ForageLogKind: String {
 internal struct ForageLoggerConfig {
     var forageEnvironment: Environment?
     var prefix: String?
+    var traceId: String?
     var context: ForageLogContext?
     
-    init(environment: Environment? = ForageSDK.shared.environment, prefix: String? = nil, context: ForageLogContext? = nil) {
+    init(environment: Environment? = ForageSDK.shared.environment, prefix: String? = nil, context: ForageLogContext? = nil, traceId: String? = nil) {
         self.forageEnvironment = environment
         self.context = context
         self.prefix = prefix
+        self.traceId = traceId
     }
 }
 
@@ -115,6 +118,8 @@ internal class DatadogLogger : ForageLogger {
             ),
             in: datadogInstance
         )
+        
+        self.logger?.addAttribute(forKey: "trace_id", value: self.config?.traceId)
         
         _ = self.addContext(config?.context ?? ForageLogContext())
     }

@@ -44,7 +44,7 @@ internal class LiveForageService: ForageService {
     ///  - sessionToken: Session authorization token.
     ///  - completion: Returns *ForageXKeyModel* object.
     internal func getXKey(sessionToken: String, merchantID: String, completion: @escaping (Result<ForageXKeyModel, Error>) -> Void) {
-        do { try provider.execute(model: ForageXKeyModel.self, endpoint: ForageAPI.xKey(sessionToken: sessionToken, merchantID: merchantID), completion: completion) }
+        do { try provider.execute(model: ForageXKeyModel.self, endpoint: ForageAPI.xKey(sessionToken: sessionToken, merchantID: merchantID, traceId: ForageSDK.shared.traceId), completion: completion) }
         catch { completion(.failure(error)) }
     }
     
@@ -66,7 +66,8 @@ internal class LiveForageService: ForageService {
         
         pinCollector.setCustomHeaders(headers: [
             "IDEMPOTENCY-KEY": UUID.init().uuidString,
-            "Merchant-Account": request.merchantID
+            "Merchant-Account": request.merchantID,
+            "x-datadog-trace-id": ForageSDK.shared.traceId
         ], xKey: request.xKey)
 
         let extraData = [
@@ -127,7 +128,7 @@ internal class LiveForageService: ForageService {
     ///  - request: Model element with data to perform request.
     ///  - completion: Returns balance object.
     internal func getPaymentMethod(sessionToken: String, merchantID: String, paymentMethodRef: String, completion: @escaping (Result<PaymentMethodModel, Error>) -> Void) {
-        do { try provider.execute(model: PaymentMethodModel.self, endpoint: ForageAPI.getPaymentMethod(sessionToken: sessionToken, merchantID: merchantID, paymentMethodRef: paymentMethodRef), completion: completion) }
+        do { try provider.execute(model: PaymentMethodModel.self, endpoint: ForageAPI.getPaymentMethod(sessionToken: sessionToken, merchantID: merchantID, paymentMethodRef: paymentMethodRef, traceId: ForageSDK.shared.traceId), completion: completion) }
         catch { completion(.failure(error)) }
     }
     
@@ -146,7 +147,8 @@ internal class LiveForageService: ForageService {
     {
         pinCollector.setCustomHeaders(headers: [
             "IDEMPOTENCY-KEY": UUID.init().uuidString,
-            "Merchant-Account": request.merchantID
+            "Merchant-Account": request.merchantID,
+            "x-datadog-trace-id": ForageSDK.shared.traceId
         ], xKey: request.xKey)
 
         let extraData = [
@@ -193,7 +195,7 @@ internal class LiveForageService: ForageService {
     ///  - request: Model element with data to perform request.
     ///  - completion: Returns balance object.
     internal func getPayment(sessionToken: String, merchantID: String, paymentRef: String, completion: @escaping (Result<PaymentModel, Error>) -> Void) {
-        do { try provider.execute(model: PaymentModel.self, endpoint: ForageAPI.getPayment(sessionToken: sessionToken, merchantID: merchantID, paymentRef: paymentRef), completion: completion) }
+        do { try provider.execute(model: PaymentModel.self, endpoint: ForageAPI.getPayment(sessionToken: sessionToken, merchantID: merchantID, paymentRef: paymentRef, traceId: ForageSDK.shared.traceId), completion: completion) }
         catch { completion(.failure(error)) }
     }
 }
@@ -251,7 +253,7 @@ extension LiveForageService: Polling {
         completion: @escaping (Result<MessageResponseModel, Error>) -> Void) -> Void
     {
         do {
-            try provider.execute(model: MessageResponseModel.self, endpoint: ForageAPI.message(request: message, sessionToken: request.authorization, merchantID: request.merchantID), completion: { [weak self] result in
+            try provider.execute(model: MessageResponseModel.self, endpoint: ForageAPI.message(request: message, sessionToken: request.authorization, merchantID: request.merchantID, traceId: ForageSDK.shared.traceId), completion: { [weak self] result in
                 guard let self = self else { return }
                 switch result {
                 case .success(let data):

@@ -15,4 +15,5 @@ internal struct ForageRequestModel: Codable {
     let cardNumberToken: String
     let merchantID: String
     let xKey: [String: String]
+    let traceId: String?
 }

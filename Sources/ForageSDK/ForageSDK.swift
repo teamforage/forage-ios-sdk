@@ -17,6 +17,7 @@ public class ForageSDK {
     internal var logger: ForageLogger? = nil
     internal var merchantID: String = ""
     internal var sessionToken: String = ""
+    internal var traceId: String = ""
     
     public var environment: Environment = .sandbox
     // Don't update! Only updated when releasing.
@@ -33,14 +34,15 @@ public class ForageSDK {
         self.environment = Environment(sessionToken: config.sessionToken)
         self.merchantID = config.merchantID
         self.sessionToken = config.sessionToken
-        
+        self.traceId = ForageSDK.generateTraceId()
         // ForageSDK.shared.environment is not set
         // until the end of this initialization
         // so we have to provide the environment from the config
         let logger = DatadogLogger(
             ForageLoggerConfig(
                 environment: self.environment,
-                prefix: ""
+                prefix: "",
+                traceId: traceId
             )
         )
         self.logger = logger
@@ -49,6 +51,16 @@ public class ForageSDK {
         VGSCollectLogger.shared.disableAllLoggers()
         let provider = Provider(logger: logger)
         self.service = LiveForageService(provider: provider, logger: logger)
+    }
+    
+    private static func generateTraceId() -> String {
+        var traceSeed = ""
+        for _ in 0..<14 {
+            let randomDigit = UInt64(arc4random_uniform(10))
+            traceSeed = traceSeed + String(randomDigit)
+        }
+        return "33" + traceSeed
+        
     }
     
     /**

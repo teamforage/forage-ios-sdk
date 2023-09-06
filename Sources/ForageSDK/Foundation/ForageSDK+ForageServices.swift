@@ -68,7 +68,8 @@ extension ForageSDK: ForageSDKService {
             panNumber: foragePanTextField.getActualPAN(),
             type: CardType.EBT.rawValue,
             customerID: customerID,
-            reusable: reusable ?? true
+            reusable: reusable ?? true,
+            traceId: ForageSDK.shared.traceId
         )
         service?.tokenizeEBTCard(request: request, completion: completion)
     }
@@ -100,7 +101,8 @@ extension ForageSDK: ForageSDKService {
                                 paymentReference: "",
                                 cardNumberToken: paymentMethod.card.token,
                                 merchantID: merchantID,
-                                xKey: ["vgsXKey": model.alias, "btXKey": model.bt_alias]
+                                xKey: ["vgsXKey": model.alias, "btXKey": model.bt_alias],
+                                traceId: ForageSDK.shared.traceId
                             )
                             self.service?.checkBalance(pinCollector: foragePinTextField.collector!, request: request, completion: completion)
                             
@@ -144,7 +146,8 @@ extension ForageSDK: ForageSDKService {
                                         paymentReference: paymentReference,
                                         cardNumberToken: paymentMethod.card.token,
                                         merchantID: merchantID,
-                                        xKey: ["vgsXKey": model.alias, "btXKey": model.bt_alias]
+                                        xKey: ["vgsXKey": model.alias, "btXKey": model.bt_alias],
+                                        traceId: ForageSDK.shared.traceId
                                     )
                                     self.service?.capturePayment(pinCollector: foragePinTextField.collector!, request: request, completion: completion)
                                 case .failure(let error):
