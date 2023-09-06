@@ -76,7 +76,7 @@ public class ForageSDK {
     /// - Parameter config: The configuration used to setup the SDK.
     ///
     /// - Use ``updateMerchantID(_:)`` to update the merchant ID after configuring.
-    /// - Use ``updateSessionToken(_:)`` to udpate the session token after token expiration.
+    /// - Use ``updateSessionToken(_:)`` to update the session token after it expires.
     public class func setup(_ config: Config) {
         ForageSDK.config = config
     }
