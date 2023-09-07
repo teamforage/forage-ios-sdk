@@ -10,6 +10,8 @@ import VGSCollectSDK
 
 class VGSTextFieldWrapper: UIView, VaultWrapper {
     
+    // MARK: - Properties
+    
     @IBInspectable public var isEmpty: Bool {
         get { return textField.state.isEmpty }
     }
@@ -22,22 +24,32 @@ class VGSTextFieldWrapper: UIView, VaultWrapper {
         get { return textField.state.inputLength == 4 }
     }
     
-    func clearText() {
-        textField.cleanText()
-    }
-    
-    var collector: VaultCollector
+    private let textField: VGSTextField
+    private var inputWidthConstraint: NSLayoutConstraint?
+    private var inputHeightConstraint: NSLayoutConstraint?
     
     var delegate: VaultWrapperDelegate?
-    
+    var collector: VaultCollector
     var placeholder: String?
-    
     var tfTintColor: UIColor?
     
-    var inputWidthConstraint: NSLayoutConstraint?
-    var inputHeightConstraint: NSLayoutConstraint?
+    var widthConstraint: CGFloat? {
+        didSet {
+            if let widthConstraint = widthConstraint {
+                inputWidthConstraint?.constant = widthConstraint
+            }
+        }
+    }
     
-    private let textField: VGSTextField
+    var heightConstraint: CGFloat? {
+        didSet {
+            if let heightConstraint = heightConstraint {
+                inputHeightConstraint?.constant = heightConstraint
+            }
+        }
+    }
+    
+    // MARK: - Initialization
     
     override init(frame: CGRect) {
         textField = VGSTextField()
@@ -57,6 +69,7 @@ class VGSTextFieldWrapper: UIView, VaultWrapper {
     
     private func commonInit() {
         addSubview(textField)
+        
         var rules = VGSValidationRuleSet()
         rules.add(rule: VGSValidationRulePattern(pattern: "^[0-9]+$", error: VGSValidationErrorType.pattern.rawValue))
         let configuration = VGSConfiguration(collector: (collector as! VGSCollectWrapper).vgsCollect, fieldName: "pin")
@@ -67,7 +80,6 @@ class VGSTextFieldWrapper: UIView, VaultWrapper {
         textField.configuration = configuration
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.textAlignment = .center
-
         textField.anchor(
             top: self.topAnchor,
             leading: self.leadingAnchor,
@@ -77,68 +89,59 @@ class VGSTextFieldWrapper: UIView, VaultWrapper {
             padding: UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         )
         
-        inputHeightConstraint = textField.heightAnchor.constraint(equalToConstant: inputHeight)
-        inputHeightConstraint?.isActive = true
-        
-        inputWidthConstraint = textField.widthAnchor.constraint(equalToConstant: inputWidth)
-        inputWidthConstraint?.isActive = true
+        setupWidthHeightConstraints()
         
         textField.isSecureTextEntry = true
-        
         textField.delegate = self
     }
+    
+    // MARK: - Private API
+    
+    private func setupWidthHeightConstraints() {
+        inputWidthConstraint = textField.widthAnchor.constraint(equalToConstant: 342)
+        inputWidthConstraint?.isActive = true
+        
+        inputHeightConstraint = textField.heightAnchor.constraint(equalToConstant: 36)
+        inputHeightConstraint?.isActive = true
+    }
+    
+    // MARK: - Public API
     
     func setPlaceholderText(_ text: String) {
         textField.placeholder = text
     }
     
-    var borderWidth: CGFloat {
-        get {
-            return textField.borderWidth
-        }
-        set {
-            textField.borderWidth = newValue
-        }
-    }
-    
-    var borderRadius: CGFloat {
-        get {
-            return textField.cornerRadius
-        }
-        set {
-            textField.cornerRadius = newValue
-        }
-    }
-    
-    var padding: UIEdgeInsets {
-        get {
-            return textField.padding
-        }
-        set {
-            textField.padding = newValue
-        }
-    }
-    
-    var borderColor: UIColor? {
-        get {
-            return textField.borderColor
-        }
-        set {
-            textField.borderColor = newValue
-        }
-    }
-    
-    override var backgroundColor: UIColor? {
-        get {
-            return textField.backgroundColor
-        }
-        set {
-            textField.backgroundColor = newValue
-        }
+    func clearText() {
+        textField.cleanText()
     }
     
     func setPlaceholder(_ text: String) {
         textField.placeholder = text
+    }
+    
+    var borderWidth: CGFloat {
+        get { return textField.borderWidth }
+        set { textField.borderWidth = newValue }
+    }
+    
+    var borderRadius: CGFloat {
+        get { return textField.cornerRadius }
+        set { textField.cornerRadius = newValue }
+    }
+    
+    var padding: UIEdgeInsets {
+        get { return textField.padding }
+        set { textField.padding = newValue }
+    }
+    
+    var borderColor: UIColor? {
+        get { return textField.borderColor }
+        set { textField.borderColor = newValue }
+    }
+    
+    override var backgroundColor: UIColor? {
+        get { return textField.backgroundColor }
+        set { textField.backgroundColor = newValue }
     }
 
     var textColor: UIColor? {
@@ -157,21 +160,17 @@ class VGSTextFieldWrapper: UIView, VaultWrapper {
     }
     
     var inputWidth: CGFloat {
-        get { return inputWidthConstraint?.constant ?? 0 }
-        set {
-            inputWidthConstraint?.constant = newValue
-            inputWidthConstraint?.isActive = true
-        }
+        get { return widthConstraint ?? 342 }
+        set { widthConstraint = newValue }
     }
- 
+
     var inputHeight: CGFloat {
-        get { return inputHeightConstraint?.constant ?? 0 }
-        set {
-            inputHeightConstraint?.constant = newValue
-            inputHeightConstraint?.isActive = true
-        }
+        get { return heightConstraint ?? 36 }
+        set { heightConstraint = newValue }
     }
 }
+
+// MARK: - VGSTextFieldDelegate
 
 extension VGSTextFieldWrapper: VGSTextFieldDelegate {
     @objc func vgsTextFieldDidChange(_ textField: VGSTextField) {
@@ -193,6 +192,8 @@ extension VGSTextFieldWrapper: VGSTextFieldDelegate {
         delegate?.firstResponderDidChange(self)
     }
 }
+
+// MARK: - UIResponder methods
 
 extension VGSTextFieldWrapper {
     /// Make `ForagePINTextField` focused.
