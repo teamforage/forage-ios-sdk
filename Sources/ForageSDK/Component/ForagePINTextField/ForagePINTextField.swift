@@ -37,7 +37,7 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
     internal var collector: VaultCollector?
     
     // TODO: This is a no-op for now
-    /// BorderWidth for the text field
+    /// CornerRadius for the text field
     public var cornerRadius: CGFloat = 0
     
     /// BorderWidth for the text field
