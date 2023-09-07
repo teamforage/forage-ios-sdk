@@ -146,6 +146,15 @@ final class ForagePINTextFieldTests: XCTestCase {
         
         let color = foragePinTextField.borderColor
         XCTAssertEqual(color, borderColor)
+        
+        // Test BasisTheoryTextFieldWrapper border color
+        let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
+        btTextFieldWrapper.borderColor = .blue
+        XCTAssertEqual(btTextFieldWrapper.borderColor, .blue)
+        
+        // Test BasisTheoryTextFieldWrapper border color = .none
+        btTextFieldWrapper.borderColor = .none
+        XCTAssertEqual(btTextFieldWrapper.borderColor, nil)
     }
     
     func test_borderWidth() {
@@ -154,6 +163,16 @@ final class ForagePINTextFieldTests: XCTestCase {
         
         let width = foragePinTextField.borderWidth
         XCTAssertEqual(width, borderWidth)
+        
+        // Test VGSTextFieldWrapper border width
+        let vgsTextFieldWrapper = VGSTextFieldWrapper()
+        vgsTextFieldWrapper.borderWidth = 10
+        XCTAssertEqual(vgsTextFieldWrapper.borderWidth, 10)
+        
+        // Test BasisTheoryTextFieldWrapper border width
+        let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
+        btTextFieldWrapper.borderWidth = 10
+        XCTAssertEqual(btTextFieldWrapper.borderWidth, 10)
     }
     
     func test_elementHeight() {
@@ -170,6 +189,14 @@ final class ForagePINTextFieldTests: XCTestCase {
 
         let width = foragePinTextField.inputWidth
         XCTAssertEqual(newWidth, width)
+        
+        // Test BasisTheoryTextFieldWrapper input width = default
+        let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
+        XCTAssertEqual(btTextFieldWrapper.inputWidth, 342)
+        
+        // Test BasisTheoryTextFieldWrapper input width = custom
+        btTextFieldWrapper.inputWidth = 100
+        XCTAssertEqual(btTextFieldWrapper.inputWidth, 100)
     }
 
     func test_inputHeight() {
@@ -178,6 +205,14 @@ final class ForagePINTextFieldTests: XCTestCase {
 
         let height = foragePinTextField.inputHeight
         XCTAssertEqual(newHeight, height)
+        
+        // Test BasisTheoryTextFieldWrapper input height = default
+        let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
+        XCTAssertEqual(btTextFieldWrapper.inputHeight, 36)
+        
+        // Test BasisTheoryTextFieldWrapper input height = custom
+        btTextFieldWrapper.inputHeight = 100
+        XCTAssertEqual(btTextFieldWrapper.inputHeight, 100)
     }
     
     func test_tintColor() {
@@ -194,6 +229,23 @@ final class ForagePINTextFieldTests: XCTestCase {
         
         let textAlignment = foragePinTextField.textAlignment
         XCTAssertEqual(alignment, textAlignment)
+        
+        // Test VGSTextFieldWrapper text alignment
+        let vgsTextFieldWrapper = VGSTextFieldWrapper()
+        vgsTextFieldWrapper.textAlignment = .center
+        XCTAssertEqual(vgsTextFieldWrapper.textAlignment, .center)
+        
+        // Test BasisTheoryTextFieldWrapper text alignment
+        let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
+        btTextFieldWrapper.textAlignment = .center
+        XCTAssertEqual(btTextFieldWrapper.textAlignment, .center)
+    }
+    
+    func test_padding() {
+        // Test VGSTextFieldWrapper padding
+        let vgsTextFieldWrapper = VGSTextFieldWrapper()
+        vgsTextFieldWrapper.padding = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+        XCTAssertEqual(vgsTextFieldWrapper.padding,  UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10))
     }
     
     func test_font() {
@@ -202,6 +254,12 @@ final class ForagePINTextFieldTests: XCTestCase {
         
         let font = foragePinTextField.font
         XCTAssertEqual(newFont, font)
+        
+        // Test BasisTheoryTextFieldWrapper font
+        let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
+        let btFont = UIFont.systemFont(ofSize: 20, weight: .bold)
+        btTextFieldWrapper.font = btFont
+        XCTAssertEqual(btTextFieldWrapper.font, btFont)
     }
     
     func test_textColor() {
@@ -210,6 +268,11 @@ final class ForagePINTextFieldTests: XCTestCase {
         
         let textColor = foragePinTextField.textColor
         XCTAssertEqual(color, textColor)
+        
+        // Test BasisTheoryTextFieldWrapper text color
+        let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
+        btTextFieldWrapper.textColor = .blue
+        XCTAssertEqual(btTextFieldWrapper.textColor, .blue)
     }
     
     func test_placeholder() {

@@ -115,10 +115,6 @@ class VGSTextFieldWrapper: UIView, VaultWrapper {
         textField.cleanText()
     }
     
-    func setPlaceholder(_ text: String) {
-        textField.placeholder = text
-    }
-    
     var borderWidth: CGFloat {
         get { return textField.borderWidth }
         set { textField.borderWidth = newValue }
