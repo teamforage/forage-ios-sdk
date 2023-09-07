@@ -72,71 +72,34 @@ class CapturePaymentView: UIView {
         return button
     }()
     
-    private let statusTypeLabel: UILabel = {
+    private let statusTypeLabel = makeLabel()
+    private let statusLabel = makeLabel()
+    private let paymentRefLabel = makeLabel()
+    private let fundingTypeLabel = makeLabel()
+    private let amountLabel = makeLabel()
+    private let errorLabel = makeLabel()
+    private let remainingBalanceLabel = makeLabel()
+
+    private static func makeLabel() -> UILabel {
         let label = UILabel()
         label.text = ""
         label.textColor = .black
         label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         label.numberOfLines = 0
-        label.accessibilityIdentifier = "lbl_status_type"
         label.isAccessibilityElement = true
         return label
-    }()
-    
-    private let statusLabel: UILabel = {
-        let label = UILabel()
-        label.text = ""
-        label.textColor = .black
-        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        label.numberOfLines = 0
-        label.accessibilityIdentifier = "lbl_status"
-        label.isAccessibilityElement = true
-        return label
-    }()
-    
-    private let paymentRefLabel: UILabel = {
-        let label = UILabel()
-        label.text = ""
-        label.textColor = .black
-        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        label.numberOfLines = 0
-        label.accessibilityIdentifier = "lbl_payment_ref"
-        label.isAccessibilityElement = true
-        return label
-    }()
-    
-    private let fundingTypeLabel: UILabel = {
-        let label = UILabel()
-        label.text = ""
-        label.textColor = .black
-        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        label.numberOfLines = 0
-        label.accessibilityIdentifier = "lbl_funding_type"
-        label.isAccessibilityElement = true
-        return label
-    }()
-    
-    private let amountLabel: UILabel = {
-        let label = UILabel()
-        label.text = ""
-        label.textColor = .black
-        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        label.numberOfLines = 0
-        label.accessibilityIdentifier = "lbl_amount"
-        label.isAccessibilityElement = true
-        return label
-    }()
-    
-    private let errorLabel: UILabel = {
-        let label = UILabel()
-        label.text = ""
-        label.textColor = .black
-        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        label.numberOfLines = 0
-        label.accessibilityIdentifier = "lbl_error"
-        label.isAccessibilityElement = true
-        return label
-    }()
+    }
+
+    /// Set accessibilityIdentifier for all of the elements, used by mobile-qa-tests service.
+    private func configureIdentifiers() {
+        statusTypeLabel.accessibilityIdentifier = "lbl_status_type"
+        statusLabel.accessibilityIdentifier = "lbl_status"
+        paymentRefLabel.accessibilityIdentifier = "lbl_payment_ref"
+        fundingTypeLabel.accessibilityIdentifier = "lbl_funding_type"
+        amountLabel.accessibilityIdentifier = "lbl_amount"
+        errorLabel.accessibilityIdentifier = "lbl_error"
+        remainingBalanceLabel.accessibilityIdentifier = "lbl_remaining_balance"
+    }
     
     // MARK: Fileprivate Methods
     
@@ -153,6 +116,8 @@ class CapturePaymentView: UIView {
     public func render() {
         snapTextField.delegate = self
         nonSnapTextField.delegate = self
+        
+        configureIdentifiers()
         setupView()
         setupConstraints()
     }
@@ -183,6 +148,16 @@ class CapturePaymentView: UIView {
                 self.amountLabel.text = "amount=\(response.amount)"
                 self.errorLabel.text = ""
             case .failure(let error):
+                if let forageError = error as? ForageError? {
+                    let firstError = forageError?.errors.first
+                    
+                    if (firstError?.code == "ebt_error_51") {
+                        let snapBalance = firstError?.details?.snapBalance ?? "N/A"
+                        let cashBalance = firstError?.details?.cashBalance ?? "N/A"
+                        
+                        self.remainingBalanceLabel.text = "firstForageError.details: remaining balances are SNAP: \(snapBalance), EBT Cash: \(cashBalance)"
+                    }
+                }
                 self.errorLabel.text = "\(error)"
                 self.paymentRefLabel.text = ""
                 self.fundingTypeLabel.text = ""
@@ -196,6 +171,7 @@ class CapturePaymentView: UIView {
     
     private func setupView() {
         self.addSubview(contentView)
+        
         contentView.addSubview(titleLabel)
         contentView.addSubview(snapTextField)
         contentView.addSubview(captureSnapPaymentButton)
@@ -207,6 +183,7 @@ class CapturePaymentView: UIView {
         contentView.addSubview(fundingTypeLabel)
         contentView.addSubview(amountLabel)
         contentView.addSubview(errorLabel)
+        contentView.addSubview(remainingBalanceLabel)
     }
     
     private func setupConstraints() {
@@ -317,6 +294,15 @@ class CapturePaymentView: UIView {
         
         errorLabel.anchor(
             top: amountLabel.safeAreaLayoutGuide.bottomAnchor,
+            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
+            bottom: nil,
+            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
+            centerXAnchor: contentView.centerXAnchor,
+            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
+        )
+        
+        remainingBalanceLabel.anchor(
+            top: errorLabel.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
             bottom: nil,
             trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
