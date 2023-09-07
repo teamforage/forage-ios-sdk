@@ -10,4 +10,6 @@ ignore:
   - "**/Vendor/DatadogLogs/*"
   - "DatadogPrivate-Objc/*"
   - "**/DatadogPrivate-Objc/*"
+  - "Sources/ForageSDK/Foundation/Telemetry/NoopLogger.swift"
+  - "**/Sources/ForageSDK/Foundation/Telemetry/NoopLogger.swift"
   - Tests/*
