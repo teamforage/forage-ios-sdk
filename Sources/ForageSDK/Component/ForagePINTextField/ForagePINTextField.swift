@@ -37,6 +37,12 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
     internal var collector: VaultCollector?
     
     /// BorderWidth for the text field
+    @IBInspectable public var cornerRadius: CGFloat {
+        get { return textField.layer.cornerRadius }
+        set { textField.layer.cornerRadius = newValue }
+    }
+    
+    /// BorderWidth for the text field
     @IBInspectable public var borderWidth: CGFloat {
         get { return textField.borderWidth }
         set { textField.borderWidth = newValue }
@@ -45,7 +51,7 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
     /// BorderColor for the text field
     @IBInspectable public var borderColor: UIColor? {
         get { return textField.borderColor }
-        set { textField.borderColor = newValue }
+        set { textField.borderColor = newValue ?? .black}
     }
     
     /// BorderRadius for the text field

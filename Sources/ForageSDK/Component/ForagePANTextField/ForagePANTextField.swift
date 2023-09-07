@@ -23,17 +23,27 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
     }
     
     /// BorderWidth for the text field
-    private var _borderWidth: CGFloat = 0.1
     @IBInspectable public var borderWidth: CGFloat {
-        get { return _borderWidth }
-        set { _borderWidth = newValue }
+        get { return enhancedTextField.borderWidth }
+        set { enhancedTextField.borderWidth = newValue }
     }
     
     /// BorderColor for the text field
-    private var _borderColor: UIColor? = .black
     @IBInspectable public var borderColor: UIColor? {
-        get { return _borderColor }
-        set { _borderColor = newValue }
+        get { return enhancedTextField.borderColor }
+        set { enhancedTextField.borderColor = newValue ?? .black }
+    }
+    
+    /// CornerRadius for the text field
+    @IBInspectable public var cornerRadius: CGFloat {
+        get { return enhancedTextField.layer.cornerRadius }
+        set { enhancedTextField.layer.cornerRadius = newValue }
+    }
+    
+    /// MasksToBounds for the text field
+    @IBInspectable public var masksToBounds: Bool {
+        get { return enhancedTextField.layer.masksToBounds }
+        set { enhancedTextField.layer.masksToBounds = newValue }
     }
     
     /// Padding for the text field
@@ -162,6 +172,9 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         tf.keyboardType = UIKeyboardType.numberPad
         tf.accessibilityIdentifier = "tf_forage_ebt_text_field"
         tf.isAccessibilityElement = true
+        tf.borderWidth = 0.1
+        tf.borderColor = .black
+        tf.layer.cornerRadius = 4
         return tf
     }()
     
