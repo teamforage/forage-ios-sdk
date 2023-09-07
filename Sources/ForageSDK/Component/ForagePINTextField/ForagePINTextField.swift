@@ -36,9 +36,17 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
     
     internal var collector: VaultCollector?
     
-    // TODO: This is a no-op for now
     /// CornerRadius for the text field
-    public var cornerRadius: CGFloat = 0
+    @IBInspectable public var cornerRadius: CGFloat {
+        get { return textField.cornerRadius }
+        set { textField.cornerRadius = newValue }
+    }
+    
+    /// MasksToBounds for the text field
+    @IBInspectable public var masksToBounds: Bool {
+        get { return textField.masksToBounds }
+        set { textField.masksToBounds = newValue }
+    }
     
     /// BorderWidth for the text field
     @IBInspectable public var borderWidth: CGFloat {
@@ -50,12 +58,6 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
     @IBInspectable public var borderColor: UIColor? {
         get { return textField.borderColor }
         set { textField.borderColor = newValue }
-    }
-    
-    /// BorderRadius for the text field
-    @IBInspectable public var borderRadius: CGFloat {
-        get { return textField.borderRadius }
-        set { textField.borderRadius = newValue }
     }
     
     /// Padding for the text field
@@ -153,18 +155,21 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
         
         var tf: VaultWrapper?
         
-        if (vaultType == VaultType.vgsVaultType) {
-            tf = VGSTextFieldWrapper()
-        } else if (vaultType == VaultType.btVaultType) {
-            tf = BasisTheoryTextFieldWrapper()
-        } else {
-            tf = VGSTextFieldWrapper()
-        }
+//        if (vaultType == VaultType.vgsVaultType) {
+//            tf = VGSTextFieldWrapper()
+//        } else if (vaultType == VaultType.btVaultType) {
+//            tf = BasisTheoryTextFieldWrapper()
+//        } else {
+//            tf = VGSTextFieldWrapper()
+//        }
+        
+        tf = BasisTheoryTextFieldWrapper()
         
         tf?.textColor = UIColor.black
         tf?.font = UIFont.systemFont(ofSize: 14, weight: .regular)
         tf?.borderWidth = 0.25
-        tf?.borderRadius = 4
+        tf?.cornerRadius = 4
+        tf?.masksToBounds = true
         tf?.borderColor = UIColor.lightGray
         tf?.backgroundColor = UIColor.white
         tf?.padding = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 0)
