@@ -44,7 +44,6 @@ class RequestBalanceView: UIView {
         tf.pinType = .balance
         tf.accessibilityIdentifier = "tf_pin_balance"
         tf.isAccessibilityElement = true
-        tf.cornerRadius = 10
         return tf
     }()
     

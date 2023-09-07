@@ -155,23 +155,21 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
         
         var tf: VaultWrapper?
         
-//        if (vaultType == VaultType.vgsVaultType) {
-//            tf = VGSTextFieldWrapper()
-//        } else if (vaultType == VaultType.btVaultType) {
-//            tf = BasisTheoryTextFieldWrapper()
-//        } else {
-//            tf = VGSTextFieldWrapper()
-//        }
-        
-        tf = BasisTheoryTextFieldWrapper()
+        if (vaultType == VaultType.vgsVaultType) {
+            tf = VGSTextFieldWrapper()
+        } else if (vaultType == VaultType.btVaultType) {
+            tf = BasisTheoryTextFieldWrapper()
+        } else {
+            tf = VGSTextFieldWrapper()
+        }
         
         tf?.textColor = UIColor.black
         tf?.font = UIFont.systemFont(ofSize: 14, weight: .regular)
-        tf?.borderWidth = 0.25
-        tf?.cornerRadius = 4
+        tf?.borderWidth = 0
+        tf?.cornerRadius = 16
         tf?.masksToBounds = true
-        tf?.borderColor = UIColor.lightGray
-        tf?.backgroundColor = UIColor.white
+        tf?.borderColor = .clear
+        tf?.backgroundColor = UIColor.lightGray
         tf?.padding = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 0)
         collector = tf?.collector
         
