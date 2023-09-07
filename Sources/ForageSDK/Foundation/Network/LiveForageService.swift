@@ -265,7 +265,15 @@ extension LiveForageService: Polling {
                         let statusCode = error.statusCode
                         let forageErrorCode = error.forageCode
                         let message = error.message
-                        let forageError = ForageError(errors: [ForageErrorObj(httpStatusCode: statusCode, code: forageErrorCode, message: message)])
+                        let details = error.details
+                        let forageError = ForageError(errors: [
+                            ForageErrorObj(
+                                httpStatusCode: statusCode,
+                                code: forageErrorCode,
+                                message: message,
+                                details: details
+                            )
+                        ])
                         
                         self.logger?.error(
                             "Received SQS Error message for \(self.getLogSuffix(request))",
