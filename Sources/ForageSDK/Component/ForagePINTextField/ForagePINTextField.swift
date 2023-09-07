@@ -169,7 +169,7 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
         tf?.cornerRadius = 16
         tf?.masksToBounds = true
         tf?.borderColor = .clear
-        tf?.backgroundColor = UIColor.lightGray
+        tf?.backgroundColor = .systemGray6
         tf?.padding = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 0)
         collector = tf?.collector
         
