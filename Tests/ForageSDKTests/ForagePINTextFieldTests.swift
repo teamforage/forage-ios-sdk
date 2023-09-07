@@ -128,20 +128,35 @@ final class ForagePINTextFieldTests: XCTestCase {
     }
     
     func test_CornerRadius() {
-        // Test ForagePINTextField border radius
+        // Test ForagePINTextField corner radius
         let foragePinTextField = ForagePINTextField()
-        foragePinTextField.borderRadius = 10
-        XCTAssertEqual(foragePinTextField.borderRadius, 10)
+        foragePinTextField.cornerRadius = 10
+        XCTAssertEqual(foragePinTextField.cornerRadius, 10)
         
-        // Test VGSTextFieldWrapper border radius
+        // Test VGSTextFieldWrapper corner radius
         let vgsTextFieldWrapper = VGSTextFieldWrapper()
-        vgsTextFieldWrapper.borderRadius = 10
-        XCTAssertEqual(vgsTextFieldWrapper.borderRadius, 10)
+        vgsTextFieldWrapper.cornerRadius = 10
+        XCTAssertEqual(vgsTextFieldWrapper.cornerRadius, 10)
         
-        // Test BasisTheoryTextFieldWrapper border radius
+        // Test BasisTheoryTextFieldWrapper corner radius
         let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
-        btTextFieldWrapper.borderRadius = 10
-        XCTAssertEqual(btTextFieldWrapper.borderRadius, 10)
+        btTextFieldWrapper.cornerRadius = 10
+        XCTAssertEqual(btTextFieldWrapper.cornerRadius, 10)
+    }
+    
+    func text_MasksToBounds() {
+        let foragePinTextField = ForagePINTextField()
+        let newVal = false
+        foragePinTextField.masksToBounds = newVal
+        XCTAssertEqual(foragePinTextField.masksToBounds, newVal)
+        
+        let vgsTextFieldWrapper = VGSTextFieldWrapper()
+        vgsTextFieldWrapper.masksToBounds = newVal
+        XCTAssertEqual(vgsTextFieldWrapper.masksToBounds, newVal)
+        
+        let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
+        btTextFieldWrapper.masksToBounds = newVal
+        XCTAssertEqual(btTextFieldWrapper.masksToBounds, newVal)
     }
 }
 
