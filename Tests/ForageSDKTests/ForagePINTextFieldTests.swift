@@ -132,19 +132,19 @@ final class ForagePINTextFieldTests: XCTestCase {
         let foragePinTextField = ForagePINTextField()
         foragePinTextField.cornerRadius = 10
         XCTAssertEqual(foragePinTextField.cornerRadius, 10)
-        
+
         // Test VGSTextFieldWrapper corner radius
         let vgsTextFieldWrapper = VGSTextFieldWrapper()
         vgsTextFieldWrapper.cornerRadius = 10
         XCTAssertEqual(vgsTextFieldWrapper.cornerRadius, 10)
-        
+
         // Test BasisTheoryTextFieldWrapper corner radius
         let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
         btTextFieldWrapper.cornerRadius = 10
         XCTAssertEqual(btTextFieldWrapper.cornerRadius, 10)
     }
     
-    func text_MasksToBounds() {
+    func test_MasksToBounds() {
         let foragePinTextField = ForagePINTextField()
         let newVal = false
         foragePinTextField.masksToBounds = newVal
