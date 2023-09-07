@@ -42,9 +42,6 @@ class CardNumberView: UIView {
         tf.placeholder = "PAN Number"
         tf.accessibilityIdentifier = "tf_ebt_number"
         tf.isAccessibilityElement = true
-        tf.borderWidth = 3
-        tf.borderColor = .orange
-        tf.cornerRadius = 4
         return tf
     }()
     
