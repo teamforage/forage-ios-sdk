@@ -25,14 +25,12 @@ internal enum ForageLogKind: String {
 internal struct ForageLoggerConfig {
     var forageEnvironment: Environment?
     var prefix: String?
-    var traceId: String?
     var context: ForageLogContext?
     
     init(environment: Environment? = ForageSDK.shared.environment, prefix: String? = nil, context: ForageLogContext? = nil, traceId: String? = nil) {
         self.forageEnvironment = environment
         self.context = context
         self.prefix = prefix
-        self.traceId = traceId
     }
 }
 
@@ -92,6 +90,8 @@ internal class DatadogLogger : ForageLogger {
     private var logger: LoggerProtocol? = nil
     private var config: ForageLoggerConfig? = nil
     
+    public var traceId: String = generateTraceId()
+    
     required internal init(_ config: ForageLoggerConfig? = ForageLoggerConfig()) {
         if isUnitTesting() {
             // avoid emitting logs when running unit tests
@@ -119,7 +119,9 @@ internal class DatadogLogger : ForageLogger {
             in: datadogInstance
         )
         
-        self.logger?.addAttribute(forKey: "trace_id", value: self.config?.traceId)
+//        self.traceId = DatadogLogger.generateTraceId()
+        // TODO: This field should be owned by the logger and then should be added to ForageSDK later so that it can be shared from there.
+        self.addTraceId(traceId)
         
         _ = self.addContext(config?.context ?? ForageLogContext())
     }
@@ -142,6 +144,10 @@ internal class DatadogLogger : ForageLogger {
     
     internal func critical(_ message: String, error: Error? = nil, attributes: [String: Encodable]? = nil) {
         self.logger?.critical(self.getMessageWithPrefix(message), error: error, attributes: attributes)
+    }
+    
+    internal func addTraceId(_ traceId: String) {
+        self.logger?.addAttribute(forKey: "trace_id", value: traceId)
     }
     
     @discardableResult
@@ -204,5 +210,14 @@ internal class DatadogLogger : ForageLogger {
             return prefix.isEmpty ? message : "[\(prefix)] \(message)"
         }
         return message
+    }
+    
+    private static func generateTraceId() -> String {
+        var trace = ""
+        for _ in 0..<14 {
+            let randomDigit = UInt64(arc4random_uniform(10))
+            trace = trace + String(randomDigit)
+        }
+        return "33" + trace
     }
 }

@@ -60,7 +60,7 @@ extension ForageAPI: ServiceProtocol {
                 "customer_id": model.customerID
             ]
 
-            headers.addHeaders(other: [
+            headers.addHeaders([
                 "Merchant-Account": model.merchantID,
                 "authorization": "Bearer \(model.authorization)",
                 "API-VERSION": "2023-05-15",
@@ -73,7 +73,7 @@ extension ForageAPI: ServiceProtocol {
             )
 
         case .xKey(sessionToken: let sessionToken, merchantID: let merchantID):
-            headers.addHeaders(other: [
+            headers.addHeaders([
                 "authorization": "Bearer \(sessionToken)",
                 "accept": "application/json",
                 "Merchant-Account": merchantID,
@@ -86,7 +86,7 @@ extension ForageAPI: ServiceProtocol {
             )
 
         case .message(_, sessionToken: let sessionToken, merchantID: let merchantID):
-            headers.addHeaders(other: [
+            headers.addHeaders([
                 "Merchant-Account": merchantID,
                 "authorization": "Bearer \(sessionToken)",
                 "API-VERSION": "2023-02-01",
@@ -99,7 +99,7 @@ extension ForageAPI: ServiceProtocol {
             )
 
         case .getPaymentMethod(request: let request):
-            headers.addHeaders(other: [
+            headers.addHeaders([
                 "Merchant-Account": request.merchantID,
                 "authorization": "Bearer \(request.sessionToken)",
                 "API-VERSION": "2023-05-15",
@@ -112,7 +112,7 @@ extension ForageAPI: ServiceProtocol {
             )
 
         case .getPayment(request: let request):
-            headers.addHeaders(other: [
+            headers.addHeaders([
                 "Merchant-Account": request.merchantID,
                 "authorization": "Bearer \(request.sessionToken)",
                 "API-VERSION": "2023-05-15",

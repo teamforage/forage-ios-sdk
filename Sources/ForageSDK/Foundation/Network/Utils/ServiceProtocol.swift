@@ -8,7 +8,6 @@
 import Foundation
 
 public typealias Parameters = [String: Any]
-//public typealias HTTPHeaders = [String: String]
 
 internal enum HttpMethod: String {
     case get = "GET"
@@ -40,7 +39,7 @@ internal class HTTPHeaders {
         _headers = headers
     }
     
-    func addHeaders(other: [String: String]) {
+    func addHeaders(_ other: [String: String]) {
         for (key, value) in other {
             _headers[key] = value
         }

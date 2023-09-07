@@ -54,13 +54,12 @@ public class ForageSDK {
     }
     
     private static func generateTraceId() -> String {
-        var traceSeed = ""
+        var trace = ""
         for _ in 0..<14 {
             let randomDigit = UInt64(arc4random_uniform(10))
-            traceSeed = traceSeed + String(randomDigit)
+            trace = trace + String(randomDigit)
         }
-        return "33" + traceSeed
-        
+        return "33" + trace
     }
     
     /**
