@@ -12,10 +12,11 @@ final class ForagePANTextFieldTests: XCTestCase {
     var foragePANTextField: ForagePANTextField!
     
     override func setUp() {
-        ForageSDK.setup(ForageSDK.Config(environment: .sandbox))
-        ForageSDK.shared.service = nil
-        ForageSDK.shared.panNumber = ""
-        foragePANTextField = ForagePANTextField()
+        ForageSDK.setup(ForageSDK.Config(
+            merchantID: "merchantID123",
+            sessionToken: "authToken123"
+        ))
+        foragePANTextField = ForagePANTextField()       
     }
     
     override func tearDown() {
@@ -29,6 +30,32 @@ final class ForagePANTextFieldTests: XCTestCase {
         XCTAssertTrue(foragePANTextField.isEmpty)
         XCTAssertTrue(foragePANTextField.isValid)
         XCTAssertFalse(foragePANTextField.isComplete)
+    }
+    
+    func test_multiplePanElements_shouldHaveTheirOwnStates() {
+        let validTextField = ForagePANTextField()
+        let invalidTextField = ForagePANTextField()
+        
+        validTextField.enhancedTextField.text = "5077031234567890123"
+        invalidTextField.enhancedTextField.text = "1234123412341234"
+        
+        validTextField.enhancedTextField.textFieldDidChange()
+        invalidTextField.enhancedTextField.textFieldDidChange()
+
+        XCTAssertEqual(validTextField.enhancedTextField.actualPAN, "5077031234567890123")
+        XCTAssertEqual(invalidTextField.enhancedTextField.actualPAN, "1234123412341234")
+
+        XCTAssertEqual(validTextField.enhancedTextField.text, "507703 1234 5678 901 23")
+        XCTAssertEqual(invalidTextField.enhancedTextField.text, "1234 1234 1234 1234")
+
+        XCTAssertTrue(validTextField.isValid)
+        XCTAssertFalse(invalidTextField.isValid)
+        
+        XCTAssertTrue(validTextField.isComplete)
+        XCTAssertFalse(invalidTextField.isComplete)
+        
+        XCTAssertFalse(validTextField.isEmpty)
+        XCTAssertFalse(invalidTextField.isEmpty)
     }
     
     func test_textField_enterNumericString_shouldReturnTrue() {

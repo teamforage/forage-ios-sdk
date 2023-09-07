@@ -20,7 +20,7 @@ class RequestBalanceViewController: BaseViewCodeViewController<RequestBalanceVie
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        self.customView.pinNumberTextField.becomeFirstResponder()
+        self.customView.foragePinTextField.becomeFirstResponder()
     }
 }
 

@@ -221,7 +221,7 @@ class CollectorFactory {
         return VGSCollect(id: vaultID(ForageSDK.shared.environment).rawValue, environment: environmentVGS(ForageSDK.shared.environment))
     }
     
-    private static func vaultID(_ environment: EnvironmentTarget) -> VaultId {
+    private static func vaultID(_ environment: Environment) -> VaultId {
         switch environment {
         case .sandbox: return .sandbox
         case .cert: return .cert
@@ -231,7 +231,7 @@ class CollectorFactory {
         }
     }
     
-    private static func environmentVGS(_ environment: EnvironmentTarget) -> VGSCollectSDK.Environment {
+    private static func environmentVGS(_ environment: Environment) -> VGSCollectSDK.Environment {
         switch environment {
         case .cert, .sandbox, .staging, .dev: return .sandbox
         case .prod: return .live
@@ -249,7 +249,7 @@ class CollectorFactory {
         case dev = "key_AZfcBuKUsV38PEeYu6ZV8x"
     }
     
-    private static func publicKey(_ environment: EnvironmentTarget) -> PublicKey {
+    private static func publicKey(_ environment: Environment) -> PublicKey {
         switch environment {
         case .sandbox: return .sandbox
         case .cert: return .cert
@@ -259,7 +259,7 @@ class CollectorFactory {
         }
     }
     
-    private static func proxyKey(_ environment: EnvironmentTarget) -> ProxyKey {
+    private static func proxyKey(_ environment: Environment) -> ProxyKey {
         switch environment {
         case .sandbox: return .sandbox
         case .cert: return .cert
@@ -280,14 +280,14 @@ class CollectorFactory {
         case dev = "N31FZgKpYZpo3oQ6XiM6M6"
     }
     
-    static func createVGS(environment: EnvironmentTarget) -> VGSCollectWrapper {
+    static func createVGS(environment: Environment) -> VGSCollectWrapper {
         let id = vaultID(environment).rawValue
         let environmentVGS = environmentVGS(environment)
         let config = VGSCollectConfig(id: id, environment: environmentVGS)
         return VGSCollectWrapper(config: config)
     }
     
-    static func createBasisTheory(environment: EnvironmentTarget, textElement: TextElementUITextField) -> BasisTheoryWrapper {
+    static func createBasisTheory(environment: Environment, textElement: TextElementUITextField) -> BasisTheoryWrapper {
         let publicKey = publicKey(environment).rawValue
         let proxyKey = proxyKey(environment).rawValue
         let config = BasisTheoryConfig(publicKey: publicKey, proxyKey: proxyKey)

@@ -38,7 +38,7 @@ class RequestBalanceView: UIView {
         return label
     }()
     
-    public let pinNumberTextField: ForagePINTextField = {
+    public let foragePinTextField: ForagePINTextField = {
         let tf = ForagePINTextField()
         tf.placeholder = "PIN Field"
         tf.pinType = .balance
@@ -156,10 +156,8 @@ class RequestBalanceView: UIView {
     
     @objc fileprivate func getBalanceInfo(_ gesture: UIGestureRecognizer) {
         ForageSDK.shared.checkBalance(
-            bearerToken: ClientSharedData.shared.bearerToken,
-            merchantAccount: ClientSharedData.shared.merchantID,
-            paymentMethodReference: ClientSharedData.shared.paymentMethodReference,
-            foragePinTextEdit: pinNumberTextField) { result in
+            foragePinTextField: foragePinTextField,
+            paymentMethodReference: ClientSharedData.shared.paymentMethodReference) { result in
                 self.printPINResult(result: result)
             }
     }
@@ -171,7 +169,7 @@ class RequestBalanceView: UIView {
     // MARK: Public Methods
     
     public func render() {
-        pinNumberTextField.delegate = self
+        foragePinTextField.delegate = self
         setupView()
         setupConstraints()
     }
@@ -201,7 +199,7 @@ class RequestBalanceView: UIView {
     private func setupView() {
         self.addSubview(contentView)
         contentView.addSubview(titleLabel)
-        contentView.addSubview(pinNumberTextField)
+        contentView.addSubview(foragePinTextField)
         contentView.addSubview(isFirstResponderLabel)
         contentView.addSubview(isEmptyLabel)
         contentView.addSubview(isValidLabel)
@@ -236,7 +234,7 @@ class RequestBalanceView: UIView {
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
         )
         
-        pinNumberTextField.anchor(
+        foragePinTextField.anchor(
             top: titleLabel.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
             bottom: nil,
@@ -246,7 +244,7 @@ class RequestBalanceView: UIView {
         )
         
         isFirstResponderLabel.anchor(
-            top: pinNumberTextField.safeAreaLayoutGuide.bottomAnchor,
+            top: foragePinTextField.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
             bottom: nil,
             trailing: contentView.safeAreaLayoutGuide.trailingAnchor,

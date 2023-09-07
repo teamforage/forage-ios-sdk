@@ -22,11 +22,11 @@ internal enum ForageLogKind: String {
 }
 
 internal struct ForageLoggerConfig {
-    var forageEnvironment: EnvironmentTarget?
+    var forageEnvironment: Environment?
     var prefix: String?
     var context: ForageLogContext?
     
-    init(environment: EnvironmentTarget? = ForageSDK.shared.environment, prefix: String? = nil, context: ForageLogContext? = nil) {
+    init(environment: Environment? = ForageSDK.shared.environment, prefix: String? = nil, context: ForageLogContext? = nil) {
         self.forageEnvironment = environment
         self.context = context
         self.prefix = prefix
@@ -170,7 +170,7 @@ internal class DatadogLogger : ForageLogger {
     
     /// Initializes and returns a Datadog instance for the given environment. If an instance with the specified name already exists,
     /// it returns the existing instance.
-    private func initDatadog(_ environment: EnvironmentTarget) -> DatadogCoreProtocol {
+    private func initDatadog(_ environment: Environment) -> DatadogCoreProtocol {
         let instanceName = DatadogLogger.DD_SDK_INSTANCE_NAME
         
         if Datadog.isInitialized(instanceName: instanceName) {

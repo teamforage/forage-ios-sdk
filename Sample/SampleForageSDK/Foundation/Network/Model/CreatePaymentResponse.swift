@@ -11,7 +11,7 @@ struct CreatePaymentResponse: Codable {
     let fundingType: FundingType
     let paymentMethodIdentifier: String
     let paymentIdentifier: String
-    let merchantAccount: String
+    let merchantID: String
     let amount: String
     let description: String
     
@@ -19,7 +19,7 @@ struct CreatePaymentResponse: Codable {
         case fundingType = "funding_type"
         case paymentMethodIdentifier = "payment_method"
         case paymentIdentifier = "ref"
-        case merchantAccount = "merchant"
+        case merchantID = "merchant"
         case amount
         case description
     }

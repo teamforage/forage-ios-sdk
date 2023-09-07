@@ -12,7 +12,7 @@ class ViewController: UIViewController {
     
     // MARK: IBOutlets
     
-    @IBOutlet private weak var bearerTokenTextField: UITextField!
+    @IBOutlet private weak var sessionTokenTextField: UITextField!
     @IBOutlet private weak var merchantIdTextField: UITextField!
     
     // MARK: Lifecycle Methods
@@ -26,11 +26,18 @@ class ViewController: UIViewController {
     @IBAction func didTapOnStartSDK(_ sender: Any) {
         guard
             let merchantID = merchantIdTextField.text,
-            let bearerToken = bearerTokenTextField.text
+            let sessionToken = sessionTokenTextField.text
         else { return }
         
         ClientSharedData.shared.merchantID = merchantID
-        ClientSharedData.shared.bearerToken = bearerToken
+        ClientSharedData.shared.sessionToken = sessionToken
+        
+        ForageSDK.setup(
+            ForageSDK.Config(
+                merchantID: merchantID,
+                sessionToken: sessionToken
+            )
+        )
         
         let cardNumberViewController = CardNumberViewController()
         navigationController?.pushViewController(cardNumberViewController, animated: true)

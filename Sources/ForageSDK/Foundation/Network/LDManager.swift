@@ -62,11 +62,10 @@ public class LDManager {
             return internalVaultType
         }
     }
-
-    private init() {
-    }
-
-    internal func initialize(_ environment: EnvironmentTarget, logger: ForageLogger? = nil) {
+        
+    private init() {}
+    
+    internal func initialize(_ environment: Environment, logger: ForageLogger? = nil) {
         self.logger = logger
         let ldConfig = LDConfig(mobileKey: getLDMobileKey(environment).rawValue)
         var ldContextBuilder = LDContextBuilder(key: ContextKey.iosSdk.rawValue)
@@ -109,7 +108,7 @@ public class LDManager {
             .notice("Using \(vaultType.rawValue)", attributes: nil)
     }
     
-    private func getLDMobileKey(_ environment: EnvironmentTarget) -> LDMobileKey {
+    private func getLDMobileKey(_ environment: Environment) -> LDMobileKey {
         switch environment {
         case .sandbox: return .sandbox
         case .cert: return .cert

@@ -17,7 +17,7 @@ public enum ForageOrderStatus: String, Codable {
 
 public struct ForageCaptureModel: Codable {
     public let paymentIdentifier: String
-    public let merchantAccount: String
+    public let merchantID: String
     public let fundingType: String
     public let amount: String
     public let description: String
@@ -31,7 +31,7 @@ public struct ForageCaptureModel: Codable {
     
     private enum CodingKeys : String, CodingKey {
         case paymentIdentifier = "ref"
-        case merchantAccount = "merchant"
+        case merchantID = "merchant"
         case fundingType = "funding_type"
         case amount
         case description
