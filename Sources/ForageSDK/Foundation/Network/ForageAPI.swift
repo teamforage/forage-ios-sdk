@@ -12,10 +12,10 @@ import Foundation
  */
 enum ForageAPI {
     case tokenizeNumber(request: ForagePANRequestModel)
-    case xKey(sessionToken: String, merchantID: String, traceId: String)
-    case message(request: MessageResponseModel, sessionToken: String, merchantID: String, traceId: String)
-    case getPaymentMethod(sessionToken: String, merchantID: String, paymentMethodRef: String, traceId: String)
-    case getPayment(sessionToken: String, merchantID: String, paymentRef: String, traceId: String)
+    case xKey(sessionToken: String, merchantID: String)
+    case message(request: MessageResponseModel, sessionToken: String, merchantID: String)
+    case getPaymentMethod(sessionToken: String, merchantID: String, paymentMethodRef: String)
+    case getPayment(sessionToken: String, merchantID: String, paymentRef: String)
 }
 
 extension ForageAPI: ServiceProtocol {
@@ -27,7 +27,7 @@ extension ForageAPI: ServiceProtocol {
         switch self {
         case .tokenizeNumber: return "/api/payment_methods/"
         case .xKey: return "/iso_server/encryption_alias/"
-        case .message(request: let response, _, _, _): return "/api/message/\(response.contentId)/"
+        case .message(request: let response, _, _): return "/api/message/\(response.contentId)/"
         case .getPaymentMethod(request: let request): return "/api/payment_methods/\(request.paymentMethodRef)/"
         case .getPayment(request: let request): return "/api/payments/\(request.paymentRef)/"
         }
@@ -41,6 +41,11 @@ extension ForageAPI: ServiceProtocol {
     }
 
     var task: HttpTask {
+        let headers = HTTPHeaders(headers: [
+            "content-type": "application/json",
+            "accept": "application/json",
+            "x-datadog-trace-id": ForageSDK.shared.traceId
+        ])
         switch self {
         case .tokenizeNumber(
             request: let model
@@ -55,76 +60,68 @@ extension ForageAPI: ServiceProtocol {
                 "customer_id": model.customerID
             ]
 
-            let httpHeaders: HTTPHeaders = [
+            headers.addHeaders(other: [
                 "Merchant-Account": model.merchantID,
                 "authorization": "Bearer \(model.authorization)",
-                "content-type": "application/json",
-                "accept": "application/json",
                 "API-VERSION": "2023-05-15",
-                "x-datadog-trace-id": model.traceId ?? ""
-            ]
+            ])
 
             return .requestParametersAndHeaders(
                 bodyParameters: bodyParameters,
                 urlParameters: nil,
-                additionalHeaders: httpHeaders
+                additionalHeaders: headers
             )
 
-        case .xKey(sessionToken: let sessionToken, merchantID: let merchantID, traceId: let traceId):
-            let httpHeaders: HTTPHeaders = [
+        case .xKey(sessionToken: let sessionToken, merchantID: let merchantID):
+            headers.addHeaders(other: [
                 "authorization": "Bearer \(sessionToken)",
                 "accept": "application/json",
                 "Merchant-Account": merchantID,
-                "x-datadog-trace-id": traceId
-            ]
+            ])
 
             return .requestParametersAndHeaders(
                 bodyParameters: nil,
                 urlParameters: nil,
-                additionalHeaders: httpHeaders
+                additionalHeaders: headers
             )
 
-        case .message(_, sessionToken: let sessionToken, merchantID: let merchantID, traceId: let traceId):
-            let httpHeaders: HTTPHeaders = [
+        case .message(_, sessionToken: let sessionToken, merchantID: let merchantID):
+            headers.addHeaders(other: [
                 "Merchant-Account": merchantID,
                 "authorization": "Bearer \(sessionToken)",
-                "accept": "application/json",
                 "API-VERSION": "2023-02-01",
-                "x-datadog-trace-id": traceId
-            ]
+            ])
 
             return .requestParametersAndHeaders(
                 bodyParameters: nil,
                 urlParameters: nil,
-                additionalHeaders: httpHeaders
+                additionalHeaders: headers
             )
 
         case .getPaymentMethod(request: let request):
-            let httpHeaders: HTTPHeaders = [
+            headers.addHeaders(other: [
                 "Merchant-Account": request.merchantID,
                 "authorization": "Bearer \(request.sessionToken)",
                 "API-VERSION": "2023-05-15",
-                "x-datadog-trace-id": request.traceId
-            ]
+            ])
 
             return .requestParametersAndHeaders(
                 bodyParameters: nil,
                 urlParameters: nil,
-                additionalHeaders: httpHeaders
+                additionalHeaders: headers
             )
 
         case .getPayment(request: let request):
-            let httpHeaders: HTTPHeaders = [
+            headers.addHeaders(other: [
                 "Merchant-Account": request.merchantID,
                 "authorization": "Bearer \(request.sessionToken)",
                 "API-VERSION": "2023-05-15",
-                "x-datadog-trace-id": request.traceId
-            ]
+            ])
 
             return .requestParametersAndHeaders(
                 bodyParameters: nil,
                 urlParameters: nil,
-                additionalHeaders: httpHeaders
+                additionalHeaders: headers
             )
         }
     }
