@@ -91,7 +91,16 @@ class VGSTextFieldWrapper: UIView, VaultWrapper {
         }
     }
     
-    var borderRadius: CGFloat {
+    var masksToBounds: Bool {
+        get {
+            return textField.layer.masksToBounds
+        }
+        set {
+            textField.layer.masksToBounds = newValue
+        }
+    }
+    
+    var cornerRadius: CGFloat {
         get {
             return textField.cornerRadius
         }

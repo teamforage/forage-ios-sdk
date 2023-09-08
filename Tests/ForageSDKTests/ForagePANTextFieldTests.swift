@@ -81,4 +81,28 @@ final class ForagePANTextFieldTests: XCTestCase {
         
         XCTAssertFalse(changesAllowed)
     }
+    
+    func test_borderWidth() {
+        let newBorderWidth = CGFloat(3)
+        foragePANTextField.borderWidth = newBorderWidth
+        XCTAssertEqual(newBorderWidth, foragePANTextField.borderWidth)
+    }
+    
+    func test_borderColor() {
+        let newBorderColor = UIColor.orange
+        foragePANTextField.borderColor = newBorderColor
+        XCTAssertEqual(newBorderColor, foragePANTextField.borderColor)
+    }
+    
+    func test_cornerRadius() {
+        let newCornerRadius = CGFloat(4)
+        foragePANTextField.cornerRadius = newCornerRadius
+        XCTAssertEqual(newCornerRadius, foragePANTextField.cornerRadius)
+    }
+    
+    func test_masksToBounds() {
+        let masksToBounds = false
+        foragePANTextField.masksToBounds = masksToBounds
+        XCTAssertEqual(masksToBounds, foragePANTextField.masksToBounds)
+    }
 }
