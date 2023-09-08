@@ -81,7 +81,7 @@ internal protocol ForageLogger {
     
     /// The ForageSDK object needs a handler to the TraceId in order to pass it along to each endpoint call.
     /// - Returns: The traceID that was generated at the beginning of the app's lifecycle.
-    func getTraceId() -> String
+    func getTraceID() -> String
 }
 
 /// Read this [document](https://docs.google.com/document/d/1BU609qv7qSDN-tdNaJP-sAyrgeM6REe9tvcMk5CxN3c/edit#bookmark=id.w44b8kk07o7o) for to learn more about how DatadogLogger works
@@ -91,7 +91,7 @@ internal class DatadogLogger : ForageLogger {
     private static let DD_SDK_INSTANCE_NAME: String = "forage"
     
     // DO NOT UPDATE! Generate 1 TraceID per living session of the app
-    internal static var traceId: String = generateTraceId()
+    internal static let traceId: String = generateTraceID()
 
     private var logger: LoggerProtocol? = nil
     private var config: ForageLoggerConfig? = nil
@@ -182,7 +182,7 @@ internal class DatadogLogger : ForageLogger {
         return self
     }
     
-    internal func getTraceId() -> String {
+    internal func getTraceID() -> String {
         return DatadogLogger.traceId
     }
     
@@ -216,7 +216,7 @@ internal class DatadogLogger : ForageLogger {
         return message
     }
     
-    private static func generateTraceId() -> String {
+    private static func generateTraceID() -> String {
         var trace = ""
         for _ in 0..<14 {
             let randomDigit = UInt64(arc4random_uniform(10))

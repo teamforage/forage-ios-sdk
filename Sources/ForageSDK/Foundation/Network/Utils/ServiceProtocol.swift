@@ -7,7 +7,7 @@
 
 import Foundation
 
-public typealias Parameters = [String: Any]
+internal typealias Parameters = [String: Any]
 
 internal enum HttpMethod: String {
     case get = "GET"

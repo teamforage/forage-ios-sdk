@@ -42,7 +42,7 @@ public class ForageSDK {
             )
         )
         self.logger = logger
-        self.traceId = logger.getTraceId()
+        self.traceId = logger.getTraceID()
         LDManager.shared.initialize(self.environment, logger: logger)
         
         VGSCollectLogger.shared.disableAllLoggers()
