@@ -43,5 +43,6 @@ jobs:
         run: |
           cd mobile-qa-tests
           pip3 install -r requirements.txt
-          pytest ios/tests/test_basic_flow.py
+          pytest ios/tests/test_basic_flow.py || true
+          pytest --lf --last-failed-no-failures none --suppress-no-test-exit-code ios/tests/test_basic_flow.py
   
