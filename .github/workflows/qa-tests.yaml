@@ -3,7 +3,8 @@ name: QA Tests
 on:
   push:
     branches:
-      - owen/pop-85-be-able-to-build-sample-ios-app-to-upload-to-browserstack
+      - main
+  pull_request:
 
 env:
   DEVELOPER_DIR: '/Applications/Xcode_14.3.1.app/Contents/Developer'
@@ -36,7 +37,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: teamforage/mobile-qa-tests
-          ref: owen/set-ios-to-run-remote
+          ref: main
           ssh-key: ${{ secrets.MOBILE_QA_DEPLOY_KEY }}
           path: 'mobile-qa-tests/'
       - name: Run Integration Tests
