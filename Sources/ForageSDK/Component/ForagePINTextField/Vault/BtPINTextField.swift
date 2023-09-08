@@ -131,12 +131,21 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
         }
     }
     
-    var borderRadius: CGFloat {
+    var cornerRadius: CGFloat {
         get {
             return textField.layer.cornerRadius
         }
         set {
             textField.layer.cornerRadius = newValue
+        }
+    }
+    
+    var masksToBounds: Bool {
+        get {
+            return textField.layer.masksToBounds
+        }
+        set {
+            textField.layer.masksToBounds = newValue
         }
     }
     
