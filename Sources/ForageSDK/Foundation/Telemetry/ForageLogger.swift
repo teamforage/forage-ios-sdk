@@ -14,7 +14,6 @@ internal struct ForageLogContext {
     var paymentMethodRef: String? = nil
     var vaultType: VaultType? = nil
     var sdkVersion: String = ForageSDK.version
-    var traceId: String? = nil
 }
 
 internal enum ForageLogKind: String {
@@ -27,7 +26,7 @@ internal struct ForageLoggerConfig {
     var prefix: String?
     var context: ForageLogContext?
     
-    init(environment: Environment? = ForageSDK.shared.environment, prefix: String? = nil, context: ForageLogContext? = nil, traceId: String? = nil) {
+    init(environment: Environment? = ForageSDK.shared.environment, prefix: String? = nil, context: ForageLogContext? = nil) {
         self.forageEnvironment = environment
         self.context = context
         self.prefix = prefix
@@ -79,6 +78,10 @@ internal protocol ForageLogger {
     /// - Parameter error: An optional error object associated with the critical log.
     /// - Parameter attributes: An optional dictionary of key-value pairs providing additional context for the log.
     func critical(_ message: String, error: Error?, attributes: [String: Encodable]?)
+    
+    /// The ForageSDK object needs a handler to the TraceId in order to pass it along to each endpoint call.
+    /// - Returns: The traceID that was generated at the beginning of the app's lifecycle.
+    func getTraceId() -> String
 }
 
 /// Read this [document](https://docs.google.com/document/d/1BU609qv7qSDN-tdNaJP-sAyrgeM6REe9tvcMk5CxN3c/edit#bookmark=id.w44b8kk07o7o) for to learn more about how DatadogLogger works
@@ -86,12 +89,13 @@ internal class DatadogLogger : ForageLogger {
     private static let DD_CLIENT_TOKEN: String = "pub1e4572ba0f5e53df108c333d5ec66c02"
     private static let DD_SERVICE_NAME: String = "ios-sdk"
     private static let DD_SDK_INSTANCE_NAME: String = "forage"
+    
+    // DO NOT UPDATE! Generate 1 TraceID per living session of the app
+    internal static var traceId: String = generateTraceId()
 
     private var logger: LoggerProtocol? = nil
     private var config: ForageLoggerConfig? = nil
-    
-    public var traceId: String = generateTraceId()
-    
+
     required internal init(_ config: ForageLoggerConfig? = ForageLoggerConfig()) {
         if isUnitTesting() {
             // avoid emitting logs when running unit tests
@@ -119,10 +123,10 @@ internal class DatadogLogger : ForageLogger {
             in: datadogInstance
         )
         
-//        self.traceId = DatadogLogger.generateTraceId()
-        // TODO: This field should be owned by the logger and then should be added to ForageSDK later so that it can be shared from there.
-        self.addTraceId(traceId)
-        
+        // Do this explicitly in the constructor so that we confirm each logger that is created
+        // has the trace_id field.
+        self.logger?.addAttribute(forKey: "trace_id", value: DatadogLogger.traceId)
+
         _ = self.addContext(config?.context ?? ForageLogContext())
     }
     
@@ -180,6 +184,10 @@ internal class DatadogLogger : ForageLogger {
     internal func setPrefix(_ newPrefix: String) -> ForageLogger {
         self.config?.prefix = newPrefix
         return self
+    }
+    
+    internal func getTraceId() -> String {
+        return DatadogLogger.traceId
     }
     
     /// Initializes and returns a Datadog instance for the given environment. If an instance with the specified name already exists,

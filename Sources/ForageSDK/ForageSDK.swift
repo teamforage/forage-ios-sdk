@@ -2,8 +2,6 @@
 //  ForageSDK.swift
 //  ForageSDK
 //
-//  Created by Symphony on 18/10/22.
-//
 
 import Foundation
 import VGSCollectSDK
@@ -34,32 +32,22 @@ public class ForageSDK {
         self.environment = Environment(sessionToken: config.sessionToken)
         self.merchantID = config.merchantID
         self.sessionToken = config.sessionToken
-        self.traceId = ForageSDK.generateTraceId()
         // ForageSDK.shared.environment is not set
         // until the end of this initialization
         // so we have to provide the environment from the config
         let logger = DatadogLogger(
             ForageLoggerConfig(
                 environment: self.environment,
-                prefix: "",
-                traceId: traceId
+                prefix: ""
             )
         )
         self.logger = logger
+        self.traceId = logger.getTraceId()
         LDManager.shared.initialize(self.environment, logger: logger)
         
         VGSCollectLogger.shared.disableAllLoggers()
         let provider = Provider(logger: logger)
         self.service = LiveForageService(provider: provider, logger: logger)
-    }
-    
-    private static func generateTraceId() -> String {
-        var trace = ""
-        for _ in 0..<14 {
-            let randomDigit = UInt64(arc4random_uniform(10))
-            trace = trace + String(randomDigit)
-        }
-        return "33" + trace
     }
     
     /**

@@ -2,8 +2,6 @@
 //  ForagePINTextField.swift
 //  ForageSDK
 //
-//  Created by Symphony on 23/10/22.
-//
 
 import UIKit
 import VGSCollectSDK
