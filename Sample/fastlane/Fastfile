@@ -39,6 +39,7 @@ platform :ios do
       sdk: "iphoneos*",
       code_sign_identity: "iPhone Developer",
       bundle_identifier: "com.forage.ios-qa-sample-app",
+      profile_name: "match Development com.forage.ios-qa-sample-app",
     )
 
     build_app(
