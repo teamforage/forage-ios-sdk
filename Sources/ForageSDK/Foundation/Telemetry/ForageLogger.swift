@@ -78,6 +78,10 @@ internal protocol ForageLogger {
     /// - Parameter error: An optional error object associated with the critical log.
     /// - Parameter attributes: An optional dictionary of key-value pairs providing additional context for the log.
     func critical(_ message: String, error: Error?, attributes: [String: Encodable]?)
+    
+    /// The ForageSDK object needs a handler to the TraceId in order to pass it along to each endpoint call.
+    /// - Returns: The traceID that was generated at the beginning of the app's lifecycle.
+    func getTraceID() -> String
 }
 
 /// Read this [document](https://docs.google.com/document/d/1BU609qv7qSDN-tdNaJP-sAyrgeM6REe9tvcMk5CxN3c/edit#bookmark=id.w44b8kk07o7o) for to learn more about how DatadogLogger works
@@ -85,10 +89,13 @@ internal class DatadogLogger : ForageLogger {
     private static let DD_CLIENT_TOKEN: String = "pub1e4572ba0f5e53df108c333d5ec66c02"
     private static let DD_SERVICE_NAME: String = "ios-sdk"
     private static let DD_SDK_INSTANCE_NAME: String = "forage"
+    
+    // DO NOT UPDATE! Generate 1 TraceID per living session of the app
+    internal static let traceId: String = generateTraceID()
 
     private var logger: LoggerProtocol? = nil
     private var config: ForageLoggerConfig? = nil
-    
+
     required internal init(_ config: ForageLoggerConfig? = ForageLoggerConfig()) {
         if isUnitTesting() {
             // avoid emitting logs when running unit tests
@@ -116,6 +123,10 @@ internal class DatadogLogger : ForageLogger {
             in: datadogInstance
         )
         
+        // Do this explicitly in the constructor so that we confirm each logger that is created
+        // has the trace_id field.
+        self.logger?.addAttribute(forKey: "trace_id", value: DatadogLogger.traceId)
+
         _ = self.addContext(config?.context ?? ForageLogContext())
     }
     
@@ -171,6 +182,10 @@ internal class DatadogLogger : ForageLogger {
         return self
     }
     
+    internal func getTraceID() -> String {
+        return DatadogLogger.traceId
+    }
+    
     /// Initializes and returns a Datadog instance for the given environment. If an instance with the specified name already exists,
     /// it returns the existing instance.
     private func initDatadog(_ environment: Environment) -> DatadogCoreProtocol {
@@ -199,5 +214,14 @@ internal class DatadogLogger : ForageLogger {
             return prefix.isEmpty ? message : "[\(prefix)] \(message)"
         }
         return message
+    }
+    
+    private static func generateTraceID() -> String {
+        var trace = ""
+        for _ in 0..<14 {
+            let randomDigit = UInt64(arc4random_uniform(10))
+            trace = trace + String(randomDigit)
+        }
+        return "33" + trace
     }
 }

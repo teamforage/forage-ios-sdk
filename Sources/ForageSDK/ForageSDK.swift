@@ -2,8 +2,6 @@
 //  ForageSDK.swift
 //  ForageSDK
 //
-//  Created by Symphony on 18/10/22.
-//
 
 import Foundation
 import VGSCollectSDK
@@ -17,6 +15,7 @@ public class ForageSDK {
     internal var logger: ForageLogger? = nil
     internal var merchantID: String = ""
     internal var sessionToken: String = ""
+    internal var traceId: String = ""
     
     public var environment: Environment = .sandbox
     // Don't update! Only updated when releasing.
@@ -33,7 +32,6 @@ public class ForageSDK {
         self.environment = Environment(sessionToken: config.sessionToken)
         self.merchantID = config.merchantID
         self.sessionToken = config.sessionToken
-        
         // ForageSDK.shared.environment is not set
         // until the end of this initialization
         // so we have to provide the environment from the config
@@ -44,6 +42,7 @@ public class ForageSDK {
             )
         )
         self.logger = logger
+        self.traceId = logger.getTraceID()
         LDManager.shared.initialize(self.environment, logger: logger)
         
         VGSCollectLogger.shared.disableAllLoggers()

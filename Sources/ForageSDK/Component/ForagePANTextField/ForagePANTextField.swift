@@ -2,8 +2,6 @@
 //  ForagePANTextField.swift
 //  ForageSDK
 //
-//  Created by Symphony on 16/10/22.
-//
 
 import UIKit
 import VGSCollectSDK

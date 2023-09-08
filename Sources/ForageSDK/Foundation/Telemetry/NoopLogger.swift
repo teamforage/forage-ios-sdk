@@ -9,6 +9,10 @@ import Foundation
 
 /// Silent logger that doesn't do anything!
 internal class NoopLogger: ForageLogger {
+    func getTraceID() -> String {
+        return ""
+    }
+    
     required init(_ config: ForageLoggerConfig? = ForageLoggerConfig(environment: .sandbox)) {
         // noop
     }
