@@ -2,8 +2,6 @@
 //  ForagePANTextField.swift
 //  ForageSDK
 //
-//  Created by Symphony on 16/10/22.
-//
 
 import UIKit
 import VGSCollectSDK
@@ -13,35 +11,8 @@ public enum CardType: String {
 }
 
 public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElementDelegate {
-    public func setPlaceholderText(_ text: String) {
-        
-    }
     
-    public func clearText() {
-        self.enhancedTextField.text = ""
-        self.enhancedTextField.actualPAN = ""
-    }
-    
-    /// BorderWidth for the text field
-    private var _borderWidth: CGFloat = 0.1
-    @IBInspectable public var borderWidth: CGFloat {
-        get { return _borderWidth }
-        set { _borderWidth = newValue }
-    }
-    
-    /// BorderColor for the text field
-    private var _borderColor: UIColor? = .black
-    @IBInspectable public var borderColor: UIColor? {
-        get { return _borderColor }
-        set { _borderColor = newValue }
-    }
-    
-    /// Padding for the text field
-    private var _padding: UIEdgeInsets = UIEdgeInsets(top: 0.0, left: 0.0, bottom: 0.0, right: 0.0)
-    @IBInspectable public var padding: UIEdgeInsets {
-        get { return _padding }
-        set { _padding = newValue }
-    }
+    // MARK: - Properties
     
     @IBInspectable public var isEmpty: Bool {
         enhancedTextField.isEmpty
@@ -55,13 +26,37 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         enhancedTextField.isComplete
     }
     
-    // MARK: Public Delegate
+    /// BorderWidth for the text field
+    @IBInspectable public var borderWidth: CGFloat {
+        get { return enhancedTextField.borderWidth }
+        set { enhancedTextField.borderWidth = newValue }
+    }
     
-    /// A delegate that informs the client about the state of the entered card number (validation, focus).
-    public weak var delegate: ForageElementDelegate?
+    /// BorderColor for the text field
+    @IBInspectable public var borderColor: UIColor? {
+        get { return enhancedTextField.borderColor }
+        set { enhancedTextField.borderColor = newValue ?? .black }
+    }
     
-    // MARK: Public Properties
+    /// CornerRadius for the text field
+    @IBInspectable public var cornerRadius: CGFloat {
+        get { return enhancedTextField.layer.cornerRadius }
+        set { enhancedTextField.layer.cornerRadius = newValue }
+    }
     
+    /// MasksToBounds for the text field
+    @IBInspectable public var masksToBounds: Bool {
+        get { return enhancedTextField.layer.masksToBounds }
+        set { enhancedTextField.layer.masksToBounds = newValue }
+    }
+    
+    /// Padding for the text field
+    private var _padding: UIEdgeInsets = UIEdgeInsets(top: 0.0, left: 0.0, bottom: 0.0, right: 0.0)
+    @IBInspectable public var padding: UIEdgeInsets {
+        get { return _padding }
+        set { _padding = newValue }
+    }
+        
     /// Placeholder for the text field
     @IBInspectable public var placeholder: String? {
         get { return enhancedTextField.placeholder }
@@ -117,11 +112,12 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         }
     }
     
-    override public var intrinsicContentSize: CGSize {
-        return CGSize(width: frame.width, height: 83)
-    }
+    // MARK: - Public Delegate
     
-    // MARK: Private components
+    /// A delegate that informs the client about the state of the entered card number (validation, focus).
+    public weak var delegate: ForageElementDelegate?
+    
+    // MARK: - Private components
     
     private lazy var root: UIView = {
         let view = UIView()
@@ -172,6 +168,9 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         tf.keyboardType = UIKeyboardType.numberPad
         tf.accessibilityIdentifier = "tf_forage_ebt_text_field"
         tf.isAccessibilityElement = true
+        tf.borderWidth = 0.1
+        tf.borderColor = .black
+        tf.layer.cornerRadius = 4
         return tf
     }()
     
@@ -188,7 +187,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         return imgView
     }()
     
-    // MARK: Lifecycle methods
+    // MARK: - Lifecycle methods
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -204,7 +203,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         super.awakeFromNib()
     }
     
-    // MARK: Private Methods
+    // MARK: - Private API
     
     private func commonInit() {
         addSubview(root)
@@ -273,6 +272,19 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
 
     internal func getActualPAN() -> String {
         return enhancedTextField.actualPAN
+    }
+    
+    // MARK: - Public API
+    
+    override public var intrinsicContentSize: CGSize {
+        return CGSize(width: frame.width, height: 83)
+    }
+    
+    public func setPlaceholderText(_ text: String) {}
+    
+    public func clearText() {
+        self.enhancedTextField.text = ""
+        self.enhancedTextField.actualPAN = ""
     }
 }
 

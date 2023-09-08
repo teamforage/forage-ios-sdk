@@ -30,6 +30,8 @@ public protocol Appearance {
     var borderWidth: CGFloat { get set }
     var borderColor: UIColor? { get set }
     var elementHeight: CGFloat { get set }
+    var cornerRadius: CGFloat { get set }
+    var masksToBounds: Bool { get set }
 }
 
 /// The visual characteristics that require input-specific customization.

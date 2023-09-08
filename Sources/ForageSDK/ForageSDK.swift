@@ -2,8 +2,6 @@
 //  ForageSDK.swift
 //  ForageSDK
 //
-//  Created by Symphony on 18/10/22.
-//
 
 import Foundation
 import VGSCollectSDK
@@ -17,23 +15,23 @@ public class ForageSDK {
     internal var logger: ForageLogger? = nil
     internal var merchantID: String = ""
     internal var sessionToken: String = ""
+    internal var traceId: String = ""
     
     public var environment: Environment = .sandbox
     // Don't update! Only updated when releasing.
-    public static let version = "3.0.9"
+    public static let version = "4.0.0"
     public static let shared = ForageSDK()
     
     // MARK: Init
     
     private init() {
         guard let config = ForageSDK.config else {
-            assertionFailure("ForageSDK missing Config setup")
+            assertionFailure("ForageSDK unconfigured - call ForageSDK.setup() before accessing ForageSDK.shared")
             return
         }
         self.environment = Environment(sessionToken: config.sessionToken)
         self.merchantID = config.merchantID
         self.sessionToken = config.sessionToken
-        
         // ForageSDK.shared.environment is not set
         // until the end of this initialization
         // so we have to provide the environment from the config
@@ -44,6 +42,7 @@ public class ForageSDK {
             )
         )
         self.logger = logger
+        self.traceId = logger.getTraceID()
         LDManager.shared.initialize(self.environment, logger: logger)
         
         VGSCollectLogger.shared.disableAllLoggers()
@@ -59,8 +58,8 @@ public class ForageSDK {
         - sessionToken: The [session token](https://docs.joinforage.app/docs/authentication#session-tokens) that your backend generates to authenticate your app against the Forage Payments API. The token expires after 15 minutes.
      */
     public struct Config {
-        let merchantID: String
-        let sessionToken: String
+        var merchantID: String
+        var sessionToken: String
 
         public init(merchantID: String, sessionToken: String) {
             self.merchantID = merchantID
@@ -68,22 +67,46 @@ public class ForageSDK {
         }
     }
     
-    /**
-     Setup ForageSDK using ``Config`` struct.
-     
-     - Parameters:
-       - config: ``Config`` struct object to set merchant ID, and session token
-     
-    ````
-     ForageSDK.setup(
-         ForageSDK.Config(
-             merchantID: "1234567",
-             sessionToken: "sandbox_eyJ0eXAiOiJKV1Qi..."
-         )
-     )
-    ````
-     */
+    /// Configures the Forage SDK with the given configuration.
+    ///
+    /// This sets up the merchant ID, session token, and other internal state needed to make API calls.
+    /// It must be called before using the SDK.
+    ///
+    /// - Parameter config: The configuration used to setup the SDK.
+    ///
+    /// - Use ``updateMerchantID(_:)`` to update the merchant ID after configuring.
+    /// - Use ``updateSessionToken(_:)`` to update the session token after it expires.
     public class func setup(_ config: Config) {
         ForageSDK.config = config
+    }
+    
+    /// Updates the merchant ID to use for subsequent API calls.
+    /// Use this method to change the active merchant ID if your app supports multiple merchants.
+    ///
+    /// - Parameter newMerchantID: The new merchant ID to set.
+    public static func updateMerchantID(_ newMerchantID: String) {
+        guard ForageSDK.config != nil else {
+            assertionFailure("ForageSDK must be configured before setting merchant ID")
+            return
+        }
+        // config is guarented to be non-nil because of the guard above.
+        ForageSDK.config!.merchantID = newMerchantID
+        ForageSDK.shared.merchantID = newMerchantID
+    }
+    
+    /// Updates the session token to use for subsequent API calls.
+    ///
+    /// Session tokens expire after 15 minutes. Use this method to set a new session token
+    /// after refreshing it from your backend.
+    ///
+    /// - Parameter newSessionToken: The new session token to use for subsequent API calls
+    public static func updateSessionToken(_ newSessionToken: String) {
+        guard ForageSDK.config != nil else {
+            assertionFailure("ForageSDK must be configured before updating the session token")
+            return
+        }
+        // config is guarented to be non-nil because of the guard above.
+        ForageSDK.config!.sessionToken = newSessionToken
+        ForageSDK.shared.sessionToken = newSessionToken
     }
 }

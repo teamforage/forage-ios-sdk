@@ -66,7 +66,8 @@ internal class LiveForageService: ForageService {
         
         pinCollector.setCustomHeaders(headers: [
             "IDEMPOTENCY-KEY": UUID.init().uuidString,
-            "Merchant-Account": request.merchantID
+            "Merchant-Account": request.merchantID,
+            "x-datadog-trace-id": ForageSDK.shared.traceId
         ], xKey: request.xKey)
 
         let extraData = [
@@ -146,7 +147,8 @@ internal class LiveForageService: ForageService {
     {
         pinCollector.setCustomHeaders(headers: [
             "IDEMPOTENCY-KEY": UUID.init().uuidString,
-            "Merchant-Account": request.merchantID
+            "Merchant-Account": request.merchantID,
+            "x-datadog-trace-id": ForageSDK.shared.traceId
         ], xKey: request.xKey)
 
         let extraData = [

@@ -29,7 +29,8 @@ internal protocol InternalAppearance {
     var tfTintColor: UIColor? { get set }
     var borderWidth: CGFloat { get set }
     var borderColor: UIColor? { get set }
-    var borderRadius: CGFloat { get set }
+    var cornerRadius: CGFloat { get set }
+    var masksToBounds: Bool { get set }
     var backgroundColor: UIColor? { get set }
     var inputWidth: CGFloat { get set }
     var inputHeight: CGFloat { get set }

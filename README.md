@@ -178,7 +178,7 @@ A component the securely accepts an EBT PIN for balance requests and payment cap
 private let foragePinTextField: ForagePINTextField = {
     let tf = ForagePINTextField()
     tf.borderRadius = 10
-    tf.backgroundColor = .lightGray
+    tf.backgroundColor = .systemGray6
     tf.pinType = .balance
     return tf
 }()

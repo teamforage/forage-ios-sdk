@@ -41,6 +41,11 @@ extension ForageAPI: ServiceProtocol {
     }
 
     var task: HttpTask {
+        let headers = HTTPHeaders([
+            "content-type": "application/json",
+            "accept": "application/json",
+            "x-datadog-trace-id": ForageSDK.shared.traceId
+        ])
         switch self {
         case .tokenizeNumber(
             request: let model
@@ -55,71 +60,68 @@ extension ForageAPI: ServiceProtocol {
                 "customer_id": model.customerID
             ]
 
-            let httpHeaders: HTTPHeaders = [
+            headers.addHeaders([
                 "Merchant-Account": model.merchantID,
                 "authorization": "Bearer \(model.authorization)",
-                "content-type": "application/json",
-                "accept": "application/json",
-                "API-VERSION": "2023-05-15"
-            ]
+                "API-VERSION": "2023-05-15",
+            ])
 
             return .requestParametersAndHeaders(
                 bodyParameters: bodyParameters,
                 urlParameters: nil,
-                additionalHeaders: httpHeaders
+                additionalHeaders: headers
             )
 
         case .xKey(sessionToken: let sessionToken, merchantID: let merchantID):
-            let httpHeaders: HTTPHeaders = [
+            headers.addHeaders([
                 "authorization": "Bearer \(sessionToken)",
                 "accept": "application/json",
                 "Merchant-Account": merchantID,
-            ]
+            ])
 
             return .requestParametersAndHeaders(
                 bodyParameters: nil,
                 urlParameters: nil,
-                additionalHeaders: httpHeaders
+                additionalHeaders: headers
             )
 
         case .message(_, sessionToken: let sessionToken, merchantID: let merchantID):
-            let httpHeaders: HTTPHeaders = [
+            headers.addHeaders([
                 "Merchant-Account": merchantID,
                 "authorization": "Bearer \(sessionToken)",
-                "accept": "application/json",
-                "API-VERSION": "2023-02-01"
-            ]
+                "API-VERSION": "2023-02-01",
+            ])
 
             return .requestParametersAndHeaders(
                 bodyParameters: nil,
                 urlParameters: nil,
-                additionalHeaders: httpHeaders
+                additionalHeaders: headers
             )
 
         case .getPaymentMethod(request: let request):
-            let httpHeaders: HTTPHeaders = [
+            headers.addHeaders([
                 "Merchant-Account": request.merchantID,
                 "authorization": "Bearer \(request.sessionToken)",
-                "API-VERSION": "2023-05-15"
-            ]
+                "API-VERSION": "2023-05-15",
+            ])
 
             return .requestParametersAndHeaders(
                 bodyParameters: nil,
                 urlParameters: nil,
-                additionalHeaders: httpHeaders
+                additionalHeaders: headers
             )
 
         case .getPayment(request: let request):
-            let httpHeaders: HTTPHeaders = [
+            headers.addHeaders([
                 "Merchant-Account": request.merchantID,
                 "authorization": "Bearer \(request.sessionToken)",
-                "API-VERSION": "2023-05-15"
-            ]
+                "API-VERSION": "2023-05-15",
+            ])
 
             return .requestParametersAndHeaders(
                 bodyParameters: nil,
                 urlParameters: nil,
-                additionalHeaders: httpHeaders
+                additionalHeaders: headers
             )
         }
     }

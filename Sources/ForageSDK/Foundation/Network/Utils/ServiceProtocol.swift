@@ -7,8 +7,7 @@
 
 import Foundation
 
-public typealias Parameters = [String: Any]
-public typealias HTTPHeaders = [String: String]
+internal typealias Parameters = [String: Any]
 
 internal enum HttpMethod: String {
     case get = "GET"
@@ -32,6 +31,24 @@ internal protocol ServiceProtocol {
     var path: String { get }
     var method: HttpMethod { get }
     var task: HttpTask { get }
+}
+
+internal class HTTPHeaders {
+    private var _headers: [String: String] = [String: String]()
+
+    init(_ headers: [String: String]) {
+        _headers = headers
+    }
+    
+    func addHeaders(_ other: [String: String]) {
+        for (key, value) in other {
+            _headers[key] = value
+        }
+    }
+    
+    func getHeaders() -> [String: String] {
+        return _headers
+    }
 }
 
 extension ServiceProtocol {
@@ -92,7 +109,7 @@ extension ServiceProtocol {
     }
     
     private func addAdditionalHeaders(_ additionalHeaders: HTTPHeaders?, request: inout URLRequest) {
-        guard let headers = additionalHeaders else { return }
+        guard let headers = additionalHeaders?.getHeaders() else { return }
         for (key, value) in headers {
             request.setValue(value, forHTTPHeaderField: key)
         }
