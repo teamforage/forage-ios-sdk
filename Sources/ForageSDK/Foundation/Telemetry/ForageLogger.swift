@@ -150,10 +150,6 @@ internal class DatadogLogger : ForageLogger {
         self.logger?.critical(self.getMessageWithPrefix(message), error: error, attributes: attributes)
     }
     
-    internal func addTraceId(_ traceId: String) {
-        self.logger?.addAttribute(forKey: "trace_id", value: traceId)
-    }
-    
     @discardableResult
     internal func addContext(_ newContext: ForageLogContext) -> ForageLogger {
         self.config?.context = newContext

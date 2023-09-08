@@ -41,7 +41,7 @@ extension ForageAPI: ServiceProtocol {
     }
 
     var task: HttpTask {
-        let headers = HTTPHeaders(headers: [
+        let headers = HTTPHeaders([
             "content-type": "application/json",
             "accept": "application/json",
             "x-datadog-trace-id": ForageSDK.shared.traceId

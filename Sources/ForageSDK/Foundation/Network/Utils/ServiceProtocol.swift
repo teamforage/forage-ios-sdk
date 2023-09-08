@@ -35,7 +35,8 @@ internal protocol ServiceProtocol {
 
 internal class HTTPHeaders {
     private var _headers: [String: String] = [String: String]()
-    init(headers: [String: String]) {
+
+    init(_ headers: [String: String]) {
         _headers = headers
     }
     
