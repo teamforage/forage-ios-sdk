@@ -30,7 +30,23 @@ public struct ForageError: Error, Codable {
 }
 
 /// Contains additional details about a Forage API error.
-public struct ForageErrorDetails: Codable {
+public enum ForageErrorDetails: Codable {
+    case insufficientFunds(snapBalance: String?, cashBalance: String?)
+    case unexpected
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if let details = try? container.decode(InsufficientFundsDetails.self) {
+            self = .insufficientFunds(snapBalance: details.snapBalance, cashBalance: details.cashBalance)
+            return
+        }
+        
+        self = .unexpected
+    }
+}
+
+/// Allows you to display the SNAP balance and EBT Cash balance when an insufficient funds error (ebt_error_51) occurs
+public struct InsufficientFundsDetails: Codable {
     /// The remaining SNAP balance
     /// Only populated when the error code is [ebt_error_51](https://docs.joinforage.app/reference/errors#ebt_error_51)
     public let snapBalance: String?
@@ -68,5 +84,18 @@ public struct ForageErrorObj: Codable {
         self.code = code
         self.message = message
         self.details = details
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.httpStatusCode = try container.decode(Int.self, forKey: .httpStatusCode)
+        self.code = try container.decode(String.self, forKey: .code)
+        self.message = try container.decode(String.self, forKey: .message)
+        
+        if self.code == "ebt_error_51" {
+            self.details = try? container.decode(ForageErrorDetails.self, forKey: .details)
+        } else {
+            self.details = nil
+        }
     }
 }
