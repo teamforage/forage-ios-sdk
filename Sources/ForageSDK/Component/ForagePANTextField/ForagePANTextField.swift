@@ -11,13 +11,19 @@ public enum CardType: String {
 }
 
 public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElementDelegate {
-    public func setPlaceholderText(_ text: String) {
-        
-    }
     
-    public func clearText() {
-        self.enhancedTextField.text = ""
-        self.enhancedTextField.actualPAN = ""
+    // MARK: - Properties
+    
+    @IBInspectable public var isEmpty: Bool {
+        enhancedTextField.isEmpty
+    }
+
+    @IBInspectable public var isValid: Bool {
+        enhancedTextField.isValid
+    }
+
+    @IBInspectable public var isComplete: Bool {
+        enhancedTextField.isComplete
     }
     
     /// BorderWidth for the text field
@@ -50,26 +56,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         get { return _padding }
         set { _padding = newValue }
     }
-    
-    @IBInspectable public var isEmpty: Bool {
-        enhancedTextField.isEmpty
-    }
-
-    @IBInspectable public var isValid: Bool {
-        enhancedTextField.isValid
-    }
-
-    @IBInspectable public var isComplete: Bool {
-        enhancedTextField.isComplete
-    }
-    
-    // MARK: Public Delegate
-    
-    /// A delegate that informs the client about the state of the entered card number (validation, focus).
-    public weak var delegate: ForageElementDelegate?
-    
-    // MARK: Public Properties
-    
+        
     /// Placeholder for the text field
     @IBInspectable public var placeholder: String? {
         get { return enhancedTextField.placeholder }
@@ -115,11 +102,22 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         set { enhancedTextField.font = newValue }
     }
     
-    override public var intrinsicContentSize: CGSize {
-        return CGSize(width: frame.width, height: 83)
+    /// ElementHeight for the text field
+    private var _elementHeight: CGFloat = 0
+    @IBInspectable public var elementHeight: CGFloat {
+        get { return _elementHeight }
+        set {
+            _elementHeight = newValue
+            self.changeElementHeight(value: _elementHeight)
+        }
     }
     
-    // MARK: Private components
+    // MARK: - Public Delegate
+    
+    /// A delegate that informs the client about the state of the entered card number (validation, focus).
+    public weak var delegate: ForageElementDelegate?
+    
+    // MARK: - Private components
     
     private lazy var root: UIView = {
         let view = UIView()
@@ -189,7 +187,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         return imgView
     }()
     
-    // MARK: Lifecycle methods
+    // MARK: - Lifecycle methods
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -205,7 +203,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         super.awakeFromNib()
     }
     
-    // MARK: Private Methods
+    // MARK: - Private API
     
     private func commonInit() {
         addSubview(root)
@@ -267,8 +265,26 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         becomeFirstResponder()
     }
     
+    private func changeElementHeight(value: CGFloat) {
+        container.distribution = .equalCentering
+        container.heightAnchor.constraint(equalToConstant: value).isActive = true
+    }
+
     internal func getActualPAN() -> String {
         return enhancedTextField.actualPAN
+    }
+    
+    // MARK: - Public API
+    
+    override public var intrinsicContentSize: CGSize {
+        return CGSize(width: frame.width, height: 83)
+    }
+    
+    public func setPlaceholderText(_ text: String) {}
+    
+    public func clearText() {
+        self.enhancedTextField.text = ""
+        self.enhancedTextField.actualPAN = ""
     }
 }
 

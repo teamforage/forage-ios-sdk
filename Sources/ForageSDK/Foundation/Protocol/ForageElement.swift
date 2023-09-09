@@ -29,6 +29,7 @@ public protocol Appearance {
     var tfTintColor: UIColor? { get set }
     var borderWidth: CGFloat { get set }
     var borderColor: UIColor? { get set }
+    var elementHeight: CGFloat { get set }
     var cornerRadius: CGFloat { get set }
     var masksToBounds: Bool { get set }
 }

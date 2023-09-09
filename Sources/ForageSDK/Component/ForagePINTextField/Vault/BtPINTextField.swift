@@ -10,15 +10,16 @@ import BasisTheoryElements
 import Combine
 
 class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
-    /**
-     BT Event Types
-     */
+
+    // BT Event Types
     private enum BTEventType: String {
         case TEXT_CHANGE = "textChange"
         case MASK_CHANGE = "maskChange"
         case BLUR = "blur"
         case FOCUS = "focus"
     }
+    
+    // MARK: - Properties
     
     private var _isEmpty: Bool = true
     @IBInspectable public var isEmpty: Bool {
@@ -35,29 +36,38 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
         get { return _isComplete }
     }
     
-    func clearText() {
-        textField.text = ""
-    }
-    
-    var collector: VaultCollector
-    
-    var delegate: VaultWrapperDelegate?
-    
-    var placeholder: String?
-    
-    var tfTintColor: UIColor?
-    
+    private let textField: TextElementUITextField
+    private var inputWidthConstraint: NSLayoutConstraint?
+    private var inputHeightConstraint: NSLayoutConstraint?
     private var cancellables = Set<AnyCancellable>()
     
-    var verticalConstraint: [NSLayoutConstraint]?
-    var horizontalConstraints: [NSLayoutConstraint]?
+    var delegate: VaultWrapperDelegate?
+    var collector: VaultCollector
+    var placeholder: String?
+    var tfTintColor: UIColor?
+    var padding = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
     
-    private let textField: TextElementUITextField
+    var widthConstraint: CGFloat? {
+        didSet {
+            if let widthConstraint = widthConstraint {
+                inputWidthConstraint?.constant = widthConstraint
+            }
+        }
+    }
+
+    var heightConstraint: CGFloat? {
+        didSet {
+            if let heightConstraint = heightConstraint {
+                inputHeightConstraint?.constant = heightConstraint
+            }
+        }
+    }
+    
+    // MARK: - Initialization
     
     override init(frame: CGRect) {
         textField = TextElementUITextField()
         collector = CollectorFactory.createBasisTheory(environment: ForageSDK.shared.environment, textElement: textField)
-        
         super.init(frame: frame)
         
         commonInit()
@@ -77,6 +87,16 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
         textField.keyboardType = UIKeyboardType.phonePad
         textField.isSecureTextEntry = true
         textField.textAlignment = .center
+        textField.anchor(
+            top: self.topAnchor,
+            leading: self.leadingAnchor,
+            bottom: self.bottomAnchor,
+            trailing: self.trailingAnchor,
+            centerXAnchor: nil,
+            padding: UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        )
+        
+        setupWidthHeightConstraints()
         
         let regexDigit = try! NSRegularExpression(pattern: "\\d")
         
@@ -118,39 +138,39 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
         }.store(in: &cancellables)
     }
     
+    // MARK: - Private API
+    
+    private func setupWidthHeightConstraints() {
+        inputWidthConstraint = textField.widthAnchor.constraint(equalToConstant: 342)
+        inputWidthConstraint?.isActive = true
+        
+        inputHeightConstraint = textField.heightAnchor.constraint(equalToConstant: 36)
+        inputHeightConstraint?.isActive = true
+    }
+    
+    // MARK: - Public API
+    
     func setPlaceholderText(_ text: String) {
         textField.placeholder = text
     }
     
+    func clearText() {
+        textField.text = ""
+    }
+    
     var borderWidth: CGFloat {
-        get {
-            return textField.layer.borderWidth
-        }
-        set {
-            textField.layer.borderWidth = newValue
-        }
+        get { return textField.layer.borderWidth }
+        set { textField.layer.borderWidth = newValue }
     }
     
     var cornerRadius: CGFloat {
-        get {
-            return textField.layer.cornerRadius
-        }
-        set {
-            textField.layer.cornerRadius = newValue
-        }
+        get { return textField.layer.cornerRadius }
+        set { textField.layer.cornerRadius = newValue }
     }
     
     var masksToBounds: Bool {
-        get {
-            return textField.layer.masksToBounds
-        }
-        set {
-            textField.layer.masksToBounds = newValue
-        }
-    }
-    
-    var padding = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0) {
-            didSet { setMainPaddings() }
+        get { return textField.layer.masksToBounds }
+        set { textField.layer.masksToBounds = newValue }
     }
     
     var borderColor: UIColor? {
@@ -160,9 +180,7 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
             }
             return UIColor(cgColor: cgcolor)
         }
-        set {
-            textField.layer.borderColor = newValue?.cgColor
-        }
+        set { textField.layer.borderColor = newValue?.cgColor }
     }
     
     override var backgroundColor: UIColor? {
@@ -172,39 +190,7 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
             }
             return UIColor(cgColor: cgcolor)
         }
-        set {
-            textField.layer.backgroundColor = newValue?.cgColor
-        }
-    }
-    
-    func setPlaceholder(_ text: String) {
-        textField.placeholder = text
-    }
-    
-    func setMainPaddings() {
-        if let verticalConstraint = verticalConstraint {
-            NSLayoutConstraint.deactivate(verticalConstraint)
-        }
-        
-        if let horizontalConstraints = horizontalConstraints {
-            NSLayoutConstraint.deactivate(horizontalConstraints)
-        }
-        
-        let views = ["view": self, "textField": textField]
-        
-        horizontalConstraints = NSLayoutConstraint.constraints(withVisualFormat: "H:|-\(padding.left)-[textField]-\(padding.right)-|",
-                                                               options: .alignAllCenterY,
-                                                               metrics: nil,
-                                                               views: views)
-        NSLayoutConstraint.activate(horizontalConstraints ?? [])
-        
-        verticalConstraint = NSLayoutConstraint.constraints(withVisualFormat: "V:|-\(padding.top)-[textField]-\(padding.bottom)-|",
-                                                                options: .alignAllCenterX,
-                                                                metrics: nil,
-                                                                views: views)
-        NSLayoutConstraint.activate(verticalConstraint ?? [])
-        
-        self.layoutIfNeeded()
+        set { textField.layer.backgroundColor = newValue?.cgColor }
     }
     
     var textColor: UIColor? {
@@ -221,7 +207,19 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
         get { return textField.textAlignment }
         set { textField.textAlignment = newValue }
     }
+    
+    var inputWidth: CGFloat {
+        get { return widthConstraint ?? 342 }
+        set { widthConstraint = newValue }
+    }
+
+    var inputHeight: CGFloat {
+        get { return heightConstraint ?? 36 }
+        set { heightConstraint = newValue }
+    }
 }
+
+// MARK: - UIResponder methods
 
 extension BasisTheoryTextFieldWrapper {
     /// Make `ForagePINTextField` focused.

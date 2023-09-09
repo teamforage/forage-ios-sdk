@@ -7,9 +7,16 @@ import UIKit
 import VGSCollectSDK
 
 public class ForagePINTextField: UIView, Identifiable, ForageElement {
-    public func setPlaceholderText(_ text: String) {
-        
-    }
+    
+    // MARK: - Properties
+    
+    public var pinType: PinType = .balance
+    internal var collector: VaultCollector?
+    
+    /// Delegate that updates client's side about state of the entered pin
+    public weak var delegate: ForageElementDelegate?
+    
+    // MARK: - Exposed properties
     
     @IBInspectable public var isEmpty: Bool {
         get { return textField.isEmpty }
@@ -22,17 +29,6 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
     @IBInspectable public var isComplete: Bool {
         get { return textField.isComplete }
     }
-    
-    // MARK: Public Delegate
-    
-    /// Delegate that updates client's side about state of the entered pin
-    public weak var delegate: ForageElementDelegate?
-    
-    // MARK: Public Properties
-    
-    public var pinType: PinType = .balance
-    
-    internal var collector: VaultCollector?
     
     /// CornerRadius for the text field
     @IBInspectable public var cornerRadius: CGFloat {
@@ -109,7 +105,38 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
         set { textField.font = newValue }
     }
     
-    // MARK: Private components
+    /// Width of the input field within the ForagePINTextField.
+    /// - SeeAlso: `inputHeight` to customize the height of the input field within the ForagePINTextField.
+    @IBInspectable public var inputWidth: CGFloat {
+        get { return textField.inputWidth }
+        set {
+            container.alignment = .center
+            textField.inputWidth = newValue
+        }
+    }
+    
+    /// Height of the input field within the ForagePINTextField.
+    /// - SeeAlso: `elementHeight` to customize the height of the entire ForagePINTextField.
+    @IBInspectable public var inputHeight: CGFloat {
+        get { return textField.inputHeight }
+        set {
+            container.alignment = .center
+            textField.inputHeight = newValue
+        }
+    }
+    
+    /// Height of the entire ForagePINTextField element.
+    /// - SeeAlso: `inputHeight` to customize the height of the input field within the ForagePINTextField.
+    private var _elementHeight: CGFloat = 0
+    @IBInspectable public var elementHeight: CGFloat {
+        get { return _elementHeight }
+        set {
+            _elementHeight = newValue
+            self.changeElementHeight(value: _elementHeight)
+        }
+    }
+    
+    // MARK: - Private components
     
     private lazy var root: UIView = {
         let view = UIView()
@@ -152,7 +179,7 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
         let vaultType = LDManager.shared.getVaultType()
         
         var tf: VaultWrapper?
-        
+
         if (vaultType == VaultType.vgsVaultType) {
             tf = VGSTextFieldWrapper()
         } else if (vaultType == VaultType.btVaultType) {
@@ -160,7 +187,7 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
         } else {
             tf = VGSTextFieldWrapper()
         }
-        
+
         tf?.textColor = UIColor.black
         tf?.font = UIFont.systemFont(ofSize: 14, weight: .regular)
         tf?.borderWidth = 0
@@ -168,9 +195,8 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
         tf?.masksToBounds = true
         tf?.borderColor = .clear
         tf?.backgroundColor = .systemGray6
-        tf?.padding = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 0)
         collector = tf?.collector
-        
+
         return tf ?? VGSTextFieldWrapper()
     }()
     
@@ -187,7 +213,7 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
         return imgView
     }()
     
-    // MARK: Lifecycle methods
+    // MARK: - Lifecycle methods
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -203,7 +229,7 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
         super.awakeFromNib()
     }
     
-    // MARK: Private Methods
+    // MARK: - Private Methods
     
     private func commonInit() {
         addSubview(root)
@@ -264,11 +290,22 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
     @objc fileprivate func requestFocus(_ gesture: UIGestureRecognizer) {
         becomeFirstResponder()
     }
-
+    
+    private func changeElementHeight(value: CGFloat) {
+        container.distribution = .equalCentering
+        container.heightAnchor.constraint(equalToConstant: value).isActive = true
+    }
+    
+    // MARK: - Public API
+    
     public func clearText() {
         textField.clearText()
     }
+    
+    public func setPlaceholderText(_ text: String) {}
 }
+
+// MARK: - VaultWrapperDelegate
 
 extension ForagePINTextField: VaultWrapperDelegate {
     internal func textFieldDidChange(_ textField: VaultWrapper) {
@@ -281,6 +318,7 @@ extension ForagePINTextField: VaultWrapperDelegate {
 }
 
 // MARK: - UIResponder methods
+
 extension ForagePINTextField {
     /// Make `ForagePINTextField` focused.
     @discardableResult override public func becomeFirstResponder() -> Bool {
