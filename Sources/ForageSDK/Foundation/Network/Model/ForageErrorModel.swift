@@ -30,9 +30,15 @@ public struct ForageError: Error, Codable {
 }
 
 /// Contains additional details about a Forage API error.
+/// 
 public enum ForageErrorDetails: Codable {
+    /// Used for displaying SNAP and EBT Cash balances when an insufficient funds error occurs.
+    ///
+    /// - Important: Typically used when the error code is [ebt_error_51](https://docs.joinforage.app/reference/errors#ebt_error_51)
     case insufficientFunds(snapBalance: String?, cashBalance: String?)
-    case unexpected
+    
+    /// Received a malformed details object from the Forage API
+    case invalid
     
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
@@ -41,18 +47,13 @@ public enum ForageErrorDetails: Codable {
             return
         }
         
-        self = .unexpected
+        self = .invalid
     }
 }
 
-/// Allows you to display the SNAP balance and EBT Cash balance when an insufficient funds error (ebt_error_51) occurs
 public struct InsufficientFundsDetails: Codable {
-    /// The remaining SNAP balance
-    /// Only populated when the error code is [ebt_error_51](https://docs.joinforage.app/reference/errors#ebt_error_51)
     public let snapBalance: String?
     
-    /// The remaining EBT Cash balance.
-    /// Only populated when the error code is [ebt_error_51](https://docs.joinforage.app/reference/errors#ebt_error_51)
     public let cashBalance: String?
     
     private enum CodingKeys : String, CodingKey {
@@ -75,8 +76,8 @@ public struct ForageErrorObj: Codable {
     /// A developer-facing message about the error, not to be displayed to customers.
     public let message: String
     
-    /// Additional details about the error, such as remaining EBT card balances.
-    /// Only non-nil when additional context is available (e.g. when the error code is `ebt_error_51`)
+    /// Additional details about the error, included for your convenience.
+    /// Not nil when details are available, e.g. when the error code is [ebt_error_51](https://docs.joinforage.app/reference/errors#ebt_error_51)
     public let details: ForageErrorDetails?
     
     internal init(httpStatusCode: Int, code: String, message: String, details: ForageErrorDetails? = nil) {
