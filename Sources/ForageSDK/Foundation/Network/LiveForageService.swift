@@ -14,7 +14,7 @@ internal class LiveForageService: ForageService {
     internal var provider: Provider
     
     private var logger: ForageLogger?
-    private var maxAttempts: Int = 10
+    private var maxAttempts: Int = 90
     private var intervalBetweenAttempts: Double = 1.0
     private var retryCount = 0
     
