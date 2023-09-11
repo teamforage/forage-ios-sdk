@@ -11,11 +11,13 @@ internal struct ForageSQSError: Codable {
     let statusCode: Int
     let forageCode: String
     let message: String
+    let details: ForageErrorDetails?
     
     private enum CodingKeys: String, CodingKey {
         case statusCode = "status_code"
         case forageCode = "forage_code"
         case message
+        case details
     }
 }
 
@@ -41,7 +43,7 @@ internal struct MessageResponseModel: Codable {
         messageType = try container.decode(String.self, forKey: .messageType)
         status = try container.decode(String.self, forKey: .status)
         failed = try container.decode(Bool.self, forKey: .failed)
-        
+
         do {
             errors = try container.decode([ForageSQSError].self, forKey: .errors)
         } catch {
