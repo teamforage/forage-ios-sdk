@@ -150,15 +150,16 @@ class CapturePaymentView: UIView {
             case .failure(let error):
                 if let forageError = error as? ForageError? {
                     let firstError = forageError?.errors.first
-                    
-                    if (firstError?.code == "ebt_error_51") {
-                        let errorDetails = firstError?.details
-                                                
-                        if case .insufficientFunds(let snapBalance, let cashBalance)? = errorDetails {
-                            self.remainingBalanceLabel.text = "firstForageError.details: remaining balances are SNAP: \(snapBalance ?? "N/A"), EBT Cash: \(cashBalance ?? "N/A")"
-                        } else {
-                            self.remainingBalanceLabel.text = "firstForageError.details: Missing insufficient funds error details!"
-                        }
+                    let errorDetails = firstError?.details
+                                    
+                    switch errorDetails {
+                    case .insufficientFunds(let snapBalance, let cashBalance):
+                        let snapBalanceText = snapBalance ?? "N/A"
+                        let cashBalanceText = cashBalance ?? "N/A"
+                        
+                        self.remainingBalanceLabel.text = "firstForageError.details: remaining balances are SNAP: \(snapBalanceText), EBT Cash: \(cashBalanceText)"
+                    default:
+                        self.remainingBalanceLabel.text = "firstForageError.details: Missing insufficient funds error details!"
                     }
                 }
                 self.errorLabel.text = "\(error)"
