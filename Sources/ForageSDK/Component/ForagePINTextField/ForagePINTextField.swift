@@ -300,9 +300,7 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
     
     public func clearText() {
         textField.clearText()
-    }
-    
-    public func setPlaceholderText(_ text: String) {}
+    }    
 }
 
 // MARK: - VaultWrapperDelegate

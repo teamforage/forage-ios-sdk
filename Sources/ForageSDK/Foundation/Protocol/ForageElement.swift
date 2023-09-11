@@ -44,9 +44,6 @@ public protocol Style {
 public protocol ForageElement: UIView, Appearance, ObservableState, Style {
     var delegate: ForageElementDelegate? { get set }
     
-    /// Set the placeholder text of the input field.
-    func setPlaceholderText(_ text: String)
-    
     /// Clear the value in the input field.
     func clearText() -> Void
     

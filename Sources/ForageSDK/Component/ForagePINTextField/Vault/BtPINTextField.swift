@@ -150,10 +150,6 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
     
     // MARK: - Public API
     
-    func setPlaceholderText(_ text: String) {
-        textField.placeholder = text
-    }
-    
     func clearText() {
         textField.text = ""
     }

@@ -279,9 +279,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
     override public var intrinsicContentSize: CGSize {
         return CGSize(width: frame.width, height: 83)
     }
-    
-    public func setPlaceholderText(_ text: String) {}
-    
+        
     public func clearText() {
         self.enhancedTextField.text = ""
         self.enhancedTextField.actualPAN = ""
