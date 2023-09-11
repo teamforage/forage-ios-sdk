@@ -48,6 +48,5 @@ internal protocol InternalStyle {
 internal protocol VaultWrapper: UIView, InternalObservableState, InternalAppearance, InternalStyle {
     var collector: VaultCollector { get set }
     var delegate: VaultWrapperDelegate? { get set }
-    func setPlaceholderText(_ text: String)
     func clearText() -> Void
 }
