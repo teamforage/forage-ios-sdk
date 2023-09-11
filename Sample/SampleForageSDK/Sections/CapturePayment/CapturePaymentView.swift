@@ -153,7 +153,7 @@ class CapturePaymentView: UIView {
                     let errorDetails = firstError?.details
                                     
                     switch errorDetails {
-                    case .insufficientFunds(let snapBalance, let cashBalance):
+                    case .ebtError51(let snapBalance, let cashBalance):
                         let snapBalanceText = snapBalance ?? "N/A"
                         let cashBalanceText = cashBalance ?? "N/A"
                         

@@ -40,11 +40,11 @@ final class MessageResponseTests: XCTestCase {
         XCTAssertEqual(firstError.forageCode, "ebt_error_51")
         XCTAssertEqual(firstError.message, "Insufficient Funds")
         
-        if case .insufficientFunds(let snapBalance, let cashBalance)? = firstError.details {
+        if case .ebtError51(let snapBalance, let cashBalance)? = firstError.details {
             XCTAssertEqual(snapBalance, "12.34")
             XCTAssertEqual(cashBalance, "567.89")
         } else {
-            XCTFail("Decoded details should be of type .insufficientFunds")
+            XCTFail("Decoded details should be of type .ebtError51")
         }
     }
     

@@ -22,11 +22,11 @@ final class ForageErrorTests: XCTestCase {
         XCTAssertEqual(decodedError.code, "ebt_error_51")
         XCTAssertEqual(decodedError.message, "Insufficient Funds")
         
-        if case .insufficientFunds(let snapBalance, let cashBalance)? = decodedError.details {
+        if case .ebtError51(let snapBalance, let cashBalance)? = decodedError.details {
             XCTAssertEqual(snapBalance, "20.00")
             XCTAssertEqual(cashBalance, "30.12")
         } else {
-            XCTFail("Decoded details should be of type .insufficientFunds")
+            XCTFail("Decoded details should be of type .ebtError51")
         }
     }
     
@@ -47,11 +47,11 @@ final class ForageErrorTests: XCTestCase {
         XCTAssertEqual(decodedError.httpStatusCode, 400)
         XCTAssertEqual(decodedError.code, "ebt_error_51")
         XCTAssertEqual(decodedError.message, "Almost Insufficient Funds, but not")
-        if case .insufficientFunds(let snapBalance, let cashBalance)? = decodedError.details {
+        if case .ebtError51(let snapBalance, let cashBalance)? = decodedError.details {
             XCTAssertNil(snapBalance)
             XCTAssertEqual(cashBalance, "123.34")
         } else {
-            XCTFail("Decoded details should be of type .insufficientFunds")
+            XCTFail("Decoded details should be of type .ebtError51")
         }
     }
     
