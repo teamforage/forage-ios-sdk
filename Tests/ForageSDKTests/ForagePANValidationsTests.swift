@@ -2,7 +2,8 @@
 //  ForagePANValidationsTests.swift
 //  ForageSDK
 //
-//  Created by Symphony on 28/11/22.
+//  Created by Tiago Oliveira on 28/11/22.
+//  Copyright © 2023-Present Forage Technology Corporation. All rights reserved.
 //
 
 import XCTest
