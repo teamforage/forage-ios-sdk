@@ -1,8 +1,9 @@
 //
-//  File.swift
+//  LDManager.swift
 //
 //
 //  Created by Danny Leiser on 5/11/23.
+//  Copyright © 2023-Present Forage Technology Corporation. All rights reserved.
 //
 
 import Foundation

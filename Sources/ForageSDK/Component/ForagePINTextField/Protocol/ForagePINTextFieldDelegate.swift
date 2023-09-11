@@ -2,7 +2,8 @@
 //  ForagePINTextFieldDelegate.swift
 //  ForageSDK
 //
-//  Created by Symphony on 24/10/22.
+//  Created by Tiago Oliveira on 24/10/22.
+//  Copyright © 2022-Present Forage Technology Corporation. All rights reserved.
 //
 
 import UIKit

@@ -2,7 +2,8 @@
 //  Polling.swift
 //  ForageSDK
 //
-//  Created by Symphony on 21/11/22.
+//  Created by Tiago Oliveira on 21/11/22.
+//  Copyright © 2022-Present Forage Technology Corporation. All rights reserved.
 //
 
 import Foundation
