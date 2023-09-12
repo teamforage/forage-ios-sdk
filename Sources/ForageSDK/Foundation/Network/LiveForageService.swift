@@ -317,7 +317,7 @@ extension LiveForageService: Polling {
     /// 
     /// Returns a random double between -25 and 25  
     internal func getJitterAmount() -> Double {
-        return Int.random(in: -25...25) / 1000.0
+        return Double(Int.random(in: -25...25)) / 1000.0
     }
     
     /// Support function to update retry count and interval between attempts.
