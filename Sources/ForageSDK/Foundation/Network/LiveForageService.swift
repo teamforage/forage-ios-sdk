@@ -310,6 +310,15 @@ extension LiveForageService: Polling {
             completion(.failure(error))
         }
     }
+
+    /// We generate a random jitter amount to add to our retry delay when polling for the status of
+    /// Payments and Payment Methods so that we can avoid a thundering herd scenario in which there are
+    /// several requests retrying at the same exact time.
+    /// 
+    /// Returns a random double between -25 and 25  
+    internal func getJitterAmount() -> Double {
+        return Int.random(in: -25...25) / 1000.0
+    }
     
     /// Support function to update retry count and interval between attempts.
     ///
@@ -317,7 +326,7 @@ extension LiveForageService: Polling {
     ///  - completion: Which will return after an wait.
     private func waitNextAttempt(completion: @escaping () -> ()) {
         retryCount = retryCount + 1
-        DispatchQueue.main.asyncAfter(deadline: .now() + self.intervalBetweenAttempts) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + self.intervalBetweenAttempts + self.getJitterAmount()) {
             completion()
         }
     }
