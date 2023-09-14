@@ -6,6 +6,12 @@
 import UIKit
 import VGSCollectSDK
 
+public enum PinType: String {
+    case snap
+    case nonSnap
+    case balance
+}
+
 public class ForagePINTextField: UIView, Identifiable, ForageElement {
     
     // MARK: - Properties
