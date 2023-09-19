@@ -205,6 +205,27 @@ final class ForageServiceTests: XCTestCase {
         }
         wait(for: [expectation], timeout: 1.0)
     }
+
+    func testGetJitterAmountWithCustomRandomGenerator() {
+        let mockSession = URLSessionMock()
+        mockSession.data = forageMocks.capturePaymentSuccess
+        mockSession.response = forageMocks.mockSuccessResponse
+        let service = LiveForageService(provider: Provider(mockSession))
+
+        struct FixedSeedRandomNumberGenerator: RandomNumberGeneratorProtocol { 
+            mutating func next() -> UInt64 { return 42 } 
+        }
+
+        // Arrange
+        let customGenerator = FixedSeedRandomNumberGenerator()
+        
+        // Act
+        let jitterAmount = service.getJitterAmount(randomNumberGenerator: customGenerator)
+        
+        // Assert
+        XCTAssertNotNil(jitterAmount, "Jitter amount should not be nil")
+        XCTAssertTrue(jitterAmount >= -0.025 && jitterAmount <= 0.025, "Jitter amount should be within -0.025 and 0.025")
+    }
     
     func test_getBalance_onSuccess_checkExpectedPayload() {
         _ = XCTSkip("Need to clean up and decouple checkBalance before we can test it properly")
