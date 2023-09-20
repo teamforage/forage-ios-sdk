@@ -326,8 +326,8 @@ extension LiveForageService: Polling {
     ///  - completion: Which will return after an wait.
     private func waitNextAttempt(completion: @escaping () -> ()) {
         retryCount = retryCount + 1
-        let nextPollTime = .now() + self.intervalBetweenAttempts + self.getJitterAmount()
-        DispatchQueue.main.asyncAfter(deadline: nextPollTime) {
+        let nextPollTime = self.intervalBetweenAttempts + self.getJitterAmount()
+        DispatchQueue.main.asyncAfter(deadline: .now() + nextPollTime) {
             completion()
         }
     }
