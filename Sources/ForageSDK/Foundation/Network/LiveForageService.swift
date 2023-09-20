@@ -311,16 +311,13 @@ extension LiveForageService: Polling {
         }
     }
 
-    protocol RandomNumberGeneratorProtocol { mutating func next() -> UInt64 }
-
     /// We generate a random jitter amount to add to our retry delay when polling for the status of
     /// Payments and Payment Methods so that we can avoid a thundering herd scenario in which there are
     /// several requests retrying at the same exact time.
     /// 
     /// Returns a random double between -25 and 25  
-    internal func getJitterAmount(randomNumberGenerator: RandomNumberGeneratorProtocol? = nil) -> Double {
-        let rng = randomNumberGenerator ?? SystemRandomNumberGenerator() // fallback to system one
-        return Double(Int.random(in: -25...25, using: &rng)) / 1000.0
+    internal func getJitterAmount() -> Double {
+        return Double(Int.random(in: -25...25)) / 1000.0
     }
     
     /// Support function to update retry count and interval between attempts.

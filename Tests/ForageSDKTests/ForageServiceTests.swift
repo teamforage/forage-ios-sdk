@@ -211,16 +211,9 @@ final class ForageServiceTests: XCTestCase {
         mockSession.data = forageMocks.capturePaymentSuccess
         mockSession.response = forageMocks.mockSuccessResponse
         let service = LiveForageService(provider: Provider(mockSession))
-
-        struct FixedSeedRandomNumberGenerator: RandomNumberGeneratorProtocol { 
-            mutating func next() -> UInt64 { return 42 } 
-        }
-
-        // Arrange
-        let customGenerator = FixedSeedRandomNumberGenerator()
         
-        // Act
         let jitterAmount = service.getJitterAmount(randomNumberGenerator: customGenerator)
+        print(jitterAmount)
         
         // Assert
         XCTAssertNotNil(jitterAmount, "Jitter amount should not be nil")
