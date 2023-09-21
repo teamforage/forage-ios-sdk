@@ -212,7 +212,7 @@ final class ForageServiceTests: XCTestCase {
         mockSession.response = forageMocks.mockSuccessResponse
         let service = LiveForageService(provider: Provider(mockSession))
         
-        let jitterAmount = service.getJitterAmount(randomNumberGenerator: customGenerator)
+        let jitterAmount = service.getJitterAmount()
         print(jitterAmount)
         
         // Assert
