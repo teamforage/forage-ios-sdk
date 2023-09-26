@@ -75,7 +75,6 @@ class ForagePANValidations {
         StateIIN(state: "WEST_VIRGINIA", panNumber: "507720", panLength: 16),
         StateIIN(state: "WISCONSIN", panNumber: "507708", panLength: 16),
         StateIIN(state: "WYOMING", panNumber: "505349", panLength: 16),
-        StateIIN(state: "WYOMIN", panNumber: "50539", panLength: 16),
     ]
 }
 
