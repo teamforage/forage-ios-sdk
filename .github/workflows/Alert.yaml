@@ -18,7 +18,7 @@ jobs:
         with:
           payload: |
             {
-              "message": "QA Tests failed on main branch in forage-ios-sdk!",
+              "message": "QA Tests failed on main branch in forage-ios-sdk!"
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
