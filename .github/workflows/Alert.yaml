@@ -3,18 +3,14 @@ name: Alert
 on:
   workflow_run:
     workflows: ["QA Tests"]
-    types:
-      - completed
+    types: ["completed"]
+    branches: ["main"]
 
 jobs:
   send-alert:
-    if: github.ref == 'refs/heads/main'
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
     runs-on: ubuntu-latest
-
     steps:
-      - name: Test
-        run: echo ${{ github.ref }} ${{ github.ref == 'refs/heads/main' }}
-
       - name: Send alert to slack
         id: slack
         uses: slackapi/slack-github-action@v1.24.0
