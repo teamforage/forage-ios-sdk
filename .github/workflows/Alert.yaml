@@ -1,0 +1,24 @@
+name: Alert
+
+on:
+  workflow_run:
+    workflows: ["QA Tests"]
+    types:
+      - completed
+
+jobs:
+  send-alert:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send alert to slack
+        id: slack
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "message": "QA Tests failed on main branch in forage-ios-sdk!",
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
