@@ -12,6 +12,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Test
+        run: echo ${{ github.ref }} ${{ github.ref == 'refs/heads/main' }}
+
       - name: Send alert to slack
         id: slack
         uses: slackapi/slack-github-action@v1.24.0
