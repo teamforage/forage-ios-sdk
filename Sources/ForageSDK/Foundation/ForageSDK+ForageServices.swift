@@ -85,6 +85,15 @@ extension ForageSDK: ForageSDKService {
                     paymentMethodRef: paymentMethodReference
                 ))
                 .notice("Called ForageSDK.shared.checkBalance for Payment Method \(paymentMethodReference)", attributes: nil)
+            
+            if (!foragePinTextField.isComplete) {
+                self.logger?.warn(
+                    "User attempted to submit an invalid PIN",
+                    error: CommonErrors.INVALID_PIN_ERROR,
+                    attributes: nil)
+                completion(.failure(CommonErrors.INVALID_PIN_ERROR))
+                return
+            }
                         
             let sessionToken = ForageSDK.shared.sessionToken
             let merchantID = ForageSDK.shared.merchantID
@@ -126,6 +135,15 @@ extension ForageSDK: ForageSDKService {
                     paymentRef: paymentReference
                 ))
                 .notice("Called ForageSDK.shared.capturePayment for Payment \(paymentReference)", attributes: nil)
+            
+            if (!foragePinTextField.isComplete) {
+                self.logger?.warn(
+                    "User attempted to submit an invalid PIN",
+                    error: CommonErrors.INVALID_PIN_ERROR,
+                    attributes: nil)
+                completion(.failure(CommonErrors.INVALID_PIN_ERROR))
+                return
+            }
 
             let sessionToken = ForageSDK.shared.sessionToken
             let merchantID = ForageSDK.shared.merchantID
