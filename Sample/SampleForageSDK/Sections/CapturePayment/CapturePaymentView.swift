@@ -317,7 +317,7 @@ class CapturePaymentView: UIView {
     }
 }
 
-// MARK: - ForagePINTextFieldDelegate
+// MARK: - ForageElementDelegate
 
 extension CapturePaymentView: ForageElementDelegate {
     func focusDidChange(_ state: ObservableState) {

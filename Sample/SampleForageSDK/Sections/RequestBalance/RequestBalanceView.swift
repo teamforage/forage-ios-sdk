@@ -342,7 +342,7 @@ class RequestBalanceView: UIView {
     }
 }
 
-// MARK: - ForagePINTextFieldDelegate
+// MARK: - ForageElementDelegate
 
 extension RequestBalanceView: ForageElementDelegate {
     func focusDidChange(_ state: ObservableState) {
