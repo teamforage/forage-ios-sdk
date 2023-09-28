@@ -89,9 +89,9 @@ extension ForageSDK: ForageSDKService {
             if (!foragePinTextField.isComplete) {
                 self.logger?.warn(
                     "User attempted to submit an invalid PIN",
-                    error: CommonErrors.INVALID_PIN_ERROR,
+                    error: CommonErrors.INCOMPLETE_PIN_ERROR,
                     attributes: nil)
-                completion(.failure(CommonErrors.INVALID_PIN_ERROR))
+                completion(.failure(CommonErrors.INCOMPLETE_PIN_ERROR))
                 return
             }
                         
@@ -139,9 +139,9 @@ extension ForageSDK: ForageSDKService {
             if (!foragePinTextField.isComplete) {
                 self.logger?.warn(
                     "User attempted to submit an invalid PIN",
-                    error: CommonErrors.INVALID_PIN_ERROR,
+                    error: CommonErrors.INCOMPLETE_PIN_ERROR,
                     attributes: nil)
-                completion(.failure(CommonErrors.INVALID_PIN_ERROR))
+                completion(.failure(CommonErrors.INCOMPLETE_PIN_ERROR))
                 return
             }
 

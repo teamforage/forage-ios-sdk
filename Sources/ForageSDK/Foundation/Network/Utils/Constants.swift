@@ -8,7 +8,7 @@
 import Foundation
 
 struct CommonErrors {
-    static let INVALID_PIN_ERROR = ForageError(errors: [
+    static let INCOMPLETE_PIN_ERROR = ForageError(errors: [
         ForageErrorObj(
             httpStatusCode: 400,
             code: "user_error",
