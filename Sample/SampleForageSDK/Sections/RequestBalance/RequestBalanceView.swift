@@ -45,6 +45,10 @@ class RequestBalanceView: UIView {
         tf.pinType = .balance
         tf.accessibilityIdentifier = "tf_pin_balance"
         tf.isAccessibilityElement = true
+        tf.font = .systemFont(ofSize: 18)
+        let height = tf.heightAnchor.constraint(equalToConstant: 84)
+        height.priority = UILayoutPriority.defaultHigh + 10
+        height.isActive = true
         return tf
     }()
     
