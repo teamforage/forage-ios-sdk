@@ -99,10 +99,10 @@ class VGSTextFieldWrapper: UIView, VaultWrapper {
     // MARK: - Private API
     
     private func setupWidthHeightConstraints() {
-        inputWidthConstraint = textField.widthAnchor.constraint(equalToConstant: 342)
+        inputWidthConstraint = textField.widthAnchor.constraint(greaterThanOrEqualToConstant: 342)
         inputWidthConstraint?.isActive = true
         
-        inputHeightConstraint = textField.heightAnchor.constraint(equalToConstant: 36)
+        inputHeightConstraint = textField.heightAnchor.constraint(greaterThanOrEqualToConstant: 36)
         inputHeightConstraint?.isActive = true
     }
     

@@ -299,7 +299,7 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
     
     private func changeElementHeight(value: CGFloat) {
         container.distribution = .equalCentering
-        container.heightAnchor.constraint(equalToConstant: value).isActive = true
+        container.heightAnchor.constraint(greaterThanOrEqualToConstant: value).isActive = true
     }
     
     // MARK: - Public API
