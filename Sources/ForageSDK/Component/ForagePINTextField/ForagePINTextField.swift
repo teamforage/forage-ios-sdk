@@ -6,17 +6,10 @@
 import UIKit
 import VGSCollectSDK
 
-public enum PinType: String {
-    case snap
-    case nonSnap
-    case balance
-}
-
 public class ForagePINTextField: UIView, Identifiable, ForageElement {
     
     // MARK: - Properties
     
-    public var pinType: PinType = .balance
     internal var collector: VaultCollector?
     
     /// Delegate that updates client's side about state of the entered pin

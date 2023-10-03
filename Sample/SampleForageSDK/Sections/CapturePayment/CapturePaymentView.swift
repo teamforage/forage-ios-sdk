@@ -33,7 +33,6 @@ class CapturePaymentView: UIView {
     public let snapTextField: ForagePINTextField = {
         let tf = ForagePINTextField()
         tf.placeholder = "PIN Snap Field"
-        tf.pinType = .snap
         tf.accessibilityIdentifier = "tf_pin_snap"
         tf.isAccessibilityElement = true
         return tf
@@ -42,7 +41,6 @@ class CapturePaymentView: UIView {
     private let nonSnapTextField: ForagePINTextField = {
         let tf = ForagePINTextField()
         tf.placeholder = "PIN Snap Field"
-        tf.pinType = .nonSnap
         tf.accessibilityIdentifier = "tf_pin_non_snap"
         tf.isAccessibilityElement = true
         return tf

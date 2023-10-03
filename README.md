@@ -179,19 +179,8 @@ private let foragePinTextField: ForagePINTextField = {
     let tf = ForagePINTextField()
     tf.borderRadius = 10
     tf.backgroundColor = .systemGray6
-    tf.pinType = .balance
     return tf
 }()
-```
-
-To identify the type of pin we are handling in the component, you can use the `pinType` property. We have support for these types:
-
-```swift
-public enum PinType: String {
-    case snap
-    case nonSnap
-    case balance
-}
 ```
 
 ForagePINTextField uses a delegate `ForageElementDelegate` to communicate the updates to the client side.
