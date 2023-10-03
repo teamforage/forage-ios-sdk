@@ -42,7 +42,6 @@ class RequestBalanceView: UIView {
     public let foragePinTextField: ForagePINTextField = {
         let tf = ForagePINTextField()
         tf.placeholder = "PIN Field"
-        tf.pinType = .balance
         tf.accessibilityIdentifier = "tf_pin_balance"
         tf.isAccessibilityElement = true
         tf.font = .systemFont(ofSize: 18)
