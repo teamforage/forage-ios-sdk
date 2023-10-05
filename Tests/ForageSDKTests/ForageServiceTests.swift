@@ -213,11 +213,33 @@ final class ForageServiceTests: XCTestCase {
         let service = LiveForageService(provider: Provider(mockSession))
         
         let jitterAmount = service.getJitterAmount()
-        print(jitterAmount)
         
         // Assert
         XCTAssertNotNil(jitterAmount, "Jitter amount should not be nil")
         XCTAssertTrue(jitterAmount >= -0.025 && jitterAmount <= 0.025, "Jitter amount should be within -0.025 and 0.025")
+    }
+    
+    func testWaitNextAttempt() {
+        let mockSession = URLSessionMock()
+        mockSession.data = forageMocks.capturePaymentSuccess
+        mockSession.response = forageMocks.mockSuccessResponse
+        let service = LiveForageService(provider: Provider(mockSession))
+        
+        let failureExpectation = XCTestExpectation(description: "Completion called before delay")
+        let successExpectation = XCTestExpectation(description: "Completion called after delay")
+        
+        // Mark the expectation as fulfilled only if it failed
+        failureExpectation.isInverted = true
+        
+        service.waitNextAttempt {
+            failureExpectation.fulfill()
+            successExpectation.fulfill()
+        }
+        
+        // Ensure that the failureExpectation wasn't fulfilled in the extremely short period of time
+        wait(for: [failureExpectation], timeout: 0.1)
+        // Ensure that the successExpectation was fulfilled before the longer period of time
+        wait(for: [successExpectation], timeout: 1.26)
     }
     
     func test_getBalance_onSuccess_checkExpectedPayload() {

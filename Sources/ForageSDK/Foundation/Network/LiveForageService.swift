@@ -323,8 +323,8 @@ extension LiveForageService: Polling {
     /// Support function to update retry count and interval between attempts.
     ///
     /// - Parameters:
-    ///  - completion: Which will return after an wait.
-    private func waitNextAttempt(completion: @escaping () -> ()) {
+    ///  - completion: Which will return after a wait.
+    internal func waitNextAttempt(completion: @escaping () -> ()) {
         retryCount = retryCount + 1
         let nextPollTime = self.intervalBetweenAttempts + self.getJitterAmount()
         DispatchQueue.main.asyncAfter(deadline: .now() + nextPollTime) {
