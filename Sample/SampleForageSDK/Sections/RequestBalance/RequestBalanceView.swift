@@ -75,9 +75,9 @@ class RequestBalanceView: UIView {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(goToCreatePayment(_:)), for: .touchUpInside)
         button.backgroundColor = .systemBlue
-        button.isEnabled = false
-        button.isUserInteractionEnabled = false
-        button.alpha = 0.5
+        button.isEnabled = true
+        button.isUserInteractionEnabled = true
+        button.alpha = 1.0
         button.accessibilityIdentifier = "bt_next"
         button.isAccessibilityElement = true
         return button
@@ -187,12 +187,10 @@ class RequestBalanceView: UIView {
                 self.snapBalanceLabel.text = "snap=\(response.snap)"
                 self.nonSnapBalanceLabel.text = "cash=\(response.cash)"
                 self.errorLabel.text = ""
-                self.updateButtonState(isEnabled: true, button: self.nextButton)
             case .failure(let error):
                 self.errorLabel.text = "\(error)"
                 self.snapBalanceLabel.text = ""
                 self.nonSnapBalanceLabel.text = ""
-                self.updateButtonState(isEnabled: false, button: self.nextButton)
             }
             
             self.layoutIfNeeded()
@@ -329,12 +327,6 @@ class RequestBalanceView: UIView {
             padding: .init(top: 0, left: 24, bottom: 0, right: 24),
             size: .init(width: 0, height: 48)
         )
-    }
-    
-    private func updateButtonState(isEnabled: Bool, button: UIButton) {
-        button.isEnabled = isEnabled
-        button.isUserInteractionEnabled = isEnabled
-        button.alpha = isEnabled ? 1.0 : 0.5
     }
     
     private func updateState(state: ObservableState) {

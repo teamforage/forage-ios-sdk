@@ -176,7 +176,7 @@ final class ForageServiceTests: XCTestCase {
             case .success(let payment):
                 XCTAssertEqual(payment.paymentMethodRef, "81dab02290")
                 XCTAssertEqual(payment.receipt?.refNumber, "11767381fd")
-                XCTAssertEqual(payment.receipt?.balance.snap, "90.00")
+                XCTAssertEqual(payment.receipt?.balance?.snap, "90.00")
                 XCTAssertEqual(payment.lastProcessingError, nil)
                 XCTAssertEqual(payment.refunds[0], "9bf75154be")
                 expectation.fulfill()
