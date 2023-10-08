@@ -38,7 +38,7 @@ public struct Receipt: Codable {
     public let ebtCashAmount: String
     public let otherAmount: String
     public let salesTaxApplied: String
-    public let balance: ReceiptBalance
+    public let balance: ReceiptBalance?
     public let last4: String
     public let message: String
     public let transactionType: String
