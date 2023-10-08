@@ -31,7 +31,7 @@ The ForageSDK processes Electronic Benefits Transfer (EBT) payments in your e-co
 [CocoaPods](https://cocoapods.org) is a dependency manager for Cocoa projects. For usage and installation instructions, visit their website. To integrate ForageSDK into your Xcode project using CocoaPods, specify it in your `Podfile`:
 
 ```swift
-pod 'ForageSDK', '~> 4.1.1'
+pod 'ForageSDK', '~> 4.1.2'
 ```
 
 ### Swift Package Manager
