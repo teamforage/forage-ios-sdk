@@ -53,6 +53,23 @@ private enum FlagType: String {
 }
 
 /**
+ Key value used to grab the dictionary returned by the "iso-polling-wait-intervals" flag
+ */
+private let INTERVALS = "intervals"
+
+/**
+ LaunchDarkly prefix
+ */
+private let LAUNCH_DARKLY_PREFIX = "LaunchDarkly"
+
+/**
+ LD Errors
+ */
+enum LDError: Error {
+    case parsingError
+}
+
+/**
  Contexts
  */
 private enum ContextKey: String {
@@ -89,7 +106,7 @@ internal class LDManager {
         logger: ForageLogger? = nil,
         startLdClient: (LDConfig, LDContext?, (() -> Void)?) -> Void = LDClient.start
     ) {
-        self.logger = logger
+        self.logger = logger?.setPrefix(LAUNCH_DARKLY_PREFIX)
         
         let ldConfig = createLDConfig(for: environment)
         
@@ -117,7 +134,7 @@ internal class LDManager {
         genRandomDouble: () -> Double = generateRandomDouble,
         fromCache: Bool = true
     ) -> VaultType {
-        logger = logger?.setPrefix("LaunchDarkly")
+        logger = logger?.setPrefix(LAUNCH_DARKLY_PREFIX)
         
         if fromCache, let existingVaultType = vaultType {
             return existingVaultType
@@ -148,7 +165,7 @@ internal class LDManager {
     }
     
     /// Determines on what interval we will poll for SQS messages based on "iso-polling-wait-intervals" feature flag.
-    /// Defaults to 1000 ms intervals if something goes wrong (ex: LDClient not initialized, LaunchDarkly is down).
+    /// Defaults to the empty array if something goes wrong and defers polling intervals to the polling class (ex: LDClient not initialized, LaunchDarkly is down).
     ///
     /// - Parameters:
     ///   - ldClient: An optional `LDClientProtocol` object used to fetch feature flags. Defaults to `getDefaultLDClient()`.
@@ -157,19 +174,18 @@ internal class LDManager {
     internal func getPollingIntervals(
         ldClient: LDClientProtocol? = getDefaultLDClient()
     ) -> [Int] {
-        logger = logger?.setPrefix("LaunchDarkly")
+        logger = logger?.setPrefix(LAUNCH_DARKLY_PREFIX)
         
-        let intervals = "intervals"
-        
-        let defaultValLdValue = LDValue(dictionaryLiteral: (intervals, LDValue(arrayLiteral: [1000])))
-        
-        var toReturn: [Int] = [1000]
+        // NOTE: The two values below should stay in sync! There is no initializer for the LDValue object to be able to reuse the initial variable declaration
+        let defaultReturnValue: [Int] = []
+        let defaultValLdValue = LDValue(dictionaryLiteral: (INTERVALS, []))
         
         guard let ld = ldClient else {
             logger?.error("Defaulting to 1 second polling intervals. LDClient.get() was called before init()!",
                           error: nil,
                           attributes: nil)
-            return toReturn
+            
+            return defaultReturnValue
         }
         
         let pollingIntervalsAsLdValue = ld.jsonVariationWrapper(forKey: FlagType.isoPollingWaitIntervals.rawValue, defaultValue: defaultValLdValue)
@@ -178,48 +194,48 @@ internal class LDManager {
             let convertedVals = try convertLdValueToIntArray(val: pollingIntervalsAsLdValue)
             logger?.info("Evaluated \(FlagType.isoPollingWaitIntervals) = \(convertedVals)%",
                          attributes: nil)
+            
             return convertedVals
         } catch {
-            return toReturn
+            logger?.error("Defaulting to 1 second polling intervals. Failed to correctly parse \(FlagType.isoPollingWaitIntervals) value!",
+                          error: nil,
+                          attributes: nil)
+            
+            return []
         }
     }
     
-    enum TestError: Error {
-        case ldError
-    }
-    
-    private func convertLdValueToIntArray(val: LDValue) throws -> [Int] {
-        let intervals = "intervals"
-        var toReturn: [Int] = [1]
+    internal func convertLdValueToIntArray(val: LDValue) throws -> [Int] {
+        var toReturn: [Int] = []
         switch val {
         case .object(let dict):
             for (key, value) in dict {
-                if (key == intervals) {
+                if (key == INTERVALS) {
                     switch value {
 
                     case .null:
-                        throw TestError.ldError
+                        throw LDError.parsingError
                     case .bool(_):
-                        throw TestError.ldError
+                        throw LDError.parsingError
                     case .number(_):
-                        throw TestError.ldError
+                        throw LDError.parsingError
                     case .string(_):
-                        throw TestError.ldError
+                        throw LDError.parsingError
                     case .array(let intervalVals):
                         do {
                             toReturn = try intervalVals.map { timeInMs in
                                 switch timeInMs {
 
                                 case .null:
-                                    throw TestError.ldError
+                                    throw LDError.parsingError
                                 case .bool(_):
-                                    throw TestError.ldError
+                                    throw LDError.parsingError
                                 case .string(_):
-                                    throw TestError.ldError
+                                    throw LDError.parsingError
                                 case .array(_):
-                                    throw TestError.ldError
+                                    throw LDError.parsingError
                                 case .object(_):
-                                    throw TestError.ldError
+                                    throw LDError.parsingError
                                 case .number(let valAsNum):
                                     return Int(valAsNum)
                                 }
@@ -228,20 +244,20 @@ internal class LDManager {
                             return toReturn
                         }
                     case .object(_):
-                        throw TestError.ldError
+                        throw LDError.parsingError
                     }
                 }
             }
         case .null:
-            throw TestError.ldError
+            throw LDError.parsingError
         case .bool(_):
-            throw TestError.ldError
+            throw LDError.parsingError
         case .number(_):
-            throw TestError.ldError
+            throw LDError.parsingError
         case .string(_):
-            throw TestError.ldError
+            throw LDError.parsingError
         case .array(_):
-            throw TestError.ldError
+            throw LDError.parsingError
         }
 
         return toReturn

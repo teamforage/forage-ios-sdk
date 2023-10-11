@@ -45,7 +45,7 @@ class MockLDClient : LDClientProtocol {
     }
     
     func jsonVariationWrapper(forKey key: String, defaultValue: LDValue) -> LDValue {
-        return pollingIntervals!
+        return pollingIntervals ?? defaultValue
     }
 }
 
@@ -110,14 +110,59 @@ final class LDManagerTests: XCTestCase {
         XCTAssertEqual(result, VaultType.vgsVaultType)
     }
     
-    func testGetPollingIntervals_VariationEqualToRandom_ShouldReturnVGSVaultType() {
-        let mockLDClient = MockLDClient(pollingIntervals: LDValue(dictionaryLiteral: ("intervals", LDValue(arrayLiteral: [1000]))))
+    func testGetPollingIntervals_ReturnsDefaultVal() {
+        let mockLDClient = MockLDClient()
         
         let result = LDManager.shared.getPollingIntervals(
-            ldClient: mockLDClient,
-            fromCache: false
+            ldClient: mockLDClient
         )
-//        XCTAssertEqual(result, VaultType.vgsVaultType)
+        let defatulVal: [Int] = []
+        XCTAssertEqual(result, defatulVal)
+    }
+    
+    func testGetPollingIntervals_InvalidFlagValueReturnsDefault() {
+        // Structure of the flag value is incorrect! The object should be:
+        // { "intervals": [1000] }
+        // Instead it is:
+        // { "intervals": 1000 }
+        let mockLDClient = MockLDClient(pollingIntervals: LDValue(dictionaryLiteral: ("intervals", 1000)))
+        
+        let result = LDManager.shared.getPollingIntervals(
+            ldClient: mockLDClient
+        )
+        let defatulVal: [Int] = []
+        XCTAssertEqual(result, defatulVal)
+    }
+    
+    func testGetPollingIntervals_ValidFlagValueIsReturned() {
+        let defVal = LDValue(dictionaryLiteral: ("intervals", [250, 250, 500, 500, 1000]))
+        let mockLDClient = MockLDClient(pollingIntervals: defVal)
+        
+        let result = LDManager.shared.getPollingIntervals(
+            ldClient: mockLDClient
+        )
+        let expectedValue: [Int] = [250, 250, 500, 500, 1000]
+        XCTAssertEqual(result, expectedValue)
+    }
+    
+    func testConvertLdValueToIntArray_ThrowsIfIncorrectStructure() {
+        let defVal = LDValue(dictionaryLiteral: ("intervals", 1000))
+        
+        XCTAssertThrowsError(try LDManager.shared.convertLdValueToIntArray(val: defVal)) { error in
+            XCTAssertTrue(error is LDError)
+        }
+    }
+    
+    func testConvertLdValueToIntArray_ParsesCorrectVal() {
+        let defVal = LDValue(dictionaryLiteral: ("intervals", [250, 250, 500, 500, 1000]))
+        
+        do {
+            let result = try LDManager.shared.convertLdValueToIntArray(val: defVal)
+            let expectedValue: [Int] = [250, 250, 500, 500, 1000]
+            XCTAssertEqual(result, expectedValue)
+        } catch {
+            XCTFail("Test failed because the structure of the input was incorrect")
+        }
     }
     
     // MARK: Test LDManager.Initialize
