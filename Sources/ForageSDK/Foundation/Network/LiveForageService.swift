@@ -336,7 +336,6 @@ extension LiveForageService: Polling {
         }
         let intervalAsDouble = Double(interval) / 1000.0
         let nextPollTime = intervalAsDouble + self.jitterAmountInSeconds()
-        print(nextPollTime)
         DispatchQueue.main.asyncAfter(deadline: .now() + nextPollTime) {
             completion()
         }

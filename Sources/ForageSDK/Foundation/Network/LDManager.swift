@@ -148,16 +148,14 @@ internal class LDManager {
     }
     
     /// Determines on what interval we will poll for SQS messages based on "iso-polling-wait-intervals" feature flag.
-    /// Defaults to 1 second intervals if something goes wrong (ex: LDClient not initialized, LaunchDarkly is down).
+    /// Defaults to 1000 ms intervals if something goes wrong (ex: LDClient not initialized, LaunchDarkly is down).
     ///
     /// - Parameters:
     ///   - ldClient: An optional `LDClientProtocol` object used to fetch feature flags. Defaults to `getDefaultLDClient()`.
-    ///   - fromCache: A Boolean flag indicating whether to return the cached vault type if available. Defaults to `true`.
     ///
     /// - Returns: A list of Ints.
     internal func getPollingIntervals(
-        ldClient: LDClientProtocol? = getDefaultLDClient(),
-        fromCache: Bool = true
+        ldClient: LDClientProtocol? = getDefaultLDClient()
     ) -> [Int] {
         logger = logger?.setPrefix("LaunchDarkly")
         
@@ -184,14 +182,6 @@ internal class LDManager {
         } catch {
             return toReturn
         }
-        
-//        // Define a closure to convert each element to the desired type
-//        let transformedArray = pollingIntervalsAsLdValue.map { stringValue in
-//            return Int(stringValue) // Replace Int with the desired target type
-//        }
-//
-//
-//        logVaultType(vaultType)
     }
     
     enum TestError: Error {
