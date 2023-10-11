@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import VGSCollectSDK
 
 internal class LiveForageService: ForageService {
     // MARK: Properties
@@ -16,7 +15,8 @@ internal class LiveForageService: ForageService {
     
     private var logger: ForageLogger?
     private var maxAttempts: Int = 90
-    private var intervalBetweenAttempts: Double = 1.0
+    private var pollingIntervals: [Int] = LDManager.shared.getPollingIntervals()
+    private var defaultPollingIntervalInMS: Int = 1000
     private var retryCount = 0
     
     init(provider: Provider = Provider(), logger: ForageLogger? = nil) {
@@ -51,7 +51,7 @@ internal class LiveForageService: ForageService {
     
     // MARK: Check balance
     
-    /// Perform VGS SDK request to retrieve balance.
+    /// Perform Vault request to retrieve balance.
     ///
     /// - Parameters:
     ///  - pinCollector: The pin collection service
@@ -135,7 +135,7 @@ internal class LiveForageService: ForageService {
     
     // MARK: Capture payment
     
-    /// Perform VGS SDK request to capture payment.
+    /// Perform Vault request to capture payment.
     ///
     /// - Parameters:
     ///  - pinCollector: The pin collection service
@@ -204,10 +204,10 @@ internal class LiveForageService: ForageService {
 // MARK: - Polling
 
 extension LiveForageService: Polling {
-    /// Process VGSData for polling message.
+    /// Process Vault Data for polling message.
     ///
     /// - Parameters:
-    ///  - response: The *VGSResponse* which contains the result from VGS SDK.
+    ///  - response: The Vault response.
     ///  - request: Model element with data to perform request.
     ///  - completion: Which will return the result.
     internal func polling(response: VaultResponse, request: ForageRequestModel, completion: @escaping (Result<Data?, Error>) -> Void) {
@@ -216,11 +216,11 @@ extension LiveForageService: Polling {
         if let error = response.error {
             completion(.failure(error))
         } else if let data = response.data, let urlResponse = response.urlResponse {
-            provider.processVGSData(model: MessageResponseModel.self, code: response.statusCode, data: data, response: urlResponse) { [weak self] messageResponse in
+            provider.processVaultData(model: MessageResponseModel.self, code: response.statusCode, data: data, response: urlResponse) { [weak self] messageResponse in
                 switch messageResponse {
                 case .success(let message):
                     self?.pollingMessage(
-                        message: message,
+                        contentId: message.contentId,
                         request: request) { pollingResult in
                             switch pollingResult {
                             case .success:
@@ -245,16 +245,16 @@ extension LiveForageService: Polling {
     /// Polls message to check payment status
     ///
     /// - Parameters:
-    ///  - message: The *MessageResponseModel* which contains the message.
+    ///  - contentId: The *MessageResponseModel* which contains the message.
     ///  - request: Model element with data to perform request.
     ///  - completion: Which will return the message for another retry or success.
     internal func pollingMessage(
-        message: MessageResponseModel,
+        contentId: String,
         request: ForageRequestModel,
         completion: @escaping (Result<MessageResponseModel, Error>) -> Void) -> Void
     {
         do {
-            try provider.execute(model: MessageResponseModel.self, endpoint: ForageAPI.message(request: message, sessionToken: request.authorization, merchantID: request.merchantID), completion: { [weak self] result in
+            try provider.execute(model: MessageResponseModel.self, endpoint: ForageAPI.message(contentId: contentId, sessionToken: request.authorization, merchantID: request.merchantID), completion: { [weak self] result in
                 guard let self = self else { return }
                 switch result {
                 case .success(let data):
@@ -287,7 +287,7 @@ extension LiveForageService: Polling {
                     } else if self.retryCount < self.maxAttempts {
                         self.waitNextAttempt {
                             self.pollingMessage(
-                                message: data,
+                                contentId: data.contentId,
                                 request: request,
                                 completion: completion
                             )
@@ -330,7 +330,13 @@ extension LiveForageService: Polling {
     ///  - completion: Which will return after a wait.
     internal func waitNextAttempt(completion: @escaping () -> ()) {
         retryCount = retryCount + 1
-        let nextPollTime = self.intervalBetweenAttempts + self.jitterAmountInSeconds()
+        var interval = self.defaultPollingIntervalInMS
+        if (retryCount < pollingIntervals.count) {
+            interval = pollingIntervals[retryCount]
+        }
+        let intervalAsDouble = Double(interval) / 1000.0
+        let nextPollTime = intervalAsDouble + self.jitterAmountInSeconds()
+        print(nextPollTime)
         DispatchQueue.main.asyncAfter(deadline: .now() + nextPollTime) {
             completion()
         }

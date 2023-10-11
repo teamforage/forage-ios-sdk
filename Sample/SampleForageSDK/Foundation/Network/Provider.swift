@@ -105,7 +105,7 @@ internal class Provider {
         return completion(.success(result))
     }
     
-    internal func processVGSData<T: Decodable>(model: T.Type, code: Int?, data: Data?, response: URLResponse?, completion: @escaping (Result<T, Error>) -> Void) {
+    internal func processVaultData<T: Decodable>(model: T.Type, code: Int?, data: Data?, response: URLResponse?, completion: @escaping (Result<T, Error>) -> Void) {
         
         guard let data = data else {
             return completion(.failure(NSError(domain: "Invalid data", code: code ?? -991, userInfo: nil)))

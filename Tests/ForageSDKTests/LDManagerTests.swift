@@ -28,18 +28,24 @@ class MockLogger : NoopLogger {
 }
 
 class MockLDClient : LDClientProtocol {
+    var pollingIntervals: LDValue?
     var vaultPercentage: Double
     
-    init(vaultPercentage: Double) {
+    init(vaultPercentage: Double = 0.0, pollingIntervals: LDValue? = nil) {
         self.vaultPercentage = vaultPercentage
+        self.pollingIntervals = pollingIntervals
     }
-    
+
     init(vaultType: VaultType) {
         self.vaultPercentage = vaultType == VaultType.vgsVaultType ? 0 : 100
     }
     
     func doubleVariationWrapper(forKey key: String, defaultValue: Double) -> Double {
         return vaultPercentage
+    }
+    
+    func jsonVariationWrapper(forKey key: String, defaultValue: LDValue) -> LDValue {
+        return pollingIntervals!
     }
 }
 
@@ -102,6 +108,16 @@ final class LDManagerTests: XCTestCase {
             fromCache: false
         )
         XCTAssertEqual(result, VaultType.vgsVaultType)
+    }
+    
+    func testGetPollingIntervals_VariationEqualToRandom_ShouldReturnVGSVaultType() {
+        let mockLDClient = MockLDClient(pollingIntervals: LDValue(dictionaryLiteral: ("intervals", LDValue(arrayLiteral: [1000]))))
+        
+        let result = LDManager.shared.getPollingIntervals(
+            ldClient: mockLDClient,
+            fromCache: false
+        )
+//        XCTAssertEqual(result, VaultType.vgsVaultType)
     }
     
     // MARK: Test LDManager.Initialize

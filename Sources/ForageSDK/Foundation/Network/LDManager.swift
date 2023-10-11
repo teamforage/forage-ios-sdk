@@ -11,13 +11,19 @@ import LaunchDarkly
 
 internal protocol LDClientProtocol {
     func doubleVariationWrapper(forKey key: String, defaultValue: Double) -> Double
+    func jsonVariationWrapper(forKey key: String, defaultValue: LDValue) -> LDValue
 }
 
 extension LDClient: LDClientProtocol {
     func doubleVariationWrapper(forKey key: String, defaultValue: Double) -> Double {
         return self.doubleVariation(forKey: key, defaultValue: defaultValue)
     }
+    
+    func jsonVariationWrapper(forKey key: String, defaultValue: LDValue) -> LDValue {
+        return self.jsonVariation(forKey: key, defaultValue: defaultValue)
+    }
 }
+
 
 /**
  LD Public Keys
@@ -43,6 +49,7 @@ public enum VaultType: String {
  */
 private enum FlagType: String {
     case vaultPrimaryTrafficPercentage = "vault-primary-traffic-percentage"
+    case isoPollingWaitIntervals = "iso-polling-wait-intervals"
 }
 
 /**
@@ -138,6 +145,116 @@ internal class LDManager {
         logVaultType(vaultType)
         
         return vaultType ?? .vgsVaultType
+    }
+    
+    /// Determines on what interval we will poll for SQS messages based on "iso-polling-wait-intervals" feature flag.
+    /// Defaults to 1 second intervals if something goes wrong (ex: LDClient not initialized, LaunchDarkly is down).
+    ///
+    /// - Parameters:
+    ///   - ldClient: An optional `LDClientProtocol` object used to fetch feature flags. Defaults to `getDefaultLDClient()`.
+    ///   - fromCache: A Boolean flag indicating whether to return the cached vault type if available. Defaults to `true`.
+    ///
+    /// - Returns: A list of Ints.
+    internal func getPollingIntervals(
+        ldClient: LDClientProtocol? = getDefaultLDClient(),
+        fromCache: Bool = true
+    ) -> [Int] {
+        logger = logger?.setPrefix("LaunchDarkly")
+        
+        let intervals = "intervals"
+        
+        let defaultValLdValue = LDValue(dictionaryLiteral: (intervals, LDValue(arrayLiteral: [1000])))
+        
+        var toReturn: [Int] = [1000]
+        
+        guard let ld = ldClient else {
+            logger?.error("Defaulting to 1 second polling intervals. LDClient.get() was called before init()!",
+                          error: nil,
+                          attributes: nil)
+            return toReturn
+        }
+        
+        let pollingIntervalsAsLdValue = ld.jsonVariationWrapper(forKey: FlagType.isoPollingWaitIntervals.rawValue, defaultValue: defaultValLdValue)
+        
+        do {
+            let convertedVals = try convertLdValueToIntArray(val: pollingIntervalsAsLdValue)
+            logger?.info("Evaluated \(FlagType.isoPollingWaitIntervals) = \(convertedVals)%",
+                         attributes: nil)
+            return convertedVals
+        } catch {
+            return toReturn
+        }
+        
+//        // Define a closure to convert each element to the desired type
+//        let transformedArray = pollingIntervalsAsLdValue.map { stringValue in
+//            return Int(stringValue) // Replace Int with the desired target type
+//        }
+//
+//
+//        logVaultType(vaultType)
+    }
+    
+    enum TestError: Error {
+        case ldError
+    }
+    
+    private func convertLdValueToIntArray(val: LDValue) throws -> [Int] {
+        let intervals = "intervals"
+        var toReturn: [Int] = [1]
+        switch val {
+        case .object(let dict):
+            for (key, value) in dict {
+                if (key == intervals) {
+                    switch value {
+
+                    case .null:
+                        throw TestError.ldError
+                    case .bool(_):
+                        throw TestError.ldError
+                    case .number(_):
+                        throw TestError.ldError
+                    case .string(_):
+                        throw TestError.ldError
+                    case .array(let intervalVals):
+                        do {
+                            toReturn = try intervalVals.map { timeInMs in
+                                switch timeInMs {
+
+                                case .null:
+                                    throw TestError.ldError
+                                case .bool(_):
+                                    throw TestError.ldError
+                                case .string(_):
+                                    throw TestError.ldError
+                                case .array(_):
+                                    throw TestError.ldError
+                                case .object(_):
+                                    throw TestError.ldError
+                                case .number(let valAsNum):
+                                    return Int(valAsNum)
+                                }
+                            }
+                        } catch {
+                            return toReturn
+                        }
+                    case .object(_):
+                        throw TestError.ldError
+                    }
+                }
+            }
+        case .null:
+            throw TestError.ldError
+        case .bool(_):
+            throw TestError.ldError
+        case .number(_):
+            throw TestError.ldError
+        case .string(_):
+            throw TestError.ldError
+        case .array(_):
+            throw TestError.ldError
+        }
+
+        return toReturn
     }
 
     private func createLDConfig(for environment: Environment) -> LDConfig {
