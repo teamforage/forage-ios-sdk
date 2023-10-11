@@ -14,14 +14,15 @@ internal class LiveForageService: ForageService {
     internal var provider: Provider
     
     private var logger: ForageLogger?
+    private var ldManager: LDManagerBaseClass?
     private var maxAttempts: Int = 90
-    private var pollingIntervals: [Int] = LDManager.shared.getPollingIntervals()
     private var defaultPollingIntervalInMS: Int = 1000
     private var retryCount = 0
     
-    init(provider: Provider = Provider(), logger: ForageLogger? = nil) {
+    init(provider: Provider = Provider(), logger: ForageLogger? = nil, ldManager: LDManagerBaseClass) {
         self.provider = provider
         self.logger = logger?.setPrefix("")
+        self.ldManager = ldManager
     }
     
     // MARK: Tokenize EBT card
@@ -329,13 +330,16 @@ extension LiveForageService: Polling {
     /// - Parameters:
     ///  - completion: Which will return after a wait.
     internal func waitNextAttempt(completion: @escaping () -> ()) {
-        retryCount = retryCount + 1
         var interval = self.defaultPollingIntervalInMS
+        let pollingIntervals = ldManager?.getPollingIntervals() ?? []
         if (retryCount < pollingIntervals.count) {
             interval = pollingIntervals[retryCount]
         }
         let intervalAsDouble = Double(interval) / 1000.0
         let nextPollTime = intervalAsDouble + self.jitterAmountInSeconds()
+        
+        retryCount = retryCount + 1
+
         DispatchQueue.main.asyncAfter(deadline: .now() + nextPollTime) {
             completion()
         }

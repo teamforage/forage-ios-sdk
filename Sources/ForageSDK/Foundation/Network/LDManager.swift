@@ -24,6 +24,33 @@ extension LDClient: LDClientProtocol {
     }
 }
 
+internal protocol LDManagerProtocol {
+    func getVaultType(ldClient: LDClientProtocol?, genRandomDouble: () -> Double, fromCache: Bool) -> VaultType
+    func getPollingIntervals(ldClient: LDClientProtocol?) -> [Int]
+}
+
+internal class LDManagerBaseClass: LDManagerProtocol {
+    // Meant to be overriden by subclass
+    func getVaultType(
+        ldClient: LDClientProtocol? = getDefaultLDClient(),
+        genRandomDouble: () -> Double = generateRandomDouble,
+        fromCache: Bool = true) -> VaultType {
+            return VaultType.vgsVaultType
+    }
+    
+    // Meant to be overriden by subclass
+    func getPollingIntervals(ldClient: LDClientProtocol? = getDefaultLDClient()) -> [Int] {
+        return []
+    }
+    
+    internal static func getDefaultLDClient() -> LDClientProtocol? {
+        return LDClient.get()
+    }
+    
+    internal static func generateRandomDouble() -> Double {
+        return Double.random(in: 0...100)
+    }
+}
 
 /**
  LD Public Keys
@@ -80,10 +107,12 @@ private enum ContextKind: String {
     case service = "service"
 }
 
+// TODO: Make LDManager an interface, create a mocked version of the interface, test using the mocked version
+
 /// `LDManager` is responsible for managing interactions with the LaunchDarkly service.
 ///
 /// - Note: This class is a singleton and should be accessed via `LDManager.shared`.
-internal class LDManager {
+internal class LDManager: LDManagerBaseClass {
     // MARK: - Properties
     
     static let shared = LDManager()
@@ -93,7 +122,7 @@ internal class LDManager {
     
     // MARK: - Initialization
     
-    private init() {}
+    private override init() {}
     
     /// Initializes the LaunchDarkly client with a given environment and optional logger.
     ///
@@ -129,7 +158,7 @@ internal class LDManager {
     ///   - fromCache: A Boolean flag indicating whether to return the cached vault type if available. Defaults to `true`.
     ///
     /// - Returns: The determined `VaultType`.
-    internal func getVaultType(
+    internal override func getVaultType(
         ldClient: LDClientProtocol? = getDefaultLDClient(),
         genRandomDouble: () -> Double = generateRandomDouble,
         fromCache: Bool = true
@@ -171,7 +200,7 @@ internal class LDManager {
     ///   - ldClient: An optional `LDClientProtocol` object used to fetch feature flags. Defaults to `getDefaultLDClient()`.
     ///
     /// - Returns: A list of Ints.
-    internal func getPollingIntervals(
+    internal override func getPollingIntervals(
         ldClient: LDClientProtocol? = getDefaultLDClient()
     ) -> [Int] {
         logger = logger?.setPrefix(LAUNCH_DARKLY_PREFIX)
@@ -274,14 +303,6 @@ internal class LDManager {
             return nil
         }
         return context
-    }
-    
-    private static func getDefaultLDClient() -> LDClientProtocol? {
-        return LDClient.get()
-    }
-    
-    private static func generateRandomDouble() -> Double {
-        return Double.random(in: 0...100)
     }
     
     private func logVaultType(_ vaultType: VaultType? = nil) {

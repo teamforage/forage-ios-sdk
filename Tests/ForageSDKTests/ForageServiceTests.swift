@@ -9,6 +9,19 @@
 import XCTest
 import VGSCollectSDK
 @testable import ForageSDK
+@testable import LaunchDarkly
+
+class MockLDManager : LDManagerBaseClass {
+    var pollingIntervals: [Int]
+    
+    init(pollingIntervals: [Int] = [1000, 1000, 1000]) {
+        self.pollingIntervals = pollingIntervals
+    }
+    
+    override func getPollingIntervals(ldClient: LDClientProtocol? = getDefaultLDClient()) -> [Int] {
+        return pollingIntervals
+    }
+}
 
 final class ForageServiceTests: XCTestCase {
     
@@ -26,7 +39,7 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.data = forageMocks.tokenizeSuccess
         mockSession.response = forageMocks.mockSuccessResponse
-        let service = LiveForageService(provider: Provider(mockSession))
+        let service = LiveForageService(provider: Provider(mockSession), ldManager: MockLDManager())
         
         let foragePANRequestModel = ForagePANRequestModel(
             authorization: "authToken123",
@@ -58,7 +71,7 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.error = forageMocks.tokenizeFailure
         mockSession.response = forageMocks.mockFailureResponse
-        let service = LiveForageService(provider: Provider(mockSession))
+        let service = LiveForageService(provider: Provider(mockSession), ldManager: MockLDManager())
         
         let foragePANRequestModel = ForagePANRequestModel(
             authorization: "authToken123",
@@ -86,7 +99,7 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.data = forageMocks.xKeySuccess
         mockSession.response = forageMocks.mockSuccessResponse
-        let service = LiveForageService(provider: Provider(mockSession))
+        let service = LiveForageService(provider: Provider(mockSession), ldManager: MockLDManager())
         
         let expectation = XCTestExpectation(description: "Get the X-Key header - should succeed")
         service.getXKey(sessionToken: "auth1234", merchantID: "1234567") { result in
@@ -106,7 +119,7 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.error = forageMocks.generalError
         mockSession.response = forageMocks.mockFailureResponse
-        let service = LiveForageService(provider: Provider(mockSession))
+        let service = LiveForageService(provider: Provider(mockSession), ldManager: MockLDManager())
         
         let expectation = XCTestExpectation(description: "Get the X-Key header - result should be failure")
         service.getXKey(sessionToken: "auth1234", merchantID: "1234567") { result in
@@ -125,7 +138,7 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.data = forageMocks.getPaymentMethodSuccess
         mockSession.response = forageMocks.mockSuccessResponse
-        let service = LiveForageService(provider: Provider(mockSession))
+        let service = LiveForageService(provider: Provider(mockSession), ldManager: MockLDManager())
         
         let expectation = XCTestExpectation(description: "Get the Payment Method - should succeed")
         service.getPaymentMethod(sessionToken: "auth1234", merchantID: "1234567", paymentMethodRef: "ca29d3443f") { result in
@@ -149,7 +162,7 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.error = forageMocks.getPaymentMethodFailure
         mockSession.response = forageMocks.mockFailureResponse
-        let service = LiveForageService(provider: Provider(mockSession))
+        let service = LiveForageService(provider: Provider(mockSession), ldManager: MockLDManager())
         
         let expectation = XCTestExpectation(description: "Get the Payment Method - result should be failure")
         service.getPaymentMethod(sessionToken: "auth1234", merchantID: "1234567", paymentMethodRef: "ca29d3443f") { result in
@@ -168,7 +181,7 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.data = forageMocks.capturePaymentSuccess
         mockSession.response = forageMocks.mockSuccessResponse
-        let service = LiveForageService(provider: Provider(mockSession))
+        let service = LiveForageService(provider: Provider(mockSession), ldManager: MockLDManager())
         
         let expectation = XCTestExpectation(description: "Get the Payment - should succeed")
         service.getPayment(sessionToken: "auth1234", merchantID: "1234567", paymentRef: "11767381fd") { result in
@@ -191,7 +204,7 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.error = forageMocks.getPaymentError
         mockSession.response = forageMocks.mockFailureResponse
-        let service = LiveForageService(provider: Provider(mockSession))
+        let service = LiveForageService(provider: Provider(mockSession), ldManager: MockLDManager())
         
         let expectation = XCTestExpectation(description: "Get the Payment - result should be failure")
         service.getPayment(sessionToken: "auth1234", merchantID: "1234567", paymentRef: "11767381fd") { result in
@@ -208,7 +221,7 @@ final class ForageServiceTests: XCTestCase {
 
     func test_getJitterAmountInSeconds() {
         let mockSession = URLSessionMock()
-        let service = LiveForageService(provider: Provider(mockSession))
+        let service = LiveForageService(provider: Provider(mockSession), ldManager: MockLDManager())
         
         func mockRNG() -> Int {
             return 1000
@@ -220,9 +233,9 @@ final class ForageServiceTests: XCTestCase {
         XCTAssertTrue(jitterAmount == 1)
     }
     
-    func test_waitNextAttempt() {
+    func test_WaitNextAttempt_defaultIntervals() {
         let mockSession = URLSessionMock()
-        let service = LiveForageService(provider: Provider(mockSession))
+        let service = LiveForageService(provider: Provider(mockSession), ldManager: MockLDManager())
         
         let failureExpectation = XCTestExpectation(description: "Completion called before delay")
         let successExpectation = XCTestExpectation(description: "Completion called after delay")
@@ -238,7 +251,41 @@ final class ForageServiceTests: XCTestCase {
         // Ensure that the failureExpectation wasn't fulfilled in the extremely short period of time
         wait(for: [failureExpectation], timeout: 0.1)
         // Ensure that the successExpectation was fulfilled before the longer period of time
-        wait(for: [successExpectation], timeout: 1.26)
+        wait(for: [successExpectation], timeout: 1.026)
+    }
+    
+    func test_waitNextAttempt_noPollingIntervals() {
+        let mockSession = URLSessionMock()
+        mockSession.data = forageMocks.capturePaymentSuccess
+        mockSession.response = forageMocks.mockSuccessResponse
+        
+        let successExpectation = XCTestExpectation(description: "Completion called after delay")
+        
+        let service = LiveForageService(provider: Provider(mockSession), ldManager: MockLDManager(pollingIntervals: []))
+        
+        service.waitNextAttempt {
+            successExpectation.fulfill()
+        }
+        
+        // Default value is 1000 ms + 25 ms
+        wait(for: [successExpectation], timeout: 1.026)
+    }
+    
+    func test_waitNextAttempt_shorterIntervals() {
+        let mockSession = URLSessionMock()
+        mockSession.data = forageMocks.capturePaymentSuccess
+        mockSession.response = forageMocks.mockSuccessResponse
+        
+        let successExpectation = XCTestExpectation(description: "Completion called after delay")
+        
+        let service = LiveForageService(provider: Provider(mockSession), ldManager: MockLDManager(pollingIntervals: [100]))
+        
+        service.waitNextAttempt {
+            successExpectation.fulfill()
+        }
+        
+        // Default value is 1000 ms + 25 ms
+        wait(for: [successExpectation], timeout: 0.126)
     }
     
     func test_getBalance_onSuccess_checkExpectedPayload() {
