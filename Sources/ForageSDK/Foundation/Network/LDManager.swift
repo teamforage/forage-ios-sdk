@@ -219,7 +219,7 @@ internal class LDManager: LDManagerBaseClass {
         
         do {
             let convertedVals = try convertLdValueToIntArray(val: pollingIntervalsAsLdValue)
-            logger?.info("Evaluated \(FlagType.isoPollingWaitIntervals) = \(convertedVals)%",
+            logger?.info("Evaluated \(FlagType.isoPollingWaitIntervals) = \(convertedVals)",
                          attributes: nil)
             
             return convertedVals
