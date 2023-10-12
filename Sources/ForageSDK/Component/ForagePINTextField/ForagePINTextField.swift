@@ -104,37 +104,6 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
         set { textField.font = newValue }
     }
     
-    /// Width of the input field within the ForagePINTextField.
-    /// - SeeAlso: `inputHeight` to customize the height of the input field within the ForagePINTextField.
-    @IBInspectable public var inputWidth: CGFloat {
-        get { return textField.inputWidth }
-        set {
-            container.alignment = .center
-            textField.inputWidth = newValue
-        }
-    }
-    
-    /// Height of the input field within the ForagePINTextField.
-    /// - SeeAlso: `elementHeight` to customize the height of the entire ForagePINTextField.
-    @IBInspectable public var inputHeight: CGFloat {
-        get { return textField.inputHeight }
-        set {
-            container.alignment = .center
-            textField.inputHeight = newValue
-        }
-    }
-    
-    /// Height of the entire ForagePINTextField element.
-    /// - SeeAlso: `inputHeight` to customize the height of the input field within the ForagePINTextField.
-    private var _elementHeight: CGFloat = 0
-    @IBInspectable public var elementHeight: CGFloat {
-        get { return _elementHeight }
-        set {
-            _elementHeight = newValue
-            self.changeElementHeight(value: _elementHeight)
-        }
-    }
-    
     // MARK: - Private components
     
     private lazy var root: UIView = {
@@ -288,11 +257,6 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
     
     @objc fileprivate func requestFocus(_ gesture: UIGestureRecognizer) {
         becomeFirstResponder()
-    }
-    
-    private func changeElementHeight(value: CGFloat) {
-        container.distribution = .equalCentering
-        container.heightAnchor.constraint(equalToConstant: value).isActive = true
     }
     
     // MARK: - Public API
