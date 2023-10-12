@@ -235,61 +235,37 @@ internal class LDManager: LDManagerBaseClass {
     }
     
     internal func convertLdValueToIntArray(val: LDValue) throws -> [Int] {
-        var toReturn: [Int] = []
         switch val {
         case .object(let dict):
             for (key, value) in dict {
                 if (key == INTERVALS) {
                     switch value {
-
-                    case .null:
-                        throw LDError.parsingError
-                    case .bool(_):
-                        throw LDError.parsingError
-                    case .number(_):
-                        throw LDError.parsingError
-                    case .string(_):
-                        throw LDError.parsingError
+                        
                     case .array(let intervalVals):
                         do {
-                            toReturn = try intervalVals.map { timeInMs in
+                            return try intervalVals.map { timeInMs in
                                 switch timeInMs {
-
-                                case .null:
-                                    throw LDError.parsingError
-                                case .bool(_):
-                                    throw LDError.parsingError
-                                case .string(_):
-                                    throw LDError.parsingError
-                                case .array(_):
-                                    throw LDError.parsingError
-                                case .object(_):
-                                    throw LDError.parsingError
+                                    
                                 case .number(let valAsNum):
                                     return Int(valAsNum)
+                                    
+                                default:
+                                    throw LDError.parsingError
                                 }
                             }
                         } catch {
-                            return toReturn
+                            throw LDError.parsingError
                         }
-                    case .object(_):
+                    default:
                         throw LDError.parsingError
                     }
                 }
             }
-        case .null:
-            throw LDError.parsingError
-        case .bool(_):
-            throw LDError.parsingError
-        case .number(_):
-            throw LDError.parsingError
-        case .string(_):
-            throw LDError.parsingError
-        case .array(_):
+        default:
             throw LDError.parsingError
         }
-
-        return toReturn
+        
+        throw LDError.parsingError
     }
 
     private func createLDConfig(for environment: Environment) -> LDConfig {
