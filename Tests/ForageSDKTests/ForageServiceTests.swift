@@ -206,17 +206,19 @@ final class ForageServiceTests: XCTestCase {
         wait(for: [expectation], timeout: 1.0)
     }
 
-    func testGetJitterAmountWithCustomRandomGenerator() {
+    func test_getJitterAmountInSeconds() {
         let mockSession = URLSessionMock()
-        mockSession.data = forageMocks.capturePaymentSuccess
-        mockSession.response = forageMocks.mockSuccessResponse
         let service = LiveForageService(provider: Provider(mockSession))
         
-        let jitterAmount = service.getJitterAmount()
+        func mockRNG() -> Int {
+            return 1000
+        }
+
+        let jitterAmount = service.jitterAmountInSeconds(using: mockRNG)
         
         // Assert
         XCTAssertNotNil(jitterAmount, "Jitter amount should not be nil")
-        XCTAssertTrue(jitterAmount >= -0.025 && jitterAmount <= 0.025, "Jitter amount should be within -0.025 and 0.025")
+        XCTAssertTrue(jitterAmount == 1)
     }
     
     func testWaitNextAttempt() {
