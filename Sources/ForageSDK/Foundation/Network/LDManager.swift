@@ -107,8 +107,6 @@ private enum ContextKind: String {
     case service = "service"
 }
 
-// TODO: Make LDManager an interface, create a mocked version of the interface, test using the mocked version
-
 /// `LDManager` is responsible for managing interactions with the LaunchDarkly service.
 ///
 /// - Note: This class is a singleton and should be accessed via `LDManager.shared`.
