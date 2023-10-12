@@ -312,17 +312,14 @@ extension LiveForageService: Polling {
         }
     }
     
-    private static func defaultRNG() -> Int {
-        return Int.random(in: -25...25)
-    }
-    
     /// We generate a random jitter amount to add to our retry delay when polling for the status of
     /// Payments and Payment Methods so that we can avoid a thundering herd scenario in which there are
     /// several requests retrying at the same exact time.
     ///
     /// Returns a random double between -.025 and .025
-    internal func jitterAmountInSeconds(using rng: () -> Int = defaultRNG) -> Double {
-        return Double(rng()) / 1000.0
+    @objc
+    internal func jitterAmountInSeconds() -> Double {
+        return Double(Int.random(in: -25...25)) / 1000.0
     }
     
     /// Support function to update retry count and interval between attempts.

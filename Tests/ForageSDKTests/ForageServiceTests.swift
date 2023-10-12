@@ -27,6 +27,12 @@ class MockLDManager : LDManagerProtocol {
     }
 }
 
+class MockForageService: LiveForageService {
+    override func jitterAmountInSeconds() -> Double {
+        return 0.0
+    }
+}
+
 final class ForageServiceTests: XCTestCase {
     
     var forageMocks: ForageMocks!
@@ -226,20 +232,16 @@ final class ForageServiceTests: XCTestCase {
     func test_getJitterAmountInSeconds() {
         let mockSession = URLSessionMock()
         let service = LiveForageService(provider: Provider(mockSession), ldManager: MockLDManager())
-        
-        func mockRNG() -> Int {
-            return 1000
-        }
 
-        let jitterAmount = service.jitterAmountInSeconds(using: mockRNG)
+        let jitterAmount = service.jitterAmountInSeconds()
         
         XCTAssertNotNil(jitterAmount, "Jitter amount should not be nil")
-        XCTAssertTrue(jitterAmount == 1)
+        XCTAssertTrue(jitterAmount >= -0.025 && jitterAmount <= 0.025)
     }
     
     func test_WaitNextAttempt_defaultIntervals() {
         let mockSession = URLSessionMock()
-        let service = LiveForageService(provider: Provider(mockSession), ldManager: MockLDManager())
+        let service = MockForageService(provider: Provider(mockSession), ldManager: MockLDManager())
         
         let failureExpectation = XCTestExpectation(description: "Completion called before delay")
         let successExpectation = XCTestExpectation(description: "Completion called after delay")
@@ -253,43 +255,53 @@ final class ForageServiceTests: XCTestCase {
         }
         
         // Ensure that the failureExpectation wasn't fulfilled in the extremely short period of time
-        wait(for: [failureExpectation], timeout: 0.1)
+        wait(for: [failureExpectation], timeout: 0.95)
         // Ensure that the successExpectation was fulfilled before the longer period of time
-        wait(for: [successExpectation], timeout: 1.026)
+        wait(for: [successExpectation], timeout: 1.05)
     }
     
     func test_waitNextAttempt_noPollingIntervals() {
         let mockSession = URLSessionMock()
-        mockSession.data = forageMocks.capturePaymentSuccess
-        mockSession.response = forageMocks.mockSuccessResponse
         
+        let failureExpectation = XCTestExpectation(description: "Completion called before delay")
         let successExpectation = XCTestExpectation(description: "Completion called after delay")
         
-        let service = LiveForageService(provider: Provider(mockSession), ldManager: MockLDManager(pollingIntervals: []))
+        // Mark the expectation as fulfilled only if it failed
+        failureExpectation.isInverted = true
+        
+        let service = MockForageService(provider: Provider(mockSession), ldManager: MockLDManager(pollingIntervals: []))
         
         service.waitNextAttempt {
+            failureExpectation.fulfill()
             successExpectation.fulfill()
         }
         
-        // Default value is 1000 ms + 25 ms
-        wait(for: [successExpectation], timeout: 1.026)
+        // Ensure that the failureExpectation wasn't fulfilled in the extremely short period of time
+        wait(for: [failureExpectation], timeout: 0.95)
+        // Ensure that the successExpectation was fulfilled before the longer period of time
+        wait(for: [successExpectation], timeout: 1.05)
     }
     
     func test_waitNextAttempt_shorterIntervals() {
         let mockSession = URLSessionMock()
-        mockSession.data = forageMocks.capturePaymentSuccess
-        mockSession.response = forageMocks.mockSuccessResponse
         
+        let failureExpectation = XCTestExpectation(description: "Completion called before delay")
         let successExpectation = XCTestExpectation(description: "Completion called after delay")
         
-        let service = LiveForageService(provider: Provider(mockSession), ldManager: MockLDManager(pollingIntervals: [100]))
+        // Mark the expectation as fulfilled only if it failed
+        failureExpectation.isInverted = true
+        
+        let service = MockForageService(provider: Provider(mockSession), ldManager: MockLDManager(pollingIntervals: [100]))
         
         service.waitNextAttempt {
             successExpectation.fulfill()
+            failureExpectation.fulfill()
         }
         
-        // Default value is 1000 ms + 25 ms
-        wait(for: [successExpectation], timeout: 0.126)
+        // Ensure that the failureExpectation wasn't fulfilled in the extremely short period of time
+        wait(for: [failureExpectation], timeout: 0.09)
+        // Ensure that the successExpectation was fulfilled before the longer period of time
+        wait(for: [successExpectation], timeout: 0.11)
     }
     
     func test_getBalance_onSuccess_checkExpectedPayload() {
