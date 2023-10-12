@@ -216,15 +216,12 @@ final class ForageServiceTests: XCTestCase {
 
         let jitterAmount = service.jitterAmountInSeconds(using: mockRNG)
         
-        // Assert
         XCTAssertNotNil(jitterAmount, "Jitter amount should not be nil")
         XCTAssertTrue(jitterAmount == 1)
     }
     
-    func testWaitNextAttempt() {
+    func test_waitNextAttempt() {
         let mockSession = URLSessionMock()
-        mockSession.data = forageMocks.capturePaymentSuccess
-        mockSession.response = forageMocks.mockSuccessResponse
         let service = LiveForageService(provider: Provider(mockSession))
         
         let failureExpectation = XCTestExpectation(description: "Completion called before delay")
