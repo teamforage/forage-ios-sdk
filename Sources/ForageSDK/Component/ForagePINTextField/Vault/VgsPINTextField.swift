@@ -156,16 +156,6 @@ class VGSTextFieldWrapper: UIView, VaultWrapper {
         get { return textField.textAlignment }
         set { textField.textAlignment = newValue }
     }
-    
-    var inputWidth: CGFloat {
-        get { return widthConstraint ?? 342 }
-        set { widthConstraint = newValue }
-    }
-
-    var inputHeight: CGFloat {
-        get { return heightConstraint ?? 36 }
-        set { heightConstraint = newValue }
-    }
 }
 
 // MARK: - VGSTextFieldDelegate

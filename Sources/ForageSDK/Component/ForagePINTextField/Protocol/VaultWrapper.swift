@@ -33,8 +33,6 @@ internal protocol InternalAppearance {
     var cornerRadius: CGFloat { get set }
     var masksToBounds: Bool { get set }
     var backgroundColor: UIColor? { get set }
-    var inputWidth: CGFloat { get set }
-    var inputHeight: CGFloat { get set }
     var font: UIFont? { get set }
 }
 

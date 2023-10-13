@@ -191,46 +191,6 @@ final class ForagePINTextFieldTests: XCTestCase {
         XCTAssertEqual(btTextFieldWrapper.borderWidth, 10)
     }
     
-    func test_elementHeight() {
-        let newHeight = 200.0
-        foragePinTextField.elementHeight = newHeight
-        
-        let height = foragePinTextField.elementHeight
-        XCTAssertEqual(newHeight, height)
-    }
-    
-    func test_inputWidth() {
-        let newWidth = 300.0
-        foragePinTextField.inputWidth = newWidth
-
-        let width = foragePinTextField.inputWidth
-        XCTAssertEqual(newWidth, width)
-        
-        // Test BasisTheoryTextFieldWrapper input width = default
-        let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
-        XCTAssertEqual(btTextFieldWrapper.inputWidth, 342)
-        
-        // Test BasisTheoryTextFieldWrapper input width = custom
-        btTextFieldWrapper.inputWidth = 100
-        XCTAssertEqual(btTextFieldWrapper.inputWidth, 100)
-    }
-
-    func test_inputHeight() {
-        let newHeight = 100.0
-        foragePinTextField.inputHeight = newHeight
-
-        let height = foragePinTextField.inputHeight
-        XCTAssertEqual(newHeight, height)
-        
-        // Test BasisTheoryTextFieldWrapper input height = default
-        let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
-        XCTAssertEqual(btTextFieldWrapper.inputHeight, 36)
-        
-        // Test BasisTheoryTextFieldWrapper input height = custom
-        btTextFieldWrapper.inputHeight = 100
-        XCTAssertEqual(btTextFieldWrapper.inputHeight, 100)
-    }
-    
     func test_tintColor() {
         let tintColor = UIColor.red
         foragePinTextField.tfTintColor = tintColor
