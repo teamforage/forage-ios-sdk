@@ -60,7 +60,7 @@ internal final class CustomerPerceivedResponseMonitor: ResponseMonitor {
             let responseTimeMs = responseAttributes.responseTimeMs,
             let eventOutcome = self.eventOutcome
         else {
-            metricsLogger?.error("Incomplete or missing response attributes. Could not log metric.", error: nil, attributes: nil)
+            metricsLogger?.error("Incomplete or missing response attributes. Could not report metric event.", error: nil, attributes: nil)
             return
         }
         

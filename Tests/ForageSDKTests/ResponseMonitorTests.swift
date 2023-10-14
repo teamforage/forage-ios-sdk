@@ -49,7 +49,7 @@ final class ResponseMonitorTests: XCTestCase {
     func testInit_shouldSetLogKind() {
         let mockMetricsLogger = MockMetricsLogger()
         _ = TestableResponseMonitor(metricsLogger: mockMetricsLogger)
-
+        
         XCTAssertEqual(mockMetricsLogger.logKind!.rawValue, "metric")
     }
     
@@ -93,9 +93,9 @@ final class ResponseMonitorTests: XCTestCase {
         
         XCTAssertEqual(mockMetricsLogger.loggedErrors.count, 1, "There should be one logged error")
         XCTAssertEqual(mockMetricsLogger.loggedInfos.count, 0, "There should be no logged infos")
-
+        
         let loggedError = mockMetricsLogger.loggedErrors.first!
-        XCTAssertEqual(loggedError.message, "Incomplete or missing response attributes. Could not log metric.")
+        XCTAssertEqual(loggedError.message, "Incomplete or missing response attributes. Could not report metric event.")
     }
     
     func testLogWithResponseAttributes_shouldLogWithAttributes() {
@@ -123,5 +123,63 @@ final class ResponseMonitorTests: XCTestCase {
         XCTAssertEqual(loggedAttributes["method"] as? String, "POST")
         XCTAssertEqual(loggedAttributes["http_status"] as? Int, 201)
         XCTAssertEqual(loggedAttributes["response_time_ms"] as? Double, 123.45)
+    }
+    
+    func testCustomerPerceivedMonitor_missingEventOutcome_logsAssertionError() {
+        let mockMetricsLogger = MockMetricsLogger()
+        let monitor = CustomerPerceivedResponseMonitor.newMeasurement(
+            vaultType: .btVaultType,
+            vaultAction: .balanceCheck
+        )
+        let attributes = ResponseAttributes(
+            responseTimeMs: 123.45,
+            path: "/vault/test",
+            method: .post,
+            code: 201
+        )
+        monitor.logWithResponseAttributes(metricsLogger: mockMetricsLogger, responseAttributes: attributes)
+        
+        XCTAssertEqual(mockMetricsLogger.loggedErrors.count, 1)
+        XCTAssertEqual(mockMetricsLogger.loggedErrors.first?.message, "Incomplete or missing response attributes. Could not report metric event.")
+    }
+    
+    func testCustomerPerceivedMonitor_missingForageErrorCode_logsAssertionError() {
+        let mockMetricsLogger = MockMetricsLogger()
+        let monitor = CustomerPerceivedResponseMonitor.newMeasurement(
+            vaultType: .btVaultType,
+            vaultAction: .balanceCheck
+        )
+        monitor.setEventOutcome(.failure)
+        // set to failure, but missing forage_error_code!
+        
+        let attributes = ResponseAttributes(responseTimeMs: 123)
+        
+        monitor.logWithResponseAttributes(
+            metricsLogger: mockMetricsLogger,
+            responseAttributes: attributes
+        )
+        
+        XCTAssertEqual(mockMetricsLogger.loggedErrors.count, 1)
+        XCTAssertEqual(mockMetricsLogger.loggedErrors.first?.message, "Failure event did not include forage_error_code.")
+    }
+    
+    func testCustomerPerceivedMonitor_successOutcome_reportsMetricEvent() {
+        let mockMetricsLogger = MockMetricsLogger()
+        let monitor = CustomerPerceivedResponseMonitor.newMeasurement(
+            vaultType: .btVaultType,
+            vaultAction: .balanceCheck
+        )
+        monitor.setEventOutcome(.success)
+        
+        let attributes = ResponseAttributes(responseTimeMs: 123.23)
+        monitor.logWithResponseAttributes(metricsLogger: mockMetricsLogger, responseAttributes: attributes)
+        
+        XCTAssertEqual(mockMetricsLogger.loggedInfos.count, 1)
+        
+        let loggedInfo = mockMetricsLogger.loggedInfos.first!
+        XCTAssertEqual(loggedInfo.message, "Reported customer-perceived response event")
+        
+        let loggedAttributes = loggedInfo.attributes!
+        XCTAssertEqual(loggedAttributes["event_outcome"] as! String, "success")
     }
 }

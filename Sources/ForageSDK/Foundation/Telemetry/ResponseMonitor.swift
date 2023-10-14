@@ -98,7 +98,7 @@ internal class ResponseMonitor: NetworkMonitor {
     
     internal func logResult() {
         guard let startTime = self.startTime, let endTime = self.endTime else {
-            metricsLogger?.error("Missing startTime or endTime. Could not log metric.", error: nil, attributes: nil)
+            metricsLogger?.error("Missing startTime or endTime. Could not report metric event.", error: nil, attributes: nil)
             return
         }
         responseAttributes.responseTimeMs = calculateDurationMs(from: startTime, to: endTime)

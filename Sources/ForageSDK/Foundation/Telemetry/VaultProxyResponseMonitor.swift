@@ -45,7 +45,7 @@ internal final class VaultProxyResponseMonitor: ResponseMonitor {
               let path = responseAttributes.path,
               let httpStatus = responseAttributes.code,
               let responseTimeMs = responseAttributes.responseTimeMs else {
-            metricsLogger?.error("Incomplete or missing response attributes. Could not log metric.", error: nil, attributes: nil)
+            metricsLogger?.error("Incomplete or missing response attributes. Could not report metric event.", error: nil, attributes: nil)
             return
         }
         
