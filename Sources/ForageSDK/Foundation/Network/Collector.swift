@@ -21,6 +21,7 @@ internal protocol VaultCollector {
         extraData: [String: Any],
         completion: @escaping (VaultResponse) -> Void)
     func getPaymentMethodToken(paymentMethodToken: String) throws -> String
+    func getVaultType() -> VaultType
     
 }
 
@@ -32,11 +33,6 @@ struct VGSCollectConfig {
 struct BasisTheoryConfig {
     let publicKey: String
     let proxyKey: String
-}
-
-internal enum VaultAction: String {
-    case balanceCheck = "balance"
-    case capture
 }
 
 // Wrapper class for VGSCollect
@@ -97,6 +93,10 @@ class VGSCollectWrapper: VaultCollector {
             return paymentMethodToken.components(separatedBy: tokenDelimiter)[0]
         }
         return paymentMethodToken
+    }
+    
+    internal func getVaultType() -> VaultType {
+        return VaultType.vgsVaultType
     }
 }
 
@@ -203,6 +203,10 @@ class BasisTheoryWrapper: VaultCollector {
             )
             completion(vaultResponse)
         }
+    }
+    
+    internal func getVaultType() -> VaultType {
+        return VaultType.btVaultType
     }
 }
 

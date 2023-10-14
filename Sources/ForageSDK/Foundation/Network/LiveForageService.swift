@@ -158,7 +158,7 @@ internal class LiveForageService: ForageService {
 
         pinCollector.sendData(
             path: "/api/payments/\(request.paymentReference)/capture/",
-            vaultAction: VaultAction.capture,
+            vaultAction: VaultAction.capturePayment,
             extraData: extraData) { [weak self] result in
                 self?.polling(response: result, request: request, completion: { pollingResult in
                     switch pollingResult {

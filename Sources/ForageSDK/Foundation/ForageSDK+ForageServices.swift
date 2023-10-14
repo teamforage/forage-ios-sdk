@@ -94,7 +94,16 @@ extension ForageSDK: ForageSDKService {
                 completion(.failure(CommonErrors.INCOMPLETE_PIN_ERROR))
                 return
             }
-                        
+            
+            // This block is used for tracking important Metrics!
+            // -----------------------------------------------------
+            let responseMonitor = CustomerPerceivedResponseMonitor.newMeasurement(
+                vaultType: foragePinTextField.collector!.getVaultType(),
+                vaultAction: VaultAction.balanceCheck
+            )
+            responseMonitor.start()
+            // ------------------------------------------------------
+            
             let sessionToken = ForageSDK.shared.sessionToken
             let merchantID = ForageSDK.shared.merchantID
             
@@ -112,13 +121,31 @@ extension ForageSDK: ForageSDKService {
                                 merchantID: merchantID,
                                 xKey: ["vgsXKey": model.alias, "btXKey": model.bt_alias]
                             )
-                            self.service?.checkBalance(pinCollector: foragePinTextField.collector!, request: request, completion: completion)
                             
+                            self.service?.checkBalance(
+                                pinCollector: foragePinTextField.collector!,
+                                request: request
+                            ) { result in
+                                switch result {
+                                case .success(let balanceResult):
+                                    responseMonitor.setEventOutcome(.success).end()
+                                    responseMonitor.logResult()
+                                    completion(.success(balanceResult))
+                                case .failure(let error):
+                                    responseMonitor.setForageErrorCode(error).end()
+                                    responseMonitor.logResult()
+                                    completion(.failure(error))
+                                }
+                            }
                         case .failure(let error):
+                            responseMonitor.setForageErrorCode(error).end()
+                            responseMonitor.logResult()
                             completion(.failure(error))
                         }
                     }
                 case .failure(let error):
+                    responseMonitor.setForageErrorCode(error).end()
+                    responseMonitor.logResult()
                     completion(.failure(error))
                 }
             }
@@ -144,9 +171,18 @@ extension ForageSDK: ForageSDKService {
                 completion(.failure(CommonErrors.INCOMPLETE_PIN_ERROR))
                 return
             }
-
+            
             let sessionToken = ForageSDK.shared.sessionToken
             let merchantID = ForageSDK.shared.merchantID
+            
+            // This block is used for tracking important Metrics!
+            // -----------------------------------------------------
+            let responseMonitor = CustomerPerceivedResponseMonitor.newMeasurement(
+                vaultType: foragePinTextField.collector!.getVaultType(),
+                vaultAction: VaultAction.capturePayment
+            )
+            responseMonitor.start()
+            // ------------------------------------------------------
             
             service?.getXKey(sessionToken: sessionToken, merchantID: merchantID) { result in
                 switch result {
@@ -165,16 +201,34 @@ extension ForageSDK: ForageSDKService {
                                         merchantID: merchantID,
                                         xKey: ["vgsXKey": model.alias, "btXKey": model.bt_alias]
                                     )
-                                    self.service?.capturePayment(pinCollector: foragePinTextField.collector!, request: request, completion: completion)
+                                    
+                                    self.service?.capturePayment(pinCollector: foragePinTextField.collector!, request: request) { result in
+                                        switch result {
+                                        case .success(let payment):
+                                            responseMonitor.setEventOutcome(.success).end()
+                                            responseMonitor.logResult()
+                                            completion(.success(payment))
+                                        case .failure(let error):
+                                            responseMonitor.setForageErrorCode(error).end()
+                                            responseMonitor.logResult()
+                                            completion(.failure(error))
+                                        }
+                                    }
                                 case .failure(let error):
+                                    responseMonitor.setForageErrorCode(error).end()
+                                    responseMonitor.logResult()
                                     completion(.failure(error))
                                 }
                             }
                         case .failure(let error):
+                            responseMonitor.setForageErrorCode(error).end()
+                            responseMonitor.logResult()
                             completion(.failure(error))
                         }
                     }
                 case .failure(let error):
+                    responseMonitor.setForageErrorCode(error).end()
+                    responseMonitor.logResult()
                     completion(.failure(error))
                 }
             }
