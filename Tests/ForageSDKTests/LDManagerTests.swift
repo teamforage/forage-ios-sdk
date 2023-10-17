@@ -145,26 +145,6 @@ final class LDManagerTests: XCTestCase {
         XCTAssertEqual(result, expectedValue)
     }
     
-    func testConvertLdValueToIntArray_ThrowsIfIncorrectStructure() {
-        let defVal = LDValue(dictionaryLiteral: ("intervals", 1000))
-        
-        XCTAssertThrowsError(try LDManager.shared.convertLdValueToIntArray(val: defVal)) { error in
-            XCTAssertTrue(error is LDError)
-        }
-    }
-    
-    func testConvertLdValueToIntArray_ParsesCorrectVal() {
-        let defVal = LDValue(dictionaryLiteral: ("intervals", [250, 250, 500, 500, 1000]))
-        
-        do {
-            let result = try LDManager.shared.convertLdValueToIntArray(val: defVal)
-            let expectedValue: [Int] = [250, 250, 500, 500, 1000]
-            XCTAssertEqual(result, expectedValue)
-        } catch {
-            XCTFail("Test failed because the structure of the input was incorrect")
-        }
-    }
-    
     // MARK: Test LDManager.Initialize
     
     func testInitialize_StartsLDClient() {

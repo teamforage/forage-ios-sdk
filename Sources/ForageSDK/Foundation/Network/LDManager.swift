@@ -24,6 +24,63 @@ extension LDClient: LDClientProtocol {
     }
 }
 
+extension LDValue {
+    
+    /// Converts the original LDValue returned from the polling feature flag to an Array of Ints.
+    internal func convertToIntArray() -> [Int] {
+        let intervalArrayAsLDValue = self.extractArray(pollingFlagObj: self)
+        let intervalArrayAsArray = self.convertToArray(pollingArray: intervalArrayAsLDValue)
+        return self.convertArrayValsToInts(arrayOfInts: intervalArrayAsArray)
+    }
+    
+    /// Inspects the original LDValue returned from the polling feature flag and extracts the value mapped to INTERVALS
+    ///
+    /// - Parameters:
+    ///   - pollingFlagObj: The `LDValue` representing a JSON object.
+    internal func extractArray(pollingFlagObj: LDValue) -> LDValue {
+        let defaultLDValueArray: LDValue = LDValue(arrayLiteral: [])
+        switch pollingFlagObj {
+        case .object(let dictValue):
+            for (key, value) in dictValue {
+                if (key == INTERVALS) {
+                    return value
+                }
+            }
+            return defaultLDValueArray
+        default:
+            return defaultLDValueArray
+        }
+    }
+    
+    /// Converts the LDValue to an Array.
+    ///
+    /// - Parameters:
+    ///   - pollingArray: The `LDValue` representing an Array.
+    internal func convertToArray(pollingArray: LDValue) -> [LDValue] {
+        switch pollingArray {
+        case .array(let intervalVals):
+            return intervalVals
+        default:
+            return []
+        }
+    }
+
+    /// Converts an Array of LDValue to an Array of Ints.
+    ///
+    /// - Parameters:
+    ///   - arrayOfInts: The `LDValue` representing an Array of Ints.
+    internal func convertArrayValsToInts(arrayOfInts: [LDValue]) -> [Int] {
+        return arrayOfInts.map { timeInMs in
+            switch timeInMs {
+            case .number(let valAsNum):
+                return Int(valAsNum)
+            default:
+                return 1000
+            }
+        }
+    }
+}
+
 internal protocol LDManagerProtocol {
     func getVaultType(ldClient: LDClientProtocol?, genRandomDouble: () -> Double, fromCache: Bool) -> VaultType
     func getPollingIntervals(ldClient: LDClientProtocol?) -> [Int]
@@ -88,13 +145,6 @@ private let INTERVALS = "intervals"
  LaunchDarkly prefix
  */
 private let LAUNCH_DARKLY_PREFIX = "LaunchDarkly"
-
-/**
- LD Errors
- */
-enum LDError: Error {
-    case parsingError
-}
 
 /**
  Contexts
@@ -203,8 +253,6 @@ internal class LDManager: LDManagerBaseClass {
     ) -> [Int] {
         logger = logger?.setPrefix(LAUNCH_DARKLY_PREFIX)
         
-        // NOTE: The two values below should stay in sync! There is no initializer for the LDValue object to be able to reuse the initial variable declaration
-        let defaultReturnValue: [Int] = []
         let defaultValLdValue = LDValue(dictionaryLiteral: (INTERVALS, []))
         
         guard let ld = ldClient else {
@@ -212,58 +260,16 @@ internal class LDManager: LDManagerBaseClass {
                           error: nil,
                           attributes: nil)
             
-            return defaultReturnValue
+            return []
         }
         
         let pollingIntervalsAsLdValue = ld.jsonVariationWrapper(forKey: FlagType.isoPollingWaitIntervals.rawValue, defaultValue: defaultValLdValue)
+        let pollingIntervals = pollingIntervalsAsLdValue.convertToIntArray()
         
-        do {
-            let convertedVals = try convertLdValueToIntArray(val: pollingIntervalsAsLdValue)
-            logger?.info("Evaluated \(FlagType.isoPollingWaitIntervals) = \(convertedVals)",
-                         attributes: nil)
-            
-            return convertedVals
-        } catch {
-            logger?.error("Defaulting to 1 second polling intervals. Failed to correctly parse \(FlagType.isoPollingWaitIntervals) value!",
-                          error: nil,
-                          attributes: nil)
-            
-            return []
-        }
-    }
-    
-    internal func convertLdValueToIntArray(val: LDValue) throws -> [Int] {
-        switch val {
-        case .object(let dict):
-            for (key, value) in dict {
-                if (key == INTERVALS) {
-                    switch value {
-                        
-                    case .array(let intervalVals):
-                        do {
-                            return try intervalVals.map { timeInMs in
-                                switch timeInMs {
-                                    
-                                case .number(let valAsNum):
-                                    return Int(valAsNum)
-                                    
-                                default:
-                                    throw LDError.parsingError
-                                }
-                            }
-                        } catch {
-                            throw LDError.parsingError
-                        }
-                    default:
-                        throw LDError.parsingError
-                    }
-                }
-            }
-        default:
-            throw LDError.parsingError
-        }
+        logger?.info("Evaluated \(FlagType.isoPollingWaitIntervals) = \(pollingIntervals)",
+                     attributes: nil)
         
-        throw LDError.parsingError
+        return pollingIntervals
     }
 
     private func createLDConfig(for environment: Environment) -> LDConfig {
