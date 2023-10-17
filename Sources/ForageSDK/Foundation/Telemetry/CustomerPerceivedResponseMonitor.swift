@@ -39,7 +39,7 @@ internal final class CustomerPerceivedResponseMonitor: ResponseMonitor {
     
     // override to set event_outcome to "failure" if we know the event has a forage_error_code
     @discardableResult
-    internal override func setForageErrorCode(_ error: Error) -> ResponseMonitor {
+    internal override func setForageErrorCode(_ error: Error) -> CustomerPerceivedResponseMonitor {
         self.setEventOutcome(.failure)
         super.setForageErrorCode(error)
         return self
