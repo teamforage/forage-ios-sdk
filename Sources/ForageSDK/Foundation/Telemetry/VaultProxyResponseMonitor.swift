@@ -8,84 +8,27 @@
 
 import Foundation
 
-internal struct ResponseAttributes {
-    var responseTimeMs: Double?
-    var path: String?
-    var method: HttpMethod?
-    var code: Int?
+internal enum EventName: String {
+    /// vaultResponse refers to a response from the VGS or BT submit actions.
+    case vaultResponse = "vault_response"
+    /**
+     customer_perceived_response refers to the response from a balance or capture action. There are
+     multiple chained requests that come from the client when executing a balance or capture action.
+     Example of a balance action:
+     [GET] EncryptionKey -> [GET] PaymentMethod -> [POST] to VGS/BT -> [GET] Poll for Response ->
+     [GET] PaymentMethod -> Return Balance
+     */
+    case customerPerceivedResponse = "customer_perceived_response"
 }
 
-/// `ResponseMonitor` serves as the base class for monitoring network metrics
-internal class ResponseMonitor: NetworkMonitor {
-    private var startTime: DispatchTime?
-    private var endTime: DispatchTime?
-    
-    private var responseAttributes: ResponseAttributes = ResponseAttributes()
-    private var metricsLogger: ForageLogger?
-    
-    init(
-        metricsLogger: ForageLogger? = DatadogLogger(
-            ForageLoggerConfig(prefix: "Metrics")
-        )
-    ) {
-        self.metricsLogger = metricsLogger?.setLogKind(ForageLogKind.metric)
-    }
-    
-    internal func start() {
-        startTime = DispatchTime.now()
-    }
-    
-    internal func end() {
-        endTime = DispatchTime.now()
-    }
-    
-    @discardableResult
-    internal func setPath(_ httpPath: String) -> NetworkMonitor {
-        self.responseAttributes.path = httpPath
-        return self
-    }
-    
-    @discardableResult
-    internal func setMethod(_ httpMethod: HttpMethod) -> NetworkMonitor {
-        self.responseAttributes.method = httpMethod
-        return self
-    }
-    
-    @discardableResult
-    internal func setHttpStatusCode(_ httpStatusCode: Int?) -> NetworkMonitor {
-        self.responseAttributes.code = httpStatusCode
-        return self
-    }
-    
-    internal func logResult() {
-        guard let startTime = self.startTime, let endTime = self.endTime else {
-            metricsLogger?.error("Missing startTime or endTime. Could not log metric.", error: nil, attributes: nil)
-            return
-        }
-        responseAttributes.responseTimeMs = calculateDurationMs(from: startTime, to: endTime)
-        
-        // handled by subclass
-        logWithResponseAttributes(
-            metricsLogger: self.metricsLogger,
-            responseAttributes: responseAttributes
-        )
-    }
-    
-    /// Calculates the time in milliseconds between the start and end time
-    private func calculateDurationMs(from startTime: DispatchTime, to endTime: DispatchTime) -> Double {
-        let nanoseconds = endTime.uptimeNanoseconds - startTime.uptimeNanoseconds
-        return Double(nanoseconds) / 1_000_000
-    }
-    
-    // Do nothing here; meant to be overridden by subclasses
-    internal func logWithResponseAttributes(metricsLogger: ForageLogger?, responseAttributes: ResponseAttributes) {}
-}
-
-/// `VaultProxyResponseMonitor` is a specialized `ResponseMonitor` for handling Vault-related network metrics
+/*
+ `VaultProxyResponseMonitor` is a specialized `ResponseMonitor` for handling Vault-related network metrics. VaultProxyResponseMonitor is used to track the errors and response times from the VGS and BT submit functions. The timer begins when a balance or capture request is submitted to VGS/BT and ends when a response is received by the SDK.
+ */
 internal final class VaultProxyResponseMonitor: ResponseMonitor {
     
     private let vaultAction: VaultAction
     private let vaultType: VaultType
+    private var eventName: EventName = .vaultResponse
     
     private init(vaultType: VaultType, vaultAction: VaultAction) {
         self.vaultType = vaultType
@@ -102,20 +45,24 @@ internal final class VaultProxyResponseMonitor: ResponseMonitor {
               let path = responseAttributes.path,
               let httpStatus = responseAttributes.code,
               let responseTimeMs = responseAttributes.responseTimeMs else {
-            metricsLogger?.error("Incomplete or missing response attributes. Could not log metric.", error: nil, attributes: nil)
+            metricsLogger?.error("Incomplete or missing response attributes. Could not report metric event.", error: nil, attributes: nil)
             return
         }
         
-        let vaultName = self.vaultType.rawValue
-        let vaultAction = self.vaultAction.rawValue
+        let vaultType = self.vaultType.rawValue
         
-        metricsLogger?.info("Received response from \(vaultName) proxy", attributes: [
-            "vault_type": vaultName,
-            "action": vaultAction,
-            "path": path,
-            "method": httpMethod,
-            "http_status": httpStatus,
-            "response_time_ms": responseTimeMs,
-        ])
+        metricsLogger?.info(
+            "Received response from \(vaultType) proxy",
+            attributes: mapEnumKeysToStrings(from: [
+                .action: self.vaultAction.rawValue,
+                .eventName: self.eventName.rawValue,
+                .httpStatus: httpStatus,
+                .logType: ForageLogKind.metric.rawValue,
+                .method: httpMethod,
+                .path: path,
+                .responseTimeMs: responseTimeMs,
+                .vaultType: self.vaultType.rawValue,
+            ])
+        )
     }
 }
