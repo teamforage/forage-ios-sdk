@@ -11,15 +11,19 @@ import VGSCollectSDK
 @testable import ForageSDK
 @testable import LaunchDarkly
 
-class MockLDManager : LDManagerBaseClass {
+class MockLDManager : LDManagerProtocol {
     var pollingIntervals: [Int]
     
     init(pollingIntervals: [Int] = [1000, 1000, 1000]) {
         self.pollingIntervals = pollingIntervals
     }
     
-    override func getPollingIntervals(ldClient: LDClientProtocol? = getDefaultLDClient()) -> [Int] {
+    func getPollingIntervals(ldClient: LDClientProtocol?) -> [Int] {
         return pollingIntervals
+    }
+    
+    func getVaultType(ldClient: LDClientProtocol?, genRandomDouble: () -> Double, fromCache: Bool) -> VaultType {
+        return VaultType.vgsVaultType
     }
 }
 

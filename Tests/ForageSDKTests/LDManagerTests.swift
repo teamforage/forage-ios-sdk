@@ -53,17 +53,18 @@ final class LDManagerTests: XCTestCase {
     // MARK: Test LDManager.getVaultType
     
     func testGetVaultType_WhenLDClientIsNil_ShouldReturnVGSVaultType() {
-        let result = LDManager.shared.getVaultType(ldClient: nil, fromCache: false)
+        let result = LDManager.shared.getVaultType(ldClient: nil, genRandomDouble: LDManager.generateRandomDouble, fromCache: false)
         XCTAssertEqual(result, VaultType.vgsVaultType)
     }
     
     func testGetVaultType_WhenVaultTypeIsAlreadySet_ShouldReturnCachedValue() {
         let mockLDClient = MockLDClient(vaultType: VaultType.btVaultType)
-        let firstVaultType = LDManager.shared.getVaultType(ldClient: mockLDClient, fromCache: false)
+        let firstVaultType = LDManager.shared.getVaultType(ldClient: mockLDClient, genRandomDouble: LDManager.generateRandomDouble, fromCache: false)
         
         let vgsMockLdClient = MockLDClient(vaultType: VaultType.vgsVaultType)
         let secondVaultType = LDManager.shared.getVaultType(
             ldClient: vgsMockLdClient,
+            genRandomDouble: LDManager.generateRandomDouble,
             fromCache: true
         )
         

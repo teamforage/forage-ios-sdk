@@ -14,12 +14,12 @@ internal class LiveForageService: ForageService {
     internal var provider: Provider
     
     private var logger: ForageLogger?
-    private var ldManager: LDManagerBaseClass?
+    private var ldManager: LDManagerProtocol
     private var maxAttempts: Int = 90
     private var defaultPollingIntervalInMS: Int = 1000
     private var retryCount = 0
     
-    init(provider: Provider = Provider(), logger: ForageLogger? = nil, ldManager: LDManagerBaseClass) {
+    init(provider: Provider = Provider(), logger: ForageLogger? = nil, ldManager: LDManagerProtocol) {
         self.provider = provider
         self.logger = logger?.setPrefix("")
         self.ldManager = ldManager
@@ -331,7 +331,7 @@ extension LiveForageService: Polling {
     ///  - completion: Which will return after a wait.
     internal func waitNextAttempt(completion: @escaping () -> ()) {
         var interval = self.defaultPollingIntervalInMS
-        let pollingIntervals = ldManager?.getPollingIntervals() ?? []
+        let pollingIntervals = ldManager.getPollingIntervals(ldClient: LDManager.getDefaultLDClient())
         if (retryCount < pollingIntervals.count) {
             interval = pollingIntervals[retryCount]
         }

@@ -144,7 +144,11 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
     }()
     
     private lazy var textField: VaultWrapper = {
-        let vaultType = LDManager.shared.getVaultType()
+        let vaultType = LDManager.shared.getVaultType(
+            ldClient: LDManager.getDefaultLDClient(),
+            genRandomDouble: LDManager.generateRandomDouble,
+            fromCache: false
+        )
         
         var tf: VaultWrapper?
 
