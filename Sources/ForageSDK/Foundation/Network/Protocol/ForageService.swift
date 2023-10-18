@@ -16,12 +16,12 @@ internal protocol ForageService: AnyObject {
     /// Provider provides the interface for performing HTTP requests.
     var provider: Provider { get }
     
-    /// Retrieve X-key header for requests
+    /// Retrieves the EncryptionKey from the Forage API, to be utilized as the X-Key header.
     ///
     /// - Parameters:
-    ///  - sessionToken: Authorization token.
-    ///  - merchantID: merchant ID.
-    ///  - completion: Which will return the x-key object.
+    ///  - sessionToken: Short-lived session token that authorizes requests to the Forage API.
+    ///  - merchantID: The unique ID of the Merchant.
+    ///  - completion: The closure returns a `Result` containing either a `ForageXKeyModel` or an `Error`.
     func getXKey(
         sessionToken: String,
         merchantID: String,
@@ -30,57 +30,65 @@ internal protocol ForageService: AnyObject {
     /// Perform a GET request for the PaymentMethod
     ///
     /// - Parameters:
-    ///  - sessionToken: Authorization token.
-    ///  - merchantID: merchant ID.
-    ///  - paymentMethodRef: The PaymentMethod ref.
-    ///  - completion: Returns the PaymentMethod
+    ///  - sessionToken: Short-lived session token that authorizes requests to the Forage API.
+    ///  - merchantID: The unique ID of the Merchant.
+    ///  - paymentMethodRef: The reference hash of the PaymentMethod.
+    ///  - completion: The closure returns a `Result` containing either a `PaymentMethodModel` or an `Error`. [Read more](https://docs.joinforage.app/reference/get-payment-method)
     func getPaymentMethod(
         sessionToken: String,
         merchantID: String,
         paymentMethodRef: String,
         completion: @escaping (Result<PaymentMethodModel, Error>) -> Void) -> Void
     
-    /// Perform a GET request for the Payment
+    /// Performs a GET request to retrieve the specified Payment.
     ///
     /// - Parameters:
-    ///  - sessionToken: Authorization token.
-    ///  - merchantID: merchant ID.
-    ///  - paymentRef: The Payment ref.
-    ///  - completion: Returns the Payment
+    ///  - sessionToken: Short-lived session token that authorizes requests to the Forage API.
+    ///  - merchantID: The unique ID of the Merchant.
+    ///  - paymentRef: The reference hash of the Payment.
+    ///  - completion: The closure returns a `Result` containing either a `PaymentModel` or an `Error`. [Read more](https://docs.joinforage.app/reference/get-payment-details)
     func getPayment(
         sessionToken: String,
         merchantID: String,
         paymentRef: String,
         completion: @escaping (Result<PaymentModel, Error>) -> Void)
     
-    /// Tokenize a given *ForagePANRequestModel* object
+    /// Tokenize an EBT card using the given *ForagePANRequestModel* object
     ///
     /// - Parameters:
-    ///  - request: *ForagePANRequestModel* contains ebt card object.
-    ///  - completion: Returns tokenized object. (See more [here](https://docs.joinforage.app/reference/create-payment-method-1))
+    ///  - request: An instance of `ForagePANRequestModel` containing the EBT card details.
+    ///  - completion: The closure returns a `Result` containing either a `PaymentMethodModel` or an `Error`. [Read more](https://docs.joinforage.app/reference/create-payment-method)
     func tokenizeEBTCard(
         request: ForagePANRequestModel,
         completion: @escaping (Result<PaymentMethodModel, Error>) -> Void) -> Void
     
-    /// Perform request through VGS to retrieve balance
+    /// Asynchronously checks the balance of a PaymentMethod using the given `pinCollector` and `paymentMethodReference`
     ///
     /// - Parameters:
-    ///  - pinCollector: The pin collection service
-    ///  - request: `ForageRequestModel` info to request balance.
-    ///  - completion: Which will return the balance object.
+    ///   - pinCollector: The service responsible for securely collecting PINs.
+    ///   - paymentMethodReference: The reference hash of the PaymentMethod.
+    ///
+    /// - Throws:
+    ///   - `ForageError`: If there's an issue at any stage of the balance check process.
+    ///
+    /// - Returns:
+    ///   - A `BalanceModel` object containing the balance of the PaymentMethod.
     func checkBalance(
         pinCollector: VaultCollector,
-        request: ForageRequestModel,
-        completion: @escaping (Result<BalanceModel, Error>) -> Void) -> Void
+        paymentMethodReference: String) async throws -> BalanceModel
     
-    /// Perform request through VGS to capture payment
+    /// Asynchronously captures a payment using the given `pinCollector` and `paymentReference`
     ///
     /// - Parameters:
-    ///  - pinCollector: The pin collection service
-    ///  - request: `ForageRequestModel` info to request balance.
-    ///  - completion: Which will return the payment object.
+    ///   - pinCollector: The service responsible for securely collecting PINs.
+    ///   - paymentReference: The reference hash of the Payment.
+    ///
+    /// - Throws:
+    ///   - `ForageError`: If there's an issue at any stage of the payment capture process.
+    ///
+    /// - Returns:
+    ///   - A `PaymentModel` object containing the details of the captured payment.
     func capturePayment(
         pinCollector: VaultCollector,
-        request: ForageRequestModel,
-        completion: @escaping (Result<PaymentModel, Error>) -> Void)
+        paymentReference: String) async throws -> PaymentModel
 }

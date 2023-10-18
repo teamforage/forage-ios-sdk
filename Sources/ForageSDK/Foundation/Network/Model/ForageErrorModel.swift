@@ -28,10 +28,27 @@ internal struct ForageErrorSource: Codable {
 public struct ForageError: Error, Codable {
     /// An array of error objects returned from the Forage API.
     public let errors: [ForageErrorObj]
+    
+    /// Creates a `ForageError` instance with a single `ForageErrorObj` object
+    static internal func create(
+        httpStatusCode: Int,
+        code: String,
+        message: String
+    ) -> ForageError {
+        return ForageError(
+            errors: [
+                ForageErrorObj(
+                    httpStatusCode: httpStatusCode,
+                    code: code,
+                    message: message
+                )
+            ]
+        )
+    }
 }
 
 /// Contains additional details about a Forage API error.
-/// 
+///
 public enum ForageErrorDetails: Codable {
     /// Use this to display the SNAP and EBT Cash balances when an [ebt_error_51](https://docs.joinforage.app/reference/errors#ebt_error_51) error occurs
     case ebtError51(snapBalance: String?, cashBalance: String?)

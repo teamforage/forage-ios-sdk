@@ -10,17 +10,17 @@ import Foundation
 import VGSCollectSDK
 
 /**
- Interface for Polling
+ Interface for Polling service.
  */
 internal protocol Polling: AnyObject {
     /// Handle Vault Response to start polling
     ///
     /// - Parameters:
-    ///  - response: Response from Vault request.
+    ///  - vaultResponse: Response from Vault request.
     ///  - request: Model composed with info to identify the polling.
     ///  - completion: Which will return a `Result` to be handle.
     func polling(
-        response: VaultResponse,
+        vaultResponse: VaultResponse,
         request: ForageRequestModel,
         completion: @escaping (Result<Data?, Error>) -> Void)
     
