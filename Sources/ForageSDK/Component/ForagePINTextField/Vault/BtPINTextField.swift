@@ -152,7 +152,9 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
     // MARK: - Public API
     
     func clearText() {
-        textField.text = ""
+        DispatchQueue.main.async {
+            self.textField.text = ""
+        }
     }
     
     var borderWidth: CGFloat {

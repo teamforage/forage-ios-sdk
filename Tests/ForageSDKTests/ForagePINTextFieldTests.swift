@@ -258,6 +258,24 @@ final class ForagePINTextFieldTests: XCTestCase {
         let textPlaceholder = foragePinTextField.placeholder
         XCTAssertEqual(textPlaceholder, placeholder)
     }
+    
+    func test_clearText() {
+        // VGS
+        let vgsTextFieldWrapper = VGSTextFieldWrapper()
+        vgsTextFieldWrapper.clearText()
+        vgsTextFieldWrapper.clearText()
+
+        // assert that it does not cause crash and resets isComplete=false!
+        XCTAssertEqual(vgsTextFieldWrapper.isComplete, false)
+        
+        // Basis Theory
+        let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
+        btTextFieldWrapper.clearText()
+        btTextFieldWrapper.clearText()
+
+        // assert that it does not cause crash and resets isComplete=false!
+        XCTAssertEqual(btTextFieldWrapper.isComplete, false)
+    }
 }
 
 extension ForagePINTextFieldTests: ForageElementDelegate {

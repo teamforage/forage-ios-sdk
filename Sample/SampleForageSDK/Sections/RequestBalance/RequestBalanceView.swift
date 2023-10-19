@@ -162,6 +162,7 @@ class RequestBalanceView: UIView {
         ForageSDK.shared.checkBalance(
             foragePinTextField: foragePinTextField,
             paymentMethodReference: ClientSharedData.shared.paymentMethodReference) { result in
+                self.foragePinTextField.clearText()
                 self.printPINResult(result: result)
             }
     }

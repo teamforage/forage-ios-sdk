@@ -134,6 +134,7 @@ class CapturePaymentView: UIView {
         ForageSDK.shared.capturePayment(
             foragePinTextField: inputFieldReference,
             paymentReference: paymentReference) { result in
+                inputFieldReference.clearText()
                 self.printResult(result: result)
             }
     }
@@ -149,16 +150,17 @@ class CapturePaymentView: UIView {
             case .failure(let error):
                 if let forageError = error as? ForageError? {
                     let firstError = forageError?.errors.first
-                    let errorDetails = firstError?.details
-                                    
-                    switch errorDetails {
-                    case .ebtError51(let snapBalance, let cashBalance):
-                        let snapBalanceText = snapBalance ?? "N/A"
-                        let cashBalanceText = cashBalance ?? "N/A"
-                        
-                        self.remainingBalanceLabel.text = "firstForageError.details: remaining balances are SNAP: \(snapBalanceText), EBT Cash: \(cashBalanceText)"
-                    default:
-                        self.remainingBalanceLabel.text = "firstForageError.details: Missing insufficient funds error details!"
+                    
+                    if firstError?.code == "ebt_error_51" {
+                        switch firstError?.details {
+                        case .ebtError51(let snapBalance, let cashBalance):
+                            let snapBalanceText = snapBalance ?? "N/A"
+                            let cashBalanceText = cashBalance ?? "N/A"
+                            
+                            self.remainingBalanceLabel.text = "firstForageError.details: remaining balances are SNAP: \(snapBalanceText), EBT Cash: \(cashBalanceText)"
+                        default:
+                            self.remainingBalanceLabel.text = "firstForageError.details: Missing insufficient funds error details!"
+                        }
                     }
                 }
                 self.errorLabel.text = "\(error)"
