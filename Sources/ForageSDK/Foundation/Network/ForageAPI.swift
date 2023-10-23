@@ -14,7 +14,7 @@ import Foundation
 enum ForageAPI {
     case tokenizeNumber(request: ForagePANRequestModel)
     case xKey(sessionToken: String, merchantID: String)
-    case message(request: MessageResponseModel, sessionToken: String, merchantID: String)
+    case message(contentId: String, sessionToken: String, merchantID: String)
     case getPaymentMethod(sessionToken: String, merchantID: String, paymentMethodRef: String)
     case getPayment(sessionToken: String, merchantID: String, paymentRef: String)
 }
@@ -28,7 +28,7 @@ extension ForageAPI: ServiceProtocol {
         switch self {
         case .tokenizeNumber: return "/api/payment_methods/"
         case .xKey: return "/iso_server/encryption_alias/"
-        case .message(request: let response, _, _): return "/api/message/\(response.contentId)/"
+        case .message(contentId: let contentId, _, _): return "/api/message/\(contentId)/"
         case .getPaymentMethod(request: let request): return "/api/payment_methods/\(request.paymentMethodRef)/"
         case .getPayment(request: let request): return "/api/payments/\(request.paymentRef)/"
         }

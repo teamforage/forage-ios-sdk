@@ -57,7 +57,7 @@ internal class Provider {
                             completion(.success(data))
                         case .failure:
                             if let data = data {
-                                self.processVGSData(
+                                self.processVaultData(
                                     model: ForageServiceError.self,
                                     code: nil,
                                     data: data,
@@ -170,7 +170,7 @@ internal class Provider {
         return "\(host)\(path)"
     }
     
-    internal func processVGSData<T: Decodable>(model: T.Type, code: Int?, data: Data?, response: URLResponse?, completion: @escaping (Result<T, Error>) -> Void) {
+    internal func processVaultData<T: Decodable>(model: T.Type, code: Int?, data: Data?, response: URLResponse?, completion: @escaping (Result<T, Error>) -> Void) {
         var httpResponse: HTTPURLResponse?
         
         processResponse(response: response) { (result) in

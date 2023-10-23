@@ -13,10 +13,10 @@ import VGSCollectSDK
  Interface for Polling
  */
 internal protocol Polling: AnyObject {
-    /// Handle VGS Response to start polling
+    /// Handle Vault Response to start polling
     ///
     /// - Parameters:
-    ///  - response: Response from VGS request. (See more [here](https://verygoodsecurity.github.io/vgs-collect-ios/Enums/VGSResponse.html))
+    ///  - response: Response from Vault request.
     ///  - request: Model composed with info to identify the polling.
     ///  - completion: Which will return a `Result` to be handle.
     func polling(
@@ -27,11 +27,11 @@ internal protocol Polling: AnyObject {
     /// Polling method
     ///
     /// - Parameters:
-    ///  - message: Message object to be used to polling.
+    ///  - contentId: Message object to be used to polling.
     ///  - request: Model composed with info to identify the polling.
     ///  - completion: Return a `MessageResponseModel` to check its validation. It will trigger another request using its object or it will return a completion `.success` or `.failure`.
     func pollingMessage(
-        message: MessageResponseModel,
+        contentId: String,
         request: ForageRequestModel,
         completion: @escaping (Result<MessageResponseModel, Error>) -> Void) -> Void
 }

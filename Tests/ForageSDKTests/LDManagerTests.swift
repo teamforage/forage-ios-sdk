@@ -28,12 +28,14 @@ class MockLogger : NoopLogger {
 }
 
 class MockLDClient : LDClientProtocol {
+    var pollingIntervals: LDValue?
     var vaultPercentage: Double
     
-    init(vaultPercentage: Double) {
+    init(vaultPercentage: Double = 0.0, pollingIntervals: LDValue? = nil) {
         self.vaultPercentage = vaultPercentage
+        self.pollingIntervals = pollingIntervals
     }
-    
+
     init(vaultType: VaultType) {
         self.vaultPercentage = vaultType == VaultType.vgsVaultType ? 0 : 100
     }
@@ -41,23 +43,28 @@ class MockLDClient : LDClientProtocol {
     func doubleVariationWrapper(forKey key: String, defaultValue: Double) -> Double {
         return vaultPercentage
     }
+    
+    func jsonVariationWrapper(forKey key: String, defaultValue: LDValue) -> LDValue {
+        return pollingIntervals ?? defaultValue
+    }
 }
 
 final class LDManagerTests: XCTestCase {
     // MARK: Test LDManager.getVaultType
     
     func testGetVaultType_WhenLDClientIsNil_ShouldReturnVGSVaultType() {
-        let result = LDManager.shared.getVaultType(ldClient: nil, fromCache: false)
+        let result = LDManager.shared.getVaultType(ldClient: nil, genRandomDouble: LDManager.generateRandomDouble, fromCache: false)
         XCTAssertEqual(result, VaultType.vgsVaultType)
     }
     
     func testGetVaultType_WhenVaultTypeIsAlreadySet_ShouldReturnCachedValue() {
         let mockLDClient = MockLDClient(vaultType: VaultType.btVaultType)
-        let firstVaultType = LDManager.shared.getVaultType(ldClient: mockLDClient, fromCache: false)
+        let firstVaultType = LDManager.shared.getVaultType(ldClient: mockLDClient, genRandomDouble: LDManager.generateRandomDouble, fromCache: false)
         
         let vgsMockLdClient = MockLDClient(vaultType: VaultType.vgsVaultType)
         let secondVaultType = LDManager.shared.getVaultType(
             ldClient: vgsMockLdClient,
+            genRandomDouble: LDManager.generateRandomDouble,
             fromCache: true
         )
         
@@ -102,6 +109,41 @@ final class LDManagerTests: XCTestCase {
             fromCache: false
         )
         XCTAssertEqual(result, VaultType.vgsVaultType)
+    }
+    
+    func testGetPollingIntervals_ReturnsDefaultVal() {
+        let mockLDClient = MockLDClient()
+        
+        let result = LDManager.shared.getPollingIntervals(
+            ldClient: mockLDClient
+        )
+        let defatulVal: [Int] = []
+        XCTAssertEqual(result, defatulVal)
+    }
+    
+    func testGetPollingIntervals_InvalidFlagValueReturnsDefault() {
+        // Structure of the flag value is incorrect! The object should be:
+        // { "intervals": [1000] }
+        // Instead it is:
+        // { "intervals": 1000 }
+        let mockLDClient = MockLDClient(pollingIntervals: LDValue(dictionaryLiteral: ("intervals", 1000)))
+        
+        let result = LDManager.shared.getPollingIntervals(
+            ldClient: mockLDClient
+        )
+        let defatulVal: [Int] = []
+        XCTAssertEqual(result, defatulVal)
+    }
+    
+    func testGetPollingIntervals_ValidFlagValueIsReturned() {
+        let defVal = LDValue(dictionaryLiteral: ("intervals", [250, 250, 500, 500, 1000]))
+        let mockLDClient = MockLDClient(pollingIntervals: defVal)
+        
+        let result = LDManager.shared.getPollingIntervals(
+            ldClient: mockLDClient
+        )
+        let expectedValue: [Int] = [250, 250, 500, 500, 1000]
+        XCTAssertEqual(result, expectedValue)
     }
     
     // MARK: Test LDManager.Initialize

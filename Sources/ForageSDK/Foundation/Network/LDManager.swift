@@ -11,12 +11,79 @@ import LaunchDarkly
 
 internal protocol LDClientProtocol {
     func doubleVariationWrapper(forKey key: String, defaultValue: Double) -> Double
+    func jsonVariationWrapper(forKey key: String, defaultValue: LDValue) -> LDValue
 }
 
 extension LDClient: LDClientProtocol {
     func doubleVariationWrapper(forKey key: String, defaultValue: Double) -> Double {
         return self.doubleVariation(forKey: key, defaultValue: defaultValue)
     }
+    
+    func jsonVariationWrapper(forKey key: String, defaultValue: LDValue) -> LDValue {
+        return self.jsonVariation(forKey: key, defaultValue: defaultValue)
+    }
+}
+
+extension LDValue {
+    
+    /// Converts the original LDValue returned from the polling feature flag to an Array of Ints.
+    internal func convertToIntArray() -> [Int] {
+        let intervalArrayAsLDValue = self.extractArray(pollingFlagObj: self)
+        let intervalArrayAsArray = self.convertToArray(pollingArray: intervalArrayAsLDValue)
+        return self.convertArrayValsToInts(arrayOfInts: intervalArrayAsArray)
+    }
+    
+    /// Inspects the original LDValue returned from the polling feature flag and extracts the value mapped to INTERVALS
+    ///
+    /// - Parameters:
+    ///   - pollingFlagObj: The `LDValue` representing a JSON object.
+    internal func extractArray(pollingFlagObj: LDValue) -> LDValue {
+        let defaultLDValueArray: LDValue = LDValue(arrayLiteral: [])
+        switch pollingFlagObj {
+        case .object(let dictValue):
+            for (key, value) in dictValue {
+                if (key == INTERVALS) {
+                    return value
+                }
+            }
+            return defaultLDValueArray
+        default:
+            return defaultLDValueArray
+        }
+    }
+    
+    /// Converts the LDValue to an Array.
+    ///
+    /// - Parameters:
+    ///   - pollingArray: The `LDValue` representing an Array.
+    internal func convertToArray(pollingArray: LDValue) -> [LDValue] {
+        switch pollingArray {
+        case .array(let intervalVals):
+            return intervalVals
+        default:
+            return []
+        }
+    }
+
+    /// Converts an Array of LDValue to an Array of Ints.
+    ///
+    /// - Parameters:
+    ///   - arrayOfInts: The `LDValue` representing an Array of Ints.
+    internal func convertArrayValsToInts(arrayOfInts: [LDValue]) -> [Int] {
+        return arrayOfInts.map { timeInMs in
+            switch timeInMs {
+            case .number(let valAsNum):
+                return Int(valAsNum)
+            default:
+                return 1000
+            }
+        }
+    }
+}
+
+internal protocol LDManagerProtocol {
+    func getVaultType(ldClient: LDClientProtocol?, genRandomDouble: () -> Double, fromCache: Bool) -> VaultType
+    func getPollingIntervals(ldClient: LDClientProtocol?) -> [Int]
 }
 
 /**
@@ -43,7 +110,18 @@ public enum VaultType: String {
  */
 private enum FlagType: String {
     case vaultPrimaryTrafficPercentage = "vault-primary-traffic-percentage"
+    case isoPollingWaitIntervals = "iso-polling-wait-intervals"
 }
+
+/**
+ Key value used to grab the dictionary returned by the "iso-polling-wait-intervals" flag
+ */
+private let INTERVALS = "intervals"
+
+/**
+ LaunchDarkly prefix
+ */
+private let LAUNCH_DARKLY_PREFIX = "LaunchDarkly"
 
 /**
  Contexts
@@ -59,7 +137,7 @@ private enum ContextKind: String {
 /// `LDManager` is responsible for managing interactions with the LaunchDarkly service.
 ///
 /// - Note: This class is a singleton and should be accessed via `LDManager.shared`.
-internal class LDManager {
+internal class LDManager: LDManagerProtocol {
     // MARK: - Properties
     
     static let shared = LDManager()
@@ -82,7 +160,7 @@ internal class LDManager {
         logger: ForageLogger? = nil,
         startLdClient: (LDConfig, LDContext?, (() -> Void)?) -> Void = LDClient.start
     ) {
-        self.logger = logger
+        self.logger = logger?.setPrefix(LAUNCH_DARKLY_PREFIX)
         
         let ldConfig = createLDConfig(for: environment)
         
@@ -106,11 +184,11 @@ internal class LDManager {
     ///
     /// - Returns: The determined `VaultType`.
     internal func getVaultType(
-        ldClient: LDClientProtocol? = getDefaultLDClient(),
-        genRandomDouble: () -> Double = generateRandomDouble,
-        fromCache: Bool = true
+        ldClient: LDClientProtocol?,
+        genRandomDouble: () -> Double,
+        fromCache: Bool
     ) -> VaultType {
-        logger = logger?.setPrefix("LaunchDarkly")
+        logger = logger?.setPrefix(LAUNCH_DARKLY_PREFIX)
         
         if fromCache, let existingVaultType = vaultType {
             return existingVaultType
@@ -139,6 +217,37 @@ internal class LDManager {
         
         return vaultType ?? .vgsVaultType
     }
+    
+    /// Determines on what interval we will poll for SQS messages based on "iso-polling-wait-intervals" feature flag.
+    /// Defaults to the empty array if something goes wrong and defers polling intervals to the polling class (ex: LDClient not initialized, LaunchDarkly is down).
+    ///
+    /// - Parameters:
+    ///   - ldClient: An optional `LDClientProtocol` object used to fetch feature flags. Defaults to `getDefaultLDClient()`.
+    ///
+    /// - Returns: A list of Ints.
+    internal func getPollingIntervals(
+        ldClient: LDClientProtocol?
+    ) -> [Int] {
+        logger = logger?.setPrefix(LAUNCH_DARKLY_PREFIX)
+        
+        let defaultValLdValue = LDValue(dictionaryLiteral: (INTERVALS, []))
+        
+        guard let ld = ldClient else {
+            logger?.error("Defaulting to 1 second polling intervals. LDClient.get() was called before init()!",
+                          error: nil,
+                          attributes: nil)
+            
+            return []
+        }
+        
+        let pollingIntervalsAsLdValue = ld.jsonVariationWrapper(forKey: FlagType.isoPollingWaitIntervals.rawValue, defaultValue: defaultValLdValue)
+        let pollingIntervals = pollingIntervalsAsLdValue.convertToIntArray()
+        
+        logger?.info("Evaluated \(FlagType.isoPollingWaitIntervals) = \(pollingIntervals)",
+                     attributes: nil)
+        
+        return pollingIntervals
+    }
 
     private func createLDConfig(for environment: Environment) -> LDConfig {
         return LDConfig(mobileKey: getLDMobileKey(environment).rawValue)
@@ -153,14 +262,6 @@ internal class LDManager {
         return context
     }
     
-    private static func getDefaultLDClient() -> LDClientProtocol? {
-        return LDClient.get()
-    }
-    
-    private static func generateRandomDouble() -> Double {
-        return Double.random(in: 0...100)
-    }
-    
     private func logVaultType(_ vaultType: VaultType? = nil) {
         guard let vaultType = vaultType else {
             // this shouldn't happen, but we log here in case something went really wrong
@@ -173,6 +274,14 @@ internal class LDManager {
                 vaultType: vaultType
             ))
             .notice("Using \(vaultType.rawValue)", attributes: nil)
+    }
+    
+    internal static func getDefaultLDClient() -> LDClientProtocol? {
+        return LDClient.get()
+    }
+    
+    internal static func generateRandomDouble() -> Double {
+        return Double.random(in: 0...100)
     }
     
     private func getLDMobileKey(_ environment: Environment) -> LDMobileKey {
