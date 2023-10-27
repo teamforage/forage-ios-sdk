@@ -178,8 +178,7 @@ public protocol ObservableState {
     /// Indicates whether the input is empty.
     var isEmpty: Bool { get }
 
-    /// isValid is true when the input text does not fail any validation checks with the exception of target length;
-    /// false if any of the validation checks other than target length fail.
+    /// Indicates whether all validation checks pass, excluding the the minimum length validator.
     var isValid: Bool { get }
 
     /// Indicates whether all validation checks pass and the ForageElement is ready for submission.
