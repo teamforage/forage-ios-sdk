@@ -6,17 +6,17 @@ The ForageSDK is a Swift library for securely processing EBT payments. You can u
 - Check the balance of an EBT card
 - Capture an EBT payment
 
-# Table of contents
+## Table of contents
 
 <!--ts-->
 
 - [ForageSDK](#foragesdk)
-- [Table of contents](#table-of-contents)
+  - [Table of contents](#table-of-contents)
   - [Install the ForageSDK](#install-the-foragesdk)
     - [CocoaPods](#cocoapods)
     - [Swift Package Manager (SPM)](#swift-package-manager-spm)
   - [Usage](#usage)
-    - [Import SDK into your file](#import-sdk-into-your-file)
+    - [Import the SDK](#import-the-sdk)
     - [Initialize the ForageSDK](#initialize-the-foragesdk)
   - [Forage UI Elements](#forage-ui-elements)
     - [ForagePANTextField](#foragepantextfield)
@@ -89,10 +89,12 @@ Follow the official Apple SPM guide [instructions](https://developer.apple.com/d
 
 ## Usage
 
-### Import SDK into your file
+### Import the SDK
 
 ```swift
 import ForageSDK
+
+// your code here
 ```
 
 ### Initialize the ForageSDK
