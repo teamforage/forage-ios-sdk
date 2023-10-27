@@ -81,7 +81,7 @@ To use Swift Package Manager, in Xcode add the https://github.com/teamforage/for
 
 Click on the `Add Package` button. On the next screen, select the package `ForageSDK`, and finish by clicking on `Add Package`.
 
-<img src="https://user-images.githubusercontent.com/115553362/199013832-ad86b074-63e3-469b-ad8c-75d65169433b.png" alt="Confirm" width="80%">
+<img src="https://user-images.githubusercontent.com/115553362/199013832-ad86b074-63e3-469b-ad8c-75d65169433b.png" alt="Confirm adding package" width="70%">
 
 Follow the official Apple SPM guide [instructions](https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app) for more details.
 
