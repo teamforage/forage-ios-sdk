@@ -1,6 +1,6 @@
 # ForageSDK
 
-The ForageSDK is a Swift library for securely processing EBT payments. You can use the library to add all of the essential EBT checkout operations to your iOS app:
+The ForageSDK is a Swift library for securely processing EBT payments. You can use the library to add all of the following EBT checkout operations to your iOS app:
 
 - Store tokenized EBT card numbers for future use
 - Check the balance of an EBT card
@@ -60,9 +60,10 @@ pod 'ForageSDK', '~> 4.1'
 pod install
 ```
 
-5. In the future, to update to the latest version of the SDK, run:
+5. To update to the latest version of the SDK, run:
 
 ```bash
+pod repo update
 pod update ForageSDK
 ```
 
