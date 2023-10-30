@@ -1,77 +1,108 @@
 # ForageSDK
 
-The ForageSDK processes Electronic Benefits Transfer (EBT) payments in your e-commerce application. It provides secure user interfaces for collecting and tokenizing an EBT cardholder's PAN and accepting an EBT cardholder's PIN to execute a balance check and process a payment.
+The ForageSDK is a Swift library for securely processing EBT payments. You can use the library to add all of the following EBT checkout operations to your iOS app:
 
-# Table of contents
+- Store tokenized EBT card numbers for future use
+- Check the balance of an EBT card
+- Capture an EBT payment
+
+## Table of contents
 
 <!--ts-->
 
 - [ForageSDK](#foragesdk)
-- [Table of contents](#table-of-contents)
-  - [Integration](#integration)
+  - [Table of contents](#table-of-contents)
+  - [Install the ForageSDK](#install-the-foragesdk)
     - [CocoaPods](#cocoapods)
-    - [Swift Package Manager](#swift-package-manager)
-    - [Step-by-step](#step-by-step)
+    - [Swift Package Manager (SPM)](#swift-package-manager-spm)
   - [Usage](#usage)
-    - [Import SDK into your file](#import-sdk-into-your-file)
-    - [Create ForageSDK instance](#create-foragesdk-instance)
+    - [Import the SDK](#import-the-sdk)
+    - [Initialize the ForageSDK](#initialize-the-foragesdk)
   - [Forage UI Elements](#forage-ui-elements)
     - [ForagePANTextField](#foragepantextfield)
-    - [Tokenize card number](#tokenize-card-number)
+      - [Initialize the `ForagePANTextField`](#initialize-the-foragepantextfield)
+      - [Subscribe to `ForageElement` state changes](#subscribe-to-forageelement-state-changes)
+      - [Set the `ForageElement` as the First Responder](#set-the-forageelement-as-the-first-responder)
+    - [Tokenize a customer's EBT card](#tokenize-a-customers-ebt-card)
     - [ForagePINTextField](#foragepintextfield)
-    - [Balance](#balance)
-    - [Capture payment](#capture-payment)
-  - [Demo Application](#demo-application)
+      - [Initialize the `ForagePINTextField`](#initialize-the-foragepintextfield)
+      - [Subscribe to `ForagePINTextField` state changes](#subscribe-to-foragepintextfield-state-changes)
+      - [Check the balance of an EBT card](#check-the-balance-of-an-ebt-card)
+      - [Capture an EBT payment](#capture-an-ebt-payment)
+  - [Sample Application](#sample-application)
   - [Dependencies](#dependencies)
 
-## Integration
+## Install the ForageSDK
+
+You can use CocoaPods or Swift Package Manager (SPM) to install `forage-ios-sdk`.
+
+The Forage iOS SDK requires Xcode 14.1 or later and is compatible with apps targeting iOS 13 or above. Earlier Xcode versions do not support Swift packages with resources.
 
 ### CocoaPods
 
-[CocoaPods](https://cocoapods.org) is a dependency manager for Cocoa projects. For usage and installation instructions, visit their website. To integrate ForageSDK into your Xcode project using CocoaPods, specify it in your `Podfile`:
+1. If you haven’t already, install the latest version of [CocoaPods](https://guides.cocoapods.org/using/getting-started.html).
 
-```swift
-pod 'ForageSDK', '~> 4.1.2'
+2. If you don’t have an existing [Podfile](https://guides.cocoapods.org/syntax/podfile.html), run the following command to create one:
+
+```bash
+pod init
 ```
 
-### Swift Package Manager
-
-The [Swift Package Manager](https://www.swift.org/package-manager/) is a tool for managing the distribution of Swift code. It’s integrated with the Swift build system to automate the process of downloading, compiling, and linking dependencies.
-
-We recommend using Xcode with Swift tools version 5.3 or higher. Earlier Xcode versions don't support Swift packages with resources.
-To check your current Swift tools version run in your terminal:
+3. Add the following line to your `Podfile`:
 
 ```swift
-xcrun swift -version
+pod 'ForageSDK', '~> 4.1'
 ```
 
-Follow the official Apple SPM guide [instructions](https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app) for more details.
+4. Run the following command
 
-### Step-by-step
+```bash
+pod install
+```
 
-Add package:
+5. To update to the latest version of the SDK, run:
 
-![Screen Shot 2022-10-31 at 09 54 23](https://user-images.githubusercontent.com/115553362/199012534-9d6475d4-73ed-4459-928e-684aba83a63c.png)
+```bash
+pod repo update
+pod update ForageSDK
+```
+
+### Swift Package Manager (SPM)
+
+<details>
+<summary>
+See the step-by-step Xcode installation instructions
+</summary>
+
+<img width="50%" src="https://user-images.githubusercontent.com/115553362/199012534-9d6475d4-73ed-4459-928e-684aba83a63c.png" alt="File > Add packages">
 
 To use Swift Package Manager, in Xcode add the https://github.com/teamforage/forage-ios-sdk dependency and choose the `Dependency Rule` as Branch and the branch enter `main`.
 
-![Screen Shot 2022-10-31 at 09 56 50](https://user-images.githubusercontent.com/115553362/199013574-59c1968a-f879-4404-99df-9db4c0c93f78.png)
+<img src="https://user-images.githubusercontent.com/115553362/199013574-59c1968a-f879-4404-99df-9db4c0c93f78.png" alt="Add package" width="80%">
 
-Click on `Add Package` button. And, on the next screen, select the package `ForageSDK`, and finish by clicking on `Add Package`.
+Click on the `Add Package` button. On the next screen, select the package `ForageSDK`, and finish by clicking on `Add Package`.
 
-![Screen Shot 2022-10-31 at 10 00 57](https://user-images.githubusercontent.com/115553362/199013832-ad86b074-63e3-469b-ad8c-75d65169433b.png)
+<img src="https://user-images.githubusercontent.com/115553362/199013832-ad86b074-63e3-469b-ad8c-75d65169433b.png" alt="Confirm adding package" width="70%">
+
+Follow the official Apple SPM guide [instructions](https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app) for more details.
+
+</details>
 
 ## Usage
 
-### Import SDK into your file
+### Import the SDK
 
 ```swift
 import ForageSDK
+
+// your code here
 ```
 
-### Create ForageSDK instance
+### Initialize the ForageSDK
 
-To initialize a ForageSDK instance, you need to provide the merchantID and sessionToken.
+Initialize the ForageSDK by calling `ForageSDK.setup` and passing in a `ForageSDK.Config` object with a valid `merchantID` and `sessionToken`.
+
+ℹ️ **Note:** `ForageSDK.setup` must be called before initializing the [Forage UI Elements](#forage-ui-elements).
 
 ```swift
 ForageSDK.setup(
@@ -88,60 +119,87 @@ ForageSDK provides two UI Elements to securely communicate with the Forage API.
 
 ### ForagePANTextField
 
-A component that securely accepts the PAN number. This field validates the PAN number based on the [StateIIN list](https://www.nacha.org/sites/default/files/2019-05/State-IINs-04-10-19.pdf)
+A `ForageElement` that securely collects the customer's EBT PAN. This field validates the PAN based on the Issuer Identification Number (IIN).
 
-![Screen Shot 2022-10-31 at 10 19 27](https://user-images.githubusercontent.com/115553362/199017253-ee05dcf0-01c8-41dc-9662-9da525e573c9.png)
+<img width="45%" alt="image" src="https://github.com/teamforage/forage-ios-sdk/assets/32694765/0a338662-9d29-4a65-882c-b09e99417b25">
+
+#### Initialize the `ForagePANTextField`
 
 ```swift
 private let foragePanTextField: ForagePANTextField = {
     let tf = ForagePANTextField()
+
     tf.borderColor = .black
+    tf.borderWidth = 3
+    tf.clearButtonMode = .whileEditing
+    tf.cornerRadius = 4
+    tf.font = .systemFont(ofSize: 22)
     tf.placeholder = "EBT Card Number"
+
     return tf
 }()
 ```
 
-ForagePANTextField uses a delegate `ForageElementDelegate` to communicate the updates to the client side.
+#### Subscribe to `ForageElement` state changes
+
+Forage validates an EBT Element’s input as a customer types. To notify customers of input validation errors, you'll need to conform to the `ForageElementDelegate` protocol.
+
+The `focusDidChange` method is triggered when a `ForageElement` gains or loses focus.
 
 ```swift
 foragePanTextField.delegate = self
 ```
 
 ```swift
+// signature
 public protocol ForageElementDelegate: AnyObject {
     func focusDidChange(_ state: ObservableState)
     func textFieldDidChange(_ state: ObservableState)
 }
+
+// usage
+extension ForagePanView: ForageElementDelegate {
+    func focusDidChange(_ state: ObservableState) {
+        if state.isFirstResponder { ... } // element gained focus
+        else { ... } // element lost focus (blurred)
+    }
+
+    func textFieldDidChange(_ state: ObservableState) {
+        // show an error message on blur if the input is invalid
+        if !state.isValid && !state.isFirstResponder { ... }
+    }
+}
 ```
 
-The ObservableState object has the values:
+The `ObservableState` protocol defines properties reflecting the state of a `ForageElement`.
 
 ```swift
 public protocol ObservableState {
-    /// isFirstResponder is true if the input is focused, false otherwise.
+    /// Indicates whether the input is focused.
     var isFirstResponder: Bool { get }
 
-    /// isEmpty is true if the input is empty, false otherwise.
+    /// Indicates whether the input is empty.
     var isEmpty: Bool { get }
 
-    /// isValid is true when the input text does not fail any validation checks with the exception of target length;
-    /// false if any of the validation checks other than target length fail.
+    /// Indicates whether all validation checks pass, excluding the the minimum length validator.
     var isValid: Bool { get }
 
-    /// isComplete is true when all validation checks pass and the input is ready to be submitted.
+    /// Indicates whether all validation checks pass and the ForageElement is ready for submission.
     var isComplete: Bool { get }
 }
 ```
 
-The ForagePINTextField exposes a function to programmatically gain focus:
+#### Set the `ForageElement` as the First Responder
+
+Call `foragePanTextField.becomeFirstResponder()` to programmatically set focus on the `ForagePANTextField`:
 
 ```swift
 func becomeFirstResponder() -> Bool
 ```
 
-To send the PAN number, we can use ForageSDK to perform the request.
+### Tokenize a customer's EBT card
 
-### Tokenize card number
+Call `ForageSDK.shared.tokenizeEBTCard` to tokenize a customer’s EBT card number and create a Forage `PaymentMethod`.
 
 ```swift
 // Signature
@@ -170,9 +228,11 @@ ForageSDK.shared.tokenizeEBTCard(
 
 ### ForagePINTextField
 
-A component the securely accepts an EBT PIN for balance requests and payment capture. It only accepts 4 digit numbers.
+A `ForageElement` that securely collects the customer's EBT card PIN to perform a balance check or capture an EBT payment.
 
-![Screen Shot 2022-10-31 at 10 21 32](https://user-images.githubusercontent.com/115553362/199017609-33b2094c-339c-4117-8124-00b5ce130dac.png)
+<img width="40%" alt="image" src="https://github.com/teamforage/forage-ios-sdk/assets/32694765/aa65ead5-08ea-40ff-be6c-40d97466cfaa">
+
+#### Initialize the `ForagePINTextField`
 
 ```swift
 private let foragePinTextField: ForagePINTextField = {
@@ -183,47 +243,27 @@ private let foragePinTextField: ForagePINTextField = {
 }()
 ```
 
-ForagePINTextField uses a delegate `ForageElementDelegate` to communicate the updates to the client side.
+#### Subscribe to `ForagePINTextField` state changes
+
+Use the `ForageElementDelegate` to subscribe to input validation and element focus state changes for `ForagePINTextField`.
 
 ```swift
 foragePinTextField.delegate = self
-```
 
-```swift
-public protocol ForageElementDelegate: AnyObject {
-    func focusDidChange(_ state: ObservableState)
-    func textFieldDidChange(_ state: ObservableState)
+extension ForagePinView: ForageElementDelegate {
+    func focusDidChange(_ state: ObservableState) {
+        if state.isFirstResponder { ... }
+    }
+
+    func textFieldDidChange(_ state: ObservableState) {
+        if state.isComplete { ... }
+    }
 }
 ```
 
-The ObservableState object has the values:
+#### Check the balance of an EBT card
 
-```swift
-public protocol ObservableState {
-    /// isFirstResponder is true if the input is focused, false otherwise.
-    var isFirstResponder: Bool { get }
-
-    /// isEmpty is true if the input is empty, false otherwise.
-    var isEmpty: Bool { get }
-
-    /// isValid is true when the input text does not fail any validation checks with the exception of target length;
-    /// false if any of the validation checks other than target length fail.
-    var isValid: Bool { get }
-
-    /// isComplete is true when all validation checks pass and the input is ready to be submitted.
-    var isComplete: Bool { get }
-}
-```
-
-The ForagePINTextField exposes a function to programmatically gain focus:
-
-```swift
-func becomeFirstResponder() -> Bool
-```
-
-To send the PIN number, we can use the ForageSDK to perform the request.
-
-### Balance
+Call `ForageSDK.shared.checkBalance` to retrieve the balance of a customer’s EBT card.
 
 ```swift
 // Signature
@@ -246,7 +286,7 @@ ForageSDK.shared.checkBalance(
 }
 ```
 
-### Capture payment
+#### Capture an EBT payment
 
 ```swift
 // Signature
@@ -269,23 +309,25 @@ ForageSDK.shared.capturePayment(
 }
 ```
 
-## Demo Application
+## Sample Application
 
-Demo application for using our components on iOS is <a href="https://github.com/teamforage/forage-ios-sdk/tree/main/Sample">here</a>.
+The Forage iOS SDK sample application can be <a href="https://github.com/teamforage/forage-ios-sdk/tree/main/Sample">found here</a>.
 
-To get the application running,
+To get the application running:
 
-1. Clone this repo and open the Sample Project in the Sample folder.
+1. Clone this repo and open the `SampleForageSDK.xcodeproj` project in the `Sample/` directory.
 2. Ensure that you have a valid Merchant ID for the Forage API, which can be found on the dashboard ([sandbox](https://dashboard.sandbox.joinforage.app/login/) | [prod](https://dashboard.joinforage.app/login/)).
 3. [Create an authentication token](https://docs.joinforage.app/docs/authentication#authentication-tokens) with `pinpad_only` scope.
 4. [Create a session token](https://docs.joinforage.app/docs/authentication#session-tokens).
-5. Run the Sample app project and provide your Merchant ID and session token on the first screen.
-6. These credentials will be passed through to all the SDK calls inside the sample app.
+5. Run the Sample app and provide your Merchant ID and session token on the first screen.
+6. Forage SDKs include built-in EBT card number validation in both sandbox and production. Use the [Test EBT cards](https://docs.joinforage.app/docs/test-ebt-cards) for developing against successful transactions and invalid EBT test card numbers for triggering exceptions.
 
 ## Dependencies
 
-- iOS 10+
-- Swift 5
+- Xcode 14.1 or above
+- iOS 13 or above
+- Swift 5.5
 - 3rd party libraries:
   - [VGS-Collect-iOS](https://github.com/verygoodsecurity/vgs-collect-ios)
   - [LaunchDarkly](https://github.com/launchdarkly/ios-client-sdk.git)
+  - [BasisTheory](https://github.com/Basis-Theory/basistheory-ios)
