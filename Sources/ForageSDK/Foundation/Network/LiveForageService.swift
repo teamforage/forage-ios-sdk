@@ -27,11 +27,6 @@ internal class LiveForageService: ForageService {
     
     // MARK: Tokenize EBT card
     
-    /// Tokenize a given *ForagePANRequestModel* object
-    ///
-    /// - Parameters:
-    ///  - request: *ForagePANRequestModel* contains ebt card object.
-    ///  - completion: Returns tokenized object.
     internal func tokenizeEBTCard(request: ForagePANRequestModel, completion: @escaping (Result<PaymentMethodModel, Error>) -> Void) {
         do {
             try provider.execute(model: PaymentMethodModel.self, endpoint: ForageAPI.tokenizeNumber(request: request), completion: completion) }
@@ -40,11 +35,6 @@ internal class LiveForageService: ForageService {
     
     // MARK: X-key
     
-    /// Retrieve from ForageAPI the X-Key header to perform request.
-    ///
-    /// - Parameters:
-    ///  - sessionToken: Session authorization token.
-    ///  - completion: Returns *ForageXKeyModel* object.
     internal func getXKey(sessionToken: String, merchantID: String, completion: @escaping (Result<ForageXKeyModel, Error>) -> Void) {
         do { try provider.execute(model: ForageXKeyModel.self, endpoint: ForageAPI.xKey(sessionToken: sessionToken, merchantID: merchantID), completion: completion) }
         catch { completion(.failure(error)) }
@@ -52,172 +42,214 @@ internal class LiveForageService: ForageService {
     
     // MARK: Check balance
     
-    /// Perform Vault request to retrieve balance.
-    ///
-    /// - Parameters:
-    ///  - pinCollector: The pin collection service
-    ///  - request: Model element with data to perform request.
-    ///  - completion: Returns BalanceModel.
     internal func checkBalance(
         pinCollector: VaultCollector,
-        request: ForageRequestModel,
-        completion: @escaping (Result<BalanceModel, Error>) -> Void) -> Void
-    {
-        let paymentMethodRef = request.paymentMethodReference
-        self.logger?.info("Polling for balance check response for Payment Method \(paymentMethodRef)", attributes: nil)
+        paymentMethodReference: String
+    ) async throws -> BalanceModel {
+        let sessionToken = ForageSDK.shared.sessionToken
+        let merchantID = ForageSDK.shared.merchantID
         
-        pinCollector.setCustomHeaders(headers: [
-            "IDEMPOTENCY-KEY": UUID.init().uuidString,
-            "Merchant-Account": request.merchantID,
-            "x-datadog-trace-id": ForageSDK.shared.traceId
-        ], xKey: request.xKey)
-
-        let extraData = [
-            "card_number_token": request.cardNumberToken
-        ]
-
-        pinCollector.sendData(
-            path: "/api/payment_methods/\(request.paymentMethodReference)/balance/",
-            vaultAction: VaultAction.balanceCheck,
-            extraData: extraData) { [weak self] result in
-                self?.polling(response: result, request: request, completion: { pollingResult in
-                    switch pollingResult {
-                    case .success:
-                        self?.getPaymentMethod(
-                            sessionToken: request.authorization,
-                            merchantID: request.merchantID,
-                            paymentMethodRef: request.paymentMethodReference,
-                            completion: { paymentMethodResult in
-                                switch paymentMethodResult {
-                                case .success(let paymentMethod):
-                                    if (paymentMethod.balance == nil) {
-                                        let forageError = ForageError(errors:[ForageErrorObj(httpStatusCode: 500, code:"invalid_data", message:"Invalid Data")])
-                                        self?.logger?.error(
-                                            "Balance check failed for Payment Method \(paymentMethodRef). Balance not attached",
-                                            error: forageError,
-                                            attributes: nil
-                                        )
-                                        
-                                        completion(.failure(forageError))
-                                        return
-                                    }
-                                    self?.logger?.notice(
-                                        "Balance check succeeded for Payment Method \(paymentMethodRef)",
-                                        attributes: nil
-                                    )
-                                    completion(.success(paymentMethod.balance!))
-                                case .failure(let error):
-                                    completion(.failure(error))
-                                }
-                                
-                            }
-                        )
-                    case .failure(let error):
-                        self?.logger?.error(
-                            "Balance check failed for Payment Method \(paymentMethodRef)",
-                            error: error,
-                            attributes: nil
-                        )
-                        completion(.failure(error))
-                    }
-                })
+        do {
+            // TODO: parallelize the first 2 requests!
+            
+            let xKeyModel = try await awaitResult { completion in
+                self.getXKey(sessionToken: sessionToken, merchantID: merchantID, completion: completion)
             }
+            let paymentMethod = try await awaitResult { completion in
+                self.getPaymentMethod(
+                    sessionToken: sessionToken,
+                    merchantID: merchantID,
+                    paymentMethodRef: paymentMethodReference,
+                    completion: completion
+                )
+            }
+            
+            let balanceRequest = ForageRequestModel(
+                authorization: sessionToken,
+                paymentMethodReference: paymentMethodReference,
+                paymentReference: "",
+                cardNumberToken: paymentMethod.card.token,
+                merchantID: merchantID,
+                xKey: ["vgsXKey": xKeyModel.alias, "btXKey": xKeyModel.bt_alias]
+            )
+            
+            let vaultResult = try await submitPinToVault(
+                pinCollector: pinCollector,
+                path:  "/api/payment_methods/\(paymentMethodReference)/balance/",
+                request: balanceRequest
+            )
+            
+            _ = try await awaitResult { completion in
+                self.polling(
+                    vaultResponse: vaultResult,
+                    request: balanceRequest,
+                    completion: completion
+                )
+            }
+            
+            let paymentMethodResult = try await awaitResult { completion in
+                self.getPaymentMethod(
+                    sessionToken: balanceRequest.authorization,
+                    merchantID: balanceRequest.merchantID,
+                    paymentMethodRef: paymentMethodReference,
+                    completion: completion
+                )
+            }
+            
+            guard let balance = paymentMethodResult.balance else {
+                let forageError = CommonErrors.UNKNOWN_SERVER_ERROR
+                logger?.error(
+                    "Balance check failed for Payment Method \(paymentMethodReference). Balance not attached",
+                    error: forageError,
+                    attributes: nil
+                )
+                throw forageError
+            }
+            
+            return balance
+        } catch let error {
+            throw error
+        }
     }
     
-    /// Perform request to Forage API after polling got message success.
-    ///
-    /// - Parameters:
-    ///  - request: Model element with data to perform request.
-    ///  - completion: Returns balance object.
-    internal func getPaymentMethod(sessionToken: String, merchantID: String, paymentMethodRef: String, completion: @escaping (Result<PaymentMethodModel, Error>) -> Void) {
+    internal func getPaymentMethod(
+        sessionToken: String,
+        merchantID: String,
+        paymentMethodRef: String,
+        completion: @escaping (Result<PaymentMethodModel, Error>) -> Void
+    ) {
         do { try provider.execute(model: PaymentMethodModel.self, endpoint: ForageAPI.getPaymentMethod(sessionToken: sessionToken, merchantID: merchantID, paymentMethodRef: paymentMethodRef), completion: completion) }
         catch { completion(.failure(error)) }
     }
     
     // MARK: Capture payment
     
-    /// Perform Vault request to capture payment.
-    ///
-    /// - Parameters:
-    ///  - pinCollector: The pin collection service
-    ///  - request: Model element with data to perform request.
-    ///  - completion: Returns captured payment object.
     internal func capturePayment(
         pinCollector: VaultCollector,
-        request: ForageRequestModel,
-        completion: @escaping (Result<PaymentModel, Error>) -> Void)
-    {
+        paymentReference: String
+    ) async throws -> PaymentModel {
+        let sessionToken = ForageSDK.shared.sessionToken
+        let merchantID = ForageSDK.shared.merchantID
+        
+        do {
+            // TODO: parallelize the first 2 requests!
+            let xKeyModel = try await awaitResult { completion in
+                self.getXKey(sessionToken: sessionToken, merchantID: merchantID, completion: completion)
+            }
+            let payment = try await awaitResult { completion in
+                self.getPayment(
+                    sessionToken: sessionToken,
+                    merchantID: merchantID,
+                    paymentRef: paymentReference,
+                    completion: completion
+                )
+            }
+            let paymentMethod = try await awaitResult { completion in
+                self.getPaymentMethod(
+                    sessionToken: sessionToken,
+                    merchantID: merchantID,
+                    paymentMethodRef: payment.paymentMethodRef,
+                    completion: completion
+                )
+            }
+            
+            let captureRequest = ForageRequestModel(
+                authorization: sessionToken,
+                paymentMethodReference: "",
+                paymentReference: paymentReference,
+                cardNumberToken: paymentMethod.card.token,
+                merchantID: merchantID,
+                xKey: ["vgsXKey": xKeyModel.alias, "btXKey": xKeyModel.bt_alias]
+            )
+            
+            let vaultResult = try await submitPinToVault(
+                pinCollector: pinCollector,
+                path: "/api/payments/\(paymentReference)/capture/",
+                request: captureRequest
+            )
+            
+            _ = try await awaitResult { completion in
+                self.polling(
+                    vaultResponse: vaultResult,
+                    request: captureRequest,
+                    completion: completion
+                )
+            }
+            
+            return try await awaitResult { completion in
+                self.getPayment(
+                    sessionToken: captureRequest.authorization,
+                    merchantID: captureRequest.merchantID,
+                    paymentRef: captureRequest.paymentReference,
+                    completion: completion
+                )
+            }
+        } catch let error {
+            throw error
+        }
+    }
+    
+    internal func getPayment(sessionToken: String, merchantID: String, paymentRef: String, completion: @escaping (Result<PaymentModel, Error>) -> Void) {
+        do { try provider.execute(model: PaymentModel.self, endpoint: ForageAPI.getPayment(sessionToken: sessionToken, merchantID: merchantID, paymentRef: paymentRef), completion: completion) }
+        catch { completion(.failure(error)) }
+    }
+    
+    // MARK: Private helper methods
+    
+    private func awaitResult<T>(_ operation: @escaping (@escaping (Result<T, Error>) -> Void) -> Void) async throws -> T {
+        return try await withCheckedThrowingContinuation { continuation in
+            operation { result in
+                continuation.resume(with: result)
+            }
+        }
+    }
+    
+    /// Submit PIN to the Vault Proxy (Basis Theory or VGS)
+    /// - Parameters:
+    ///   - pinCollector: The PIN collection client
+    ///   - path: The inbound HTTP path. Ends with /capture/ or /balance/
+    ///   - request: Model  with data to perform request.
+    private func submitPinToVault(
+        pinCollector: VaultCollector,
+        path: String,
+        request: ForageRequestModel
+    ) async throws -> VaultResponse {
         pinCollector.setCustomHeaders(headers: [
             "IDEMPOTENCY-KEY": UUID.init().uuidString,
             "Merchant-Account": request.merchantID,
             "x-datadog-trace-id": ForageSDK.shared.traceId
         ], xKey: request.xKey)
-
+        
         let extraData = [
             "card_number_token": request.cardNumberToken
         ]
-
-        pinCollector.sendData(
-            path: "/api/payments/\(request.paymentReference)/capture/",
-            vaultAction: VaultAction.capturePayment,
-            extraData: extraData) { [weak self] result in
-                self?.polling(response: result, request: request, completion: { pollingResult in
-                    switch pollingResult {
-                    case .success:
-                        self?.getPayment(
-                            sessionToken: request.authorization,
-                            merchantID: request.merchantID,
-                            paymentRef: request.paymentReference,
-                            completion: { [weak self] paymentResult in
-                                switch paymentResult {
-                                case .success(let payment):
-                                    self?.logger?.notice("Capture succeeded for Payment \(request.paymentReference)", attributes: nil)
-                                    completion(.success(payment))
-                                case .failure(let error):
-                                    self?.logger?.error("Capture failed for Payment \(request.paymentReference)", error: error, attributes: nil)
-                                    completion(.failure(error))
-                                }
-                            }
-                        )
-                    case .failure(let error):
-                        self?.logger?.error(
-                            "Capture failed for Payment \(request.paymentReference)",
-                            error: error,
-                            attributes: nil
-                        )
-                        completion(.failure(error))
-                    }
-                })
+        
+        do {
+            return try await withCheckedThrowingContinuation { continuation in
+                pinCollector.sendData(
+                    path: path,
+                    vaultAction: VaultAction.capturePayment,
+                    extraData: extraData
+                ) { result in
+                    continuation.resume(returning: result)
+                }
             }
-    }
-    
-    /// Perform request to Forage API after polling got message success.
-    ///
-    /// - Parameters:
-    ///  - request: Model element with data to perform request.
-    ///  - completion: Returns balance object.
-    internal func getPayment(sessionToken: String, merchantID: String, paymentRef: String, completion: @escaping (Result<PaymentModel, Error>) -> Void) {
-        do { try provider.execute(model: PaymentModel.self, endpoint: ForageAPI.getPayment(sessionToken: sessionToken, merchantID: merchantID, paymentRef: paymentRef), completion: completion) }
-        catch { completion(.failure(error)) }
+        } catch let error {
+            throw error
+        }
     }
 }
 
 // MARK: - Polling
 
 extension LiveForageService: Polling {
-    /// Process Vault Data for polling message.
-    ///
-    /// - Parameters:
-    ///  - response: The Vault response.
-    ///  - request: Model element with data to perform request.
-    ///  - completion: Which will return the result.
-    internal func polling(response: VaultResponse, request: ForageRequestModel, completion: @escaping (Result<Data?, Error>) -> Void) {
+    internal func polling(vaultResponse: VaultResponse, request: ForageRequestModel, completion: @escaping (Result<Data?, Error>) -> Void) {
         retryCount = 0
         
-        if let error = response.error {
+        if let error = vaultResponse.error {
             completion(.failure(error))
-        } else if let data = response.data, let urlResponse = response.urlResponse {
-            provider.processVaultData(model: MessageResponseModel.self, code: response.statusCode, data: data, response: urlResponse) { [weak self] messageResponse in
+        } else if let data = vaultResponse.data, let urlResponse = vaultResponse.urlResponse {
+            provider.processVaultData(model: MessageResponseModel.self, code: vaultResponse.statusCode, data: data, response: urlResponse) { [weak self] messageResponse in
                 switch messageResponse {
                 case .success(let message):
                     self?.pollingMessage(
@@ -241,14 +273,7 @@ extension LiveForageService: Polling {
             completion(.failure(emptyError))
         }
     }
-
     
-    /// Polls message to check payment status
-    ///
-    /// - Parameters:
-    ///  - contentId: The *MessageResponseModel* which contains the message.
-    ///  - request: Model element with data to perform request.
-    ///  - completion: Which will return the message for another retry or success.
     internal func pollingMessage(
         contentId: String,
         request: ForageRequestModel,
@@ -262,7 +287,7 @@ extension LiveForageService: Polling {
                     /// check message is not failed and is completed
                     if data.failed == false && data.status == "completed" {
                         completion(.success(data))
-                    /// check message is failed to return error immediately
+                        /// check message is failed to return error immediately
                     } else if data.failed == true {
                         /// Parse the error returned from SQS message and return it back
                         let error = data.errors[0]
@@ -293,7 +318,7 @@ extension LiveForageService: Polling {
                                 completion: completion
                             )
                         }
-                    /// in case run out of attempts
+                        /// in case run out of attempts
                     } else {
                         self.logger?.error(
                             "Max polling attempts reached for \(self.getLogSuffix(request))",
@@ -336,7 +361,7 @@ extension LiveForageService: Polling {
         let nextPollTime = intervalAsDouble + self.jitterAmountInSeconds()
         
         retryCount = retryCount + 1
-
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + nextPollTime) {
             completion()
         }

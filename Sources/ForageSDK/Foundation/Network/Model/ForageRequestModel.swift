@@ -1,5 +1,5 @@
 //
-//  ForageRetrieveModel.swift
+//  ForageRequestModel.swift
 //  ForageSDK
 //
 //  Created by Tiago Oliveira on 16/11/22.

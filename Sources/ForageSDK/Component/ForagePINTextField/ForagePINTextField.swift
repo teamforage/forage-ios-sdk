@@ -10,8 +10,6 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
     
     // MARK: - Properties
     
-    internal var collector: VaultCollector?
-    
     /// Delegate that updates client's side about state of the entered pin
     public weak var delegate: ForageElementDelegate?
     
@@ -151,7 +149,7 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
         )
         
         var tf: VaultWrapper?
-
+        
         if (vaultType == VaultType.vgsVaultType) {
             tf = VGSTextFieldWrapper()
         } else if (vaultType == VaultType.btVaultType) {
@@ -159,7 +157,7 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
         } else {
             tf = VGSTextFieldWrapper()
         }
-
+        
         tf?.textColor = UIColor.black
         tf?.font = UIFont.systemFont(ofSize: 14, weight: .regular)
         tf?.borderWidth = 0
@@ -167,8 +165,7 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
         tf?.masksToBounds = true
         tf?.borderColor = .clear
         tf?.backgroundColor = .systemGray6
-        collector = tf?.collector
-
+        
         return tf ?? VGSTextFieldWrapper()
     }()
     
@@ -184,6 +181,10 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
         imgView.isAccessibilityElement = true
         return imgView
     }()
+    
+    internal func getPinCollector() -> VaultCollector {
+        return textField.collector
+    }
     
     // MARK: - Lifecycle methods
     
@@ -289,12 +290,12 @@ extension ForagePINTextField {
     @discardableResult override public func becomeFirstResponder() -> Bool {
         return textField.becomeFirstResponder()
     }
-
+    
     /// Remove focus from `ForagePINTextField`.
     @discardableResult override public func resignFirstResponder() -> Bool {
         return textField.resignFirstResponder()
     }
-
+    
     /// Check if `ForagePINTextField` is focused.
     override public var isFirstResponder: Bool {
         return textField.isFirstResponder

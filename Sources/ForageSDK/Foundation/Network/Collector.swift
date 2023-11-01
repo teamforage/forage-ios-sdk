@@ -1,6 +1,6 @@
 //
 //  Collector.swift
-//  
+//
 //
 //  Created by Danny Leiser on 3/8/23.
 //  Copyright © 2023-Present Forage Technology Corporation. All rights reserved.
@@ -69,23 +69,28 @@ class VGSCollectWrapper: VaultCollector {
         let measurement = VaultProxyResponseMonitor.newMeasurement(vault: VaultType.vgsVaultType, action: vaultAction)
             .setPath(path)
             .setMethod(.post)
-
+        
         measurement.start()
-        vgsCollect.sendData(path: path, extraData: mutableExtraData) { (response) in
-            switch response {
-            case .success(let code, let data, let urlResponse):
-                measurement.end()
-                measurement.setHttpStatusCode(code).logResult()
-                completion(VaultResponse(statusCode: code, urlResponse: urlResponse, data: data, error: nil))
-            case .failure(let code, let data, let urlResponse, let error):
-                measurement.end()
-                self.logger?.error("Failed to send data to VGS proxy", error: error, attributes: [
-                    "http_status": code
-                ])
-                measurement.setHttpStatusCode(code).logResult()
-                completion(VaultResponse(statusCode: code, urlResponse: urlResponse, data: data, error: error))
+        
+        // VGS performs UI actions in this method, which should run on the main thread
+        DispatchQueue.main.async { [self] in
+            vgsCollect.sendData(path: path, extraData: mutableExtraData) { (response) in
+                switch response {
+                case .success(let code, let data, let urlResponse):
+                    measurement.end()
+                    measurement.setHttpStatusCode(code).logResult()
+                    completion(VaultResponse(statusCode: code, urlResponse: urlResponse, data: data, error: nil))
+                case .failure(let code, let data, let urlResponse, let error):
+                    measurement.end()
+                    self.logger?.error("Failed to send data to VGS proxy", error: error, attributes: [
+                        "http_status": code
+                    ])
+                    measurement.setHttpStatusCode(code).logResult()
+                    completion(VaultResponse(statusCode: code, urlResponse: urlResponse, data: data, error: error))
+                }
             }
         }
+        
     }
     
     func getPaymentMethodToken(paymentMethodToken: String) -> String {
@@ -175,33 +180,38 @@ class BasisTheoryWrapper: VaultCollector {
         let proxyHttpRequest = ProxyHttpRequest(method: .post, path: path, body: body, headers: self.customHeaders)
         
         measurement.start()
-        BasisTheoryElements.proxy(
-            apiKey: basisTheoryConfig.publicKey, proxyKey: basisTheoryConfig.proxyKey,
-            proxyHttpRequest: proxyHttpRequest
-        ) { response, data, error in
-            measurement.end()
-            
-            let httpStatusCode = (response as? HTTPURLResponse)?.statusCode
-            measurement.setHttpStatusCode(httpStatusCode).logResult()
-
-            if error != nil {
-                self.logger?.error("Failed to send data to Basis Theory proxy", error: error, attributes: [
-                    "http_status": httpStatusCode
-                ])
+        
+        // Basis Theory performs UI actions in this method, which should run on the main thread
+        DispatchQueue.main.async { [self] in
+            BasisTheoryElements.proxy(
+                apiKey: basisTheoryConfig.publicKey,
+                proxyKey: basisTheoryConfig.proxyKey,
+                proxyHttpRequest: proxyHttpRequest
+            ) { response, data, error in
+                measurement.end()
+                
+                let httpStatusCode = (response as? HTTPURLResponse)?.statusCode
+                measurement.setHttpStatusCode(httpStatusCode).logResult()
+                
+                if error != nil {
+                    self.logger?.error("Failed to send data to Basis Theory proxy", error: error, attributes: [
+                        "http_status": httpStatusCode
+                    ])
+                }
+                
+                var rawData: Data? = nil
+                if let data = data {
+                    let dataDictionary = convertJsonToDictionary(data)
+                    rawData = try? JSONSerialization.data(withJSONObject: dataDictionary, options: [])
+                }
+                let vaultResponse = VaultResponse(
+                    statusCode: httpStatusCode,
+                    urlResponse: response,
+                    data: rawData,
+                    error: error
+                )
+                completion(vaultResponse)
             }
-            
-            var rawData: Data? = nil
-            if let data = data {
-                let dataDictionary = convertJsonToDictionary(data)
-                rawData = try? JSONSerialization.data(withJSONObject: dataDictionary, options: [])
-            }
-            let vaultResponse = VaultResponse(
-                statusCode: httpStatusCode,
-                urlResponse: response,
-                data: rawData,
-                error: error
-            )
-            completion(vaultResponse)
         }
     }
     
