@@ -14,7 +14,7 @@ The ForageSDK is a Swift library for securely processing EBT payments. You can u
   - [Table of contents](#table-of-contents)
   - [Install the ForageSDK](#install-the-foragesdk)
     - [CocoaPods](#cocoapods)
-    - [Swift Package Manager (SPM)](#swift-package-manager-spm)
+    - [Xcode](#xcode)
   - [Usage](#usage)
     - [Import the SDK](#import-the-sdk)
     - [Initialize the ForageSDK](#initialize-the-foragesdk)
@@ -67,7 +67,7 @@ pod repo update
 pod update ForageSDK
 ```
 
-### Swift Package Manager (SPM)
+### Xcode
 
 <details>
 <summary>
