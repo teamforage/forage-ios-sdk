@@ -265,7 +265,7 @@ extension ForagePinView: ForageElementDelegate {
 
 > **FNS requirements for balance inquiries**
 >
-> FNS prohibits balance inquiries on sites and apps that offer guest checkout. Do not use this endpoint if your customers can opt for guest checkout.
+> FNS prohibits balance inquiries on sites and apps that offer guest checkout. Skip this section if your customers can opt for guest checkout.
 >
 > If guest checkout is not an option, then it's up to you whether or not to add a balance inquiry feature. No FNS regulations apply.
 
