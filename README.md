@@ -263,6 +263,12 @@ extension ForagePinView: ForageElementDelegate {
 
 #### Check the balance of an EBT card
 
+> **FNS requirements for balance inquiries**
+>
+> FNS prohibits balance inquiries on sites and apps that offer guest checkout. Do not use this endpoint if your customers can opt for guest checkout.
+>
+> If guest checkout is not an option, then it's up to you whether or not to add a balance inquiry feature. No FNS regulations apply.
+
 Call `ForageSDK.shared.checkBalance` to retrieve the balance of a customer’s EBT card.
 
 ```swift
