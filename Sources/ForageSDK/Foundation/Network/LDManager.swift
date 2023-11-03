@@ -99,7 +99,7 @@ private enum LDMobileKey: String {
 /**
  Vault Types
  */
-public enum VaultType: String {
+internal enum VaultType: String {
     case vgsVaultType = "vgs"
     case btVaultType = "basis_theory"
 }
@@ -107,7 +107,7 @@ public enum VaultType: String {
 /**
  Flag Types
  */
-private enum FlagType: String {
+internal enum FlagType: String {
     case vaultPrimaryTrafficPercentage = "vault-primary-traffic-percentage"
     case isoPollingWaitIntervals = "iso-polling-wait-intervals"
 }

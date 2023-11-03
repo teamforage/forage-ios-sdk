@@ -16,11 +16,11 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
     @IBInspectable public var isEmpty: Bool {
         enhancedTextField.isEmpty
     }
-
+    
     @IBInspectable public var isValid: Bool {
         enhancedTextField.isValid
     }
-
+    
     @IBInspectable public var isComplete: Bool {
         enhancedTextField.isComplete
     }
@@ -55,7 +55,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         get { _padding }
         set { _padding = newValue }
     }
-
+    
     /// Placeholder for the text field
     @IBInspectable public var placeholder: String? {
         get { enhancedTextField.placeholder }
@@ -100,17 +100,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         get { enhancedTextField.font }
         set { enhancedTextField.font = newValue }
     }
-
-    /// ElementHeight for the text field
-    private var _elementHeight: CGFloat = 0
-    @IBInspectable public var elementHeight: CGFloat {
-        get { _elementHeight }
-        set {
-            _elementHeight = newValue
-            changeElementHeight(value: _elementHeight)
-        }
-    }
-
+    
     // MARK: - Public Delegate
 
     /// A delegate that informs the client about the state of the entered card number (validation, focus).
@@ -197,7 +187,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         super.init(coder: coder)
         commonInit()
     }
-
+    
     // MARK: - Private API
 
     private func commonInit() {
@@ -259,14 +249,9 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
     @objc fileprivate func requestFocus(_ gesture: UIGestureRecognizer) {
         becomeFirstResponder()
     }
-
-    private func changeElementHeight(value: CGFloat) {
-        container.distribution = .equalCentering
-        container.heightAnchor.constraint(equalToConstant: value).isActive = true
-    }
-
-    func getActualPAN() -> String {
-        enhancedTextField.actualPAN
+    
+    internal func getActualPAN() -> String {
+        return enhancedTextField.actualPAN
     }
 
     // MARK: - Public API
@@ -274,51 +259,10 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
     override public var intrinsicContentSize: CGSize {
         CGSize(width: frame.width, height: 83)
     }
-
+    
     public func clearText() {
         enhancedTextField.text = ""
         enhancedTextField.actualPAN = ""
-    }
-}
-
-// MARK: - UITextFieldDelegate
-
-extension ForagePANTextField: UITextFieldDelegate {
-    public func focusDidChange(_ state: ObservableState) {
-        delegate?.focusDidChange(self)
-    }
-
-    public func textFieldDidChange(_ state: ObservableState) {
-        delegate?.textFieldDidChange(self)
-    }
-
-    public func textFieldDidBeginEditing(_ textField: UITextField) {
-        delegate?.focusDidChange(self)
-    }
-
-    public func textFieldDidEndEditing(_ textField: UITextField) {
-        delegate?.focusDidChange(self)
-    }
-
-    /// Determines whether the text field should allow a change of characters within the specified range.
-    /// This method is called when the user attempts to change the content of the text field.
-    /// - Parameters:
-    ///   - textField: The text field containing the text.
-    ///   - range: The range of characters to be replaced.
-    ///   - replacementString: The replacement string.
-    /// - Returns: `true` if the changes should be allowed; otherwise, `false`.
-    public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString: String) -> Bool {
-        let isBackspace = replacementString.isEmpty
-        if isBackspace {
-            return true
-        }
-
-        // Only allow the user to enter numeric strings
-        if !replacementString.allSatisfy(\.isNumber) {
-            return false
-        }
-
-        return true
     }
 }
 

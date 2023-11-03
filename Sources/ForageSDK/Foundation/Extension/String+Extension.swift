@@ -10,8 +10,12 @@ import UIKit
 
 // MARK: - String extension
 
-extension String {
-    public var isEmptyString: Bool {
-        trimmingCharacters(in: NSCharacterSet.whitespaces).isEmpty
+internal extension String {
+    var isEmptyString: Bool {
+        return self.trimmingCharacters(in: NSCharacterSet.whitespaces).isEmpty
+    }
+    
+    subscript(safe index: Int) -> Character? {
+        return index < count && index >= 0 ? self[self.index(startIndex, offsetBy: index)] : nil
     }
 }
