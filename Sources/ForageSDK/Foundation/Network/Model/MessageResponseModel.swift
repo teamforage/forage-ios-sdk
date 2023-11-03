@@ -13,7 +13,7 @@ internal struct ForageSQSError: Codable {
     let forageCode: String
     let message: String
     let details: ForageErrorDetails?
-    
+
     private enum CodingKeys: String, CodingKey {
         case statusCode = "status_code"
         case forageCode = "forage_code"
@@ -29,15 +29,15 @@ internal struct MessageResponseModel: Codable {
     let status: String
     let failed: Bool
     let errors: [ForageSQSError]
-    
-    private enum CodingKeys : String, CodingKey {
+
+    private enum CodingKeys: String, CodingKey {
         case contentId = "content_id"
         case messageType = "message_type"
         case status
         case failed
         case errors
     }
-    
+
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         contentId = try container.decode(String.self, forKey: .contentId)

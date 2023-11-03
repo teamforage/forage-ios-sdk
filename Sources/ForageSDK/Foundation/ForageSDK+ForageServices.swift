@@ -23,7 +23,7 @@ protocol ForageSDKService: AnyObject {
         customerID: String,
         reusable: Bool?,
         completion: @escaping (Result<PaymentMethodModel, Error>) -> Void)
-    
+
     /// Check balance for a given EBT Card
     ///
     /// - Parameters:
@@ -34,7 +34,7 @@ protocol ForageSDKService: AnyObject {
         foragePinTextField: ForagePINTextField,
         paymentMethodReference: String,
         completion: @escaping (Result<BalanceModel, Error>) -> Void)
-    
+
     /// Capture a payment for a given payment reference
     ///
     /// - Parameters:
@@ -48,7 +48,7 @@ protocol ForageSDKService: AnyObject {
 }
 
 extension ForageSDK: ForageSDKService {
-    
+
     public func tokenizeEBTCard(
         foragePanTextField: ForagePANTextField,
         customerID: String,
@@ -62,7 +62,7 @@ extension ForageSDK: ForageSDKService {
                 merchantRef: merchantID
             ))
             .notice("Called ForageSDK.shared.tokenizeEBTCard", attributes: nil)
-        
+
         let request = ForagePANRequestModel(
             authorization: ForageSDK.shared.sessionToken,
             merchantID: ForageSDK.shared.merchantID,
@@ -73,7 +73,7 @@ extension ForageSDK: ForageSDKService {
         )
         service?.tokenizeEBTCard(request: request, completion: completion)
     }
-    
+
     public func checkBalance(
         foragePinTextField: ForagePINTextField,
         paymentMethodReference: String,
@@ -85,19 +85,19 @@ extension ForageSDK: ForageSDKService {
                     paymentMethodRef: paymentMethodReference
                 ))
                 .notice("Called ForageSDK.shared.checkBalance for Payment Method \(paymentMethodReference)", attributes: nil)
-            
+
             guard let forageService = service else {
                 reportIllegalState(for: "checkBalance", dueTo: "ForageService was not initialized")
                 return
             }
-            
+
             guard validatePin(foragePinTextField: foragePinTextField) else {
                 completion(.failure(CommonErrors.INCOMPLETE_PIN_ERROR))
                 return
             }
-            
+
             let pinCollector = foragePinTextField.getPinCollector()
-            
+
             // This block is used for tracking important Metrics!
             // -----------------------------------------------------
             let responseMonitor = CustomerPerceivedResponseMonitor.newMeasurement(
@@ -106,7 +106,7 @@ extension ForageSDK: ForageSDKService {
             )
             responseMonitor.start()
             // ------------------------------------------------------
-            
+
             Task.init {
                 do {
                     let balanceResult = try await forageService.checkBalance(
@@ -114,22 +114,22 @@ extension ForageSDK: ForageSDKService {
                         paymentMethodReference: paymentMethodReference
                     )
                     self.logger?.notice("Balance check succeeded for PaymentMethod \(paymentMethodReference)", attributes: nil)
-                    
+
                     responseMonitor.setEventOutcome(.success).end()
                     responseMonitor.logResult()
-                    
+
                     completion(.success(balanceResult))
                 } catch let error {
                     self.logger?.error("Balance check failed for PaymentMethod \(paymentMethodReference)", error: error, attributes: nil)
-                    
+
                     responseMonitor.setForageErrorCode(error).end()
                     responseMonitor.logResult()
-                    
+
                     completion(.failure(error))
                 }
             }
         }
-    
+
     public func capturePayment(
         foragePinTextField: ForagePINTextField,
         paymentReference: String,
@@ -141,19 +141,19 @@ extension ForageSDK: ForageSDKService {
                     paymentRef: paymentReference
                 ))
                 .notice("Called ForageSDK.shared.capturePayment for Payment \(paymentReference)", attributes: nil)
-            
+
             guard let forageService = service else {
                 reportIllegalState(for: "capturePayment", dueTo: "ForageService was not initialized")
                 return
             }
-            
+
             guard validatePin(foragePinTextField: foragePinTextField) else {
                 completion(.failure(CommonErrors.INCOMPLETE_PIN_ERROR))
                 return
             }
-           
+
             let pinCollector = foragePinTextField.getPinCollector()
-            
+
             // This block is used for tracking important Metrics!
             // -----------------------------------------------------
             let responseMonitor = CustomerPerceivedResponseMonitor.newMeasurement(
@@ -162,7 +162,7 @@ extension ForageSDK: ForageSDKService {
             )
             responseMonitor.start()
             // ------------------------------------------------------
-            
+
             Task.init {
                 do {
                     let paymentResult = try await forageService.capturePayment(
@@ -170,22 +170,22 @@ extension ForageSDK: ForageSDKService {
                         paymentReference: paymentReference
                     )
                     self.logger?.notice("Capture succeeded for Payment \(paymentReference)", attributes: nil)
-                    
+
                     responseMonitor.setEventOutcome(.success).end()
                     responseMonitor.logResult()
-                    
+
                     completion(.success(paymentResult))
                 } catch let error {
                     self.logger?.error("Capture failed for Payment \(paymentReference)", error: error, attributes: nil)
-                    
+
                     responseMonitor.setForageErrorCode(error).end()
                     responseMonitor.logResult()
-                    
+
                     completion(.failure(error))
                 }
             }
         }
-    
+
     /// Reports an illegal state by logging a critical error and triggering an assertion failure.
     ///
     /// This method is utilized to indicate that a precondition has not been met or an object is in an
@@ -200,7 +200,7 @@ extension ForageSDK: ForageSDKService {
         logger?.critical(assertionMessage, error: nil, attributes: nil)
         assertionFailure(assertionMessage)
     }
-    
+
     /// Validates the completeness of the PIN entered in the specified text field.
     /// - Returns: `true` if the PIN comprises 4 digits and is ready for submission; otherwise, logs a warning and returns `false`.
     private func validatePin(foragePinTextField: ForagePINTextField) -> Bool {

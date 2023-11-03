@@ -25,21 +25,21 @@ internal enum EventName: String {
  `VaultProxyResponseMonitor` is a specialized `ResponseMonitor` for handling Vault-related network metrics. VaultProxyResponseMonitor is used to track the errors and response times from the VGS and BT submit functions. The timer begins when a balance or capture request is submitted to VGS/BT and ends when a response is received by the SDK.
  */
 internal final class VaultProxyResponseMonitor: ResponseMonitor {
-    
+
     private let vaultAction: VaultAction
     private let vaultType: VaultType
     private var eventName: EventName = .vaultResponse
-    
+
     private init(vaultType: VaultType, vaultAction: VaultAction) {
         self.vaultType = vaultType
         self.vaultAction = vaultAction
     }
-    
+
     /// Factory method for creating new VaultProxyResponseMonitor instances
     internal static func newMeasurement(vault: VaultType, action: VaultAction) -> VaultProxyResponseMonitor {
         return VaultProxyResponseMonitor(vaultType: vault, vaultAction: action)
     }
-    
+
     internal override func logWithResponseAttributes(metricsLogger: ForageLogger?, responseAttributes: ResponseAttributes) {
         guard let httpMethod = responseAttributes.method?.rawValue,
               let path = responseAttributes.path,
@@ -48,9 +48,9 @@ internal final class VaultProxyResponseMonitor: ResponseMonitor {
             metricsLogger?.error("Incomplete or missing response attributes. Could not report metric event.", error: nil, attributes: nil)
             return
         }
-        
+
         let vaultType = self.vaultType.rawValue
-        
+
         metricsLogger?.info(
             "Received response from \(vaultType) proxy",
             attributes: mapEnumKeysToStrings(from: [

@@ -18,21 +18,21 @@ extension LDClient: LDClientProtocol {
     func doubleVariationWrapper(forKey key: String, defaultValue: Double) -> Double {
         return self.doubleVariation(forKey: key, defaultValue: defaultValue)
     }
-    
+
     func jsonVariationWrapper(forKey key: String, defaultValue: LDValue) -> LDValue {
         return self.jsonVariation(forKey: key, defaultValue: defaultValue)
     }
 }
 
 extension LDValue {
-    
+
     /// Converts the original LDValue returned from the polling feature flag to an Array of Ints.
     internal func convertToIntArray() -> [Int] {
         let intervalArrayAsLDValue = self.extractArray(pollingFlagObj: self)
         let intervalArrayAsArray = self.convertToArray(pollingArray: intervalArrayAsLDValue)
         return self.convertArrayValsToInts(arrayOfInts: intervalArrayAsArray)
     }
-    
+
     /// Inspects the original LDValue returned from the polling feature flag and extracts the value mapped to INTERVALS
     ///
     /// - Parameters:
@@ -42,7 +42,7 @@ extension LDValue {
         switch pollingFlagObj {
         case .object(let dictValue):
             for (key, value) in dictValue {
-                if (key == INTERVALS) {
+                if key == INTERVALS {
                     return value
                 }
             }
@@ -51,7 +51,7 @@ extension LDValue {
             return defaultLDValueArray
         }
     }
-    
+
     /// Converts the LDValue to an Array.
     ///
     /// - Parameters:
@@ -139,16 +139,16 @@ private enum ContextKind: String {
 /// - Note: This class is a singleton and should be accessed via `LDManager.shared`.
 internal class LDManager: LDManagerProtocol {
     // MARK: - Properties
-    
+
     static let shared = LDManager()
     private var logger: ForageLogger?
-    
+
     internal private(set) var vaultType: VaultType?
-    
+
     // MARK: - Initialization
-    
+
     private init() {}
-    
+
     /// Initializes the LaunchDarkly client with a given environment and optional logger.
     ///
     /// - Parameters:
@@ -161,19 +161,19 @@ internal class LDManager: LDManagerProtocol {
         startLdClient: (LDConfig, LDContext?, (() -> Void)?) -> Void = LDClient.start
     ) {
         self.logger = logger?.setPrefix(LAUNCH_DARKLY_PREFIX)
-        
+
         let ldConfig = createLDConfig(for: environment)
-        
+
         guard let ldContext = createLDContext() else {
             self.logger?.error("Failed to create LaunchDarkly context", error: nil, attributes: nil)
             return
         }
-        
+
         startLdClient(ldConfig, ldContext, { [weak self] in
             self?.logger?.info("Initialized LaunchDarkly client", attributes: nil)
         })
     }
-    
+
     /// Determines the type of vault to be used based on the "vault-primary-traffic-percentage" feature flag.
     /// Defaults to VGS if something goes wrong (ex: LDClient not initialized, LaunchDarkly is down).
     ///
@@ -189,35 +189,35 @@ internal class LDManager: LDManagerProtocol {
         fromCache: Bool
     ) -> VaultType {
         logger = logger?.setPrefix(LAUNCH_DARKLY_PREFIX)
-        
+
         if fromCache, let existingVaultType = vaultType {
             return existingVaultType
         }
-        
+
         guard let ld = ldClient else {
             logger?.error("Defaulting to VGS. LDClient.get() was called before init()!",
                           error: nil,
                           attributes: nil)
             return .vgsVaultType
         }
-        
+
         // Fetch the vault percentage from LaunchDarkly
         let vaultPercentage = ld.doubleVariationWrapper(
             forKey: FlagType.vaultPrimaryTrafficPercentage.rawValue,
             defaultValue: 0.0
         )
-        
+
         logger?.info("Evaluated \(FlagType.vaultPrimaryTrafficPercentage) = \(vaultPercentage)%",
                      attributes: nil)
-        
+
         let randomNum = genRandomDouble()
         vaultType = (randomNum < vaultPercentage) ? .btVaultType : .vgsVaultType
-        
+
         logVaultType(vaultType)
-        
+
         return vaultType ?? .vgsVaultType
     }
-    
+
     /// Determines on what interval we will poll for SQS messages based on "iso-polling-wait-intervals" feature flag.
     /// Defaults to the empty array if something goes wrong and defers polling intervals to the polling class (ex: LDClient not initialized, LaunchDarkly is down).
     ///
@@ -229,30 +229,30 @@ internal class LDManager: LDManagerProtocol {
         ldClient: LDClientProtocol?
     ) -> [Int] {
         logger = logger?.setPrefix(LAUNCH_DARKLY_PREFIX)
-        
+
         let defaultValLdValue = LDValue(dictionaryLiteral: (INTERVALS, []))
-        
+
         guard let ld = ldClient else {
             logger?.error("Defaulting to 1 second polling intervals. LDClient.get() was called before init()!",
                           error: nil,
                           attributes: nil)
-            
+
             return []
         }
-        
+
         let pollingIntervalsAsLdValue = ld.jsonVariationWrapper(forKey: FlagType.isoPollingWaitIntervals.rawValue, defaultValue: defaultValLdValue)
         let pollingIntervals = pollingIntervalsAsLdValue.convertToIntArray()
-        
+
         logger?.info("Evaluated \(FlagType.isoPollingWaitIntervals) = \(pollingIntervals)",
                      attributes: nil)
-        
+
         return pollingIntervals
     }
 
     private func createLDConfig(for environment: Environment) -> LDConfig {
         return LDConfig(mobileKey: getLDMobileKey(environment).rawValue)
     }
-    
+
     private func createLDContext() -> LDContext? {
         var ldContextBuilder = LDContextBuilder(key: ContextKey.iosSdk.rawValue)
         ldContextBuilder.kind(ContextKind.service.rawValue)
@@ -261,29 +261,29 @@ internal class LDManager: LDManagerProtocol {
         }
         return context
     }
-    
+
     private func logVaultType(_ vaultType: VaultType? = nil) {
         guard let vaultType = vaultType else {
             // this shouldn't happen, but we log here in case something went really wrong
             self.logger?.error("Vault type was not set!", error: nil, attributes: nil)
             return
         }
-        
+
         _ = self.logger?
             .addContext(ForageLogContext(
                 vaultType: vaultType
             ))
             .notice("Using \(vaultType.rawValue)", attributes: nil)
     }
-    
+
     internal static func getDefaultLDClient() -> LDClientProtocol? {
         return LDClient.get()
     }
-    
+
     internal static func generateRandomDouble() -> Double {
         return Double.random(in: 0...100)
     }
-    
+
     private func getLDMobileKey(_ environment: Environment) -> LDMobileKey {
         switch environment {
         case .sandbox: return .sandbox

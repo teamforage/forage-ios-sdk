@@ -15,7 +15,7 @@ import VGSCollectSDK
 internal protocol ForageService: AnyObject {
     /// Provider provides the interface for performing HTTP requests.
     var provider: Provider { get }
-    
+
     /// Retrieves the EncryptionKey from the Forage API, to be utilized as the X-Key header.
     ///
     /// - Parameters:
@@ -25,8 +25,8 @@ internal protocol ForageService: AnyObject {
     func getXKey(
         sessionToken: String,
         merchantID: String,
-        completion: @escaping (Result<ForageXKeyModel, Error>) -> Void) -> Void
-    
+        completion: @escaping (Result<ForageXKeyModel, Error>) -> Void)
+
     /// Perform a GET request for the PaymentMethod
     ///
     /// - Parameters:
@@ -38,8 +38,8 @@ internal protocol ForageService: AnyObject {
         sessionToken: String,
         merchantID: String,
         paymentMethodRef: String,
-        completion: @escaping (Result<PaymentMethodModel, Error>) -> Void) -> Void
-    
+        completion: @escaping (Result<PaymentMethodModel, Error>) -> Void)
+
     /// Performs a GET request to retrieve the specified Payment.
     ///
     /// - Parameters:
@@ -52,7 +52,7 @@ internal protocol ForageService: AnyObject {
         merchantID: String,
         paymentRef: String,
         completion: @escaping (Result<PaymentModel, Error>) -> Void)
-    
+
     /// Tokenize an EBT card using the given *ForagePANRequestModel* object
     ///
     /// - Parameters:
@@ -60,8 +60,8 @@ internal protocol ForageService: AnyObject {
     ///  - completion: The closure returns a `Result` containing either a `PaymentMethodModel` or an `Error`. [Read more](https://docs.joinforage.app/reference/create-payment-method)
     func tokenizeEBTCard(
         request: ForagePANRequestModel,
-        completion: @escaping (Result<PaymentMethodModel, Error>) -> Void) -> Void
-    
+        completion: @escaping (Result<PaymentMethodModel, Error>) -> Void)
+
     /// Asynchronously checks the balance of a PaymentMethod using the given `pinCollector` and `paymentMethodReference`
     ///
     /// - Parameters:
@@ -76,7 +76,7 @@ internal protocol ForageService: AnyObject {
     func checkBalance(
         pinCollector: VaultCollector,
         paymentMethodReference: String) async throws -> BalanceModel
-    
+
     /// Asynchronously captures a payment using the given `pinCollector` and `paymentReference`
     ///
     /// - Parameters:

@@ -29,8 +29,8 @@ public struct ForageCaptureModel: Codable {
     public let updatedDate: String
     public let status: ForageOrderStatus
     public let successDate: String
-    
-    private enum CodingKeys : String, CodingKey {
+
+    private enum CodingKeys: String, CodingKey {
         case paymentIdentifier = "ref"
         case merchantID = "merchant"
         case fundingType = "funding_type"

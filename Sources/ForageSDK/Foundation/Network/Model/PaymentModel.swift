@@ -22,7 +22,7 @@ public struct ReceiptBalance: Codable {
     public let snap: String
     public let cash: String
     public let updated: String
-    
+
     private enum CodingKeys: String, CodingKey {
         case id
         case cash = "non_snap"
@@ -43,7 +43,7 @@ public struct Receipt: Codable {
     public let message: String
     public let transactionType: String
     public let created: String
-    
+
     private enum CodingKeys: String, CodingKey {
         case refNumber = "ref_number"
         case isVoided = "is_voided"
@@ -66,7 +66,7 @@ public struct PaymentModel: Codable {
     public let fundingType: String
     public let amount: String
     public let description: String
-    public let metadata: Dictionary<String, String>
+    public let metadata: [String: String]
     public let paymentMethodRef: String
     public let deliveryAddress: ForageAddress
     public let isDelivery: Bool
@@ -80,8 +80,8 @@ public struct PaymentModel: Codable {
     public let merchantFixedSettlement: String?
     public let platformFixedSettlement: String?
     public let refunds: [String]
-    
-    private enum CodingKeys : String, CodingKey {
+
+    private enum CodingKeys: String, CodingKey {
         case paymentRef = "ref"
         case merchantID = "merchant"
         case fundingType = "funding_type"
@@ -103,4 +103,3 @@ public struct PaymentModel: Codable {
         case refunds
     }
 }
-

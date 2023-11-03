@@ -9,19 +9,19 @@
 import UIKit
 
 class CreatePaymentViewController: BaseViewCodeViewController<CreatePaymentView> {
-    
+
     // MARK: Lifecycle Methods
-    
+
     override func loadView() {
         super.loadView()
         customView.backgroundColor = .white
         customView.render()
         customView.delegate = self
     }
-    
+
     func createPayment(
         request: CreatePaymentRequest,
-        completion: @escaping (Result<CreatePaymentResponse, Error>) -> Void) -> Void {
+        completion: @escaping (Result<CreatePaymentResponse, Error>) -> Void) {
             let service = CreatePaymentService()
             return service.createPayment(request: request, completion: completion)
     }

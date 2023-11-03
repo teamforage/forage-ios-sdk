@@ -41,12 +41,12 @@ extension ServiceProtocol {
         components.scheme = scheme
         components.host = host
         components.path = path
-        
+
         guard let url = components.url else { fatalError("Could not create URL") }
-        
+
         var request = URLRequest(url: url)
         request.httpMethod = method.rawValue
-        
+
         do {
             switch task {
             case .request:
@@ -76,7 +76,7 @@ extension ServiceProtocol {
         }
         return request
     }
-    
+
     private func configureParameters(bodyParameters: Parameters?,
                                        urlParameters: Parameters?,
                                        request: inout URLRequest) throws {
@@ -91,7 +91,7 @@ extension ServiceProtocol {
             throw error
         }
     }
-    
+
     private func addAdditionalHeaders(_ additionalHeaders: HTTPHeaders?, request: inout URLRequest) {
         guard let headers = additionalHeaders else { return }
         for (key, value) in headers {

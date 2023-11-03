@@ -7,23 +7,23 @@ import Foundation
 import VGSCollectSDK
 
 public class ForageSDK {
-    
+
     // MARK: Properties
-    
+
     private static var config: Config?
     internal var service: ForageService?
-    internal var logger: ForageLogger? = nil
+    internal var logger: ForageLogger?
     internal var merchantID: String = ""
     internal var sessionToken: String = ""
     internal var traceId: String = ""
-    
+
     public var environment: Environment = .sandbox
     // Don't update! Only updated when releasing.
     public static let version = "4.1.2"
     public static let shared = ForageSDK()
-    
+
     // MARK: Init
-    
+
     private init() {
         guard let config = ForageSDK.config else {
             assertionFailure("ForageSDK unconfigured - call ForageSDK.setup() before accessing ForageSDK.shared")
@@ -44,12 +44,12 @@ public class ForageSDK {
         self.logger = logger
         self.traceId = logger.getTraceID()
         LDManager.shared.initialize(self.environment, logger: logger)
-        
+
         VGSCollectLogger.shared.disableAllLoggers()
         let provider = Provider(logger: logger)
         self.service = LiveForageService(provider: provider, logger: logger, ldManager: LDManager.shared)
     }
-    
+
     /**
      ``Config`` struct to set the merchant ID and session token on the ``ForageSDK`` singleton
      
@@ -66,7 +66,7 @@ public class ForageSDK {
             self.sessionToken = sessionToken
         }
     }
-    
+
     /// Configures the Forage SDK with the given configuration.
     ///
     /// This sets up the merchant ID, session token, and other internal state needed to make API calls.
@@ -79,7 +79,7 @@ public class ForageSDK {
     public class func setup(_ config: Config) {
         ForageSDK.config = config
     }
-    
+
     /// Updates the merchant ID to use for subsequent API calls.
     /// Use this method to change the active merchant ID if your app supports multiple merchants.
     ///
@@ -93,7 +93,7 @@ public class ForageSDK {
         ForageSDK.config!.merchantID = newMerchantID
         ForageSDK.shared.merchantID = newMerchantID
     }
-    
+
     /// Updates the session token to use for subsequent API calls.
     ///
     /// Session tokens expire after 15 minutes. Use this method to set a new session token

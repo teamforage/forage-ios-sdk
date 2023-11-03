@@ -14,7 +14,7 @@ struct CreatePaymentRequest {
     let paymentMethodIdentifier: String
     let merchantID: String
     let description: String
-    let metadata: [String:String]
+    let metadata: [String: String]
     let deliveryAddress: Address
     let isDelivery: Bool
     let customerID: String

@@ -14,7 +14,7 @@ internal protocol PerformanceMeasurer {
     func logResult()
 }
 
-internal protocol NetworkMonitor : PerformanceMeasurer {
+internal protocol NetworkMonitor: PerformanceMeasurer {
     func setPath(_ httpPath: String) -> NetworkMonitor
     func setMethod(_ httpMethod: HttpMethod) -> NetworkMonitor
     func setHttpStatusCode(_ httpStatusCode: Int?) -> NetworkMonitor

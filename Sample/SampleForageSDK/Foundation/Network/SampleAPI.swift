@@ -6,8 +6,8 @@
 //  Copyright © 2022-Present Forage Technology Corporation. All rights reserved.
 //
 
-import Foundation
 import ForageSDK
+import Foundation
 
 enum SampleAPI {
     case createPayment(request: CreatePaymentRequest)
@@ -40,14 +40,14 @@ extension SampleAPI: ServiceProtocol {
                     "state": model.deliveryAddress.state,
                 ],
                 "is_delivery": model.isDelivery,
-                "customer_id": model.customerID
+                "customer_id": model.customerID,
             ]
 
             let httpHeaders: HTTPHeaders = [
                 "Merchant-Account": model.merchantID,
                 "IDEMPOTENCY-KEY": UUID.init().uuidString,
                 "authorization": "Bearer \(ClientSharedData.shared.sessionToken)",
-                "API-VERSION": "2023-05-15"
+                "API-VERSION": "2023-05-15",
             ]
 
             return .requestParametersAndHeaders(

@@ -20,23 +20,23 @@ internal let UnknownErrorCode = "unknown"
  [GET] Poll for Response -> [GET] PaymentMethod -> Timer Ends -> Return Balance
  */
 internal final class CustomerPerceivedResponseMonitor: ResponseMonitor {
-    
+
     private var vaultType: VaultType
     private var vaultAction: VaultAction
     private var eventOutcome: EventOutcome?
     private var eventName: EventName = .customerPerceivedResponse
-    
+
     internal init(vaultType: VaultType, vaultAction: VaultAction) {
         self.vaultType = vaultType
         self.vaultAction = vaultAction
         super.init()
     }
-    
+
     /// Factory method for creating new CustomerPerceivedResponseMonitor instances
     internal static func newMeasurement(vaultType: VaultType, vaultAction: VaultAction) -> CustomerPerceivedResponseMonitor {
         return CustomerPerceivedResponseMonitor(vaultType: vaultType, vaultAction: vaultAction)
     }
-    
+
     // override to set event_outcome to "failure" if we know the event has a forage_error_code
     @discardableResult
     internal override func setForageErrorCode(_ error: Error) -> CustomerPerceivedResponseMonitor {
@@ -44,18 +44,18 @@ internal final class CustomerPerceivedResponseMonitor: ResponseMonitor {
         super.setForageErrorCode(error)
         return self
     }
-    
+
     @discardableResult
     internal func setEventOutcome(_ outcome: EventOutcome) -> CustomerPerceivedResponseMonitor {
         self.eventOutcome = outcome
         return self
     }
-    
+
     internal override func logWithResponseAttributes(
         metricsLogger: ForageLogger?,
         responseAttributes: ResponseAttributes
     ) {
-        
+
         guard
             let responseTimeMs = responseAttributes.responseTimeMs,
             let eventOutcome = self.eventOutcome
@@ -63,11 +63,11 @@ internal final class CustomerPerceivedResponseMonitor: ResponseMonitor {
             metricsLogger?.error("Incomplete or missing response attributes. Could not report metric event.", error: nil, attributes: nil)
             return
         }
-        
-        if (eventOutcome == .failure && responseAttributes.forageErrorCode == nil) {
+
+        if eventOutcome == .failure && responseAttributes.forageErrorCode == nil {
             metricsLogger?.error("Failure event did not include forage_error_code.", error: nil, attributes: nil)
         }
-        
+
         metricsLogger?.info(
             "Reported customer-perceived response event",
             attributes: mapEnumKeysToStrings(from: [

@@ -9,14 +9,14 @@
 import UIKit
 
 class ForagePANValidations {
-    
+
     /// Check ebt card number length
     static func checkPANLength(_ panNumber: String) -> StateIIN? {
         if panNumber.count >= 6 {
             let pan = panNumber.prefix(6)
             return panNumbers.first { $0.panNumber == pan }
         }
-        
+
         return nil
     }
 
@@ -74,7 +74,7 @@ class ForagePANValidations {
         StateIIN(state: "WASHINGTON", panNumber: "507710", panLength: 16),
         StateIIN(state: "WEST_VIRGINIA", panNumber: "507720", panLength: 16),
         StateIIN(state: "WISCONSIN", panNumber: "507708", panLength: 16),
-        StateIIN(state: "WYOMING", panNumber: "505349", panLength: 16),        
+        StateIIN(state: "WYOMING", panNumber: "505349", panLength: 16),
     ]
 }
 
@@ -83,12 +83,6 @@ struct StateIIN {
     let state: String
     let panNumber: String
     let panLength: Int
-    
-    init(state: String, panNumber: String, panLength: Int) {
-        self.state = state
-        self.panNumber = panNumber
-        self.panLength = panLength
-    }
 }
 
 extension StateIIN: Equatable {}

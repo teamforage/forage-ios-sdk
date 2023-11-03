@@ -12,14 +12,14 @@ import UIKit
 internal protocol InternalObservableState {
     /// isFirstResponder is true if the input is focused, false otherwise.
     var isFirstResponder: Bool { get }
-    
+
     /// isEmpty is true if the input is empty, false otherwise.
     var isEmpty: Bool { get }
-    
+
     /// isValid is true when the input text does not fail any validation checks with the exception of target length;
     /// false if any of the validation checks other than target length fail.
     var isValid: Bool { get }
-    
+
     /// isComplete is true when all validation checks pass and the input is ready to be submitted.
     var isComplete: Bool { get }
 }
@@ -46,5 +46,5 @@ internal protocol InternalStyle {
 internal protocol VaultWrapper: UIView, InternalObservableState, InternalAppearance, InternalStyle {
     var collector: VaultCollector { get set }
     var delegate: VaultWrapperDelegate? { get set }
-    func clearText() -> Void
+    func clearText()
 }

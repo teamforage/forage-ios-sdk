@@ -11,9 +11,9 @@ public enum CardType: String {
 }
 
 public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElementDelegate {
-    
+
     // MARK: - Properties
-    
+
     @IBInspectable public var isEmpty: Bool {
         enhancedTextField.isEmpty
     }
@@ -25,83 +25,83 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
     @IBInspectable public var isComplete: Bool {
         enhancedTextField.isComplete
     }
-    
+
     /// BorderWidth for the text field
     @IBInspectable public var borderWidth: CGFloat {
         get { return enhancedTextField.borderWidth }
         set { enhancedTextField.borderWidth = newValue }
     }
-    
+
     /// BorderColor for the text field
     @IBInspectable public var borderColor: UIColor? {
         get { return enhancedTextField.borderColor }
         set { enhancedTextField.borderColor = newValue ?? .black }
     }
-    
+
     /// CornerRadius for the text field
     @IBInspectable public var cornerRadius: CGFloat {
         get { return enhancedTextField.layer.cornerRadius }
         set { enhancedTextField.layer.cornerRadius = newValue }
     }
-    
+
     /// MasksToBounds for the text field
     @IBInspectable public var masksToBounds: Bool {
         get { return enhancedTextField.layer.masksToBounds }
         set { enhancedTextField.layer.masksToBounds = newValue }
     }
-    
+
     /// Padding for the text field
     private var _padding: UIEdgeInsets = UIEdgeInsets(top: 0.0, left: 0.0, bottom: 0.0, right: 0.0)
     @IBInspectable public var padding: UIEdgeInsets {
         get { return _padding }
         set { _padding = newValue }
     }
-        
+
     /// Placeholder for the text field
     @IBInspectable public var placeholder: String? {
         get { return enhancedTextField.placeholder }
         set { enhancedTextField.placeholder = newValue }
     }
-    
+
     /// Text color for the text field
     /// `textColor` default value is `black`
     @IBInspectable public var textColor: UIColor? {
         get { return enhancedTextField.textColor }
         set { enhancedTextField.textColor = newValue }
     }
-    
+
     /// Size of the text for the text field
     /// `size` default value is `24`
     @IBInspectable public var size: Double = 24.0 {
         didSet { enhancedTextField.font = UIFont.systemFont(ofSize: size) }
     }
-    
+
     /// Tint color for the text field
     /// `tfTintColor` default value is `black`
     @IBInspectable public var tfTintColor: UIColor? {
         get { return enhancedTextField.tintColor }
         set { enhancedTextField.tintColor = newValue }
     }
-    
+
     /// Text alignment
     /// `textAlignment` default value is `natural`
     @IBInspectable public var textAlignment: NSTextAlignment = .natural {
         didSet { enhancedTextField.textAlignment = textAlignment }
     }
-    
+
     /// Allow user to clear text field
     /// `clearButtonMode` default value is `never`
     @IBInspectable public var clearButtonMode: UITextField.ViewMode = .never {
         didSet { enhancedTextField.clearButtonMode = clearButtonMode }
     }
-    
+
     /// Change UIFont
     /// `UITextField` text font
     @IBInspectable public var font: UIFont? {
         get { return enhancedTextField.font }
         set { enhancedTextField.font = newValue }
     }
-    
+
     /// ElementHeight for the text field
     private var _elementHeight: CGFloat = 0
     @IBInspectable public var elementHeight: CGFloat {
@@ -111,32 +111,32 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
             self.changeElementHeight(value: _elementHeight)
         }
     }
-    
+
     // MARK: - Public Delegate
-    
+
     /// A delegate that informs the client about the state of the entered card number (validation, focus).
     public weak var delegate: ForageElementDelegate?
-    
+
     // MARK: - Private components
-    
+
     private lazy var root: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
-    
+
     private lazy var textFieldContainer: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
-    
+
     private lazy var imageViewContainer: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
-    
+
     private lazy var container: UIStackView = {
         let sv = UIStackView()
         sv.translatesAutoresizingMaskIntoConstraints = false
@@ -146,7 +146,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         sv.spacing = 8
         return sv
     }()
-    
+
     private lazy var logger: ForageLogger = {
         let ddLogger = DatadogLogger(
             ForageLoggerConfig(
@@ -155,7 +155,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         )
         return ddLogger
     }()
-    
+
     /// UITextField with masking and floating placeholder label functionality.
     internal lazy var enhancedTextField: MaskedUITextField = {
         let tf = MaskedUITextField()
@@ -173,7 +173,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         tf.layer.cornerRadius = 4
         return tf
     }()
-    
+
     private lazy var imageView: UIImageView = {
         let imgView = UIImageView()
         let image = UIImage(named: "forageLogo", in: AssetsBundle.main.iconBundle, compatibleWith: nil)
@@ -186,37 +186,33 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         imgView.isAccessibilityElement = true
         return imgView
     }()
-    
+
     // MARK: - Lifecycle methods
-    
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         commonInit()
     }
-    
+
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         commonInit()
     }
-    
-    override public func awakeFromNib() {
-        super.awakeFromNib()
-    }
-    
+
     // MARK: - Private API
-    
+
     private func commonInit() {
         addSubview(root)
-        
+
         root.addSubview(container)
-        
+
         textFieldContainer.addSubview(enhancedTextField)
         imageViewContainer.addSubview(imageView)
         container.addArrangedSubview(textFieldContainer)
         container.addArrangedSubview(imageViewContainer)
-        
+
         enhancedTextField.forageDelegate = self
-        
+
         root.anchor(
             top: self.topAnchor,
             leading: self.leadingAnchor,
@@ -225,7 +221,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
             centerXAnchor: nil,
             padding: UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         )
-        
+
         container.anchor(
             top: root.topAnchor,
             leading: root.leadingAnchor,
@@ -234,7 +230,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
             centerXAnchor: nil,
             padding: UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         )
-        
+
         enhancedTextField.anchor(
             top: textFieldContainer.topAnchor,
             leading: textFieldContainer.leadingAnchor,
@@ -243,7 +239,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
             centerXAnchor: nil,
             padding: UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         )
-        
+
         imageView.anchor(
             top: imageViewContainer.topAnchor,
             leading: imageViewContainer.leadingAnchor,
@@ -252,7 +248,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
             centerXAnchor: nil,
             padding: UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         )
-        
+
         let tapGesture = UITapGestureRecognizer(
             target: self,
             action: #selector(requestFocus(_:))
@@ -260,11 +256,11 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         addGestureRecognizer(tapGesture)
         self.logger.notice("ForagePANTextField was initialized successfully", attributes: nil)
     }
-    
+
     @objc fileprivate func requestFocus(_ gesture: UIGestureRecognizer) {
         becomeFirstResponder()
     }
-    
+
     private func changeElementHeight(value: CGFloat) {
         container.distribution = .equalCentering
         container.heightAnchor.constraint(equalToConstant: value).isActive = true
@@ -273,13 +269,13 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
     internal func getActualPAN() -> String {
         return enhancedTextField.actualPAN
     }
-    
+
     // MARK: - Public API
-    
+
     override public var intrinsicContentSize: CGSize {
         return CGSize(width: frame.width, height: 83)
     }
-        
+
     public func clearText() {
         self.enhancedTextField.text = ""
         self.enhancedTextField.actualPAN = ""
@@ -288,19 +284,19 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
 
 // MARK: - UITextFieldDelegate
 
-extension ForagePANTextField : UITextFieldDelegate {
+extension ForagePANTextField: UITextFieldDelegate {
     public func focusDidChange(_ state: ObservableState) {
         delegate?.focusDidChange(self)
     }
-    
+
     public func textFieldDidChange(_ state: ObservableState) {
         delegate?.textFieldDidChange(self)
     }
-    
+
     public func textFieldDidBeginEditing(_ textField: UITextField) {
         delegate?.focusDidChange(self)
     }
-    
+
     public func textFieldDidEndEditing(_ textField: UITextField) {
         delegate?.focusDidChange(self)
     }
@@ -317,12 +313,12 @@ extension ForagePANTextField : UITextFieldDelegate {
         if isBackspace {
             return true
         }
-        
+
         // Only allow the user to enter numeric strings
         if !replacementString.allSatisfy({ $0.isNumber }) {
             return false
         }
-        
+
         return true
     }
 }
@@ -330,17 +326,17 @@ extension ForagePANTextField : UITextFieldDelegate {
 // MARK: - UIResponder methods
 
 extension ForagePANTextField {
-    
+
     /// Make `ForagePANTextField` focused.
     @discardableResult override public func becomeFirstResponder() -> Bool {
         return enhancedTextField.becomeFirstResponder()
     }
-    
+
     /// Remove  focus from `ForagePANTextField`.
     @discardableResult override public func resignFirstResponder() -> Bool {
         return enhancedTextField.resignFirstResponder()
     }
-    
+
     /// Check if `ForagePANTextField` is focused.
     override public var isFirstResponder: Bool {
         return enhancedTextField.isFirstResponder

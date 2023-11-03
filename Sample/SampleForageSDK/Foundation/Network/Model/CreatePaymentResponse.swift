@@ -15,8 +15,8 @@ struct CreatePaymentResponse: Codable {
     let merchantID: String
     let amount: String
     let description: String
-    
-    private enum CodingKeys : String, CodingKey {
+
+    private enum CodingKeys: String, CodingKey {
         case fundingType = "funding_type"
         case paymentMethodIdentifier = "payment_method"
         case paymentIdentifier = "ref"

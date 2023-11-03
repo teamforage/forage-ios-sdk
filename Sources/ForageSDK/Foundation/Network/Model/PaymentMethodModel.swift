@@ -12,7 +12,7 @@ public struct BalanceModel: Codable {
     public let snap: String
     public let cash: String
     public let updated: String
-    
+
     private enum CodingKeys: String, CodingKey {
         case cash = "non_snap"
         case snap
@@ -25,8 +25,8 @@ public struct ForageCard: Codable {
     public let created: String
     public let state: String?
     public let token: String
-    
-    private enum CodingKeys : String, CodingKey {
+
+    private enum CodingKeys: String, CodingKey {
         case last4 = "last_4"
         case token
         case state
@@ -42,8 +42,8 @@ public struct PaymentMethodModel: Codable {
     public let card: ForageCard
     public let customerID: String?
     public let reusable: Bool?
-    
-    private enum CodingKeys : String, CodingKey {
+
+    private enum CodingKeys: String, CodingKey {
         case paymentMethodIdentifier = "ref"
         case type
         case card

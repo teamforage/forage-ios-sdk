@@ -23,7 +23,7 @@ internal protocol Polling: AnyObject {
         vaultResponse: VaultResponse,
         request: ForageRequestModel,
         completion: @escaping (Result<Data?, Error>) -> Void)
-    
+
     /// Polling method
     ///
     /// - Parameters:
@@ -33,5 +33,5 @@ internal protocol Polling: AnyObject {
     func pollingMessage(
         contentId: String,
         request: ForageRequestModel,
-        completion: @escaping (Result<MessageResponseModel, Error>) -> Void) -> Void
+        completion: @escaping (Result<MessageResponseModel, Error>) -> Void)
 }

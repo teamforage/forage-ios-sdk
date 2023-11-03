@@ -45,7 +45,7 @@ extension ForageAPI: ServiceProtocol {
         let headers = HTTPHeaders([
             "content-type": "application/json",
             "accept": "application/json",
-            "x-datadog-trace-id": ForageSDK.shared.traceId
+            "x-datadog-trace-id": ForageSDK.shared.traceId,
         ])
         switch self {
         case .tokenizeNumber(
@@ -58,7 +58,7 @@ extension ForageAPI: ServiceProtocol {
                 "type": model.type,
                 "reusable": model.reusable ?? true,
                 "card": card,
-                "customer_id": model.customerID
+                "customer_id": model.customerID,
             ]
 
             headers.addHeaders([
