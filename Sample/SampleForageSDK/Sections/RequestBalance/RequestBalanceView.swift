@@ -15,7 +15,6 @@ protocol RequestBalanceViewDelegate: AnyObject {
 }
 
 class RequestBalanceView: UIView {
-
     // MARK: Public Properties
 
     var isPINValid: Bool = false
@@ -161,10 +160,11 @@ class RequestBalanceView: UIView {
     @objc fileprivate func getBalanceInfo(_ gesture: UIGestureRecognizer) {
         ForageSDK.shared.checkBalance(
             foragePinTextField: foragePinTextField,
-            paymentMethodReference: ClientSharedData.shared.paymentMethodReference) { result in
-                self.foragePinTextField.clearText()
-                self.printPINResult(result: result)
-            }
+            paymentMethodReference: ClientSharedData.shared.paymentMethodReference
+        ) { result in
+            self.foragePinTextField.clearText()
+            self.printPINResult(result: result)
+        }
     }
 
     @objc fileprivate func goToCreatePayment(_ gesture: UIGestureRecognizer) {
@@ -184,11 +184,11 @@ class RequestBalanceView: UIView {
     private func printPINResult(result: Result<BalanceModel, Error>) {
         DispatchQueue.main.async {
             switch result {
-            case .success(let response):
+            case let .success(response):
                 self.snapBalanceLabel.text = "snap=\(response.snap)"
                 self.nonSnapBalanceLabel.text = "cash=\(response.cash)"
                 self.errorLabel.text = ""
-            case .failure(let error):
+            case let .failure(error):
                 self.errorLabel.text = "\(error)"
                 self.snapBalanceLabel.text = ""
                 self.nonSnapBalanceLabel.text = ""
@@ -200,7 +200,7 @@ class RequestBalanceView: UIView {
     }
 
     private func setupView() {
-        self.addSubview(contentView)
+        addSubview(contentView)
         contentView.addSubview(titleLabel)
         contentView.addSubview(foragePinTextField)
         contentView.addSubview(isFirstResponderLabel)
@@ -219,13 +219,12 @@ class RequestBalanceView: UIView {
     }
 
     private func setupContentViewConstraints() {
-
         contentView.anchor(
-            top: self.topAnchor,
-            leading: self.leadingAnchor,
-            bottom: self.bottomAnchor,
-            trailing: self.trailingAnchor,
-            centerXAnchor: self.centerXAnchor
+            top: topAnchor,
+            leading: leadingAnchor,
+            bottom: bottomAnchor,
+            trailing: trailingAnchor,
+            centerXAnchor: centerXAnchor
         )
 
         titleLabel.anchor(

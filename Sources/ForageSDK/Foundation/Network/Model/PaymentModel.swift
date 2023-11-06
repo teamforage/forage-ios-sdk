@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  PaymentModel.swift
 //
 //
 //  Created by Danny Leiser on 4/27/23.

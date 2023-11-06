@@ -8,7 +8,7 @@
 
 import Foundation
 
-internal class CreatePaymentService {
+class CreatePaymentService {
     let provider = Provider()
 
     func createPayment(request: CreatePaymentRequest,
@@ -16,9 +16,9 @@ internal class CreatePaymentService {
         do {
             try provider.execute(model: CreatePaymentResponse.self, endpoint: SampleAPI.createPayment(request: request), completion: { result in
                 switch result {
-                case .success(let data):
+                case let .success(data):
                     completion(.success(data))
-                case .failure(let error):
+                case let .failure(error):
                     completion(.failure(error))
                 }
             })

@@ -7,7 +7,7 @@
 
 import Foundation
 
-internal struct CommonErrors {
+enum CommonErrors {
     static let INCOMPLETE_PIN_ERROR = ForageError.create(
         httpStatusCode: 400,
         code: "user_error",

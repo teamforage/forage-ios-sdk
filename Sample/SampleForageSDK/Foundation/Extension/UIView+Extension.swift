@@ -10,8 +10,7 @@ import UIKit
 
 // MARK: - UIView extension
 
-internal extension UIView {
-
+extension UIView {
     func fillSuperview() {
         anchor(top: superview?.topAnchor, leading: superview?.leadingAnchor, bottom: superview?.bottomAnchor, trailing: superview?.trailingAnchor, centerXAnchor: superview?.centerXAnchor)
     }

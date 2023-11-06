@@ -11,7 +11,6 @@ public enum CardType: String {
 }
 
 public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElementDelegate {
-
     // MARK: - Properties
 
     @IBInspectable public var isEmpty: Bool {
@@ -28,45 +27,45 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
 
     /// BorderWidth for the text field
     @IBInspectable public var borderWidth: CGFloat {
-        get { return enhancedTextField.borderWidth }
+        get { enhancedTextField.borderWidth }
         set { enhancedTextField.borderWidth = newValue }
     }
 
     /// BorderColor for the text field
     @IBInspectable public var borderColor: UIColor? {
-        get { return enhancedTextField.borderColor }
+        get { enhancedTextField.borderColor }
         set { enhancedTextField.borderColor = newValue ?? .black }
     }
 
     /// CornerRadius for the text field
     @IBInspectable public var cornerRadius: CGFloat {
-        get { return enhancedTextField.layer.cornerRadius }
+        get { enhancedTextField.layer.cornerRadius }
         set { enhancedTextField.layer.cornerRadius = newValue }
     }
 
     /// MasksToBounds for the text field
     @IBInspectable public var masksToBounds: Bool {
-        get { return enhancedTextField.layer.masksToBounds }
+        get { enhancedTextField.layer.masksToBounds }
         set { enhancedTextField.layer.masksToBounds = newValue }
     }
 
     /// Padding for the text field
-    private var _padding: UIEdgeInsets = UIEdgeInsets(top: 0.0, left: 0.0, bottom: 0.0, right: 0.0)
+    private var _padding: UIEdgeInsets = .init(top: 0.0, left: 0.0, bottom: 0.0, right: 0.0)
     @IBInspectable public var padding: UIEdgeInsets {
-        get { return _padding }
+        get { _padding }
         set { _padding = newValue }
     }
 
     /// Placeholder for the text field
     @IBInspectable public var placeholder: String? {
-        get { return enhancedTextField.placeholder }
+        get { enhancedTextField.placeholder }
         set { enhancedTextField.placeholder = newValue }
     }
 
     /// Text color for the text field
     /// `textColor` default value is `black`
     @IBInspectable public var textColor: UIColor? {
-        get { return enhancedTextField.textColor }
+        get { enhancedTextField.textColor }
         set { enhancedTextField.textColor = newValue }
     }
 
@@ -79,7 +78,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
     /// Tint color for the text field
     /// `tfTintColor` default value is `black`
     @IBInspectable public var tfTintColor: UIColor? {
-        get { return enhancedTextField.tintColor }
+        get { enhancedTextField.tintColor }
         set { enhancedTextField.tintColor = newValue }
     }
 
@@ -98,17 +97,17 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
     /// Change UIFont
     /// `UITextField` text font
     @IBInspectable public var font: UIFont? {
-        get { return enhancedTextField.font }
+        get { enhancedTextField.font }
         set { enhancedTextField.font = newValue }
     }
 
     /// ElementHeight for the text field
     private var _elementHeight: CGFloat = 0
     @IBInspectable public var elementHeight: CGFloat {
-        get { return _elementHeight }
+        get { _elementHeight }
         set {
             _elementHeight = newValue
-            self.changeElementHeight(value: _elementHeight)
+            changeElementHeight(value: _elementHeight)
         }
     }
 
@@ -157,7 +156,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
     }()
 
     /// UITextField with masking and floating placeholder label functionality.
-    internal lazy var enhancedTextField: MaskedUITextField = {
+    lazy var enhancedTextField: MaskedUITextField = {
         let tf = MaskedUITextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
         tf.textColor = UIColor.black
@@ -214,10 +213,10 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         enhancedTextField.forageDelegate = self
 
         root.anchor(
-            top: self.topAnchor,
-            leading: self.leadingAnchor,
-            bottom: self.bottomAnchor,
-            trailing: self.trailingAnchor,
+            top: topAnchor,
+            leading: leadingAnchor,
+            bottom: bottomAnchor,
+            trailing: trailingAnchor,
             centerXAnchor: nil,
             padding: UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         )
@@ -254,7 +253,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
             action: #selector(requestFocus(_:))
         )
         addGestureRecognizer(tapGesture)
-        self.logger.notice("ForagePANTextField was initialized successfully", attributes: nil)
+        logger.notice("ForagePANTextField was initialized successfully", attributes: nil)
     }
 
     @objc fileprivate func requestFocus(_ gesture: UIGestureRecognizer) {
@@ -266,19 +265,19 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         container.heightAnchor.constraint(equalToConstant: value).isActive = true
     }
 
-    internal func getActualPAN() -> String {
-        return enhancedTextField.actualPAN
+    func getActualPAN() -> String {
+        enhancedTextField.actualPAN
     }
 
     // MARK: - Public API
 
     override public var intrinsicContentSize: CGSize {
-        return CGSize(width: frame.width, height: 83)
+        CGSize(width: frame.width, height: 83)
     }
 
     public func clearText() {
-        self.enhancedTextField.text = ""
-        self.enhancedTextField.actualPAN = ""
+        enhancedTextField.text = ""
+        enhancedTextField.actualPAN = ""
     }
 }
 
@@ -315,7 +314,7 @@ extension ForagePANTextField: UITextFieldDelegate {
         }
 
         // Only allow the user to enter numeric strings
-        if !replacementString.allSatisfy({ $0.isNumber }) {
+        if !replacementString.allSatisfy(\.isNumber) {
             return false
         }
 
@@ -326,19 +325,18 @@ extension ForagePANTextField: UITextFieldDelegate {
 // MARK: - UIResponder methods
 
 extension ForagePANTextField {
-
     /// Make `ForagePANTextField` focused.
     @discardableResult override public func becomeFirstResponder() -> Bool {
-        return enhancedTextField.becomeFirstResponder()
+        enhancedTextField.becomeFirstResponder()
     }
 
     /// Remove  focus from `ForagePANTextField`.
     @discardableResult override public func resignFirstResponder() -> Bool {
-        return enhancedTextField.resignFirstResponder()
+        enhancedTextField.resignFirstResponder()
     }
 
     /// Check if `ForagePANTextField` is focused.
     override public var isFirstResponder: Bool {
-        return enhancedTextField.isFirstResponder
+        enhancedTextField.isFirstResponder
     }
 }

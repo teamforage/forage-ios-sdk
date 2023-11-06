@@ -11,7 +11,6 @@ import Foundation
 import UIKit
 
 class CapturePaymentView: UIView {
-
     // MARK: Private Components
 
     private let contentView: UIView = {
@@ -133,27 +132,28 @@ class CapturePaymentView: UIView {
 
         ForageSDK.shared.capturePayment(
             foragePinTextField: inputFieldReference,
-            paymentReference: paymentReference) { result in
-                inputFieldReference.clearText()
-                self.printResult(result: result)
-            }
+            paymentReference: paymentReference
+        ) { result in
+            inputFieldReference.clearText()
+            self.printResult(result: result)
+        }
     }
 
     private func printResult(result: Result<PaymentModel, Error>) {
         DispatchQueue.main.async {
             switch result {
-            case .success(let response):
+            case let .success(response):
                 self.paymentRefLabel.text = "paymentRef=\(response.paymentRef)"
                 self.fundingTypeLabel.text = "fundingType=\(response.fundingType)"
                 self.amountLabel.text = "amount=\(response.amount)"
                 self.errorLabel.text = ""
-            case .failure(let error):
+            case let .failure(error):
                 if let forageError = error as? ForageError? {
                     let firstError = forageError?.errors.first
 
                     if firstError?.code == "ebt_error_51" {
                         switch firstError?.details {
-                        case .ebtError51(let snapBalance, let cashBalance):
+                        case let .ebtError51(snapBalance, cashBalance):
                             let snapBalanceText = snapBalance ?? "N/A"
                             let cashBalanceText = cashBalance ?? "N/A"
 
@@ -175,7 +175,7 @@ class CapturePaymentView: UIView {
     }
 
     private func setupView() {
-        self.addSubview(contentView)
+        addSubview(contentView)
 
         contentView.addSubview(titleLabel)
         contentView.addSubview(snapTextField)
@@ -196,13 +196,12 @@ class CapturePaymentView: UIView {
     }
 
     private func setupContentViewConstraints() {
-
         contentView.anchor(
-            top: self.topAnchor,
-            leading: self.leadingAnchor,
-            bottom: self.bottomAnchor,
-            trailing: self.trailingAnchor,
-            centerXAnchor: self.centerXAnchor
+            top: topAnchor,
+            leading: leadingAnchor,
+            bottom: bottomAnchor,
+            trailing: trailingAnchor,
+            centerXAnchor: centerXAnchor
         )
 
         titleLabel.anchor(
@@ -320,11 +319,7 @@ class CapturePaymentView: UIView {
 // MARK: - ForageElementDelegate
 
 extension CapturePaymentView: ForageElementDelegate {
-    func focusDidChange(_ state: ObservableState) {
+    func focusDidChange(_ state: ObservableState) {}
 
-    }
-
-    func textFieldDidChange(_ state: ObservableState) {
-
-    }
+    func textFieldDidChange(_ state: ObservableState) {}
 }

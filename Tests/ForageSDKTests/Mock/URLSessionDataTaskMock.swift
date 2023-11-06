@@ -6,13 +6,13 @@
 //  Copyright © 2023-Present Forage Technology Corporation. All rights reserved.
 //
 
-import XCTest
-import Foundation
 @testable import ForageSDK
+import Foundation
+import XCTest
 
 // Mock URLSession, Mock DataTask
 class DataTaskMock: URLSessionDataTask {
-    override func resume() { }
+    override func resume() {}
 }
 
 class URLSessionMock: URLSessionProtocol {
@@ -21,7 +21,7 @@ class URLSessionMock: URLSessionProtocol {
     var data: Data?
     var error: Error?
     var response: HTTPURLResponse? = nil
-    
+
     func dataTask(with request: URLRequest, completionHandler: @escaping CompletionHandler) -> URLSessionDataTask {
         defer { completionHandler(data, response, error) }
         return DataTaskMock()

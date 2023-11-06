@@ -1,5 +1,5 @@
 //
-//  ForageServiceError.swift
+//  ForageErrorModel.swift
 //  ForageSDK
 //
 //  Created by Tiago Oliveira on 24/11/22.
@@ -8,18 +8,18 @@
 
 import Foundation
 
-internal struct ForageServiceError: Error, Codable {
+struct ForageServiceError: Error, Codable {
     let path: String
     let errors: [ForageApiError]
 }
 
-internal struct ForageApiError: Codable {
+struct ForageApiError: Codable {
     let code: String
     let message: String
     let source: ForageErrorSource?
 }
 
-internal struct ForageErrorSource: Codable {
+struct ForageErrorSource: Codable {
     let resource: String
     let ref: String
 }
@@ -30,12 +30,12 @@ public struct ForageError: Error, Codable {
     public let errors: [ForageErrorObj]
 
     /// Creates a `ForageError` instance with a single `ForageErrorObj` object
-    static internal func create(
+    static func create(
         httpStatusCode: Int,
         code: String,
         message: String
     ) -> ForageError {
-        return ForageError(
+        ForageError(
             errors: [
                 ForageErrorObj(
                     httpStatusCode: httpStatusCode,
@@ -96,7 +96,7 @@ public struct ForageErrorObj: Codable {
     /// Not nil when details are available, e.g. when the error code is [ebt_error_51](https://docs.joinforage.app/reference/errors#ebt_error_51)
     public let details: ForageErrorDetails?
 
-    internal init(httpStatusCode: Int, code: String, message: String, details: ForageErrorDetails? = nil) {
+    init(httpStatusCode: Int, code: String, message: String, details: ForageErrorDetails? = nil) {
         self.httpStatusCode = httpStatusCode
         self.code = code
         self.message = message
@@ -105,14 +105,14 @@ public struct ForageErrorObj: Codable {
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.httpStatusCode = try container.decode(Int.self, forKey: .httpStatusCode)
-        self.code = try container.decode(String.self, forKey: .code)
-        self.message = try container.decode(String.self, forKey: .message)
+        httpStatusCode = try container.decode(Int.self, forKey: .httpStatusCode)
+        code = try container.decode(String.self, forKey: .code)
+        message = try container.decode(String.self, forKey: .message)
 
-        if self.code == "ebt_error_51" {
-            self.details = try? container.decode(ForageErrorDetails.self, forKey: .details)
+        if code == "ebt_error_51" {
+            details = try? container.decode(ForageErrorDetails.self, forKey: .details)
         } else {
-            self.details = nil
+            details = nil
         }
     }
 }

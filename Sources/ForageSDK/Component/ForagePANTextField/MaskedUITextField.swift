@@ -1,6 +1,6 @@
 //
 //  MaskedUITextField.swift
-//  
+//
 //
 //  Created by Danilo Joksimovic on 2023-08-14.
 //  Copyright © 2023-Present Forage Technology Corporation. All rights reserved.
@@ -11,11 +11,11 @@ import UIKit
 
 extension String {
     subscript(safe index: Int) -> Character? {
-        return index < count && index >= 0 ? self[self.index(startIndex, offsetBy: index)] : nil
+        index < count && index >= 0 ? self[self.index(startIndex, offsetBy: index)] : nil
     }
 }
 
-internal enum MaskPattern: String {
+enum MaskPattern: String {
     case unset = "###################"
     case sixteenDigits = "#### #### #### ####"
     case eighteenDigits = "###### #### ##### ## #"
@@ -23,9 +23,10 @@ internal enum MaskPattern: String {
     case noIINmatch = "#### #### #### #### ###"
 }
 
-internal class MaskedUITextField: FloatingTextField, ObservableState {
+class MaskedUITextField: FloatingTextField, ObservableState {
     // MARK: - Properties
-    internal var actualPAN: String = ""
+
+    var actualPAN: String = ""
 
     private var wasBackspacePressed = false
 
@@ -36,11 +37,12 @@ internal class MaskedUITextField: FloatingTextField, ObservableState {
         }
     }
 
-    @IBInspectable private(set) public var isEmpty = true
-    @IBInspectable private(set) public var isValid = true
-    @IBInspectable private(set) public var isComplete = false
+    @IBInspectable public private(set) var isEmpty = true
+    @IBInspectable public private(set) var isValid = true
+    @IBInspectable public private(set) var isComplete = false
 
     // MARK: - Initialization
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         setup()
@@ -57,6 +59,7 @@ internal class MaskedUITextField: FloatingTextField, ObservableState {
     }
 
     // MARK: - Text Field Actions
+
     override func deleteBackward() {
         wasBackspacePressed = true
         super.deleteBackward()
@@ -76,19 +79,20 @@ internal class MaskedUITextField: FloatingTextField, ObservableState {
         validateText(newUnmaskedText, stateIIN: matchedStateIIN)
 
         let maskPattern = determineMaskPattern(for: newUnmaskedText, stateIIN: matchedStateIIN)
-        self.applyMask(newUnmaskedText, maskPattern: maskPattern)
+        applyMask(newUnmaskedText, maskPattern: maskPattern)
 
         actualPAN = newUnmaskedText
 
-        if text.count > 0 {
-            self.addClearButton(isVisible: true)
+        if !text.isEmpty {
+            addClearButton(isVisible: true)
         } else {
-            self.addClearButton(isVisible: false)
-            self.becomeFirstResponder()
+            addClearButton(isVisible: false)
+            becomeFirstResponder()
         }
     }
 
     // MARK: - Text Handling
+
     private func trimTrailingDigits(_ newUnmaskedText: String, stateIIN: StateIIN?) -> String {
         let maxPanLength = min(newUnmaskedText.count, stateIIN?.panLength ?? 19)
 
@@ -156,13 +160,13 @@ internal class MaskedUITextField: FloatingTextField, ObservableState {
         }
 
         if wasBackspacePressed && isCursorAtEndOfText {
-            self.text = maskedText
+            text = maskedText
             return
         }
 
         // Apply the masked text to the text field with a new character, we use " " string as "any" character
         let maskedTextWithNewChar = getMaskedText(newUnmaskedText + " ", maskPattern: maskPattern)
-        self.text = maskedText
+        text = maskedText
 
         // Calculate the new cursor position
         if !isCursorAtEndOfText
@@ -177,19 +181,19 @@ internal class MaskedUITextField: FloatingTextField, ObservableState {
             cursorOffset += 1
         }
 
-        self.setNewCursorPosition(cursorOffset)
+        setNewCursorPosition(cursorOffset)
     }
 
     private func wasBackspacePressedOnGap(offset cursorOffset: NSInteger, maskPattern: MaskPattern) -> Bool {
-        return wasBackspacePressed && cursorOffset > 0 && maskPattern.rawValue[safe: cursorOffset] == " "
+        wasBackspacePressed && cursorOffset > 0 && maskPattern.rawValue[safe: cursorOffset] == " "
     }
 
     private func isNextCharacterGap(offset cursorOffset: NSInteger, maskPattern: MaskPattern) -> Bool {
-        return cursorOffset > 0 && maskPattern.rawValue[safe: cursorOffset - 1] == " "
+        cursorOffset > 0 && maskPattern.rawValue[safe: cursorOffset - 1] == " "
     }
 
     private func getNextChar(_ maskPattern: MaskPattern, cursorOffset: Int) -> Character? {
-        return maskPattern.rawValue[safe: cursorOffset]
+        maskPattern.rawValue[safe: cursorOffset]
     }
 
     private func setNewCursorPosition(_ newPositionOffset: NSInteger) {

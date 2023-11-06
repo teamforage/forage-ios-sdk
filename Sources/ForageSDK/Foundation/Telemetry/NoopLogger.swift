@@ -1,6 +1,6 @@
 //
 //  NoopLogger.swift
-//  
+//
 //
 //  Created by Danilo Joksimovic on 2023-09-01.
 //  Copyright © 2023-Present Forage Technology Corporation. All rights reserved.
@@ -9,9 +9,9 @@
 import Foundation
 
 /// Silent logger that doesn't do anything!
-internal class NoopLogger: ForageLogger {
+class NoopLogger: ForageLogger {
     func getTraceID() -> String {
-        return ""
+        ""
     }
 
     required init(_ config: ForageLoggerConfig? = ForageLoggerConfig(environment: .sandbox)) {
@@ -19,15 +19,15 @@ internal class NoopLogger: ForageLogger {
     }
 
     func addContext(_ newContext: ForageLogContext) -> ForageLogger {
-        return self
+        self
     }
 
     func setLogKind(_ logKind: ForageLogKind) -> ForageLogger {
-        return self
+        self
     }
 
     func setPrefix(_ prefix: String) -> ForageLogger {
-        return self
+        self
     }
 
     func notice(_ message: String, attributes: [String: Encodable]?) {

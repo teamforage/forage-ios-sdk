@@ -7,15 +7,14 @@ import Foundation
 import VGSCollectSDK
 
 public class ForageSDK {
-
     // MARK: Properties
 
     private static var config: Config?
-    internal var service: ForageService?
-    internal var logger: ForageLogger?
-    internal var merchantID: String = ""
-    internal var sessionToken: String = ""
-    internal var traceId: String = ""
+    var service: ForageService?
+    var logger: ForageLogger?
+    var merchantID: String = ""
+    var sessionToken: String = ""
+    var traceId: String = ""
 
     public var environment: Environment = .sandbox
     // Don't update! Only updated when releasing.
@@ -29,30 +28,30 @@ public class ForageSDK {
             assertionFailure("ForageSDK unconfigured - call ForageSDK.setup() before accessing ForageSDK.shared")
             return
         }
-        self.environment = Environment(sessionToken: config.sessionToken)
-        self.merchantID = config.merchantID
-        self.sessionToken = config.sessionToken
+        environment = Environment(sessionToken: config.sessionToken)
+        merchantID = config.merchantID
+        sessionToken = config.sessionToken
         // ForageSDK.shared.environment is not set
         // until the end of this initialization
         // so we have to provide the environment from the config
         let logger = DatadogLogger(
             ForageLoggerConfig(
-                environment: self.environment,
+                environment: environment,
                 prefix: ""
             )
         )
         self.logger = logger
-        self.traceId = logger.getTraceID()
-        LDManager.shared.initialize(self.environment, logger: logger)
+        traceId = logger.getTraceID()
+        LDManager.shared.initialize(environment, logger: logger)
 
         VGSCollectLogger.shared.disableAllLoggers()
         let provider = Provider(logger: logger)
-        self.service = LiveForageService(provider: provider, logger: logger, ldManager: LDManager.shared)
+        service = LiveForageService(provider: provider, logger: logger, ldManager: LDManager.shared)
     }
 
     /**
      ``Config`` struct to set the merchant ID and session token on the ``ForageSDK`` singleton
-     
+
      - Parameters:
         - merchantID: The unique merchant ID that Forage provides during onboarding preceded by `mid/`, as in `mid/<Merchant ID>`
         - sessionToken: The [session token](https://docs.joinforage.app/docs/authentication#session-tokens) that your backend generates to authenticate your app against the Forage Payments API. The token expires after 15 minutes.

@@ -9,7 +9,6 @@
 import UIKit
 
 class ForagePANValidations {
-
     /// Check ebt card number length
     static func checkPANLength(_ panNumber: String) -> StateIIN? {
         if panNumber.count >= 6 {

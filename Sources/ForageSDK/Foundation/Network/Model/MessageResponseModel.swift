@@ -8,7 +8,7 @@
 
 import Foundation
 
-internal struct ForageSQSError: Codable {
+struct ForageSQSError: Codable {
     let statusCode: Int
     let forageCode: String
     let message: String
@@ -23,7 +23,7 @@ internal struct ForageSQSError: Codable {
 }
 
 /// `MessageResponseModel` used for handling message for polling request
-internal struct MessageResponseModel: Codable {
+struct MessageResponseModel: Codable {
     let contentId: String
     let messageType: String
     let status: String
@@ -48,7 +48,7 @@ internal struct MessageResponseModel: Codable {
         do {
             errors = try container.decode([ForageSQSError].self, forKey: .errors)
         } catch {
-            errors = []  // If the 'errors' field isn't an array, set it to an empty array
+            errors = [] // If the 'errors' field isn't an array, set it to an empty array
         }
     }
 }

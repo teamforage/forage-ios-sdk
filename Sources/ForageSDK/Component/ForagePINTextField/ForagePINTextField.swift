@@ -7,7 +7,6 @@ import UIKit
 import VGSCollectSDK
 
 public class ForagePINTextField: UIView, Identifiable, ForageElement {
-
     // MARK: - Properties
 
     /// Delegate that updates client's side about state of the entered pin
@@ -15,64 +14,58 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
 
     // MARK: - Exposed properties
 
-    @IBInspectable public var isEmpty: Bool {
-        get { return textField.isEmpty }
-    }
+    @IBInspectable public var isEmpty: Bool { textField.isEmpty }
 
-    @IBInspectable public var isValid: Bool {
-        get { return textField.isValid }
-    }
+    @IBInspectable public var isValid: Bool { textField.isValid }
 
-    @IBInspectable public var isComplete: Bool {
-        get { return textField.isComplete }
-    }
+    @IBInspectable public var isComplete: Bool { textField.isComplete }
 
     /// CornerRadius for the text field
     @IBInspectable public var cornerRadius: CGFloat {
-        get { return textField.cornerRadius }
+        get { textField.cornerRadius }
         set { textField.cornerRadius = newValue }
     }
 
     /// MasksToBounds for the text field
     @IBInspectable public var masksToBounds: Bool {
-        get { return textField.masksToBounds }
+        get { textField.masksToBounds }
         set { textField.masksToBounds = newValue }
     }
 
     /// BorderWidth for the text field
     @IBInspectable public var borderWidth: CGFloat {
-        get { return textField.borderWidth }
+        get { textField.borderWidth }
         set { textField.borderWidth = newValue }
     }
 
     /// BorderColor for the text field
     @IBInspectable public var borderColor: UIColor? {
-        get { return textField.borderColor }
+        get { textField.borderColor }
         set { textField.borderColor = newValue }
     }
 
     /// Padding for the text field
     @IBInspectable public var padding: UIEdgeInsets {
-        get { return textField.padding }
+        get { textField.padding }
         set { textField.padding = newValue }
     }
 
     /// Placeholder for the text field
     @IBInspectable public var placeholder: String? {
-        get { return textField.placeholder }
+        get { textField.placeholder }
         set { textField.placeholder = newValue }
     }
 
     /// Text color for the text field
     /// `textColor` default value is `black`
     @IBInspectable public var textColor: UIColor? {
-        get { return textField.textColor }
+        get { textField.textColor }
         set { textField.textColor = newValue }
     }
 
     /// BackgroundColor for the text field
-    @IBInspectable public override var backgroundColor: UIColor? {
-        get { return textField.backgroundColor }
+    @IBInspectable override public var backgroundColor: UIColor? {
+        get { textField.backgroundColor }
         set { textField.backgroundColor = newValue }
     }
 
@@ -85,7 +78,7 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
     /// Tint color for the text field
     /// `tfTintColor` default value is `black`
     @IBInspectable public var tfTintColor: UIColor? {
-        get { return textField.tintColor }
+        get { textField.tintColor }
         set { textField.tintColor = newValue }
     }
 
@@ -98,7 +91,7 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
     /// Change UIFont
     /// `VGSTextField` text font
     @IBInspectable public var font: UIFont? {
-        get { return textField.font }
+        get { textField.font }
         set { textField.font = newValue }
     }
 
@@ -182,8 +175,8 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
         return imgView
     }()
 
-    internal func getPinCollector() -> VaultCollector {
-        return textField.collector
+    func getPinCollector() -> VaultCollector {
+        textField.collector
     }
 
     // MARK: - Lifecycle methods
@@ -213,10 +206,10 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
         textField.delegate = self
 
         root.anchor(
-            top: self.topAnchor,
-            leading: self.leadingAnchor,
-            bottom: self.bottomAnchor,
-            trailing: self.trailingAnchor,
+            top: topAnchor,
+            leading: leadingAnchor,
+            bottom: bottomAnchor,
+            trailing: trailingAnchor,
             centerXAnchor: nil,
             padding: UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         )
@@ -253,7 +246,7 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
             action: #selector(requestFocus(_:))
         )
         addGestureRecognizer(tapGesture)
-        self.logger.notice("ForagePINTextField was initialized successfully", attributes: nil)
+        logger.notice("ForagePINTextField was initialized successfully", attributes: nil)
     }
 
     @objc fileprivate func requestFocus(_ gesture: UIGestureRecognizer) {
@@ -270,11 +263,11 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
 // MARK: - VaultWrapperDelegate
 
 extension ForagePINTextField: VaultWrapperDelegate {
-    internal func textFieldDidChange(_ textField: VaultWrapper) {
+    func textFieldDidChange(_ textField: VaultWrapper) {
         delegate?.textFieldDidChange(self)
     }
 
-    internal func firstResponderDidChange(_ textField: VaultWrapper) {
+    func firstResponderDidChange(_ textField: VaultWrapper) {
         delegate?.focusDidChange(self)
     }
 }
@@ -284,16 +277,16 @@ extension ForagePINTextField: VaultWrapperDelegate {
 extension ForagePINTextField {
     /// Make `ForagePINTextField` focused.
     @discardableResult override public func becomeFirstResponder() -> Bool {
-        return textField.becomeFirstResponder()
+        textField.becomeFirstResponder()
     }
 
     /// Remove focus from `ForagePINTextField`.
     @discardableResult override public func resignFirstResponder() -> Bool {
-        return textField.resignFirstResponder()
+        textField.resignFirstResponder()
     }
 
     /// Check if `ForagePINTextField` is focused.
     override public var isFirstResponder: Bool {
-        return textField.isFirstResponder
+        textField.isFirstResponder
     }
 }

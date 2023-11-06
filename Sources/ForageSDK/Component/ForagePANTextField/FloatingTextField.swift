@@ -1,6 +1,6 @@
 //
 //  FloatingTextField.swift
-//  
+//
 //
 //  Created by Milos Bogdanovic on 08/16/23.
 //  Copyright © 2023-Present Forage Technology Corporation. All rights reserved.
@@ -9,7 +9,6 @@
 import UIKit
 
 public class FloatingTextField: UITextField {
-
     public enum FloatingDisplayStatus {
         case always
         case never
@@ -18,11 +17,11 @@ public class FloatingTextField: UITextField {
 
     // MARK: - Properties
 
-    private var clearButton: UIButton = UIButton()
-    private(set) var floatingPlaceholderLabel: UILabel = UILabel()
+    private var clearButton: UIButton = .init()
+    private(set) var floatingPlaceholderLabel: UILabel = .init()
     private(set) var animateFloatPlaceholder: Bool = true
-    private var floatPlaceholderColor: UIColor = UIColor.gray
-    private var floatPlaceholderActiveColor: UIColor = UIColor.gray
+    private var floatPlaceholderColor: UIColor = .gray
+    private var floatPlaceholderActiveColor: UIColor = .gray
     private var floatingLabelShowAnimationDuration = 0.3
     private var floatingDisplayStatus: FloatingDisplayStatus = .defaults
     private var paddingX: CGFloat = 8
@@ -79,7 +78,7 @@ public class FloatingTextField: UITextField {
         commonInit()
     }
 
-    required public init?(coder aDecoder: NSCoder) {
+    public required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         commonInit()
     }
@@ -110,12 +109,12 @@ public class FloatingTextField: UITextField {
         clearButton.contentMode = .scaleAspectFit
         clearButton.addTarget(self, action: #selector(clear(sender:)), for: .touchUpInside)
 
-        self.rightView = clearButton
-        self.rightViewMode = isVisible ? .whileEditing : .never
+        rightView = clearButton
+        rightViewMode = isVisible ? .whileEditing : .never
     }
 
     @objc func clear(sender: AnyObject) {
-        self.text = ""
+        text = ""
         sendActions(for: .editingChanged)
     }
 
@@ -186,7 +185,7 @@ public class FloatingTextField: UITextField {
     }
 
     private func insetRectForEmptyBounds(rect: CGRect) -> CGRect {
-        return CGRect(x: x, y: 0, width: rect.width - x - paddingX, height: rect.height)
+        CGRect(x: x, y: 0, width: rect.width - x - paddingX, height: rect.height)
     }
 
     private func insetForSideView(forBounds bounds: CGRect) -> CGRect {

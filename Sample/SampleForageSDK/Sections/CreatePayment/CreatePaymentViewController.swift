@@ -9,7 +9,6 @@
 import UIKit
 
 class CreatePaymentViewController: BaseViewCodeViewController<CreatePaymentView> {
-
     // MARK: Lifecycle Methods
 
     override func loadView() {
@@ -21,9 +20,10 @@ class CreatePaymentViewController: BaseViewCodeViewController<CreatePaymentView>
 
     func createPayment(
         request: CreatePaymentRequest,
-        completion: @escaping (Result<CreatePaymentResponse, Error>) -> Void) {
-            let service = CreatePaymentService()
-            return service.createPayment(request: request, completion: completion)
+        completion: @escaping (Result<CreatePaymentResponse, Error>) -> Void
+    ) {
+        let service = CreatePaymentService()
+        return service.createPayment(request: request, completion: completion)
     }
 }
 

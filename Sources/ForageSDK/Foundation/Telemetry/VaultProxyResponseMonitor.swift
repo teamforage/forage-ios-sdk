@@ -1,6 +1,6 @@
 //
 //  VaultProxyResponseMonitor.swift
-//  
+//
 //
 //  Created by Danilo Joksimovic on 2023-08-07.
 //  Copyright © 2023-Present Forage Technology Corporation. All rights reserved.
@@ -8,7 +8,7 @@
 
 import Foundation
 
-internal enum EventName: String {
+enum EventName: String {
     /// vaultResponse refers to a response from the VGS or BT submit actions.
     case vaultResponse = "vault_response"
     /**
@@ -24,8 +24,7 @@ internal enum EventName: String {
 /*
  `VaultProxyResponseMonitor` is a specialized `ResponseMonitor` for handling Vault-related network metrics. VaultProxyResponseMonitor is used to track the errors and response times from the VGS and BT submit functions. The timer begins when a balance or capture request is submitted to VGS/BT and ends when a response is received by the SDK.
  */
-internal final class VaultProxyResponseMonitor: ResponseMonitor {
-
+final class VaultProxyResponseMonitor: ResponseMonitor {
     private let vaultAction: VaultAction
     private let vaultType: VaultType
     private var eventName: EventName = .vaultResponse
@@ -36,11 +35,11 @@ internal final class VaultProxyResponseMonitor: ResponseMonitor {
     }
 
     /// Factory method for creating new VaultProxyResponseMonitor instances
-    internal static func newMeasurement(vault: VaultType, action: VaultAction) -> VaultProxyResponseMonitor {
-        return VaultProxyResponseMonitor(vaultType: vault, vaultAction: action)
+    static func newMeasurement(vault: VaultType, action: VaultAction) -> VaultProxyResponseMonitor {
+        VaultProxyResponseMonitor(vaultType: vault, vaultAction: action)
     }
 
-    internal override func logWithResponseAttributes(metricsLogger: ForageLogger?, responseAttributes: ResponseAttributes) {
+    override func logWithResponseAttributes(metricsLogger: ForageLogger?, responseAttributes: ResponseAttributes) {
         guard let httpMethod = responseAttributes.method?.rawValue,
               let path = responseAttributes.path,
               let httpStatus = responseAttributes.code,
@@ -49,13 +48,13 @@ internal final class VaultProxyResponseMonitor: ResponseMonitor {
             return
         }
 
-        let vaultType = self.vaultType.rawValue
+        let vaultType = vaultType.rawValue
 
         metricsLogger?.info(
             "Received response from \(vaultType) proxy",
             attributes: mapEnumKeysToStrings(from: [
-                .action: self.vaultAction.rawValue,
-                .eventName: self.eventName.rawValue,
+                .action: vaultAction.rawValue,
+                .eventName: eventName.rawValue,
                 .httpStatus: httpStatus,
                 .logType: ForageLogKind.metric.rawValue,
                 .method: httpMethod,

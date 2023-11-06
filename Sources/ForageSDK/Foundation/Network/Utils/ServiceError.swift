@@ -8,7 +8,7 @@
 
 import Foundation
 
-internal enum ServiceError: String, Error {
+enum ServiceError: String, Error {
     case parametersNil = "Parameters were nil."
     case encodingFailed = "Parameters encoding failed."
     case missingURL = "URL is nil."

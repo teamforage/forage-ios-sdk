@@ -15,7 +15,6 @@ protocol CreatePaymentViewDelegate: AnyObject {
 }
 
 class CreatePaymentView: UIView {
-
     // MARK: Public Properties
 
     private var controller = CreatePaymentViewController()
@@ -189,7 +188,7 @@ class CreatePaymentView: UIView {
     // MARK: Private Methods
 
     private func createPayment(isEbtSnap: Bool) {
-        var paymentAmount: Double = 0.0
+        var paymentAmount = 0.0
 
         if isEbtSnap {
             guard
@@ -232,7 +231,7 @@ class CreatePaymentView: UIView {
     private func printResult(result: Result<CreatePaymentResponse, Error>) {
         DispatchQueue.main.async {
             switch result {
-            case .success(let response):
+            case let .success(response):
                 self.fundingTypeLabel.text = "fundingType=\(response.fundingType.rawValue)"
                 self.paymentMethodIdentifierLabel.text = "paymentMethodIdentifier=\(response.paymentMethodIdentifier)"
                 self.paymentIdentifierLabel.text = "paymentIdentifier=\(response.paymentIdentifier)"
@@ -241,7 +240,7 @@ class CreatePaymentView: UIView {
                 self.errorLabel.text = ""
                 ClientSharedData.shared.paymentReference[response.fundingType] = response.paymentIdentifier
 
-            case .failure(let error):
+            case let .failure(error):
                 self.errorLabel.text = "error: \n\(error.localizedDescription)"
                 self.fundingTypeLabel.text = ""
                 self.paymentMethodIdentifierLabel.text = ""
@@ -256,7 +255,7 @@ class CreatePaymentView: UIView {
     }
 
     private func setupView() {
-        self.addSubview(contentView)
+        addSubview(contentView)
         contentView.addSubview(titleLabel)
         contentView.addSubview(snapTextField)
         contentView.addSubview(createSnapPaymentButton)
@@ -276,13 +275,12 @@ class CreatePaymentView: UIView {
     }
 
     private func setupContentViewConstraints() {
-
         contentView.anchor(
-            top: self.topAnchor,
-            leading: self.leadingAnchor,
-            bottom: self.bottomAnchor,
-            trailing: self.trailingAnchor,
-            centerXAnchor: self.centerXAnchor
+            top: topAnchor,
+            leading: leadingAnchor,
+            bottom: bottomAnchor,
+            trailing: trailingAnchor,
+            centerXAnchor: centerXAnchor
         )
 
         titleLabel.anchor(

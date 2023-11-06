@@ -9,7 +9,6 @@
 import UIKit
 
 class RequestBalanceViewController: BaseViewCodeViewController<RequestBalanceView> {
-
     // MARK: Lifecycle Methods
 
     override func loadView() {
@@ -21,7 +20,7 @@ class RequestBalanceViewController: BaseViewCodeViewController<RequestBalanceVie
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        self.customView.foragePinTextField.becomeFirstResponder()
+        customView.foragePinTextField.becomeFirstResponder()
     }
 }
 

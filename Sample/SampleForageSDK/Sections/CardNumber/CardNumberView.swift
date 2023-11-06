@@ -15,7 +15,6 @@ protocol CardNumberViewDelegate: AnyObject {
 }
 
 class CardNumberView: UIView {
-
     // MARK: Public Properties
 
     weak var delegate: CardNumberViewDelegate?
@@ -201,9 +200,10 @@ class CardNumberView: UIView {
         ForageSDK.shared.tokenizeEBTCard(
             foragePanTextField: panNumberTextField,
             customerID: ClientSharedData.shared.customerID,
-            reusable: ClientSharedData.shared.isReusablePaymentMethod) { result in
-                self.printResult(result: result)
-            }
+            reusable: ClientSharedData.shared.isReusablePaymentMethod
+        ) { result in
+            self.printResult(result: result)
+        }
     }
 
     @objc fileprivate func goToBalance(_ gesture: UIGestureRecognizer) {
@@ -223,7 +223,7 @@ class CardNumberView: UIView {
     private func printResult(result: Result<PaymentMethodModel, Error>) {
         DispatchQueue.main.async {
             switch result {
-            case .success(let response):
+            case let .success(response):
                 self.refLabel.text = "ref=\(response.paymentMethodIdentifier)"
                 self.typeLabel.text = "type=\(response.type)"
                 self.tokenLabel.text = "token=\(response.card.token)"
@@ -237,7 +237,7 @@ class CardNumberView: UIView {
                 self.errorLabel.text = ""
                 ClientSharedData.shared.paymentMethodReference = response.paymentMethodIdentifier
                 self.updateButtonState(isEnabled: true, button: self.nextButton)
-            case .failure(let error):
+            case let .failure(error):
                 self.errorLabel.text = "error: \n\(error)"
                 self.refLabel.text = ""
                 self.typeLabel.text = ""
@@ -254,7 +254,7 @@ class CardNumberView: UIView {
     }
 
     private func setupView() {
-        self.addSubview(contentView)
+        addSubview(contentView)
         contentView.addSubview(titleLabel)
         contentView.addSubview(panNumberTextField)
         contentView.addSubview(firstResponderLabel)
@@ -281,13 +281,12 @@ class CardNumberView: UIView {
     }
 
     private func setupContentViewConstraints() {
-
         contentView.anchor(
-            top: self.topAnchor,
-            leading: self.leadingAnchor,
-            bottom: self.bottomAnchor,
-            trailing: self.trailingAnchor,
-            centerXAnchor: self.centerXAnchor
+            top: topAnchor,
+            leading: leadingAnchor,
+            bottom: bottomAnchor,
+            trailing: trailingAnchor,
+            centerXAnchor: centerXAnchor
         )
 
         titleLabel.anchor(

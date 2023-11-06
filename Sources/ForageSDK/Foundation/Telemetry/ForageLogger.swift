@@ -8,7 +8,7 @@
 
 import Foundation
 
-internal struct ForageLogContext {
+struct ForageLogContext {
     var customerID: String?
     var merchantRef: String?
     var paymentRef: String?
@@ -17,24 +17,24 @@ internal struct ForageLogContext {
     var sdkVersion: String = ForageSDK.version
 }
 
-internal enum ForageLogKind: String {
-    case metric = "metric" // Used for logging metrics and performance data
-    case trace = "trace" // Used for tracing or logging of execution flow.
+enum ForageLogKind: String {
+    case metric // Used for logging metrics and performance data
+    case trace // Used for tracing or logging of execution flow.
 }
 
-internal struct ForageLoggerConfig {
+struct ForageLoggerConfig {
     var forageEnvironment: Environment?
     var prefix: String?
     var context: ForageLogContext?
 
     init(environment: Environment? = ForageSDK.shared.environment, prefix: String? = nil, context: ForageLogContext? = nil) {
-        self.forageEnvironment = environment
+        forageEnvironment = environment
         self.context = context
         self.prefix = prefix
     }
 }
 
-internal protocol ForageLogger {
+protocol ForageLogger {
     init(_ config: ForageLoggerConfig?)
 
     /// Adds additional context to the logger, providing useful information for each log message.
@@ -86,18 +86,18 @@ internal protocol ForageLogger {
 }
 
 /// Read this [document](https://docs.google.com/document/d/1BU609qv7qSDN-tdNaJP-sAyrgeM6REe9tvcMk5CxN3c/edit#bookmark=id.w44b8kk07o7o) for to learn more about how DatadogLogger works
-internal class DatadogLogger: ForageLogger {
+class DatadogLogger: ForageLogger {
     private static let DD_CLIENT_TOKEN: String = "pub1e4572ba0f5e53df108c333d5ec66c02"
     private static let DD_SERVICE_NAME: String = "ios-sdk"
     private static let DD_SDK_INSTANCE_NAME: String = "forage"
 
     // DO NOT UPDATE! Generate 1 TraceID per living session of the app
-    internal static let traceId: String = generateTraceID()
+    static let traceId: String = generateTraceID()
 
     private var logger: LoggerProtocol?
     private var config: ForageLoggerConfig?
 
-    required internal init(_ config: ForageLoggerConfig? = ForageLoggerConfig()) {
+    required init(_ config: ForageLoggerConfig? = ForageLoggerConfig()) {
         if isUnitTesting() {
             // avoid emitting logs when running unit tests
             return
@@ -109,8 +109,8 @@ internal class DatadogLogger: ForageLogger {
             return
         }
 
-        let datadogInstance = self.initDatadog(forageEnvironment)
-        self.logger = Logger.create(
+        let datadogInstance = initDatadog(forageEnvironment)
+        logger = Logger.create(
             with: Logger.Configuration(
                 service: "ios-sdk",
                 networkInfoEnabled: true,
@@ -126,34 +126,34 @@ internal class DatadogLogger: ForageLogger {
 
         // Do this explicitly in the constructor so that we confirm each logger that is created
         // has the trace_id field.
-        self.logger?.addAttribute(forKey: "trace_id", value: DatadogLogger.traceId)
+        logger?.addAttribute(forKey: "trace_id", value: DatadogLogger.traceId)
 
-        _ = self.addContext(config?.context ?? ForageLogContext())
+        _ = addContext(config?.context ?? ForageLogContext())
     }
 
-    internal func notice(_ message: String, attributes: [String: Encodable]? = nil) {
-        self.logger?.notice(self.getMessageWithPrefix(message), error: nil, attributes: attributes)
+    func notice(_ message: String, attributes: [String: Encodable]? = nil) {
+        logger?.notice(getMessageWithPrefix(message), error: nil, attributes: attributes)
     }
 
-    internal func info(_ message: String, attributes: [String: Encodable]? = nil) {
-        self.logger?.info(self.getMessageWithPrefix(message), error: nil, attributes: attributes)
+    func info(_ message: String, attributes: [String: Encodable]? = nil) {
+        logger?.info(getMessageWithPrefix(message), error: nil, attributes: attributes)
     }
 
-    internal func warn(_ message: String, error: Error? = nil, attributes: [String: Encodable]? = nil) {
-        self.logger?.warn(self.getMessageWithPrefix(message), error: error, attributes: attributes)
+    func warn(_ message: String, error: Error? = nil, attributes: [String: Encodable]? = nil) {
+        logger?.warn(getMessageWithPrefix(message), error: error, attributes: attributes)
     }
 
-    internal func error(_ message: String, error: Error? = nil, attributes: [String: Encodable]? = nil) {
-        self.logger?.error(self.getMessageWithPrefix(message), error: error, attributes: attributes)
+    func error(_ message: String, error: Error? = nil, attributes: [String: Encodable]? = nil) {
+        logger?.error(getMessageWithPrefix(message), error: error, attributes: attributes)
     }
 
-    internal func critical(_ message: String, error: Error? = nil, attributes: [String: Encodable]? = nil) {
-        self.logger?.critical(self.getMessageWithPrefix(message), error: error, attributes: attributes)
+    func critical(_ message: String, error: Error? = nil, attributes: [String: Encodable]? = nil) {
+        logger?.critical(getMessageWithPrefix(message), error: error, attributes: attributes)
     }
 
     @discardableResult
-    internal func addContext(_ newContext: ForageLogContext) -> ForageLogger {
-        self.config?.context = newContext
+    func addContext(_ newContext: ForageLogContext) -> ForageLogger {
+        config?.context = newContext
         let attributeMappings: [(key: String, value: Encodable?)] = [
             ("customer_id", newContext.customerID),
             ("merchant_ref", newContext.merchantRef),
@@ -165,26 +165,26 @@ internal class DatadogLogger: ForageLogger {
 
         for (key, value) in attributeMappings {
             if let attributeValue = value {
-                self.logger?.addAttribute(forKey: key, value: attributeValue)
+                logger?.addAttribute(forKey: key, value: attributeValue)
             }
         }
         return self
     }
 
     @discardableResult
-    internal func setLogKind(_ logKind: ForageLogKind) -> ForageLogger {
-        self.logger?.addTag(withKey: "log_kind", value: logKind.rawValue)
+    func setLogKind(_ logKind: ForageLogKind) -> ForageLogger {
+        logger?.addTag(withKey: "log_kind", value: logKind.rawValue)
         return self
     }
 
     @discardableResult
-    internal func setPrefix(_ newPrefix: String) -> ForageLogger {
-        self.config?.prefix = newPrefix
+    func setPrefix(_ newPrefix: String) -> ForageLogger {
+        config?.prefix = newPrefix
         return self
     }
 
-    internal func getTraceID() -> String {
-        return DatadogLogger.traceId
+    func getTraceID() -> String {
+        DatadogLogger.traceId
     }
 
     /// Initializes and returns a Datadog instance for the given environment. If an instance with the specified name already exists,
@@ -211,7 +211,7 @@ internal class DatadogLogger: ForageLogger {
     }
 
     private func getMessageWithPrefix(_ message: String) -> String {
-        if let prefix = self.config?.prefix {
+        if let prefix = config?.prefix {
             return prefix.isEmpty ? message : "[\(prefix)] \(message)"
         }
         return message

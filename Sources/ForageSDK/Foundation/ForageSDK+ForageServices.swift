@@ -22,7 +22,8 @@ protocol ForageSDKService: AnyObject {
         foragePanTextField: ForagePANTextField,
         customerID: String,
         reusable: Bool?,
-        completion: @escaping (Result<PaymentMethodModel, Error>) -> Void)
+        completion: @escaping (Result<PaymentMethodModel, Error>) -> Void
+    )
 
     /// Check balance for a given EBT Card
     ///
@@ -33,7 +34,8 @@ protocol ForageSDKService: AnyObject {
     func checkBalance(
         foragePinTextField: ForagePINTextField,
         paymentMethodReference: String,
-        completion: @escaping (Result<BalanceModel, Error>) -> Void)
+        completion: @escaping (Result<BalanceModel, Error>) -> Void
+    )
 
     /// Capture a payment for a given payment reference
     ///
@@ -44,18 +46,18 @@ protocol ForageSDKService: AnyObject {
     func capturePayment(
         foragePinTextField: ForagePINTextField,
         paymentReference: String,
-        completion: @escaping (Result<PaymentModel, Error>) -> Void)
+        completion: @escaping (Result<PaymentModel, Error>) -> Void
+    )
 }
 
 extension ForageSDK: ForageSDKService {
-
     public func tokenizeEBTCard(
         foragePanTextField: ForagePANTextField,
         customerID: String,
         reusable: Bool? = true,
         completion: @escaping (Result<PaymentMethodModel, Error>) -> Void
     ) {
-        _ = self.logger?
+        _ = logger?
             .setPrefix("tokenizeEBTCard")
             .addContext(ForageLogContext(
                 customerID: customerID,
@@ -77,114 +79,116 @@ extension ForageSDK: ForageSDKService {
     public func checkBalance(
         foragePinTextField: ForagePINTextField,
         paymentMethodReference: String,
-        completion: @escaping (Result<BalanceModel, Error>) -> Void) {
-            _ = self.logger?
-                .setPrefix("checkBalance")
-                .addContext(ForageLogContext(
-                    merchantRef: merchantID,
-                    paymentMethodRef: paymentMethodReference
-                ))
-                .notice("Called ForageSDK.shared.checkBalance for Payment Method \(paymentMethodReference)", attributes: nil)
+        completion: @escaping (Result<BalanceModel, Error>) -> Void
+    ) {
+        _ = logger?
+            .setPrefix("checkBalance")
+            .addContext(ForageLogContext(
+                merchantRef: merchantID,
+                paymentMethodRef: paymentMethodReference
+            ))
+            .notice("Called ForageSDK.shared.checkBalance for Payment Method \(paymentMethodReference)", attributes: nil)
 
-            guard let forageService = service else {
-                reportIllegalState(for: "checkBalance", dueTo: "ForageService was not initialized")
-                return
-            }
+        guard let forageService = service else {
+            reportIllegalState(for: "checkBalance", dueTo: "ForageService was not initialized")
+            return
+        }
 
-            guard validatePin(foragePinTextField: foragePinTextField) else {
-                completion(.failure(CommonErrors.INCOMPLETE_PIN_ERROR))
-                return
-            }
+        guard validatePin(foragePinTextField: foragePinTextField) else {
+            completion(.failure(CommonErrors.INCOMPLETE_PIN_ERROR))
+            return
+        }
 
-            let pinCollector = foragePinTextField.getPinCollector()
+        let pinCollector = foragePinTextField.getPinCollector()
 
-            // This block is used for tracking important Metrics!
-            // -----------------------------------------------------
-            let responseMonitor = CustomerPerceivedResponseMonitor.newMeasurement(
-                vaultType: pinCollector.getVaultType(),
-                vaultAction: VaultAction.balanceCheck
-            )
-            responseMonitor.start()
-            // ------------------------------------------------------
+        // This block is used for tracking important Metrics!
+        // -----------------------------------------------------
+        let responseMonitor = CustomerPerceivedResponseMonitor.newMeasurement(
+            vaultType: pinCollector.getVaultType(),
+            vaultAction: VaultAction.balanceCheck
+        )
+        responseMonitor.start()
+        // ------------------------------------------------------
 
-            Task.init {
-                do {
-                    let balanceResult = try await forageService.checkBalance(
-                        pinCollector: pinCollector,
-                        paymentMethodReference: paymentMethodReference
-                    )
-                    self.logger?.notice("Balance check succeeded for PaymentMethod \(paymentMethodReference)", attributes: nil)
+        Task.init {
+            do {
+                let balanceResult = try await forageService.checkBalance(
+                    pinCollector: pinCollector,
+                    paymentMethodReference: paymentMethodReference
+                )
+                self.logger?.notice("Balance check succeeded for PaymentMethod \(paymentMethodReference)", attributes: nil)
 
-                    responseMonitor.setEventOutcome(.success).end()
-                    responseMonitor.logResult()
+                responseMonitor.setEventOutcome(.success).end()
+                responseMonitor.logResult()
 
-                    completion(.success(balanceResult))
-                } catch let error {
-                    self.logger?.error("Balance check failed for PaymentMethod \(paymentMethodReference)", error: error, attributes: nil)
+                completion(.success(balanceResult))
+            } catch {
+                self.logger?.error("Balance check failed for PaymentMethod \(paymentMethodReference)", error: error, attributes: nil)
 
-                    responseMonitor.setForageErrorCode(error).end()
-                    responseMonitor.logResult()
+                responseMonitor.setForageErrorCode(error).end()
+                responseMonitor.logResult()
 
-                    completion(.failure(error))
-                }
+                completion(.failure(error))
             }
         }
+    }
 
     public func capturePayment(
         foragePinTextField: ForagePINTextField,
         paymentReference: String,
-        completion: @escaping (Result<PaymentModel, Error>) -> Void) {
-            _ = self.logger?
-                .setPrefix("capturePayment")
-                .addContext(ForageLogContext(
-                    merchantRef: merchantID,
-                    paymentRef: paymentReference
-                ))
-                .notice("Called ForageSDK.shared.capturePayment for Payment \(paymentReference)", attributes: nil)
+        completion: @escaping (Result<PaymentModel, Error>) -> Void
+    ) {
+        _ = logger?
+            .setPrefix("capturePayment")
+            .addContext(ForageLogContext(
+                merchantRef: merchantID,
+                paymentRef: paymentReference
+            ))
+            .notice("Called ForageSDK.shared.capturePayment for Payment \(paymentReference)", attributes: nil)
 
-            guard let forageService = service else {
-                reportIllegalState(for: "capturePayment", dueTo: "ForageService was not initialized")
-                return
-            }
+        guard let forageService = service else {
+            reportIllegalState(for: "capturePayment", dueTo: "ForageService was not initialized")
+            return
+        }
 
-            guard validatePin(foragePinTextField: foragePinTextField) else {
-                completion(.failure(CommonErrors.INCOMPLETE_PIN_ERROR))
-                return
-            }
+        guard validatePin(foragePinTextField: foragePinTextField) else {
+            completion(.failure(CommonErrors.INCOMPLETE_PIN_ERROR))
+            return
+        }
 
-            let pinCollector = foragePinTextField.getPinCollector()
+        let pinCollector = foragePinTextField.getPinCollector()
 
-            // This block is used for tracking important Metrics!
-            // -----------------------------------------------------
-            let responseMonitor = CustomerPerceivedResponseMonitor.newMeasurement(
-                vaultType: pinCollector.getVaultType(),
-                vaultAction: VaultAction.capturePayment
-            )
-            responseMonitor.start()
-            // ------------------------------------------------------
+        // This block is used for tracking important Metrics!
+        // -----------------------------------------------------
+        let responseMonitor = CustomerPerceivedResponseMonitor.newMeasurement(
+            vaultType: pinCollector.getVaultType(),
+            vaultAction: VaultAction.capturePayment
+        )
+        responseMonitor.start()
+        // ------------------------------------------------------
 
-            Task.init {
-                do {
-                    let paymentResult = try await forageService.capturePayment(
-                        pinCollector: pinCollector,
-                        paymentReference: paymentReference
-                    )
-                    self.logger?.notice("Capture succeeded for Payment \(paymentReference)", attributes: nil)
+        Task.init {
+            do {
+                let paymentResult = try await forageService.capturePayment(
+                    pinCollector: pinCollector,
+                    paymentReference: paymentReference
+                )
+                self.logger?.notice("Capture succeeded for Payment \(paymentReference)", attributes: nil)
 
-                    responseMonitor.setEventOutcome(.success).end()
-                    responseMonitor.logResult()
+                responseMonitor.setEventOutcome(.success).end()
+                responseMonitor.logResult()
 
-                    completion(.success(paymentResult))
-                } catch let error {
-                    self.logger?.error("Capture failed for Payment \(paymentReference)", error: error, attributes: nil)
+                completion(.success(paymentResult))
+            } catch {
+                self.logger?.error("Capture failed for Payment \(paymentReference)", error: error, attributes: nil)
 
-                    responseMonitor.setForageErrorCode(error).end()
-                    responseMonitor.logResult()
+                responseMonitor.setForageErrorCode(error).end()
+                responseMonitor.logResult()
 
-                    completion(.failure(error))
-                }
+                completion(.failure(error))
             }
         }
+    }
 
     /// Reports an illegal state by logging a critical error and triggering an assertion failure.
     ///
@@ -207,10 +211,11 @@ extension ForageSDK: ForageSDKService {
         if foragePinTextField.isComplete {
             return true
         }
-        self.logger?.warn(
+        logger?.warn(
             "User attempted to submit an incomplete PIN",
             error: CommonErrors.INCOMPLETE_PIN_ERROR,
-            attributes: nil)
+            attributes: nil
+        )
         return false
     }
 }

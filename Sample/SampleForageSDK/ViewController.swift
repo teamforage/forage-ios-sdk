@@ -10,11 +10,10 @@ import ForageSDK
 import UIKit
 
 class ViewController: UIViewController {
-
     // MARK: IBOutlets
 
-    @IBOutlet private weak var sessionTokenTextField: UITextField!
-    @IBOutlet private weak var merchantIdTextField: UITextField!
+    @IBOutlet private var sessionTokenTextField: UITextField!
+    @IBOutlet private var merchantIdTextField: UITextField!
 
     // MARK: IBActions
 

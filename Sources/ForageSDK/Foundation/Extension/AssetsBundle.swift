@@ -8,14 +8,14 @@
 
 import Foundation
 
-internal class AssetsBundle {
+class AssetsBundle {
     static var main = AssetsBundle()
     var iconBundle: Bundle?
 
     init() {
         // Identify bundle for SPM.
         #if SWIFT_PACKAGE
-            iconBundle = Bundle.module
+        iconBundle = Bundle.module
         #endif
 
         // Return if bundle is found.

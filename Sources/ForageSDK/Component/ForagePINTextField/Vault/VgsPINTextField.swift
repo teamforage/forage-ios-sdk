@@ -1,6 +1,6 @@
 //
 //  VgsPINTextField.swift
-//  
+//
 //
 //  Created by Danny Leiser on 7/27/23.
 //  Copyright © 2023-Present Forage Technology Corporation. All rights reserved.
@@ -10,20 +10,13 @@ import UIKit
 import VGSCollectSDK
 
 class VGSTextFieldWrapper: UIView, VaultWrapper {
-
     // MARK: - Properties
 
-    @IBInspectable public var isEmpty: Bool {
-        get { return textField.state.isEmpty }
-    }
+    @IBInspectable public var isEmpty: Bool { textField.state.isEmpty }
 
-    @IBInspectable public var isValid: Bool {
-        get { return textField.state.inputLength == 4 }
-    }
+    @IBInspectable public var isValid: Bool { textField.state.inputLength == 4 }
 
-    @IBInspectable public var isComplete: Bool {
-        get { return textField.state.inputLength == 4 }
-    }
+    @IBInspectable public var isComplete: Bool { textField.state.inputLength == 4 }
 
     private let textField: VGSTextField
     private var inputWidthConstraint: NSLayoutConstraint?
@@ -82,10 +75,10 @@ class VGSTextFieldWrapper: UIView, VaultWrapper {
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.textAlignment = .center
         textField.anchor(
-            top: self.topAnchor,
-            leading: self.leadingAnchor,
-            bottom: self.bottomAnchor,
-            trailing: self.trailingAnchor,
+            top: topAnchor,
+            leading: leadingAnchor,
+            bottom: bottomAnchor,
+            trailing: trailingAnchor,
             centerXAnchor: nil,
             padding: UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         )
@@ -113,47 +106,47 @@ class VGSTextFieldWrapper: UIView, VaultWrapper {
     }
 
     var borderWidth: CGFloat {
-        get { return textField.borderWidth }
+        get { textField.borderWidth }
         set { textField.borderWidth = newValue }
     }
 
     var masksToBounds: Bool {
-        get { return textField.layer.masksToBounds }
+        get { textField.layer.masksToBounds }
         set { textField.layer.masksToBounds = newValue }
     }
 
     var cornerRadius: CGFloat {
-        get { return textField.cornerRadius }
+        get { textField.cornerRadius }
         set { textField.cornerRadius = newValue }
     }
 
     var padding: UIEdgeInsets {
-        get { return textField.padding }
+        get { textField.padding }
         set { textField.padding = newValue }
     }
 
     var borderColor: UIColor? {
-        get { return textField.borderColor }
+        get { textField.borderColor }
         set { textField.borderColor = newValue }
     }
 
     override var backgroundColor: UIColor? {
-        get { return textField.backgroundColor }
+        get { textField.backgroundColor }
         set { textField.backgroundColor = newValue }
     }
 
     var textColor: UIColor? {
-        get { return textField.textColor }
+        get { textField.textColor }
         set { textField.textColor = newValue }
     }
 
     var font: UIFont? {
-        get { return textField.font }
+        get { textField.font }
         set { textField.font = newValue }
     }
 
     var textAlignment: NSTextAlignment {
-        get { return textField.textAlignment }
+        get { textField.textAlignment }
         set { textField.textAlignment = newValue }
     }
 }
@@ -186,16 +179,16 @@ extension VGSTextFieldWrapper: VGSTextFieldDelegate {
 extension VGSTextFieldWrapper {
     /// Make `ForagePINTextField` focused.
     @discardableResult override public func becomeFirstResponder() -> Bool {
-        return textField.becomeFirstResponder()
+        textField.becomeFirstResponder()
     }
 
     /// Remove focus from `ForagePINTextField`.
-    @discardableResult public override func resignFirstResponder() -> Bool {
-        return textField.resignFirstResponder()
+    @discardableResult override public func resignFirstResponder() -> Bool {
+        textField.resignFirstResponder()
     }
 
     /// Check if `ForagePINTextField` is focused.
     override public var isFirstResponder: Bool {
-        return textField.isFirstResponder
+        textField.isFirstResponder
     }
 }

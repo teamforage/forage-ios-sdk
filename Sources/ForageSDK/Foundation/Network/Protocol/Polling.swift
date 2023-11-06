@@ -12,7 +12,7 @@ import VGSCollectSDK
 /**
  Interface for Polling service.
  */
-internal protocol Polling: AnyObject {
+protocol Polling: AnyObject {
     /// Handle Vault Response to start polling
     ///
     /// - Parameters:
@@ -22,7 +22,8 @@ internal protocol Polling: AnyObject {
     func polling(
         vaultResponse: VaultResponse,
         request: ForageRequestModel,
-        completion: @escaping (Result<Data?, Error>) -> Void)
+        completion: @escaping (Result<Data?, Error>) -> Void
+    )
 
     /// Polling method
     ///
@@ -33,5 +34,6 @@ internal protocol Polling: AnyObject {
     func pollingMessage(
         contentId: String,
         request: ForageRequestModel,
-        completion: @escaping (Result<MessageResponseModel, Error>) -> Void)
+        completion: @escaping (Result<MessageResponseModel, Error>) -> Void
+    )
 }

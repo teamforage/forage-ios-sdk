@@ -9,7 +9,6 @@
 import UIKit
 
 class CardNumberViewController: BaseViewCodeViewController<CardNumberView> {
-
     // MARK: Lifecycle Methods
 
     override func loadView() {
@@ -21,7 +20,7 @@ class CardNumberViewController: BaseViewCodeViewController<CardNumberView> {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        self.customView.panNumberTextField.becomeFirstResponder()
+        customView.panNumberTextField.becomeFirstResponder()
     }
 }
 

@@ -9,7 +9,7 @@
 import Foundation
 
 /// `ForagePANRequestModel` used for compose request to tokenize Ebt Card
-internal struct ForagePANRequestModel: Codable {
+struct ForagePANRequestModel: Codable {
     let authorization: String
     let merchantID: String
     let panNumber: String

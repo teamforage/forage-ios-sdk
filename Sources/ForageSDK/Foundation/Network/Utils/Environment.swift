@@ -1,6 +1,6 @@
 //
 //  Environment.swift
-//  
+//
 //
 //  Created by Danilo Joksimovic on 2023-08-23.
 //  Copyright © 2023-Present Forage Technology Corporation. All rights reserved.
@@ -8,16 +8,16 @@
 
 import Foundation
 
-internal func isUnitTesting() -> Bool {
-    return ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
+func isUnitTesting() -> Bool {
+    ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
 }
 
 public enum Environment: String {
-    case dev = "dev"
-    case staging = "staging"
-    case sandbox = "sandbox"
-    case cert = "cert"
-    case prod = "prod"
+    case dev
+    case staging
+    case sandbox
+    case cert
+    case prod
 
     /// Returns the corresponding hostname for the environment.
     public var hostname: String {

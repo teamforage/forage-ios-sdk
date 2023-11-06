@@ -1,6 +1,6 @@
 //
 //  VaultWrapper.swift
-//  
+//
 //
 //  Created by Shardendu Gautam on 6/6/23.
 //  Copyright © 2023-Present Forage Technology Corporation. All rights reserved.
@@ -9,7 +9,7 @@
 import UIKit
 
 /// The state that the underlying vault exposes during events or statically as input instance attributes.
-internal protocol InternalObservableState {
+protocol InternalObservableState {
     /// isFirstResponder is true if the input is focused, false otherwise.
     var isFirstResponder: Bool { get }
 
@@ -25,7 +25,7 @@ internal protocol InternalObservableState {
 }
 
 /// The higher visual characteristics that apply to every vault instance and are not specific to a single input.
-internal protocol InternalAppearance {
+protocol InternalAppearance {
     var textColor: UIColor? { get set }
     var tfTintColor: UIColor? { get set }
     var borderWidth: CGFloat { get set }
@@ -37,13 +37,13 @@ internal protocol InternalAppearance {
 }
 
 /// The visual characteristics that require input-specific customization.
-internal protocol InternalStyle {
+protocol InternalStyle {
     var padding: UIEdgeInsets { get set }
     var textAlignment: NSTextAlignment { get set }
     var placeholder: String? { get set }
 }
 
-internal protocol VaultWrapper: UIView, InternalObservableState, InternalAppearance, InternalStyle {
+protocol VaultWrapper: UIView, InternalObservableState, InternalAppearance, InternalStyle {
     var collector: VaultCollector { get set }
     var delegate: VaultWrapperDelegate? { get set }
     func clearText()

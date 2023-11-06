@@ -9,7 +9,6 @@
 import UIKit
 
 class CapturePaymentViewController: BaseViewCodeViewController<CapturePaymentView> {
-
     // MARK: Lifecycle Methods
 
     override func loadView() {
@@ -20,6 +19,6 @@ class CapturePaymentViewController: BaseViewCodeViewController<CapturePaymentVie
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        self.customView.snapTextField.becomeFirstResponder()
+        customView.snapTextField.becomeFirstResponder()
     }
 }
