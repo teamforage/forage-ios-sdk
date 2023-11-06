@@ -25,7 +25,7 @@ public class ForageSDK {
 
     private init() {
         guard let config = ForageSDK.config else {
-            assertionFailure("ForageSDK unconfigured - call ForageSDK.setup() before accessing ForageSDK.shared")
+            assertionFailure("ForageSDK is not initialized - call ForageSDK.setup() before accessing ForageSDK.shared")
             return
         }
         environment = Environment(sessionToken: config.sessionToken)
@@ -85,10 +85,10 @@ public class ForageSDK {
     /// - Parameter newMerchantID: The new merchant ID to set.
     public static func updateMerchantID(_ newMerchantID: String) {
         guard ForageSDK.config != nil else {
-            assertionFailure("ForageSDK must be configured before setting merchant ID")
+            assertionFailure("ForageSDK must be initialized before setting merchant ID")
             return
         }
-        // config is guarented to be non-nil because of the guard above.
+        // config is guaranteed to be non-nil because of the guard above.
         ForageSDK.config!.merchantID = newMerchantID
         ForageSDK.shared.merchantID = newMerchantID
     }
@@ -101,10 +101,10 @@ public class ForageSDK {
     /// - Parameter newSessionToken: The new session token to use for subsequent API calls
     public static func updateSessionToken(_ newSessionToken: String) {
         guard ForageSDK.config != nil else {
-            assertionFailure("ForageSDK must be configured before updating the session token")
+            assertionFailure("ForageSDK must be initialized before updating the session token")
             return
         }
-        // config is guarented to be non-nil because of the guard above.
+        // config is guaranteed to be non-nil because of the guard above.
         ForageSDK.config!.sessionToken = newSessionToken
         ForageSDK.shared.sessionToken = newSessionToken
     }
