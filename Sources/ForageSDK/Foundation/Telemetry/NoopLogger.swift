@@ -1,6 +1,6 @@
 //
 //  NoopLogger.swift
-//  
+//
 //
 //  Created by Danilo Joksimovic on 2023-09-01.
 //  Copyright © 2023-Present Forage Technology Corporation. All rights reserved.
@@ -9,44 +9,44 @@
 import Foundation
 
 /// Silent logger that doesn't do anything!
-internal class NoopLogger: ForageLogger {
+class NoopLogger: ForageLogger {
     func getTraceID() -> String {
-        return ""
+        ""
     }
-    
+
     required init(_ config: ForageLoggerConfig? = ForageLoggerConfig(environment: .sandbox)) {
         // noop
     }
-    
+
     func addContext(_ newContext: ForageLogContext) -> ForageLogger {
-        return self
+        self
     }
-    
+
     func setLogKind(_ logKind: ForageLogKind) -> ForageLogger {
-        return self
+        self
     }
-    
+
     func setPrefix(_ prefix: String) -> ForageLogger {
-        return self
+        self
     }
-    
-    func notice(_ message: String, attributes: [String : Encodable]?) {
+
+    func notice(_ message: String, attributes: [String: Encodable]?) {
         // noop
     }
-    
-    func info(_ message: String, attributes: [String : Encodable]?) {
+
+    func info(_ message: String, attributes: [String: Encodable]?) {
         // noop
     }
-    
-    func warn(_ message: String, error: Error?, attributes: [String : Encodable]?) {
+
+    func warn(_ message: String, error: Error?, attributes: [String: Encodable]?) {
         // noop
     }
-    
-    func error(_ message: String, error: Error?, attributes: [String : Encodable]?) {
+
+    func error(_ message: String, error: Error?, attributes: [String: Encodable]?) {
         // noop
     }
-    
-    func critical(_ message: String, error: Error?, attributes: [String : Encodable]?) {
+
+    func critical(_ message: String, error: Error?, attributes: [String: Encodable]?) {
         // noop
     }
 }

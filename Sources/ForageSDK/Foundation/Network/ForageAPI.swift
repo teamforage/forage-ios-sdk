@@ -20,17 +20,17 @@ enum ForageAPI {
 }
 
 extension ForageAPI: ServiceProtocol {
-    var scheme: String { return "https" }
+    var scheme: String { "https" }
 
-    var host: String { return ForageSDK.shared.environment.hostname }
+    var host: String { ForageSDK.shared.environment.hostname }
 
     var path: String {
         switch self {
         case .tokenizeNumber: return "/api/payment_methods/"
         case .xKey: return "/iso_server/encryption_alias/"
-        case .message(contentId: let contentId, _, _): return "/api/message/\(contentId)/"
-        case .getPaymentMethod(request: let request): return "/api/payment_methods/\(request.paymentMethodRef)/"
-        case .getPayment(request: let request): return "/api/payments/\(request.paymentRef)/"
+        case let .message(contentId: contentId, _, _): return "/api/message/\(contentId)/"
+        case let .getPaymentMethod(request: request): return "/api/payment_methods/\(request.paymentMethodRef)/"
+        case let .getPayment(request: request): return "/api/payments/\(request.paymentRef)/"
         }
     }
 
@@ -45,11 +45,11 @@ extension ForageAPI: ServiceProtocol {
         let headers = HTTPHeaders([
             "content-type": "application/json",
             "accept": "application/json",
-            "x-datadog-trace-id": ForageSDK.shared.traceId
+            "x-datadog-trace-id": ForageSDK.shared.traceId,
         ])
         switch self {
-        case .tokenizeNumber(
-            request: let model
+        case let .tokenizeNumber(
+            request: model
         ):
             var card = [String: String]()
             card["number"] = model.panNumber
@@ -58,7 +58,7 @@ extension ForageAPI: ServiceProtocol {
                 "type": model.type,
                 "reusable": model.reusable ?? true,
                 "card": card,
-                "customer_id": model.customerID
+                "customer_id": model.customerID,
             ]
 
             headers.addHeaders([
@@ -73,7 +73,7 @@ extension ForageAPI: ServiceProtocol {
                 additionalHeaders: headers
             )
 
-        case .xKey(sessionToken: let sessionToken, merchantID: let merchantID):
+        case let .xKey(sessionToken: sessionToken, merchantID: merchantID):
             headers.addHeaders([
                 "authorization": "Bearer \(sessionToken)",
                 "accept": "application/json",
@@ -86,7 +86,7 @@ extension ForageAPI: ServiceProtocol {
                 additionalHeaders: headers
             )
 
-        case .message(_, sessionToken: let sessionToken, merchantID: let merchantID):
+        case let .message(_, sessionToken: sessionToken, merchantID: merchantID):
             headers.addHeaders([
                 "Merchant-Account": merchantID,
                 "authorization": "Bearer \(sessionToken)",
@@ -99,7 +99,7 @@ extension ForageAPI: ServiceProtocol {
                 additionalHeaders: headers
             )
 
-        case .getPaymentMethod(request: let request):
+        case let .getPaymentMethod(request: request):
             headers.addHeaders([
                 "Merchant-Account": request.merchantID,
                 "authorization": "Bearer \(request.sessionToken)",
@@ -112,7 +112,7 @@ extension ForageAPI: ServiceProtocol {
                 additionalHeaders: headers
             )
 
-        case .getPayment(request: let request):
+        case let .getPayment(request: request):
             headers.addHeaders([
                 "Merchant-Account": request.merchantID,
                 "authorization": "Bearer \(request.sessionToken)",

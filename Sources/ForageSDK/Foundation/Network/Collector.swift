@@ -6,23 +6,23 @@
 //  Copyright © 2023-Present Forage Technology Corporation. All rights reserved.
 //
 
+import BasisTheoryElements
 import Foundation
 import VGSCollectSDK
-import BasisTheoryElements
 
 let tokenDelimiter = ","
 let tokenKey = "card_number_token"
 
-internal protocol VaultCollector {
-    func setCustomHeaders(headers: [String: String], xKey: [String:String])
+protocol VaultCollector {
+    func setCustomHeaders(headers: [String: String], xKey: [String: String])
     func sendData(
         path: String,
         vaultAction: VaultAction,
         extraData: [String: Any],
-        completion: @escaping (VaultResponse) -> Void)
+        completion: @escaping (VaultResponse) -> Void
+    )
     func getPaymentMethodToken(paymentMethodToken: String) throws -> String
     func getVaultType() -> VaultType
-    
 }
 
 struct VGSCollectConfig {
@@ -37,27 +37,26 @@ struct BasisTheoryConfig {
 
 // Wrapper class for VGSCollect
 class VGSCollectWrapper: VaultCollector {
-    
     public let vgsCollect: VGSCollect
     private let logger: ForageLogger?
-    
+
     init(config: VGSCollectConfig, logger: ForageLogger? = DatadogLogger(ForageLoggerConfig(prefix: "VGS"))) {
-        self.vgsCollect = VGSCollect(id: config.id, environment: config.environment)
+        vgsCollect = VGSCollect(id: config.id, environment: config.environment)
         self.logger = logger
     }
-    
+
     func setCustomHeaders(headers: [String: String], xKey: [String: String]) {
         var mutableHeaders = headers
         mutableHeaders["X-KEY"] = xKey["vgsXKey"]
         vgsCollect.customHeaders = mutableHeaders
     }
-    
+
     func sendData(path: String, vaultAction: VaultAction, extraData: [String: Any], completion: @escaping (VaultResponse) -> Void) {
         var mutableExtraData = extraData
         if let paymentMethodToken = extraData[tokenKey] as? String {
             let token = getPaymentMethodToken(paymentMethodToken: paymentMethodToken)
             if token.isEmpty {
-                self.logger?.error(
+                logger?.error(
                     "Failed to send data. VGS token not found on card",
                     error: nil,
                     attributes: nil
@@ -65,22 +64,22 @@ class VGSCollectWrapper: VaultCollector {
             }
             mutableExtraData[tokenKey] = token
         }
-        
+
         let measurement = VaultProxyResponseMonitor.newMeasurement(vault: VaultType.vgsVaultType, action: vaultAction)
             .setPath(path)
             .setMethod(.post)
-        
+
         measurement.start()
-        
+
         // VGS performs UI actions in this method, which should run on the main thread
         DispatchQueue.main.async { [self] in
-            vgsCollect.sendData(path: path, extraData: mutableExtraData) { (response) in
+            vgsCollect.sendData(path: path, extraData: mutableExtraData) { response in
                 switch response {
-                case .success(let code, let data, let urlResponse):
+                case let .success(code, data, urlResponse):
                     measurement.end()
                     measurement.setHttpStatusCode(code).logResult()
                     completion(VaultResponse(statusCode: code, urlResponse: urlResponse, data: data, error: nil))
-                case .failure(let code, let data, let urlResponse, let error):
+                case let .failure(code, data, urlResponse, error):
                     measurement.end()
                     self.logger?.error("Failed to send data to VGS proxy", error: error, attributes: [
                         "http_status": code
@@ -90,27 +89,26 @@ class VGSCollectWrapper: VaultCollector {
                 }
             }
         }
-        
     }
-    
+
     func getPaymentMethodToken(paymentMethodToken: String) -> String {
         if paymentMethodToken.contains(tokenDelimiter) {
             return paymentMethodToken.components(separatedBy: tokenDelimiter)[0]
         }
         return paymentMethodToken
     }
-    
-    internal func getVaultType() -> VaultType {
-        return VaultType.vgsVaultType
+
+    func getVaultType() -> VaultType {
+        VaultType.vgsVaultType
     }
 }
 
 func convertJsonToDictionary(_ json: JSON) -> [String: Any] {
     var result: [String: Any] = [:]
-    
-    if case .dictionaryValue(let dictionary) = json {
+
+    if case let .dictionaryValue(dictionary) = json {
         for (key, value) in dictionary {
-            if case .rawValue(let rawValue) = value {
+            if case let .rawValue(rawValue) = value {
                 result[key] = rawValue
             } else {
                 result[key] = convertJsonToDictionary(value)
@@ -128,26 +126,26 @@ class BasisTheoryWrapper: VaultCollector {
         }
         throw ServiceError.parseError
     }
-    
+
     var customHeaders: [String: String] = [:]
     let textElement: TextElementUITextField
-    
+
     private let basisTheoryConfig: BasisTheoryConfig
     private let logger: ForageLogger?
-    
+
     func setCustomHeaders(headers: [String: String], xKey: [String: String]) {
-        self.customHeaders = headers
-        self.customHeaders["X-KEY"] = xKey["btXKey"]
+        customHeaders = headers
+        customHeaders["X-KEY"] = xKey["btXKey"]
     }
-    
+
     init(textElement: TextElementUITextField, basisTheoryconfig: BasisTheoryConfig, logger: ForageLogger? = DatadogLogger(ForageLoggerConfig(prefix: "BasisTheory"))) {
         self.textElement = textElement
-        self.customHeaders = [:]
-        self.basisTheoryConfig = basisTheoryconfig
+        customHeaders = [:]
+        basisTheoryConfig = basisTheoryconfig
         self.logger = logger
     }
-    
-    func sendData(path: String, vaultAction: VaultAction, extraData: [String : Any], completion: @escaping (VaultResponse) -> Void) {
+
+    func sendData(path: String, vaultAction: VaultAction, extraData: [String: Any], completion: @escaping (VaultResponse) -> Void) {
         var body: [String: Any] = ["pin": textElement]
         for (key, value) in extraData {
             if key == tokenKey, let paymentMethodToken = value as? String {
@@ -155,7 +153,7 @@ class BasisTheoryWrapper: VaultCollector {
                     let token = try getPaymentMethodToken(paymentMethodToken: paymentMethodToken)
                     body[key] = token
                 } catch {
-                    self.logger?.error(
+                    logger?.error(
                         "Failed to send data to Basis Theory proxy. BT token not found on card",
                         error: error,
                         attributes: nil
@@ -172,15 +170,15 @@ class BasisTheoryWrapper: VaultCollector {
                 body[key] = value
             }
         }
-        
+
         let measurement = VaultProxyResponseMonitor.newMeasurement(vault: VaultType.btVaultType, action: vaultAction)
             .setPath(path)
             .setMethod(.post)
-        
-        let proxyHttpRequest = ProxyHttpRequest(method: .post, path: path, body: body, headers: self.customHeaders)
-        
+
+        let proxyHttpRequest = ProxyHttpRequest(method: .post, path: path, body: body, headers: customHeaders)
+
         measurement.start()
-        
+
         // Basis Theory performs UI actions in this method, which should run on the main thread
         DispatchQueue.main.async { [self] in
             BasisTheoryElements.proxy(
@@ -189,17 +187,17 @@ class BasisTheoryWrapper: VaultCollector {
                 proxyHttpRequest: proxyHttpRequest
             ) { response, data, error in
                 measurement.end()
-                
+
                 let httpStatusCode = (response as? HTTPURLResponse)?.statusCode
                 measurement.setHttpStatusCode(httpStatusCode).logResult()
-                
+
                 if error != nil {
                     self.logger?.error("Failed to send data to Basis Theory proxy", error: error, attributes: [
                         "http_status": httpStatusCode
                     ])
                 }
-                
-                var rawData: Data? = nil
+
+                var rawData: Data?
                 if let data = data {
                     let dataDictionary = convertJsonToDictionary(data)
                     rawData = try? JSONSerialization.data(withJSONObject: dataDictionary, options: [])
@@ -214,13 +212,13 @@ class BasisTheoryWrapper: VaultCollector {
             }
         }
     }
-    
-    internal func getVaultType() -> VaultType {
-        return VaultType.btVaultType
+
+    func getVaultType() -> VaultType {
+        VaultType.btVaultType
     }
 }
 
-class CollectorFactory {
+enum CollectorFactory {
     /**
      VGS VaultId
      */
@@ -231,11 +229,11 @@ class CollectorFactory {
         case staging = "tnteykuh975"
         case dev = "tntlqkidhc6"
     }
-    
+
     public static func CreateVGS() -> VGSCollect {
-        return VGSCollect(id: vaultID(ForageSDK.shared.environment).rawValue, environment: environmentVGS(ForageSDK.shared.environment))
+        VGSCollect(id: vaultID(ForageSDK.shared.environment).rawValue, environment: environmentVGS(ForageSDK.shared.environment))
     }
-    
+
     private static func vaultID(_ environment: Environment) -> VaultId {
         switch environment {
         case .sandbox: return .sandbox
@@ -245,14 +243,14 @@ class CollectorFactory {
         case .dev: return .dev
         }
     }
-    
+
     private static func environmentVGS(_ environment: Environment) -> VGSCollectSDK.Environment {
         switch environment {
         case .cert, .sandbox, .staging, .dev: return .sandbox
         case .prod: return .live
         }
     }
-    
+
     /**
      BT public Keys
      */
@@ -263,7 +261,7 @@ class CollectorFactory {
         case staging = "key_6B4cvpcDCEeNDYNow9zH7c"
         case dev = "key_AZfcBuKUsV38PEeYu6ZV8x"
     }
-    
+
     private static func publicKey(_ environment: Environment) -> PublicKey {
         switch environment {
         case .sandbox: return .sandbox
@@ -273,7 +271,7 @@ class CollectorFactory {
         case .dev: return .dev
         }
     }
-    
+
     private static func proxyKey(_ environment: Environment) -> ProxyKey {
         switch environment {
         case .sandbox: return .sandbox
@@ -283,7 +281,7 @@ class CollectorFactory {
         case .dev: return .dev
         }
     }
-    
+
     /**
      BT proxy Keys
      */
@@ -294,19 +292,18 @@ class CollectorFactory {
         case staging = "ScWvAUkp53xz7muae7fW5p"
         case dev = "N31FZgKpYZpo3oQ6XiM6M6"
     }
-    
+
     static func createVGS(environment: Environment) -> VGSCollectWrapper {
         let id = vaultID(environment).rawValue
         let environmentVGS = environmentVGS(environment)
         let config = VGSCollectConfig(id: id, environment: environmentVGS)
         return VGSCollectWrapper(config: config)
     }
-    
+
     static func createBasisTheory(environment: Environment, textElement: TextElementUITextField) -> BasisTheoryWrapper {
         let publicKey = publicKey(environment).rawValue
         let proxyKey = proxyKey(environment).rawValue
         let config = BasisTheoryConfig(publicKey: publicKey, proxyKey: proxyKey)
         return BasisTheoryWrapper(textElement: textElement, basisTheoryconfig: config)
     }
-    
 }

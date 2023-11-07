@@ -1,6 +1,6 @@
 //
 //  Environment.swift
-//  
+//
 //
 //  Created by Danilo Joksimovic on 2023-08-23.
 //  Copyright © 2023-Present Forage Technology Corporation. All rights reserved.
@@ -8,17 +8,17 @@
 
 import Foundation
 
-internal func isUnitTesting() -> Bool {
-    return ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
+func isUnitTesting() -> Bool {
+    ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
 }
 
 public enum Environment: String {
-    case dev = "dev"
-    case staging = "staging"
-    case sandbox = "sandbox"
-    case cert = "cert"
-    case prod = "prod"
-    
+    case dev
+    case staging
+    case sandbox
+    case cert
+    case prod
+
     /// Returns the corresponding hostname for the environment.
     public var hostname: String {
         switch self {
@@ -29,7 +29,7 @@ public enum Environment: String {
         case .prod: return "api.joinforage.app"
         }
     }
-    
+
     /// Maps a session token to the corresponding environment.
     /// Defaults to `Environment.sandbox` if the token is invalid.
     ///
@@ -44,7 +44,7 @@ public enum Environment: String {
 ///
 /// - Parameter sessionToken: The session token to be converted.
 /// - Returns: The corresponding `Environment` value.
-fileprivate func sessionTokenToEnv(_ sessionToken: String?) -> Environment {
+private func sessionTokenToEnv(_ sessionToken: String?) -> Environment {
     guard let sessionToken = sessionToken, !sessionToken.isEmpty else {
         return Environment.sandbox
     }

@@ -6,25 +6,25 @@
 //  Copyright © 2022-Present Forage Technology Corporation. All rights reserved.
 //
 
-import Foundation
 import ForageSDK
+import Foundation
 
 enum SampleAPI {
     case createPayment(request: CreatePaymentRequest)
 }
 
 extension SampleAPI: ServiceProtocol {
-    var scheme: String { return "https" }
+    var scheme: String { "https" }
 
-    var host: String { return ForageSDK.shared.environment.hostname }
+    var host: String { ForageSDK.shared.environment.hostname }
 
-    var path: String { return "/api/payments/" }
+    var path: String { "/api/payments/" }
 
-    var method: HttpMethod { return .post }
+    var method: HttpMethod { .post }
 
     var task: HttpTask {
         switch self {
-        case .createPayment(request: let model):
+        case let .createPayment(request: model):
             let bodyParameters: Parameters = [
                 "amount": model.amount,
                 "funding_type": model.fundingType,
@@ -40,14 +40,14 @@ extension SampleAPI: ServiceProtocol {
                     "state": model.deliveryAddress.state,
                 ],
                 "is_delivery": model.isDelivery,
-                "customer_id": model.customerID
+                "customer_id": model.customerID,
             ]
 
             let httpHeaders: HTTPHeaders = [
                 "Merchant-Account": model.merchantID,
-                "IDEMPOTENCY-KEY": UUID.init().uuidString,
+                "IDEMPOTENCY-KEY": UUID().uuidString,
                 "authorization": "Bearer \(ClientSharedData.shared.sessionToken)",
-                "API-VERSION": "2023-05-15"
+                "API-VERSION": "2023-05-15",
             ]
 
             return .requestParametersAndHeaders(

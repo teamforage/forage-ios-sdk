@@ -6,31 +6,30 @@
 //  Copyright © 2022-Present Forage Technology Corporation. All rights reserved.
 //
 
+import ForageSDK
 import Foundation
 import UIKit
-import ForageSDK
 
 protocol CreatePaymentViewDelegate: AnyObject {
     func goToCapture(_ view: CreatePaymentView)
 }
 
 class CreatePaymentView: UIView {
-    
     // MARK: Public Properties
-    
+
     private var controller = CreatePaymentViewController()
     var isPINValid: Bool = false
     weak var delegate: CreatePaymentViewDelegate?
-    
+
     // MARK: Private Components
-    
+
     private let contentView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = UIColor.white
         return view
     }()
-    
+
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "Create Payment"
@@ -39,7 +38,7 @@ class CreatePaymentView: UIView {
         label.isAccessibilityElement = true
         return label
     }()
-    
+
     private let snapTextField: UITextField = {
         let tf = UITextField()
         tf.placeholder = "Snap amount"
@@ -49,7 +48,7 @@ class CreatePaymentView: UIView {
         tf.isAccessibilityElement = true
         return tf
     }()
-    
+
     private let nonSnapTextField: UITextField = {
         let tf = UITextField()
         tf.placeholder = "Non Snap amount"
@@ -59,7 +58,7 @@ class CreatePaymentView: UIView {
         tf.isAccessibilityElement = true
         return tf
     }()
-    
+
     private let createSnapPaymentButton: UIButton = {
         let button = UIButton()
         button.setTitle("Create Snap Payment", for: .normal)
@@ -72,7 +71,7 @@ class CreatePaymentView: UIView {
         button.isAccessibilityElement = true
         return button
     }()
-    
+
     private let createNonSnapPaymentButton: UIButton = {
         let button = UIButton()
         button.setTitle("Create Non Snap Payment", for: .normal)
@@ -85,7 +84,7 @@ class CreatePaymentView: UIView {
         button.isAccessibilityElement = true
         return button
     }()
-    
+
     private let nextButton: UIButton = {
         let button = UIButton()
         button.setTitle("Go To Next", for: .normal)
@@ -98,7 +97,7 @@ class CreatePaymentView: UIView {
         button.isAccessibilityElement = true
         return button
     }()
-    
+
     private let fundingTypeLabel: UILabel = {
         let label = UILabel()
         label.text = ""
@@ -109,7 +108,7 @@ class CreatePaymentView: UIView {
         label.isAccessibilityElement = true
         return label
     }()
-    
+
     private let paymentMethodIdentifierLabel: UILabel = {
         let label = UILabel()
         label.text = ""
@@ -120,7 +119,7 @@ class CreatePaymentView: UIView {
         label.isAccessibilityElement = true
         return label
     }()
-    
+
     private let paymentIdentifierLabel: UILabel = {
         let label = UILabel()
         label.text = ""
@@ -131,7 +130,7 @@ class CreatePaymentView: UIView {
         label.isAccessibilityElement = true
         return label
     }()
-    
+
     private let merchantIDLabel: UILabel = {
         let label = UILabel()
         label.text = ""
@@ -142,7 +141,7 @@ class CreatePaymentView: UIView {
         label.isAccessibilityElement = true
         return label
     }()
-    
+
     private let amountLabel: UILabel = {
         let label = UILabel()
         label.text = ""
@@ -153,7 +152,7 @@ class CreatePaymentView: UIView {
         label.isAccessibilityElement = true
         return label
     }()
-    
+
     private let errorLabel: UILabel = {
         let label = UILabel()
         label.text = ""
@@ -164,33 +163,33 @@ class CreatePaymentView: UIView {
         label.isAccessibilityElement = true
         return label
     }()
-    
+
     // MARK: Fileprivate Methods
-    
+
     @objc fileprivate func performSnapPayment(_ gesture: UIGestureRecognizer) {
         createPayment(isEbtSnap: true)
     }
-    
+
     @objc fileprivate func performNonSnapPayment(_ gesture: UIGestureRecognizer) {
         createPayment(isEbtSnap: false)
     }
-    
+
     @objc fileprivate func goToCapture(_ gesture: UIGestureRecognizer) {
         delegate?.goToCapture(self)
     }
-    
+
     // MARK: Public Methods
-    
+
     public func render() {
         setupView()
         setupConstraints()
     }
-    
+
     // MARK: Private Methods
-    
+
     private func createPayment(isEbtSnap: Bool) {
-        var paymentAmount: Double = 0.0
-        
+        var paymentAmount = 0.0
+
         if isEbtSnap {
             guard
                 let stringAmount = snapTextField.text,
@@ -204,7 +203,7 @@ class CreatePaymentView: UIView {
             else { return }
             paymentAmount = amount
         }
-        
+
         let request = CreatePaymentRequest(
             amount: paymentAmount,
             fundingType: isEbtSnap ? "ebt_snap" : "ebt_cash",
@@ -223,16 +222,16 @@ class CreatePaymentView: UIView {
             isDelivery: false,
             customerID: ClientSharedData.shared.customerID
         )
-        
+
         controller.createPayment(request: request) { result in
             self.printResult(result: result)
         }
     }
-    
+
     private func printResult(result: Result<CreatePaymentResponse, Error>) {
         DispatchQueue.main.async {
             switch result {
-            case .success(let response):
+            case let .success(response):
                 self.fundingTypeLabel.text = "fundingType=\(response.fundingType.rawValue)"
                 self.paymentMethodIdentifierLabel.text = "paymentMethodIdentifier=\(response.paymentMethodIdentifier)"
                 self.paymentIdentifierLabel.text = "paymentIdentifier=\(response.paymentIdentifier)"
@@ -240,8 +239,8 @@ class CreatePaymentView: UIView {
                 self.amountLabel.text = "amount=\(response.amount)"
                 self.errorLabel.text = ""
                 ClientSharedData.shared.paymentReference[response.fundingType] = response.paymentIdentifier
-                
-            case .failure(let error):
+
+            case let .failure(error):
                 self.errorLabel.text = "error: \n\(error.localizedDescription)"
                 self.fundingTypeLabel.text = ""
                 self.paymentMethodIdentifierLabel.text = ""
@@ -249,14 +248,14 @@ class CreatePaymentView: UIView {
                 self.merchantIDLabel.text = ""
                 self.amountLabel.text = ""
             }
-            
+
             self.layoutIfNeeded()
             self.layoutSubviews()
         }
     }
-    
+
     private func setupView() {
-        self.addSubview(contentView)
+        addSubview(contentView)
         contentView.addSubview(titleLabel)
         contentView.addSubview(snapTextField)
         contentView.addSubview(createSnapPaymentButton)
@@ -270,21 +269,20 @@ class CreatePaymentView: UIView {
         contentView.addSubview(errorLabel)
         contentView.addSubview(nextButton)
     }
-    
+
     private func setupConstraints() {
         setupContentViewConstraints()
     }
-    
+
     private func setupContentViewConstraints() {
-        
         contentView.anchor(
-            top: self.topAnchor,
-            leading: self.leadingAnchor,
-            bottom: self.bottomAnchor,
-            trailing: self.trailingAnchor,
-            centerXAnchor: self.centerXAnchor
+            top: topAnchor,
+            leading: leadingAnchor,
+            bottom: bottomAnchor,
+            trailing: trailingAnchor,
+            centerXAnchor: centerXAnchor
         )
-        
+
         titleLabel.anchor(
             top: contentView.safeAreaLayoutGuide.topAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
@@ -293,7 +291,7 @@ class CreatePaymentView: UIView {
             centerXAnchor: contentView.centerXAnchor,
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 12, right: 24)
         )
-        
+
         snapTextField.anchor(
             top: titleLabel.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
@@ -303,7 +301,7 @@ class CreatePaymentView: UIView {
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 12, right: 24),
             size: .init(width: 0, height: 42)
         )
-        
+
         createSnapPaymentButton.anchor(
             top: snapTextField.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
@@ -313,7 +311,7 @@ class CreatePaymentView: UIView {
             padding: .init(top: 12, left: 24, bottom: 0, right: 24),
             size: .init(width: 0, height: 48)
         )
-        
+
         nonSnapTextField.anchor(
             top: createSnapPaymentButton.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
@@ -323,7 +321,7 @@ class CreatePaymentView: UIView {
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 12, right: 24),
             size: .init(width: 0, height: 42)
         )
-        
+
         createNonSnapPaymentButton.anchor(
             top: nonSnapTextField.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
@@ -333,7 +331,7 @@ class CreatePaymentView: UIView {
             padding: .init(top: 12, left: 24, bottom: 0, right: 24),
             size: .init(width: 0, height: 48)
         )
-        
+
         fundingTypeLabel.anchor(
             top: createNonSnapPaymentButton.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
@@ -342,7 +340,7 @@ class CreatePaymentView: UIView {
             centerXAnchor: contentView.centerXAnchor,
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
         )
-        
+
         paymentMethodIdentifierLabel.anchor(
             top: fundingTypeLabel.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
@@ -351,7 +349,7 @@ class CreatePaymentView: UIView {
             centerXAnchor: contentView.centerXAnchor,
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
         )
-        
+
         paymentIdentifierLabel.anchor(
             top: paymentMethodIdentifierLabel.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
@@ -360,7 +358,7 @@ class CreatePaymentView: UIView {
             centerXAnchor: contentView.centerXAnchor,
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
         )
-        
+
         merchantIDLabel.anchor(
             top: paymentIdentifierLabel.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
@@ -369,7 +367,7 @@ class CreatePaymentView: UIView {
             centerXAnchor: contentView.centerXAnchor,
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
         )
-        
+
         amountLabel.anchor(
             top: merchantIDLabel.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
@@ -378,7 +376,7 @@ class CreatePaymentView: UIView {
             centerXAnchor: contentView.centerXAnchor,
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
         )
-        
+
         errorLabel.anchor(
             top: amountLabel.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
@@ -387,7 +385,7 @@ class CreatePaymentView: UIView {
             centerXAnchor: contentView.centerXAnchor,
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
         )
-        
+
         nextButton.anchor(
             top: nil,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,

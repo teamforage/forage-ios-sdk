@@ -1,17 +1,16 @@
 //
 //  BtPINTextField.swift
-//  
+//
 //
 //  Created by Danny Leiser on 7/27/23.
 //  Copyright © 2023-Present Forage Technology Corporation. All rights reserved.
 //
 
-import UIKit
 import BasisTheoryElements
 import Combine
+import UIKit
 
 class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
-
     // BT Event Types
     private enum BTEventType: String {
         case TEXT_CHANGE = "textChange"
@@ -19,35 +18,29 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
         case BLUR = "blur"
         case FOCUS = "focus"
     }
-    
+
     // MARK: - Properties
-    
+
     private var _isEmpty: Bool = true
-    @IBInspectable public var isEmpty: Bool {
-        get { return _isEmpty }
-    }
-    
+    @IBInspectable public var isEmpty: Bool { _isEmpty }
+
     private var _isValid: Bool = false
-    @IBInspectable public var isValid: Bool {
-        get { return _isValid }
-    }
-    
+    @IBInspectable public var isValid: Bool { _isValid }
+
     private var _isComplete: Bool = false
-    @IBInspectable public var isComplete: Bool {
-        get { return _isComplete }
-    }
-    
+    @IBInspectable public var isComplete: Bool { _isComplete }
+
     private let textField: TextElementUITextField
     private var inputWidthConstraint: NSLayoutConstraint?
     private var inputHeightConstraint: NSLayoutConstraint?
     private var cancellables = Set<AnyCancellable>()
-    
+
     var delegate: VaultWrapperDelegate?
     var collector: VaultCollector
     var placeholder: String?
     var tfTintColor: UIColor?
     var padding = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-    
+
     var widthConstraint: CGFloat? {
         didSet {
             if let widthConstraint = widthConstraint {
@@ -63,25 +56,25 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
             }
         }
     }
-    
+
     // MARK: - Initialization
-    
+
     override init(frame: CGRect) {
         textField = TextElementUITextField()
         collector = CollectorFactory.createBasisTheory(environment: ForageSDK.shared.environment, textElement: textField)
         super.init(frame: frame)
-        
+
         commonInit()
     }
-    
+
     required init?(coder aDecoder: NSCoder) {
         textField = TextElementUITextField()
         collector = CollectorFactory.createBasisTheory(environment: ForageSDK.shared.environment, textElement: textField)
         super.init(coder: aDecoder)
-        
+
         commonInit()
     }
-    
+
     private func commonInit() {
         addSubview(textField)
         textField.translatesAutoresizingMaskIntoConstraints = false
@@ -89,43 +82,41 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
         textField.isSecureTextEntry = true
         textField.textAlignment = .center
         textField.anchor(
-            top: self.topAnchor,
-            leading: self.leadingAnchor,
-            bottom: self.bottomAnchor,
-            trailing: self.trailingAnchor,
+            top: topAnchor,
+            leading: leadingAnchor,
+            bottom: bottomAnchor,
+            trailing: trailingAnchor,
             centerXAnchor: nil,
             padding: UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         )
-        
+
         setupWidthHeightConstraints()
-        
+
         let regexDigit = try! NSRegularExpression(pattern: "\\d")
-        
-        let pinMask =   [
+
+        let pinMask = [
             regexDigit,
             regexDigit,
             regexDigit,
-            regexDigit
+            regexDigit,
         ] as [Any]
-        
+
         let pinRegex = try! NSRegularExpression(pattern: "^\\d{4}$")
-        
+
         try! textField.setConfig(options: TextElementOptions(mask: pinMask, validation: pinRegex))
-        
-        textField.subject.sink { completion in
+
+        textField.subject.sink { _ in
         } receiveValue: { elementEvent in
-            if (elementEvent.type == BTEventType.TEXT_CHANGE.rawValue) {
+            if elementEvent.type == BTEventType.TEXT_CHANGE.rawValue {
                 self._isEmpty = elementEvent.empty
                 self._isValid = elementEvent.valid
                 self._isComplete = elementEvent.complete
                 self.delegate?.textFieldDidChange(self)
-            } else if (
-                elementEvent.type == BTEventType.FOCUS.rawValue ||
-                elementEvent.type == BTEventType.BLUR.rawValue
-            ) {
+            } else if elementEvent.type == BTEventType.FOCUS.rawValue ||
+                elementEvent.type == BTEventType.BLUR.rawValue {
                 // Note: This is custom logic to unblock us while BT makes changes on their
                 // end. They had the incorrect initial state logic for their input field.
-                if (elementEvent.empty) {
+                if elementEvent.empty {
                     self._isEmpty = elementEvent.empty
                     self._isValid = false
                     self._isComplete = false
@@ -138,40 +129,40 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
             }
         }.store(in: &cancellables)
     }
-    
+
     // MARK: - Private API
-    
+
     private func setupWidthHeightConstraints() {
         inputWidthConstraint = textField.widthAnchor.constraint(greaterThanOrEqualToConstant: 342)
         inputWidthConstraint?.isActive = true
-        
+
         inputHeightConstraint = textField.heightAnchor.constraint(greaterThanOrEqualToConstant: 36)
         inputHeightConstraint?.isActive = true
     }
-    
+
     // MARK: - Public API
-    
+
     func clearText() {
         DispatchQueue.main.async {
             self.textField.text = ""
         }
     }
-    
+
     var borderWidth: CGFloat {
-        get { return textField.layer.borderWidth }
+        get { textField.layer.borderWidth }
         set { textField.layer.borderWidth = newValue }
     }
-    
+
     var cornerRadius: CGFloat {
-        get { return textField.layer.cornerRadius }
+        get { textField.layer.cornerRadius }
         set { textField.layer.cornerRadius = newValue }
     }
-    
+
     var masksToBounds: Bool {
-        get { return textField.layer.masksToBounds }
+        get { textField.layer.masksToBounds }
         set { textField.layer.masksToBounds = newValue }
     }
-    
+
     var borderColor: UIColor? {
         get {
             guard let cgcolor = textField.layer.borderColor else {
@@ -181,7 +172,7 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
         }
         set { textField.layer.borderColor = newValue?.cgColor }
     }
-    
+
     override var backgroundColor: UIColor? {
         get {
             guard let cgcolor = textField.layer.backgroundColor else {
@@ -191,19 +182,19 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
         }
         set { textField.layer.backgroundColor = newValue?.cgColor }
     }
-    
+
     var textColor: UIColor? {
-        get { return textField.textColor }
+        get { textField.textColor }
         set { textField.textColor = newValue }
     }
-    
+
     var font: UIFont? {
-        get { return textField.font }
+        get { textField.font }
         set { textField.font = newValue }
     }
-    
+
     var textAlignment: NSTextAlignment {
-        get { return textField.textAlignment }
+        get { textField.textAlignment }
         set { textField.textAlignment = newValue }
     }
 }
@@ -213,16 +204,16 @@ class BasisTheoryTextFieldWrapper: UIView, VaultWrapper {
 extension BasisTheoryTextFieldWrapper {
     /// Make `ForagePINTextField` focused.
     @discardableResult override public func becomeFirstResponder() -> Bool {
-        return textField.becomeFirstResponder()
+        textField.becomeFirstResponder()
     }
 
     /// Remove focus from `ForagePINTextField`.
-    @discardableResult public override func resignFirstResponder() -> Bool {
-        return textField.resignFirstResponder()
+    @discardableResult override public func resignFirstResponder() -> Bool {
+        textField.resignFirstResponder()
     }
 
     /// Check if `ForagePINTextField` is focused.
     override public var isFirstResponder: Bool {
-        return textField.isFirstResponder
+        textField.isFirstResponder
     }
 }

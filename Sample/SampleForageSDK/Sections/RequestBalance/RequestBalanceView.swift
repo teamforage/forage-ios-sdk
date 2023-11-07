@@ -6,30 +6,29 @@
 //  Copyright © 2022-Present Forage Technology Corporation. All rights reserved.
 //
 
+import ForageSDK
 import Foundation
 import UIKit
-import ForageSDK
 
 protocol RequestBalanceViewDelegate: AnyObject {
     func goToCreatePayment(_ view: RequestBalanceView)
 }
 
 class RequestBalanceView: UIView {
-    
     // MARK: Public Properties
-    
+
     var isPINValid: Bool = false
     weak var delegate: RequestBalanceViewDelegate?
-    
+
     // MARK: Private Components
-    
+
     private let contentView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = UIColor.white
         return view
     }()
-    
+
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "Request Balance"
@@ -38,7 +37,7 @@ class RequestBalanceView: UIView {
         label.isAccessibilityElement = true
         return label
     }()
-    
+
     public let foragePinTextField: ForagePINTextField = {
         let tf = ForagePINTextField()
         tf.placeholder = "PIN Field"
@@ -50,7 +49,7 @@ class RequestBalanceView: UIView {
         height.isActive = true
         return tf
     }()
-    
+
     private let requestBalanceButton: UIButton = {
         let button = UIButton()
         button.setTitle("Get Balance", for: .normal)
@@ -66,7 +65,7 @@ class RequestBalanceView: UIView {
         button.isAccessibilityElement = true
         return button
     }()
-    
+
     private let nextButton: UIButton = {
         let button = UIButton()
         button.setTitle("Go To Next", for: .normal)
@@ -82,7 +81,7 @@ class RequestBalanceView: UIView {
         button.isAccessibilityElement = true
         return button
     }()
-    
+
     private let isFirstResponderLabel: UILabel = {
         let label = UILabel()
         label.text = "isFirstResponder: false"
@@ -92,7 +91,7 @@ class RequestBalanceView: UIView {
         label.isAccessibilityElement = true
         return label
     }()
-    
+
     private let isEmptyLabel: UILabel = {
         let label = UILabel()
         label.text = "isEmpty: true"
@@ -102,7 +101,7 @@ class RequestBalanceView: UIView {
         label.isAccessibilityElement = true
         return label
     }()
-    
+
     private let isValidLabel: UILabel = {
         let label = UILabel()
         label.text = "isValid: false"
@@ -112,7 +111,7 @@ class RequestBalanceView: UIView {
         label.isAccessibilityElement = true
         return label
     }()
-    
+
     private let isCompleteLabel: UILabel = {
         let label = UILabel()
         label.text = "isComplete: false"
@@ -122,7 +121,7 @@ class RequestBalanceView: UIView {
         label.isAccessibilityElement = true
         return label
     }()
-    
+
     private let snapBalanceLabel: UILabel = {
         let label = UILabel()
         label.text = ""
@@ -133,7 +132,7 @@ class RequestBalanceView: UIView {
         label.isAccessibilityElement = true
         return label
     }()
-    
+
     private let nonSnapBalanceLabel: UILabel = {
         let label = UILabel()
         label.text = ""
@@ -144,7 +143,7 @@ class RequestBalanceView: UIView {
         label.isAccessibilityElement = true
         return label
     }()
-    
+
     private let errorLabel: UILabel = {
         let label = UILabel()
         label.text = ""
@@ -155,52 +154,53 @@ class RequestBalanceView: UIView {
         label.isAccessibilityElement = true
         return label
     }()
-    
+
     // MARK: Fileprivate Methods
-    
+
     @objc fileprivate func getBalanceInfo(_ gesture: UIGestureRecognizer) {
         ForageSDK.shared.checkBalance(
             foragePinTextField: foragePinTextField,
-            paymentMethodReference: ClientSharedData.shared.paymentMethodReference) { result in
-                self.foragePinTextField.clearText()
-                self.printPINResult(result: result)
-            }
+            paymentMethodReference: ClientSharedData.shared.paymentMethodReference
+        ) { result in
+            self.foragePinTextField.clearText()
+            self.printPINResult(result: result)
+        }
     }
-    
+
     @objc fileprivate func goToCreatePayment(_ gesture: UIGestureRecognizer) {
         delegate?.goToCreatePayment(self)
     }
-    
+
     // MARK: Public Methods
-    
+
     public func render() {
         foragePinTextField.delegate = self
         setupView()
         setupConstraints()
     }
-    
+
     // MARK: Private Methods
-    
+
     private func printPINResult(result: Result<BalanceModel, Error>) {
         DispatchQueue.main.async {
             switch result {
-            case .success(let response):
+            case let .success(response):
                 self.snapBalanceLabel.text = "snap=\(response.snap)"
                 self.nonSnapBalanceLabel.text = "cash=\(response.cash)"
                 self.errorLabel.text = ""
-            case .failure(let error):
+            case let .failure(error):
                 self.errorLabel.text = "\(error)"
                 self.snapBalanceLabel.text = ""
                 self.nonSnapBalanceLabel.text = ""
             }
-            
+
             self.layoutIfNeeded()
             self.layoutSubviews()
         }
     }
-    
+
     private func setupView() {
-        self.addSubview(contentView)
+        addSubview(contentView)
         contentView.addSubview(titleLabel)
         contentView.addSubview(foragePinTextField)
         contentView.addSubview(isFirstResponderLabel)
@@ -213,21 +213,20 @@ class RequestBalanceView: UIView {
         contentView.addSubview(requestBalanceButton)
         contentView.addSubview(nextButton)
     }
-    
+
     private func setupConstraints() {
         setupContentViewConstraints()
     }
-    
+
     private func setupContentViewConstraints() {
-        
         contentView.anchor(
-            top: self.topAnchor,
-            leading: self.leadingAnchor,
-            bottom: self.bottomAnchor,
-            trailing: self.trailingAnchor,
-            centerXAnchor: self.centerXAnchor
+            top: topAnchor,
+            leading: leadingAnchor,
+            bottom: bottomAnchor,
+            trailing: trailingAnchor,
+            centerXAnchor: centerXAnchor
         )
-        
+
         titleLabel.anchor(
             top: contentView.safeAreaLayoutGuide.topAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
@@ -236,7 +235,7 @@ class RequestBalanceView: UIView {
             centerXAnchor: contentView.centerXAnchor,
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
         )
-        
+
         foragePinTextField.anchor(
             top: titleLabel.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
@@ -245,7 +244,7 @@ class RequestBalanceView: UIView {
             centerXAnchor: contentView.centerXAnchor,
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
         )
-        
+
         isFirstResponderLabel.anchor(
             top: foragePinTextField.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
@@ -254,7 +253,7 @@ class RequestBalanceView: UIView {
             centerXAnchor: contentView.centerXAnchor,
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
         )
-        
+
         isEmptyLabel.anchor(
             top: isFirstResponderLabel.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
@@ -263,7 +262,7 @@ class RequestBalanceView: UIView {
             centerXAnchor: contentView.centerXAnchor,
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
         )
-        
+
         isValidLabel.anchor(
             top: isEmptyLabel.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
@@ -272,7 +271,7 @@ class RequestBalanceView: UIView {
             centerXAnchor: contentView.centerXAnchor,
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
         )
-        
+
         isCompleteLabel.anchor(
             top: isValidLabel.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
@@ -281,7 +280,7 @@ class RequestBalanceView: UIView {
             centerXAnchor: contentView.centerXAnchor,
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
         )
-        
+
         snapBalanceLabel.anchor(
             top: isCompleteLabel.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
@@ -290,7 +289,7 @@ class RequestBalanceView: UIView {
             centerXAnchor: contentView.centerXAnchor,
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
         )
-        
+
         nonSnapBalanceLabel.anchor(
             top: snapBalanceLabel.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
@@ -299,7 +298,7 @@ class RequestBalanceView: UIView {
             centerXAnchor: contentView.centerXAnchor,
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
         )
-        
+
         errorLabel.anchor(
             top: nonSnapBalanceLabel.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
@@ -308,7 +307,7 @@ class RequestBalanceView: UIView {
             centerXAnchor: contentView.centerXAnchor,
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
         )
-        
+
         requestBalanceButton.anchor(
             top: nil,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
@@ -318,7 +317,7 @@ class RequestBalanceView: UIView {
             padding: .init(top: 0, left: 24, bottom: 8, right: 24),
             size: .init(width: 0, height: 48)
         )
-        
+
         nextButton.anchor(
             top: nil,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
@@ -329,7 +328,7 @@ class RequestBalanceView: UIView {
             size: .init(width: 0, height: 48)
         )
     }
-    
+
     private func updateState(state: ObservableState) {
         isEmptyLabel.text = "isEmpty: \(state.isEmpty)"
         isCompleteLabel.text = "isComplete: \(state.isComplete)"
@@ -344,7 +343,7 @@ extension RequestBalanceView: ForageElementDelegate {
     func focusDidChange(_ state: ObservableState) {
         updateState(state: state)
     }
-    
+
     func textFieldDidChange(_ state: ObservableState) {
         updateState(state: state)
     }

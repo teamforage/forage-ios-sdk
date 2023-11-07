@@ -8,12 +8,12 @@
 
 import Foundation
 
-internal struct ForageSQSError: Codable {
+struct ForageSQSError: Codable {
     let statusCode: Int
     let forageCode: String
     let message: String
     let details: ForageErrorDetails?
-    
+
     private enum CodingKeys: String, CodingKey {
         case statusCode = "status_code"
         case forageCode = "forage_code"
@@ -23,21 +23,21 @@ internal struct ForageSQSError: Codable {
 }
 
 /// `MessageResponseModel` used for handling message for polling request
-internal struct MessageResponseModel: Codable {
+struct MessageResponseModel: Codable {
     let contentId: String
     let messageType: String
     let status: String
     let failed: Bool
     let errors: [ForageSQSError]
-    
-    private enum CodingKeys : String, CodingKey {
+
+    private enum CodingKeys: String, CodingKey {
         case contentId = "content_id"
         case messageType = "message_type"
         case status
         case failed
         case errors
     }
-    
+
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         contentId = try container.decode(String.self, forKey: .contentId)
@@ -48,7 +48,7 @@ internal struct MessageResponseModel: Codable {
         do {
             errors = try container.decode([ForageSQSError].self, forKey: .errors)
         } catch {
-            errors = []  // If the 'errors' field isn't an array, set it to an empty array
+            errors = [] // If the 'errors' field isn't an array, set it to an empty array
         }
     }
 }

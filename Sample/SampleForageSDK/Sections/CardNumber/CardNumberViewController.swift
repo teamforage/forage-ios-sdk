@@ -9,19 +9,18 @@
 import UIKit
 
 class CardNumberViewController: BaseViewCodeViewController<CardNumberView> {
-    
     // MARK: Lifecycle Methods
-    
+
     override func loadView() {
         super.loadView()
         customView.backgroundColor = .white
         customView.render()
         customView.delegate = self
     }
-    
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        self.customView.panNumberTextField.becomeFirstResponder()
+        customView.panNumberTextField.becomeFirstResponder()
     }
 }
 

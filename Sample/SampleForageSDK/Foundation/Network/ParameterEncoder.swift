@@ -1,5 +1,5 @@
 //
-//  JSONParameterEncoder.swift
+//  ParameterEncoder.swift
 //  SampleForageSDK
 //
 //  Created by Tiago Oliveira on 26/10/22.
@@ -8,11 +8,11 @@
 
 import Foundation
 
-internal protocol ParameterEncoder {
+protocol ParameterEncoder {
     static func encode(urlRequest: inout URLRequest, with parameters: Parameters) throws
 }
 
-internal struct JSONParameterEncoder: ParameterEncoder {
+struct JSONParameterEncoder: ParameterEncoder {
     public static func encode(urlRequest: inout URLRequest, with parameters: Parameters) throws {
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: parameters, options: .prettyPrinted)
@@ -26,15 +26,14 @@ internal struct JSONParameterEncoder: ParameterEncoder {
     }
 }
 
-internal struct URLParameterEncoder: ParameterEncoder {
-    internal static func encode(urlRequest: inout URLRequest, with parameters: Parameters) throws {
-        
+struct URLParameterEncoder: ParameterEncoder {
+    static func encode(urlRequest: inout URLRequest, with parameters: Parameters) throws {
         guard let url = urlRequest.url else { throw ServiceError.missingURL }
-        
+
         if var urlComponents = URLComponents(url: url,
                                              resolvingAgainstBaseURL: false), !parameters.isEmpty {
             urlComponents.queryItems = [URLQueryItem]()
-            
+
             for (key, value) in parameters {
                 let queryItem = URLQueryItem(name: key,
                                              value: "\(value)".addingPercentEncoding(withAllowedCharacters: .urlHostAllowed))
@@ -42,7 +41,7 @@ internal struct URLParameterEncoder: ParameterEncoder {
             }
             urlRequest.url = urlComponents.url
         }
-            
+
         if urlRequest.value(forHTTPHeaderField: "Content-Type") == nil {
             urlRequest.setValue("application/x-www-form-urlencoded; charset=utf-8", forHTTPHeaderField: "Content-Type")
         }
