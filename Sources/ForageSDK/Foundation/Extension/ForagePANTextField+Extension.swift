@@ -1,6 +1,6 @@
 //
 //  ForagePANTextField+Extension.swift
-//  
+//
 //
 //  Created by Danilo Joksimovic on 2023-11-03.
 //
@@ -10,19 +10,19 @@ import UIKit
 
 // MARK: - UITextFieldDelegate
 
-extension ForagePANTextField : UITextFieldDelegate {
+extension ForagePANTextField: UITextFieldDelegate {
     public func focusDidChange(_ state: ObservableState) {
         delegate?.focusDidChange(self)
     }
-    
+
     public func textFieldDidChange(_ state: ObservableState) {
         delegate?.textFieldDidChange(self)
     }
-    
+
     public func textFieldDidBeginEditing(_ textField: UITextField) {
         delegate?.focusDidChange(self)
     }
-    
+
     public func textFieldDidEndEditing(_ textField: UITextField) {
         delegate?.focusDidChange(self)
     }
@@ -39,12 +39,12 @@ extension ForagePANTextField : UITextFieldDelegate {
         if isBackspace {
             return true
         }
-        
+
         // Only allow the user to enter numeric strings
-        if !replacementString.allSatisfy({ $0.isNumber }) {
+        if !replacementString.allSatisfy(\.isNumber) {
             return false
         }
-        
+
         return true
     }
 }

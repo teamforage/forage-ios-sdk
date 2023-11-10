@@ -81,7 +81,7 @@ final class ForagePANTextFieldTests: XCTestCase {
 
         XCTAssertFalse(changesAllowed)
     }
-    
+
     func test_font() {
         let newFont = UIFont.systemFont(ofSize: 14, weight: .regular)
         foragePANTextField.font = newFont

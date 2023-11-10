@@ -16,11 +16,11 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
     @IBInspectable public var isEmpty: Bool {
         enhancedTextField.isEmpty
     }
-    
+
     @IBInspectable public var isValid: Bool {
         enhancedTextField.isValid
     }
-    
+
     @IBInspectable public var isComplete: Bool {
         enhancedTextField.isComplete
     }
@@ -55,7 +55,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         get { _padding }
         set { _padding = newValue }
     }
-    
+
     /// Placeholder for the text field
     @IBInspectable public var placeholder: String? {
         get { enhancedTextField.placeholder }
@@ -100,7 +100,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         get { enhancedTextField.font }
         set { enhancedTextField.font = newValue }
     }
-    
+
     // MARK: - Public Delegate
 
     /// A delegate that informs the client about the state of the entered card number (validation, focus).
@@ -187,7 +187,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         super.init(coder: coder)
         commonInit()
     }
-    
+
     // MARK: - Private API
 
     private func commonInit() {
@@ -249,9 +249,9 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
     @objc fileprivate func requestFocus(_ gesture: UIGestureRecognizer) {
         becomeFirstResponder()
     }
-    
-    internal func getActualPAN() -> String {
-        return enhancedTextField.actualPAN
+
+    func getActualPAN() -> String {
+        enhancedTextField.actualPAN
     }
 
     // MARK: - Public API
@@ -259,7 +259,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
     override public var intrinsicContentSize: CGSize {
         CGSize(width: frame.width, height: 83)
     }
-    
+
     public func clearText() {
         enhancedTextField.text = ""
         enhancedTextField.actualPAN = ""

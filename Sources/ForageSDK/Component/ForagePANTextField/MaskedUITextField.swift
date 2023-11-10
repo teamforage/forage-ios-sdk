@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-internal enum MaskPattern : String {
+enum MaskPattern: String {
     case unset = "###################"
     case sixteenDigits = "#### #### #### ####"
     case eighteenDigits = "###### #### ##### ## #"

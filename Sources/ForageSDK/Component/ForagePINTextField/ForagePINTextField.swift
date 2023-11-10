@@ -190,7 +190,7 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
         super.init(coder: coder)
         commonInit()
     }
-    
+
     // MARK: - Private Methods
 
     private func commonInit() {
