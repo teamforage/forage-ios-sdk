@@ -9,12 +9,6 @@
 import Foundation
 import UIKit
 
-extension String {
-    subscript(safe index: Int) -> Character? {
-        index < count && index >= 0 ? self[self.index(startIndex, offsetBy: index)] : nil
-    }
-}
-
 enum MaskPattern: String {
     case unset = "###################"
     case sixteenDigits = "#### #### #### ####"

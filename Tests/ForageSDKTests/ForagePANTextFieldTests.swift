@@ -82,14 +82,6 @@ final class ForagePANTextFieldTests: XCTestCase {
         XCTAssertFalse(changesAllowed)
     }
 
-    func test_elementHeight() {
-        let newHeight = 100.0
-        foragePANTextField.elementHeight = newHeight
-
-        let height = foragePANTextField.elementHeight
-        XCTAssertEqual(newHeight, height)
-    }
-
     func test_font() {
         let newFont = UIFont.systemFont(ofSize: 14, weight: .regular)
         foragePANTextField.font = newFont

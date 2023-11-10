@@ -101,16 +101,6 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         set { enhancedTextField.font = newValue }
     }
 
-    /// ElementHeight for the text field
-    private var _elementHeight: CGFloat = 0
-    @IBInspectable public var elementHeight: CGFloat {
-        get { _elementHeight }
-        set {
-            _elementHeight = newValue
-            changeElementHeight(value: _elementHeight)
-        }
-    }
-
     // MARK: - Public Delegate
 
     /// A delegate that informs the client about the state of the entered card number (validation, focus).
@@ -260,11 +250,6 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         becomeFirstResponder()
     }
 
-    private func changeElementHeight(value: CGFloat) {
-        container.distribution = .equalCentering
-        container.heightAnchor.constraint(equalToConstant: value).isActive = true
-    }
-
     func getActualPAN() -> String {
         enhancedTextField.actualPAN
     }
@@ -278,47 +263,6 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
     public func clearText() {
         enhancedTextField.text = ""
         enhancedTextField.actualPAN = ""
-    }
-}
-
-// MARK: - UITextFieldDelegate
-
-extension ForagePANTextField: UITextFieldDelegate {
-    public func focusDidChange(_ state: ObservableState) {
-        delegate?.focusDidChange(self)
-    }
-
-    public func textFieldDidChange(_ state: ObservableState) {
-        delegate?.textFieldDidChange(self)
-    }
-
-    public func textFieldDidBeginEditing(_ textField: UITextField) {
-        delegate?.focusDidChange(self)
-    }
-
-    public func textFieldDidEndEditing(_ textField: UITextField) {
-        delegate?.focusDidChange(self)
-    }
-
-    /// Determines whether the text field should allow a change of characters within the specified range.
-    /// This method is called when the user attempts to change the content of the text field.
-    /// - Parameters:
-    ///   - textField: The text field containing the text.
-    ///   - range: The range of characters to be replaced.
-    ///   - replacementString: The replacement string.
-    /// - Returns: `true` if the changes should be allowed; otherwise, `false`.
-    public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString: String) -> Bool {
-        let isBackspace = replacementString.isEmpty
-        if isBackspace {
-            return true
-        }
-
-        // Only allow the user to enter numeric strings
-        if !replacementString.allSatisfy(\.isNumber) {
-            return false
-        }
-
-        return true
     }
 }
 

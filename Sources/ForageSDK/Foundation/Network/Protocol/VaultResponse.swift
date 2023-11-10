@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct VaultResponse {
+struct VaultResponse {
     var statusCode: Int?
     var urlResponse: URLResponse?
     var data: Data?
