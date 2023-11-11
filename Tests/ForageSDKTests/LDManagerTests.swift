@@ -10,23 +10,6 @@ import XCTest
 @testable import ForageSDK
 @testable import LaunchDarkly
 
-class MockLogger: NoopLogger {
-    var lastInfoMsg: String = ""
-    var lastErrorMsg: String = ""
-
-    required init(_ config: ForageLoggerConfig? = nil) {
-        super.init(config)
-    }
-
-    override func info(_ message: String, attributes: [String: Encodable]?) {
-        lastInfoMsg = message
-    }
-
-    override func error(_ message: String, error: Error?, attributes: [String: Encodable]?) {
-        lastErrorMsg = message
-    }
-}
-
 class MockLDClient: LDClientProtocol {
     var pollingIntervals: LDValue?
     var vaultPercentage: Double
