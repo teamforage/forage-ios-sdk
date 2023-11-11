@@ -13,16 +13,16 @@ class LivePollingService: Polling {
     private var provider: Provider
     private var logger: ForageLogger?
     private var ldManager: LDManagerProtocol
-    
+
     private var defaultPollingIntervalInMS: Int = 1000
     private var retryCount = 0
-    
+
     init(provider: Provider = Provider(), logger: ForageLogger? = nil, ldManager: LDManagerProtocol) {
         self.provider = provider
         self.logger = logger?.setPrefix("")
         self.ldManager = ldManager
     }
-    
+
     /// - Parameters:
     ///   - vaultResponse: A `VaultResponse` object containing data, status code, and other response details.
     ///   - request: An instance of `ForageRequestModel` containing request-specific information.
@@ -33,7 +33,7 @@ class LivePollingService: Polling {
         completion: @escaping (Result<Data?, Error>) -> Void
     ) {
         retryCount = 0
-        
+
         if let data = vaultResponse.data, let urlResponse = vaultResponse.urlResponse {
             provider.processVaultData(
                 model: MessageResponseModel.self,
@@ -64,7 +64,7 @@ class LivePollingService: Polling {
             completion(.failure(CommonErrors.UNKNOWN_SERVER_ERROR))
         }
     }
-        
+
     /// Fetches an SQS message based on its content ID.
     /// This method is part of a polling mechanism, repeatedly checking the status of a message
     /// until it is marked as completed, failed or a maximum retry limit is reached.
@@ -81,12 +81,12 @@ class LivePollingService: Polling {
         do {
             try provider.execute(model: MessageResponseModel.self, endpoint: ForageAPI.message(contentId: contentId, sessionToken: request.authorization, merchantID: request.merchantID), completion: { [weak self] result in
                 guard let self = self else { return }
-                
+
                 switch result {
                 case let .success(message):
                     let didReceiveFailedMessage = message.failed
                     let didNotExceedMaxAttempts = self.retryCount < self.getMaxAttempts()
-                    
+
                     if didReceiveCompletedMessage(message) {
                         completion(.success(message))
                     } else if didReceiveFailedMessage {
@@ -103,7 +103,7 @@ class LivePollingService: Polling {
                                 details: details
                             ),
                         ])
-                        
+
                         self.logger?.error(
                             "Received SQS Error message for \(self.getLogSuffix(request))",
                             error: forageError,
@@ -126,14 +126,14 @@ class LivePollingService: Polling {
                         )
                         completion(.failure(CommonErrors.UNKNOWN_SERVER_ERROR))
                     }
-                    
+
                 case let .failure(error):
                     // malformed response, API is unavailable, etc.
                     completion(.failure(error))
                 }
             })
         } catch {
-            self.logger?.error(
+            logger?.error(
                 "getMessage failed",
                 error: error,
                 attributes: nil
@@ -142,7 +142,7 @@ class LivePollingService: Polling {
             completion(.failure(error))
         }
     }
-    
+
     /// We generate a random jitter amount to add to our retry delay when polling for the status of
     /// Payments and Payment Methods so that we can avoid a thundering herd scenario in which there are
     /// several requests retrying at the same exact time.
@@ -152,7 +152,7 @@ class LivePollingService: Polling {
     func jitterAmountInSeconds() -> Double {
         Double(Int.random(in: -25...25)) / 1000.0
     }
-    
+
     /// Support function to update retry count and interval between attempts.
     ///
     /// - Parameters:
@@ -165,32 +165,32 @@ class LivePollingService: Polling {
         }
         let intervalAsDouble = Double(interval) / 1000.0
         let nextPollTime = intervalAsDouble + jitterAmountInSeconds()
-        
+
         incrementRetryCount()
-        
+
         DispatchQueue.main.asyncAfter(deadline: .now() + nextPollTime) {
             completion()
         }
     }
-    
+
     func didReceiveCompletedMessage(_ message: MessageResponseModel) -> Bool {
-        return message.failed == false && message.status == "completed"
+        message.failed == false && message.status == "completed"
     }
-    
+
     func incrementRetryCount() {
         retryCount += 1
     }
-    
+
     func getMaxAttempts() -> Int {
-        return 90
+        90
     }
-    
+
     // Get the log suffix (action + resource name + resource ref)
     // using the given ForageRequestModel
     private func getLogSuffix(_ request: ForageRequestModel) -> String {
         let paymentReference = request.paymentMethodReference
         let paymentMethodReference = request.paymentMethodReference
-        
+
         if !paymentReference.isEmpty {
             return "capture of Payment \(paymentReference)"
         }

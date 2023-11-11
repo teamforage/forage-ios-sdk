@@ -37,7 +37,7 @@ struct MessageResponseModel: Codable {
         case failed
         case errors
     }
-    
+
     init(contentId: String,
          messageType: String,
          status: String,
@@ -49,7 +49,7 @@ struct MessageResponseModel: Codable {
         self.failed = failed
         self.errors = errors
     }
-    
+
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         contentId = try container.decode(String.self, forKey: .contentId)

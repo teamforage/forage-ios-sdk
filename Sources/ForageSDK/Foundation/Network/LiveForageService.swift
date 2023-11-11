@@ -227,11 +227,11 @@ class LiveForageService: ForageService {
                     continuation.resume(returning: result)
                 }
             }
-            
+
             if let error = vaultResponse.error {
                 throw error
             }
-            
+
             return vaultResponse
         } catch {
             throw error

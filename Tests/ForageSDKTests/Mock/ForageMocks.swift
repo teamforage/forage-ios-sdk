@@ -221,7 +221,7 @@ class ForageMocks {
         """
         return Data(response.utf8)
     }
-    
+
     // we continue to retry until we see status: "completed"
     // so we permantly set the status to: "sent_to_proxy" to trigger retry attempts
     var getMessageIncomplete: Data {
@@ -295,7 +295,7 @@ class ForageMocks {
         """
         return Data(response.utf8)
     }
-    
+
     // missing "errors" list
     var getMessageMalformed: Data {
         let response = """
