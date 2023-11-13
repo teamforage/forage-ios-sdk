@@ -15,14 +15,18 @@ class LiveForageService: ForageService {
 
     private var logger: ForageLogger?
     private var ldManager: LDManagerProtocol
-    private var maxAttempts: Int = 90
-    private var defaultPollingIntervalInMS: Int = 1000
-    private var retryCount = 0
+    private var pollingService: Polling
 
-    init(provider: Provider = Provider(), logger: ForageLogger? = nil, ldManager: LDManagerProtocol) {
+    init(
+        provider: Provider = Provider(),
+        logger: ForageLogger? = nil,
+        ldManager: LDManagerProtocol,
+        pollingService: Polling
+    ) {
         self.provider = provider
         self.logger = logger?.setPrefix("")
         self.ldManager = ldManager
+        self.pollingService = pollingService
     }
 
     // MARK: Tokenize EBT card
@@ -79,7 +83,7 @@ class LiveForageService: ForageService {
             )
 
             _ = try await awaitResult { completion in
-                self.polling(
+                self.pollingService.execute(
                     vaultResponse: vaultResult,
                     request: balanceRequest,
                     completion: completion
@@ -167,7 +171,7 @@ class LiveForageService: ForageService {
             )
 
             _ = try await awaitResult { completion in
-                self.polling(
+                self.pollingService.execute(
                     vaultResponse: vaultResult,
                     request: captureRequest,
                     completion: completion
@@ -193,14 +197,6 @@ class LiveForageService: ForageService {
 
     // MARK: Private helper methods
 
-    private func awaitResult<T>(_ operation: @escaping (@escaping (Result<T, Error>) -> Void) -> Void) async throws -> T {
-        try await withCheckedThrowingContinuation { continuation in
-            operation { result in
-                continuation.resume(with: result)
-            }
-        }
-    }
-
     /// Submit PIN to the Vault Proxy (Basis Theory or VGS)
     /// - Parameters:
     ///   - pinCollector: The PIN collection client
@@ -222,7 +218,7 @@ class LiveForageService: ForageService {
         ]
 
         do {
-            return try await withCheckedThrowingContinuation { continuation in
+            let vaultResponse = try await withCheckedThrowingContinuation { continuation in
                 pinCollector.sendData(
                     path: path,
                     vaultAction: VaultAction.capturePayment,
@@ -231,150 +227,14 @@ class LiveForageService: ForageService {
                     continuation.resume(returning: result)
                 }
             }
+
+            if let error = vaultResponse.error {
+                throw error
+            }
+
+            return vaultResponse
         } catch {
             throw error
         }
-    }
-}
-
-// MARK: - Polling
-
-extension LiveForageService: Polling {
-    func polling(vaultResponse: VaultResponse, request: ForageRequestModel, completion: @escaping (Result<Data?, Error>) -> Void) {
-        retryCount = 0
-
-        if let error = vaultResponse.error {
-            completion(.failure(error))
-        } else if let data = vaultResponse.data, let urlResponse = vaultResponse.urlResponse {
-            provider.processVaultData(model: MessageResponseModel.self, code: vaultResponse.statusCode, data: data, response: urlResponse) { [weak self] messageResponse in
-                switch messageResponse {
-                case let .success(message):
-                    self?.pollingMessage(
-                        contentId: message.contentId,
-                        request: request
-                    ) { pollingResult in
-                        switch pollingResult {
-                        case .success:
-                            completion(.success(nil))
-                        case let .failure(error):
-                            completion(.failure(error))
-                        }
-                    }
-                case let .failure(error):
-                    self?.logger?.error("Failed to process vault proxy response for \(self?.getLogSuffix(request) ?? "N/A")", error: error, attributes: nil)
-                    completion(.failure(error))
-                }
-            }
-        } else {
-            let emptyError = ServiceError.emptyError
-            logger?.error(emptyError.rawValue, error: emptyError, attributes: nil)
-            completion(.failure(emptyError))
-        }
-    }
-
-    func pollingMessage(
-        contentId: String,
-        request: ForageRequestModel,
-        completion: @escaping (Result<MessageResponseModel, Error>) -> Void
-    ) {
-        do {
-            try provider.execute(model: MessageResponseModel.self, endpoint: ForageAPI.message(contentId: contentId, sessionToken: request.authorization, merchantID: request.merchantID), completion: { [weak self] result in
-                guard let self = self else { return }
-                switch result {
-                case let .success(data):
-                    /// check message is not failed and is completed
-                    if data.failed == false && data.status == "completed" {
-                        completion(.success(data))
-                        /// check message is failed to return error immediately
-                    } else if data.failed == true {
-                        /// Parse the error returned from SQS message and return it back
-                        let error = data.errors[0]
-                        let statusCode = error.statusCode
-                        let forageErrorCode = error.forageCode
-                        let message = error.message
-                        let details = error.details
-                        let forageError = ForageError(errors: [
-                            ForageErrorObj(
-                                httpStatusCode: statusCode,
-                                code: forageErrorCode,
-                                message: message,
-                                details: details
-                            ),
-                        ])
-
-                        self.logger?.error(
-                            "Received SQS Error message for \(self.getLogSuffix(request))",
-                            error: forageError,
-                            attributes: nil
-                        )
-                        completion(.failure(forageError))
-                        /// check maxAttempts to retry
-                    } else if self.retryCount < self.maxAttempts {
-                        self.waitNextAttempt {
-                            self.pollingMessage(
-                                contentId: data.contentId,
-                                request: request,
-                                completion: completion
-                            )
-                        }
-                        /// in case run out of attempts
-                    } else {
-                        self.logger?.error(
-                            "Max polling attempts reached for \(self.getLogSuffix(request))",
-                            error: nil,
-                            attributes: nil
-                        )
-                        completion(.failure(ForageError(errors: [ForageErrorObj(httpStatusCode: 500, code: "unknown_server_error", message: "Unknown Server Error")])))
-                    }
-
-                case let .failure(error):
-                    completion(.failure(error))
-                }
-            })
-        } catch {
-            completion(.failure(error))
-        }
-    }
-
-    /// We generate a random jitter amount to add to our retry delay when polling for the status of
-    /// Payments and Payment Methods so that we can avoid a thundering herd scenario in which there are
-    /// several requests retrying at the same exact time.
-    ///
-    /// Returns a random double between -.025 and .025
-    @objc
-    func jitterAmountInSeconds() -> Double {
-        Double(Int.random(in: -25...25)) / 1000.0
-    }
-
-    /// Support function to update retry count and interval between attempts.
-    ///
-    /// - Parameters:
-    ///  - completion: Which will return after a wait.
-    func waitNextAttempt(completion: @escaping () -> Void) {
-        var interval = defaultPollingIntervalInMS
-        let pollingIntervals = ldManager.getPollingIntervals(ldClient: LDManager.getDefaultLDClient())
-        if retryCount < pollingIntervals.count {
-            interval = pollingIntervals[retryCount]
-        }
-        let intervalAsDouble = Double(interval) / 1000.0
-        let nextPollTime = intervalAsDouble + jitterAmountInSeconds()
-
-        retryCount = retryCount + 1
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + nextPollTime) {
-            completion()
-        }
-    }
-
-    // get the log suffix (action + resource name + resource ref)
-    // using the given ForageRequestModel
-    private func getLogSuffix(_ request: ForageRequestModel) -> String {
-        let paymentReference = request.paymentMethodReference
-        let paymentMethodReference = request.paymentMethodReference
-
-        if !paymentReference.isEmpty {
-            return "capture of Payment \(paymentReference)"
-        }
-        return "balance check of Payment Method \(paymentMethodReference)"
     }
 }

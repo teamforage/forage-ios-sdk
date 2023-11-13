@@ -19,21 +19,9 @@ protocol Polling: AnyObject {
     ///  - vaultResponse: Response from Vault request.
     ///  - request: Model composed with info to identify the polling.
     ///  - completion: Which will return a `Result` to be handle.
-    func polling(
+    func execute(
         vaultResponse: VaultResponse,
         request: ForageRequestModel,
         completion: @escaping (Result<Data?, Error>) -> Void
-    )
-
-    /// Polling method
-    ///
-    /// - Parameters:
-    ///  - contentId: Message object to be used to polling.
-    ///  - request: Model composed with info to identify the polling.
-    ///  - completion: Return a `MessageResponseModel` to check its validation. It will trigger another request using its object or it will return a completion `.success` or `.failure`.
-    func pollingMessage(
-        contentId: String,
-        request: ForageRequestModel,
-        completion: @escaping (Result<MessageResponseModel, Error>) -> Void
     )
 }

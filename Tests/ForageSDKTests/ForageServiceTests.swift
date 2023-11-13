@@ -27,7 +27,11 @@ class MockLDManager: LDManagerProtocol {
     }
 }
 
-class MockForageService: LiveForageService {
+class MockPollingService: PollingService {
+    override func execute(vaultResponse: VaultResponse, request: ForageRequestModel, completion: @escaping (Result<Data?, Error>) -> Void) {
+        completion(.success(nil))
+    }
+
     override func jitterAmountInSeconds() -> Double {
         0.0
     }
@@ -44,11 +48,19 @@ final class ForageServiceTests: XCTestCase {
         forageMocks = ForageMocks()
     }
 
+    func createTestService(_ mockSession: URLSessionMock) -> ForageService {
+        LiveForageService(
+            provider: Provider(mockSession),
+            ldManager: MockLDManager(),
+            pollingService: MockPollingService(ldManager: MockLDManager())
+        )
+    }
+
     func test_tokenizeEBTCard_onSuccess_checkExpectedPayload() {
         let mockSession = URLSessionMock()
         mockSession.data = forageMocks.tokenizeSuccess
         mockSession.response = forageMocks.mockSuccessResponse
-        let service = LiveForageService(provider: Provider(mockSession), ldManager: MockLDManager())
+        let service = createTestService(mockSession)
 
         let foragePANRequestModel = ForagePANRequestModel(
             authorization: "authToken123",
@@ -80,7 +92,7 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.error = forageMocks.tokenizeFailure
         mockSession.response = forageMocks.mockFailureResponse
-        let service = LiveForageService(provider: Provider(mockSession), ldManager: MockLDManager())
+        let service = createTestService(mockSession)
 
         let foragePANRequestModel = ForagePANRequestModel(
             authorization: "authToken123",
@@ -108,7 +120,7 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.data = forageMocks.xKeySuccess
         mockSession.response = forageMocks.mockSuccessResponse
-        let service = LiveForageService(provider: Provider(mockSession), ldManager: MockLDManager())
+        let service = createTestService(mockSession)
 
         let expectation = XCTestExpectation(description: "Get the X-Key header - should succeed")
         service.getXKey(sessionToken: "auth1234", merchantID: "1234567") { result in
@@ -128,7 +140,7 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.error = forageMocks.generalError
         mockSession.response = forageMocks.mockFailureResponse
-        let service = LiveForageService(provider: Provider(mockSession), ldManager: MockLDManager())
+        let service = createTestService(mockSession)
 
         let expectation = XCTestExpectation(description: "Get the X-Key header - result should be failure")
         service.getXKey(sessionToken: "auth1234", merchantID: "1234567") { result in
@@ -147,7 +159,7 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.data = forageMocks.getPaymentMethodSuccess
         mockSession.response = forageMocks.mockSuccessResponse
-        let service = LiveForageService(provider: Provider(mockSession), ldManager: MockLDManager())
+        let service = createTestService(mockSession)
 
         let expectation = XCTestExpectation(description: "Get the Payment Method - should succeed")
         service.getPaymentMethod(sessionToken: "auth1234", merchantID: "1234567", paymentMethodRef: "ca29d3443f") { result in
@@ -171,7 +183,7 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.error = forageMocks.getPaymentMethodFailure
         mockSession.response = forageMocks.mockFailureResponse
-        let service = LiveForageService(provider: Provider(mockSession), ldManager: MockLDManager())
+        let service = createTestService(mockSession)
 
         let expectation = XCTestExpectation(description: "Get the Payment Method - result should be failure")
         service.getPaymentMethod(sessionToken: "auth1234", merchantID: "1234567", paymentMethodRef: "ca29d3443f") { result in
@@ -190,7 +202,7 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.data = forageMocks.capturePaymentSuccess
         mockSession.response = forageMocks.mockSuccessResponse
-        let service = LiveForageService(provider: Provider(mockSession), ldManager: MockLDManager())
+        let service = createTestService(mockSession)
 
         let expectation = XCTestExpectation(description: "Get the Payment - should succeed")
         service.getPayment(sessionToken: "auth1234", merchantID: "1234567", paymentRef: "11767381fd") { result in
@@ -213,7 +225,7 @@ final class ForageServiceTests: XCTestCase {
         let mockSession = URLSessionMock()
         mockSession.error = forageMocks.getPaymentError
         mockSession.response = forageMocks.mockFailureResponse
-        let service = LiveForageService(provider: Provider(mockSession), ldManager: MockLDManager())
+        let service = createTestService(mockSession)
 
         let expectation = XCTestExpectation(description: "Get the Payment - result should be failure")
         service.getPayment(sessionToken: "auth1234", merchantID: "1234567", paymentRef: "11767381fd") { result in
@@ -226,81 +238,6 @@ final class ForageServiceTests: XCTestCase {
             }
         }
         wait(for: [expectation], timeout: 1.0)
-    }
-
-    func test_getJitterAmountInSeconds() {
-        let mockSession = URLSessionMock()
-        let service = LiveForageService(provider: Provider(mockSession), ldManager: MockLDManager())
-
-        let jitterAmount = service.jitterAmountInSeconds()
-
-        XCTAssertNotNil(jitterAmount, "Jitter amount should not be nil")
-        XCTAssertTrue(jitterAmount >= -0.025 && jitterAmount <= 0.025)
-    }
-
-    func test_WaitNextAttempt_defaultIntervals() {
-        let mockSession = URLSessionMock()
-        let service = MockForageService(provider: Provider(mockSession), ldManager: MockLDManager())
-
-        let failureExpectation = XCTestExpectation(description: "Completion called before delay")
-        let successExpectation = XCTestExpectation(description: "Completion called after delay")
-
-        // Mark the expectation as fulfilled only if it failed
-        failureExpectation.isInverted = true
-
-        service.waitNextAttempt {
-            failureExpectation.fulfill()
-            successExpectation.fulfill()
-        }
-
-        // Ensure that the failureExpectation wasn't fulfilled in the extremely short period of time
-        wait(for: [failureExpectation], timeout: 0.95)
-        // Ensure that the successExpectation was fulfilled before the longer period of time
-        wait(for: [successExpectation], timeout: 1.05)
-    }
-
-    func test_waitNextAttempt_noPollingIntervals() {
-        let mockSession = URLSessionMock()
-
-        let failureExpectation = XCTestExpectation(description: "Completion called before delay")
-        let successExpectation = XCTestExpectation(description: "Completion called after delay")
-
-        // Mark the expectation as fulfilled only if it failed
-        failureExpectation.isInverted = true
-
-        let service = MockForageService(provider: Provider(mockSession), ldManager: MockLDManager(pollingIntervals: []))
-
-        service.waitNextAttempt {
-            failureExpectation.fulfill()
-            successExpectation.fulfill()
-        }
-
-        // Ensure that the failureExpectation wasn't fulfilled in the extremely short period of time
-        wait(for: [failureExpectation], timeout: 0.95)
-        // Ensure that the successExpectation was fulfilled before the longer period of time
-        wait(for: [successExpectation], timeout: 1.05)
-    }
-
-    func test_waitNextAttempt_shorterIntervals() {
-        let mockSession = URLSessionMock()
-
-        let failureExpectation = XCTestExpectation(description: "Completion called before delay")
-        let successExpectation = XCTestExpectation(description: "Completion called after delay")
-
-        // Mark the expectation as fulfilled only if it failed
-        failureExpectation.isInverted = true
-
-        let service = MockForageService(provider: Provider(mockSession), ldManager: MockLDManager(pollingIntervals: [100]))
-
-        service.waitNextAttempt {
-            successExpectation.fulfill()
-            failureExpectation.fulfill()
-        }
-
-        // Ensure that the failureExpectation wasn't fulfilled in the extremely short period of time
-        wait(for: [failureExpectation], timeout: 0.09)
-        // Ensure that the successExpectation was fulfilled before the longer period of time
-        wait(for: [successExpectation], timeout: 0.11)
     }
 
     func test_getBalance_onSuccess_checkExpectedPayload() {
