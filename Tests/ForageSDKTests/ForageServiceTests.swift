@@ -27,7 +27,7 @@ class MockLDManager: LDManagerProtocol {
     }
 }
 
-class MockPollingService: LivePollingService {
+class MockPollingService: PollingService {
     override func execute(vaultResponse: VaultResponse, request: ForageRequestModel, completion: @escaping (Result<Data?, Error>) -> Void) {
         completion(.success(nil))
     }

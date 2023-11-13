@@ -10,7 +10,7 @@
 import Foundation
 import XCTest
 
-class WithMockedWaitNextAttempt: LivePollingService {
+class WithMockedWaitNextAttempt: PollingService {
     var maxAttempts: Int = 90
     var numTimesCalledWaitNextAttempt: Int = 0
     var didComplete: (() -> Bool) = { false }
@@ -48,7 +48,7 @@ final class PollingServiceTests: XCTestCase {
 
     private func createTestPollingService(
         _ mockSession: URLSessionMock = URLSessionMock()
-    ) -> LivePollingService {
+    ) -> PollingService {
         WithMockedWaitNextAttempt(
             provider: Provider(mockSession),
             logger: mockLogger,
@@ -66,7 +66,7 @@ final class PollingServiceTests: XCTestCase {
         mockData: Data? = nil,
         response: HTTPURLResponse? = nil,
         error: Error? = nil
-    ) -> (LivePollingService, ForageRequestModel) {
+    ) -> (PollingService, ForageRequestModel) {
         let mockSession = URLSessionMock()
         mockSession.data = mockData
         mockSession.response = response
@@ -418,7 +418,7 @@ final class PollingServiceTests: XCTestCase {
 
     func test_getJitterAmountInSeconds() {
         let mockSession = URLSessionMock()
-        let pollingService = LivePollingService(
+        let pollingService = PollingService(
             provider: Provider(mockSession),
             ldManager: MockLDManager()
         )
@@ -433,7 +433,7 @@ final class PollingServiceTests: XCTestCase {
 
     func test_WaitNextAttempt_defaultIntervals() {
         let mockSession = URLSessionMock()
-        let pollingService = LivePollingService(
+        let pollingService = PollingService(
             provider: Provider(mockSession),
             ldManager: MockLDManager()
         )

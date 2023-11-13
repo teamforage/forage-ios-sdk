@@ -1,5 +1,5 @@
 //
-//  LivePollingService.swift
+//  PollingService.swift
 //
 //
 //  Created by Danilo Joksimovic on 2023-11-10.
@@ -9,7 +9,7 @@ import Foundation
 
 // MARK: - Polling
 
-class LivePollingService: Polling {
+class PollingService: Polling {
     private var provider: Provider
     private var logger: ForageLogger?
     private var ldManager: LDManagerProtocol
