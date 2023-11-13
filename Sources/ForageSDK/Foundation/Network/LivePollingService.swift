@@ -87,7 +87,7 @@ class LivePollingService: Polling {
                     let didReceiveFailedMessage = message.failed
                     let didNotExceedMaxAttempts = self.retryCount < self.getMaxAttempts()
 
-                    if didReceiveCompletedMessage(message) {
+                    if self.didReceiveCompletedMessage(message) {
                         completion(.success(message))
                     } else if didReceiveFailedMessage {
                         let error = message.errors[0]
