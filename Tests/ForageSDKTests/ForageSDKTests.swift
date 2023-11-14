@@ -25,11 +25,15 @@ class MockForageSDK: ForageSDK {
 }
 
 final class ForageSDKTests: XCTestCase {
+    var mockLogger: MockLogger!
+
     func setupMockSDK() {
+        mockLogger = MockLogger()
         MockForageSDK.setup(ForageSDK.Config(
             merchantID: "merchantID123",
             sessionToken: "dev_authToken123"
         ))
+        MockForageSDK.logger = mockLogger
     }
 
     func testInit_shouldInitMerchantId() {
@@ -65,16 +69,19 @@ final class ForageSDKTests: XCTestCase {
     func testSetMerchantID_shouldUpdateSharedMerchantID() {
         setupMockSDK()
 
-        ForageSDK.updateMerchantID("dev_newID456")
+        MockForageSDK.updateMerchantID("newID456")
 
-        XCTAssertEqual(ForageSDK.shared.merchantID, "dev_newID456")
+        XCTAssertEqual(mockLogger.lastNoticeMsg, "Updated merchantID to newID456")
+        XCTAssertEqual(ForageSDK.shared.merchantID, "newID456")
     }
 
     func testSetSessionToken_shouldUpdateSharedSessionToken() {
         setupMockSDK()
 
-        ForageSDK.updateSessionToken("staging_newToken456")
+        MockForageSDK.updateSessionToken("staging_newToken456")
 
-        XCTAssertEqual(ForageSDK.shared.sessionToken, "staging_newToken456")
+        XCTAssertEqual(MockForageSDK.shared.sessionToken, "staging_newToken456")
+        XCTAssertEqual(mockLogger.lastNoticeMsg, "Called updateSessionToken")
+        XCTAssertEqual(MockForageSDK.shared.environment, .staging)
     }
 }

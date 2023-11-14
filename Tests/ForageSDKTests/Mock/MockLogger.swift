@@ -10,6 +10,7 @@ import Foundation
 class MockLogger: NoopLogger {
     var lastInfoMsg: String = ""
     var lastErrorMsg: String = ""
+    var lastNoticeMsg: String = ""
 
     required init(_ config: ForageLoggerConfig? = nil) {
         super.init(config)
@@ -21,5 +22,9 @@ class MockLogger: NoopLogger {
 
     override func error(_ message: String, error: Error?, attributes: [String: Encodable]?) {
         lastErrorMsg = message
+    }
+
+    override func notice(_ message: String, attributes: [String: Encodable]?) {
+        lastNoticeMsg = message
     }
 }

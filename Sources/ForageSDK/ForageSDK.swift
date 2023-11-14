@@ -83,7 +83,9 @@ public class ForageSDK {
         initializeLogger(environment)
         initializeLaunchDarkly(environment)
 
-        ForageSDK.logger?.notice("Initialized ForageSDK for merchant \(config.merchantID)", attributes: nil)
+        ForageSDK.logger?
+            .setPrefix("ForageSDK")
+            .notice("Initialized SDK for merchant \(config.merchantID)", attributes: nil)
     }
 
     /// Updates the merchant ID to use for subsequent API calls.
@@ -95,6 +97,12 @@ public class ForageSDK {
             assertionFailure("ForageSDK must be initialized before setting merchant ID")
             return
         }
+
+        ForageSDK.logger?
+            .setPrefix("ForageSDK")
+            .addContext(ForageLogContext(merchantRef: newMerchantID))
+            .notice("Updated merchantID to \(newMerchantID)", attributes: nil)
+
         // config is guaranteed to be non-nil because of the guard above.
         ForageSDK.config!.merchantID = newMerchantID
         ForageSDK.shared.merchantID = newMerchantID
@@ -111,9 +119,15 @@ public class ForageSDK {
             assertionFailure("ForageSDK must be initialized before updating the session token")
             return
         }
+
+        ForageSDK.logger?
+            .setPrefix("ForageSDK")
+            .notice("Called updateSessionToken", attributes: nil)
+
         // config is guaranteed to be non-nil because of the guard above.
         ForageSDK.config!.sessionToken = newSessionToken
         ForageSDK.shared.sessionToken = newSessionToken
+        ForageSDK.shared.environment = Environment(sessionToken: newSessionToken)
     }
 
     class func initializeLogger(_ environment: Environment) {
