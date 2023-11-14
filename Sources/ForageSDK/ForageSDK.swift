@@ -10,8 +10,8 @@ public class ForageSDK {
     // MARK: Properties
 
     private static var config: Config?
+    static var logger: ForageLogger?
     var service: ForageService?
-    var logger: ForageLogger?
     var merchantID: String = ""
     var sessionToken: String = ""
     var traceId: String = ""
@@ -31,29 +31,20 @@ public class ForageSDK {
         environment = Environment(sessionToken: config.sessionToken)
         merchantID = config.merchantID
         sessionToken = config.sessionToken
-        // ForageSDK.shared.environment is not set
-        // until the end of this initialization
-        // so we have to provide the environment from the config
-        let logger = DatadogLogger(
-            ForageLoggerConfig(
-                environment: environment,
-                prefix: ""
-            )
-        )
-        self.logger = logger
-        traceId = logger.getTraceID()
-        LDManager.shared.initialize(environment, logger: logger)
+
+        traceId = ForageSDK.logger?.getTraceID() ?? ""
 
         VGSCollectLogger.shared.disableAllLoggers()
-        let provider = Provider(logger: logger)
+
+        let provider = Provider(logger: ForageSDK.logger)
         let pollingService = PollingService(
             provider: provider,
-            logger: logger,
+            logger: ForageSDK.logger,
             ldManager: LDManager.shared
         )
         service = LiveForageService(
             provider: provider,
-            logger: logger,
+            logger: ForageSDK.logger,
             ldManager: LDManager.shared,
             pollingService: pollingService
         )
@@ -87,6 +78,14 @@ public class ForageSDK {
     /// - Use ``updateSessionToken(_:)`` to update the session token after it expires.
     public class func setup(_ config: Config) {
         ForageSDK.config = config
+        let environment = Environment(sessionToken: config.sessionToken)
+
+        initializeLogger(environment)
+        initializeLaunchDarkly(environment)
+
+        ForageSDK.logger?
+            .setPrefix("ForageSDK")
+            .notice("Initialized SDK for merchant \(config.merchantID)", attributes: nil)
     }
 
     /// Updates the merchant ID to use for subsequent API calls.
@@ -98,6 +97,12 @@ public class ForageSDK {
             assertionFailure("ForageSDK must be initialized before setting merchant ID")
             return
         }
+
+        ForageSDK.logger?
+            .setPrefix("ForageSDK")
+            .addContext(ForageLogContext(merchantRef: newMerchantID))
+            .notice("Updated merchantID to \(newMerchantID)", attributes: nil)
+
         // config is guaranteed to be non-nil because of the guard above.
         ForageSDK.config!.merchantID = newMerchantID
         ForageSDK.shared.merchantID = newMerchantID
@@ -114,8 +119,27 @@ public class ForageSDK {
             assertionFailure("ForageSDK must be initialized before updating the session token")
             return
         }
+
+        ForageSDK.logger?
+            .setPrefix("ForageSDK")
+            .notice("Called updateSessionToken", attributes: nil)
+
         // config is guaranteed to be non-nil because of the guard above.
         ForageSDK.config!.sessionToken = newSessionToken
         ForageSDK.shared.sessionToken = newSessionToken
+        ForageSDK.shared.environment = Environment(sessionToken: newSessionToken)
+    }
+
+    class func initializeLogger(_ environment: Environment) {
+        ForageSDK.logger = DatadogLogger(
+            ForageLoggerConfig(
+                environment: environment,
+                prefix: ""
+            )
+        )
+    }
+
+    class func initializeLaunchDarkly(_ environment: Environment) {
+        LDManager.shared.initialize(environment, logger: ForageSDK.logger)
     }
 }

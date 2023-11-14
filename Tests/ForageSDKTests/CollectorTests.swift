@@ -14,10 +14,7 @@ import XCTest
 
 class VaultCollectorTests: XCTestCase {
     override func setUp() {
-        ForageSDK.setup(ForageSDK.Config(
-            merchantID: "merchantID123",
-            sessionToken: "authToken123"
-        ))
+        setUpForageSDK()
     }
 
     func testVGSCollectWrapper_SetCustomHeaders_HeaderKey() {

@@ -15,10 +15,7 @@ final class ForagePINTextFieldTests: XCTestCase {
     var foragePinTextField: ForagePINTextField!
 
     override func setUp() {
-        ForageSDK.setup(ForageSDK.Config(
-            merchantID: "merchantID123",
-            sessionToken: "authToken123"
-        ))
+        setUpForageSDK()
         observableState = nil
         foragePinTextField = ForagePINTextField()
     }
