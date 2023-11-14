@@ -11,18 +11,40 @@ import XCTest
 
 @testable import ForageSDK
 
+class MockForageSDK : ForageSDK {
+    static var initializedLogger: Bool = false
+    static var initializedLaunchDarkly: Bool = false
+
+    override static func initializeLogger(_ environment: Environment) {
+        MockForageSDK.initializedLogger = true
+    }
+    
+    override static func initializeLaunchDarkly(_ environment: Environment) {
+        MockForageSDK.initializedLaunchDarkly = true
+    }
+}
+
 final class ForageSDKTests: XCTestCase {
     func testInit_shouldInitializeLogger() {
-        ForageSDK.setup(ForageSDK.Config(
+        MockForageSDK.setup(ForageSDK.Config(
             merchantID: "merchantID123",
             sessionToken: "authToken123"
         ))
 
-        XCTAssertNotNil(ForageSDK.shared.logger)
+        XCTAssertTrue(MockForageSDK.initializedLogger)
+    }
+    
+    func testInit_shouldInitializeLaunchDarkly() {
+        MockForageSDK.setup(ForageSDK.Config(
+            merchantID: "merchantID123",
+            sessionToken: "authToken123"
+        ))
+
+        XCTAssertTrue(MockForageSDK.initializedLaunchDarkly)
     }
 
-    func testInit_shouldInitLiveForageService() {
-        ForageSDK.setup(ForageSDK.Config(
+    func testInit_shouldInitForageService() {
+        MockForageSDK.setup(ForageSDK.Config(
             merchantID: "merchantID123",
             sessionToken: "authToken123"
         ))
@@ -31,7 +53,7 @@ final class ForageSDKTests: XCTestCase {
     }
 
     func testSetMerchantID_shouldUpdateSharedMerchantID() {
-        ForageSDK.setup(ForageSDK.Config(
+        MockForageSDK.setup(ForageSDK.Config(
             merchantID: "merchantID123",
             sessionToken: "authToken123"
         ))
@@ -42,7 +64,7 @@ final class ForageSDKTests: XCTestCase {
     }
 
     func testSetSessionToken_shouldUpdateSharedSessionToken() {
-        ForageSDK.setup(ForageSDK.Config(
+        MockForageSDK.setup(ForageSDK.Config(
             merchantID: "merchantID123",
             sessionToken: "authToken123"
         ))

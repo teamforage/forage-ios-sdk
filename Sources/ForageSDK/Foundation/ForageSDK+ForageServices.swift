@@ -57,7 +57,7 @@ extension ForageSDK: ForageSDKService {
         reusable: Bool? = true,
         completion: @escaping (Result<PaymentMethodModel, Error>) -> Void
     ) {
-        _ = logger?
+        _ = ForageSDK.logger?
             .setPrefix("tokenizeEBTCard")
             .addContext(ForageLogContext(
                 customerID: customerID,
@@ -81,7 +81,7 @@ extension ForageSDK: ForageSDKService {
         paymentMethodReference: String,
         completion: @escaping (Result<BalanceModel, Error>) -> Void
     ) {
-        _ = logger?
+        _ = ForageSDK.logger?
             .setPrefix("checkBalance")
             .addContext(ForageLogContext(
                 merchantRef: merchantID,
@@ -116,14 +116,14 @@ extension ForageSDK: ForageSDKService {
                     pinCollector: pinCollector,
                     paymentMethodReference: paymentMethodReference
                 )
-                self.logger?.notice("Balance check succeeded for PaymentMethod \(paymentMethodReference)", attributes: nil)
+                ForageSDK.logger?.notice("Balance check succeeded for PaymentMethod \(paymentMethodReference)", attributes: nil)
 
                 responseMonitor.setEventOutcome(.success).end()
                 responseMonitor.logResult()
 
                 completion(.success(balanceResult))
             } catch {
-                self.logger?.error("Balance check failed for PaymentMethod \(paymentMethodReference)", error: error, attributes: nil)
+                ForageSDK.logger?.error("Balance check failed for PaymentMethod \(paymentMethodReference)", error: error, attributes: nil)
 
                 responseMonitor.setForageErrorCode(error).end()
                 responseMonitor.logResult()
@@ -138,7 +138,7 @@ extension ForageSDK: ForageSDKService {
         paymentReference: String,
         completion: @escaping (Result<PaymentModel, Error>) -> Void
     ) {
-        _ = logger?
+        _ = ForageSDK.logger?
             .setPrefix("capturePayment")
             .addContext(ForageLogContext(
                 merchantRef: merchantID,
@@ -173,14 +173,14 @@ extension ForageSDK: ForageSDKService {
                     pinCollector: pinCollector,
                     paymentReference: paymentReference
                 )
-                self.logger?.notice("Capture succeeded for Payment \(paymentReference)", attributes: nil)
+                ForageSDK.logger?.notice("Capture succeeded for Payment \(paymentReference)", attributes: nil)
 
                 responseMonitor.setEventOutcome(.success).end()
                 responseMonitor.logResult()
 
                 completion(.success(paymentResult))
             } catch {
-                self.logger?.error("Capture failed for Payment \(paymentReference)", error: error, attributes: nil)
+                ForageSDK.logger?.error("Capture failed for Payment \(paymentReference)", error: error, attributes: nil)
 
                 responseMonitor.setForageErrorCode(error).end()
                 responseMonitor.logResult()
@@ -201,7 +201,7 @@ extension ForageSDK: ForageSDKService {
     ///   - reason: A description of the illegal state or the unmet precondition.
     private func reportIllegalState(for methodName: String, dueTo reason: String) {
         let assertionMessage = "Attempted to call \(methodName), but \(reason)"
-        logger?.critical(assertionMessage, error: nil, attributes: nil)
+        ForageSDK.logger?.critical(assertionMessage, error: nil, attributes: nil)
         assertionFailure(assertionMessage)
     }
 
@@ -211,7 +211,7 @@ extension ForageSDK: ForageSDKService {
         if foragePinTextField.isComplete {
             return true
         }
-        logger?.warn(
+        ForageSDK.logger?.warn(
             "User attempted to submit an incomplete PIN",
             error: CommonErrors.INCOMPLETE_PIN_ERROR,
             attributes: nil
