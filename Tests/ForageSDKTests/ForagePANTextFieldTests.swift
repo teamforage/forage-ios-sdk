@@ -12,10 +12,7 @@ final class ForagePANTextFieldTests: XCTestCase {
     var foragePANTextField: ForagePANTextField!
 
     override func setUp() {
-        ForageSDK.setup(ForageSDK.Config(
-            merchantID: "merchantID123",
-            sessionToken: "authToken123"
-        ))
+        setUpForageSDK()
         foragePANTextField = ForagePANTextField()
     }
 

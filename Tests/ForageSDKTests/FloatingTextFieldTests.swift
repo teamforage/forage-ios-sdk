@@ -13,7 +13,7 @@ final class FloatingTextFieldTests: XCTestCase {
     var floatingTextField: FloatingTextField!
 
     override func setUp() {
-        ForageSDK.setup(ForageSDK.Config(merchantID: "merchant123", sessionToken: "sandbox_auth123"))
+        setUpForageSDK()
         ForageSDK.shared.environment = .sandbox
         floatingTextField = FloatingTextField()
     }

@@ -10,7 +10,7 @@ public class ForageSDK {
     // MARK: Properties
 
     private static var config: Config?
-    internal static var logger: ForageLogger?
+    static var logger: ForageLogger?
     var service: ForageService?
     var merchantID: String = ""
     var sessionToken: String = ""
@@ -31,11 +31,11 @@ public class ForageSDK {
         environment = Environment(sessionToken: config.sessionToken)
         merchantID = config.merchantID
         sessionToken = config.sessionToken
-    
+
         traceId = ForageSDK.logger?.getTraceID() ?? ""
 
         VGSCollectLogger.shared.disableAllLoggers()
-        
+
         let provider = Provider(logger: ForageSDK.logger)
         let pollingService = PollingService(
             provider: provider,
@@ -79,10 +79,10 @@ public class ForageSDK {
     public class func setup(_ config: Config) {
         ForageSDK.config = config
         let environment = Environment(sessionToken: config.sessionToken)
-                
+
         initializeLogger(environment)
         initializeLaunchDarkly(environment)
-        
+
         ForageSDK.logger?.notice("Initialized ForageSDK for merchant \(config.merchantID)", attributes: nil)
     }
 
@@ -115,7 +115,7 @@ public class ForageSDK {
         ForageSDK.config!.sessionToken = newSessionToken
         ForageSDK.shared.sessionToken = newSessionToken
     }
-    
+
     class func initializeLogger(_ environment: Environment) {
         ForageSDK.logger = DatadogLogger(
             ForageLoggerConfig(
@@ -124,7 +124,7 @@ public class ForageSDK {
             )
         )
     }
-    
+
     class func initializeLaunchDarkly(_ environment: Environment) {
         LDManager.shared.initialize(environment, logger: ForageSDK.logger)
     }
