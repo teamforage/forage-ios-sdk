@@ -25,49 +25,59 @@ class MockForageSDK : ForageSDK {
 }
 
 final class ForageSDKTests: XCTestCase {
-    func testInit_shouldInitializeLogger() {
-        MockForageSDK.setup(ForageSDK.Config(
+    private func createMockForageConfig() -> ForageSDK.Config {
+        return ForageSDK.Config(
             merchantID: "merchantID123",
-            sessionToken: "authToken123"
-        ))
+            sessionToken: "dev_authToken123"
+        )
+    }
+    
+    func testInit_shouldInitMerchantId() {
+        MockForageSDK.setup(createMockForageConfig())
+
+        XCTAssertEqual(MockForageSDK.shared.merchantID, "merchantID123")
+    }
+    
+    func testInit_shouldInitSessionToken() {
+        MockForageSDK.setup(createMockForageConfig())
+
+        XCTAssertEqual(MockForageSDK.shared.sessionToken, "dev_authToken123")
+    }
+    
+    func testInit_shouldInitEnvironment() {
+        MockForageSDK.setup(createMockForageConfig())
+
+        XCTAssertEqual(MockForageSDK.shared.environment, Environment.dev)
+    }
+    
+    func testInit_shouldInitializeLogger() {
+        MockForageSDK.setup(createMockForageConfig())
 
         XCTAssertTrue(MockForageSDK.initializedLogger)
     }
     
     func testInit_shouldInitializeLaunchDarkly() {
-        MockForageSDK.setup(ForageSDK.Config(
-            merchantID: "merchantID123",
-            sessionToken: "authToken123"
-        ))
+        MockForageSDK.setup(createMockForageConfig())
 
         XCTAssertTrue(MockForageSDK.initializedLaunchDarkly)
     }
 
     func testInit_shouldInitForageService() {
-        MockForageSDK.setup(ForageSDK.Config(
-            merchantID: "merchantID123",
-            sessionToken: "authToken123"
-        ))
+        MockForageSDK.setup(createMockForageConfig())
 
         XCTAssertNotNil(ForageSDK.shared.service)
     }
 
     func testSetMerchantID_shouldUpdateSharedMerchantID() {
-        MockForageSDK.setup(ForageSDK.Config(
-            merchantID: "merchantID123",
-            sessionToken: "authToken123"
-        ))
+        MockForageSDK.setup(createMockForageConfig())
 
-        ForageSDK.updateMerchantID("newID456")
+        ForageSDK.updateMerchantID("dev_newID456")
 
-        XCTAssertEqual(ForageSDK.shared.merchantID, "newID456")
+        XCTAssertEqual(ForageSDK.shared.merchantID, "dev_newID456")
     }
 
     func testSetSessionToken_shouldUpdateSharedSessionToken() {
-        MockForageSDK.setup(ForageSDK.Config(
-            merchantID: "merchantID123",
-            sessionToken: "authToken123"
-        ))
+        MockForageSDK.setup(createMockForageConfig())
 
         ForageSDK.updateSessionToken("newToken456")
 

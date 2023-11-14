@@ -119,7 +119,7 @@ class DatadogLogger: ForageLogger {
                 remoteLogThreshold: .info,
                 // we want to always emit to Datadog
                 // but we don't want to spam the client's console with our logs.
-                consoleLogFormat: .short
+                consoleLogFormat: nil
             ),
             in: datadogInstance
         )
