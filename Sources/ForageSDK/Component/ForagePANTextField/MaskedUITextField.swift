@@ -34,6 +34,7 @@ class MaskedUITextField: FloatingTextField, ObservableState {
     @IBInspectable public private(set) var isEmpty = true
     @IBInspectable public private(set) var isValid = true
     @IBInspectable public private(set) var isComplete = false
+    @IBInspectable public private(set) var binValue: String? = nil
 
     // MARK: - Initialization
 
@@ -103,6 +104,7 @@ class MaskedUITextField: FloatingTextField, ObservableState {
         if !isProdEnvironment && isSpecialCard(newUnmaskedText) {
             isValid = true
             isComplete = newUnmaskedText.count >= 16 && newUnmaskedText.count <= 19
+            binValue = nil
             return
         }
 
@@ -110,18 +112,21 @@ class MaskedUITextField: FloatingTextField, ObservableState {
         if newUnmaskedText.count < 6 {
             isValid = true
             isComplete = false
+            binValue = nil
             return
         }
 
         if let stateIIN = stateIIN {
             isValid = true
             isComplete = newUnmaskedText.count == stateIIN.panLength
+            binValue = stateIIN.state
             return
         }
 
         // If 6 or more digits are included and the first 6 digits don't map to a known state
         isValid = false
         isComplete = false
+        binValue = nil
     }
 
     private func determineMaskPattern(for newUnmaskedText: String, stateIIN: StateIIN?) -> MaskPattern {
