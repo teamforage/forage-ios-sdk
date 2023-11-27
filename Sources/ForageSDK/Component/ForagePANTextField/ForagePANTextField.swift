@@ -25,8 +25,8 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, CardInform
         enhancedTextField.isComplete
     }
     
-    @IBInspectable public var binValue: String? {
-        enhancedTextField.binValue
+    public var usState: USState? {
+        enhancedTextField.usState
     }
 
     /// BorderWidth for the text field

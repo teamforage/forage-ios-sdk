@@ -22,7 +22,7 @@ final class ForagePANValidationsTests: XCTestCase {
 
     func test_checkPANLength_withValid6digitsPan_shouldReturnState() {
         let stateINN = ForagePANValidations.checkPANLength("507680")
-        let expectedResult = StateIIN(state: "ALABAMA", panNumber: "507680", panLength: 16)
+        let expectedResult = StateIIN(state: USState.alabama, panNumber: "507680", panLength: 16)
         XCTAssertEqual(expectedResult, stateINN)
     }
 
