@@ -264,6 +264,28 @@ final class ForagePINTextFieldTests: XCTestCase {
         // assert that it does not cause crash and resets isComplete=false!
         XCTAssertEqual(btTextFieldWrapper.isComplete, false)
     }
+    
+    // because we force clearText to run on the main thread!
+    func test_clientCallsClearText_onBackgroundThread_doesNotCrash() {
+        let vgsTextFieldWrapper = VGSTextFieldWrapper()
+        let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
+
+        let expectation = XCTestExpectation(description: "should clear text without crashing")
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+            vgsTextFieldWrapper.clearText()
+            vgsTextFieldWrapper.clearText()
+
+            btTextFieldWrapper.clearText()
+            btTextFieldWrapper.clearText()
+            
+            XCTAssertFalse(vgsTextFieldWrapper.isComplete)
+            XCTAssertFalse(btTextFieldWrapper.isComplete)
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation], timeout: 3.0)
+    }
 }
 
 extension ForagePINTextFieldTests: ForageElementDelegate {
