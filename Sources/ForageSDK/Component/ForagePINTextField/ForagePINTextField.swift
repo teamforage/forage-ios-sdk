@@ -256,7 +256,9 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
     // MARK: - Public API
 
     public func clearText() {
-        textField.clearText()
+        DispatchQueue.main.async {
+            self.textField.clearText()
+        }
     }
 }
 
