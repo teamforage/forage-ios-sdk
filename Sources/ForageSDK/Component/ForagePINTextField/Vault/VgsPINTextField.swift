@@ -102,7 +102,9 @@ class VGSTextFieldWrapper: UIView, VaultWrapper {
     // MARK: - Public API
 
     func clearText() {
-        textField.cleanText()
+        DispatchQueue.main.async {
+            self.textField.cleanText()
+        }
     }
 
     var borderWidth: CGFloat {

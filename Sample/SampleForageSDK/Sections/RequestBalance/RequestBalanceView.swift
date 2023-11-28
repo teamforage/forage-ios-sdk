@@ -158,12 +158,14 @@ class RequestBalanceView: UIView {
     // MARK: Fileprivate Methods
 
     @objc fileprivate func getBalanceInfo(_ gesture: UIGestureRecognizer) {
-        ForageSDK.shared.checkBalance(
-            foragePinTextField: foragePinTextField,
-            paymentMethodReference: ClientSharedData.shared.paymentMethodReference
-        ) { result in
-            self.foragePinTextField.clearText()
-            self.printPINResult(result: result)
+        DispatchQueue.global(qos: .userInitiated).async {
+            ForageSDK.shared.checkBalance(
+                foragePinTextField: self.foragePinTextField,
+                paymentMethodReference: ClientSharedData.shared.paymentMethodReference
+            ) { result in
+                self.foragePinTextField.clearText()
+                self.printPINResult(result: result)
+            }
         }
     }
 
