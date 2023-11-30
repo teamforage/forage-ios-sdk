@@ -189,6 +189,24 @@ public protocol ObservableState {
 }
 ```
 
+The `DerivedCardInfoProtocol` protocol defines inferred information about the `ForagePANTextField`.
+
+```
+public protocol DerivedCardInfoProtocol {
+    
+    /// The US state that issued the EBT card, derived from the Issuer Identification Number (IIN),
+    /// also known as BIN (Bank Identification Number).
+    /// The IIN is the first 6 digits of the PAN.
+    var usState: USState? { get }
+}
+```
+
+This field can be accessed through the `derivedCardInfo` property.
+
+```
+foragePanTextField.derivedCardInfo.usState
+```
+
 #### Set the `ForageElement` as the First Responder
 
 Call `foragePanTextField.becomeFirstResponder()` to programmatically set focus on the `ForagePANTextField`:
