@@ -10,7 +10,7 @@ public enum CardType: String {
     case EBT = "ebt"
 }
 
-public class ForagePANTextField: UIView, Identifiable, ForageElement, CardInformation, ForageElementDelegate {
+public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElementDelegate {
     // MARK: - Properties
 
     @IBInspectable public var isEmpty: Bool {
@@ -25,8 +25,8 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, CardInform
         enhancedTextField.isComplete
     }
     
-    public var usState: USState? {
-        enhancedTextField.usState
+    public var derivedCardInfo: DerivedCardInfo {
+        enhancedTextField.derivedCardInfo
     }
 
     /// BorderWidth for the text field

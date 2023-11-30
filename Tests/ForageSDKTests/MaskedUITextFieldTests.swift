@@ -29,7 +29,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertTrue(maskedTextField.isEmpty)
         XCTAssertTrue(maskedTextField.isValid)
         XCTAssertFalse(maskedTextField.isComplete)
-        XCTAssertNil(maskedTextField.usState)
+        XCTAssertNil(maskedTextField.derivedCardInfo.usState)
     }
 
     // MARK: - Validation Tests
@@ -42,7 +42,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertTrue(maskedTextField.isValid)
         XCTAssertTrue(maskedTextField.isComplete)
         XCTAssertEqual(maskedTextField.actualPAN, "5077081234567890")
-        XCTAssertEqual(maskedTextField.usState, USState.wisconsin)
+        XCTAssertEqual(maskedTextField.derivedCardInfo.usState, .wisconsin)
     }
 
     func testValidation_partiallyIdentifying16DigitCard_shouldBeValid() {
@@ -53,7 +53,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertTrue(maskedTextField.isValid)
         XCTAssertFalse(maskedTextField.isComplete)
         XCTAssertEqual(maskedTextField.actualPAN, "50770812345678")
-        XCTAssertEqual(maskedTextField.usState, USState.wisconsin)
+        XCTAssertEqual(maskedTextField.derivedCardInfo.usState, .wisconsin)
     }
 
     func testValidation_identifyingIIN_shouldBeValid() {
@@ -64,7 +64,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertTrue(maskedTextField.isValid)
         XCTAssertFalse(maskedTextField.isComplete)
         XCTAssertEqual(maskedTextField.actualPAN, "12345")
-        XCTAssertNil(maskedTextField.usState)
+        XCTAssertNil(maskedTextField.derivedCardInfo.usState)
     }
 
     func testValidation_invalidIIN_shouldBeInvalid() {
@@ -75,7 +75,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertFalse(maskedTextField.isValid)
         XCTAssertFalse(maskedTextField.isComplete)
         XCTAssertEqual(maskedTextField.actualPAN, "123412")
-        XCTAssertNil(maskedTextField.usState)
+        XCTAssertNil(maskedTextField.derivedCardInfo.usState)
     }
 
     func testValidation_validCardWithExtraDigits_shouldBeInvalid() {
@@ -88,7 +88,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertFalse(maskedTextField.isFirstResponder)
         XCTAssertTrue(maskedTextField.isValid)
         XCTAssertTrue(maskedTextField.isComplete)
-        XCTAssertEqual(maskedTextField.usState, USState.wisconsin)
+        XCTAssertEqual(maskedTextField.derivedCardInfo.usState, .wisconsin)
 
         // Try to exceed the max length of this valid card
         maskedTextField.text = "50770812345678901"
@@ -99,7 +99,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertTrue(maskedTextField.isValid)
         XCTAssertTrue(maskedTextField.isComplete)
         XCTAssertEqual(maskedTextField.actualPAN, expectedPAN)
-        XCTAssertEqual(maskedTextField.usState, USState.wisconsin)
+        XCTAssertEqual(maskedTextField.derivedCardInfo.usState, .wisconsin)
     }
     
     func testValidation_stateShouldBeRemovedOnBackspace() {
@@ -107,14 +107,14 @@ final class MaskedUITextFieldTests: XCTestCase {
         maskedTextField.text = expectedPAN
         maskedTextField.textFieldDidChange()
 
-        XCTAssertEqual(maskedTextField.usState, USState.wisconsin)
+        XCTAssertEqual(maskedTextField.derivedCardInfo.usState, .wisconsin)
 
         // Try to exceed the max length of this valid card
         maskedTextField.text = "50770"
         maskedTextField.textFieldDidChange()
 
         // Check that we remove the state value once we don't have a valid BIN
-        XCTAssertNil(maskedTextField.usState)
+        XCTAssertNil(maskedTextField.derivedCardInfo.usState)
     }
 
     // MARK: - Validation with special cards
@@ -128,7 +128,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertFalse(maskedTextField.isValid)
         XCTAssertFalse(maskedTextField.isComplete)
         XCTAssertEqual(maskedTextField.actualPAN, "4444444444444454")
-        XCTAssertNil(maskedTextField.usState)
+        XCTAssertNil(maskedTextField.derivedCardInfo.usState)
     }
 
     func testValidation_specialInsufficientFundsCard_shouldBeValid() {
@@ -139,7 +139,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertTrue(maskedTextField.isValid)
         XCTAssertTrue(maskedTextField.isComplete)
         XCTAssertEqual(maskedTextField.actualPAN, "4444444444444451")
-        XCTAssertNil(maskedTextField.usState)
+        XCTAssertNil(maskedTextField.derivedCardInfo.usState)
     }
 
     func testValidation_specialInvalidCardNum_shouldBeValid() {
@@ -150,7 +150,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertTrue(maskedTextField.isValid)
         XCTAssertTrue(maskedTextField.isComplete)
         XCTAssertEqual(maskedTextField.actualPAN, "5555555555555514")
-        XCTAssertNil(maskedTextField.usState)
+        XCTAssertNil(maskedTextField.derivedCardInfo.usState)
     }
 
     func testValidation_specialExpiredCardNum_shouldBeValid() {
@@ -161,7 +161,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertTrue(maskedTextField.isValid)
         XCTAssertTrue(maskedTextField.isComplete)
         XCTAssertEqual(maskedTextField.actualPAN, "5555555555555554")
-        XCTAssertNil(maskedTextField.usState)
+        XCTAssertNil(maskedTextField.derivedCardInfo.usState)
     }
 
     func testValidation_completeSpecial9999Card_shouldBeValid() {
@@ -172,7 +172,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertTrue(maskedTextField.isValid)
         XCTAssertTrue(maskedTextField.isComplete)
         XCTAssertEqual(maskedTextField.actualPAN, "9999123411111111")
-        XCTAssertNil(maskedTextField.usState)
+        XCTAssertNil(maskedTextField.derivedCardInfo.usState)
     }
 
     func testValidation_partialSpecial9999Card_shouldBeValidButIncomplete() {
@@ -183,7 +183,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertTrue(maskedTextField.isValid)
         XCTAssertFalse(maskedTextField.isComplete)
         XCTAssertEqual(maskedTextField.actualPAN, "99991234")
-        XCTAssertNil(maskedTextField.usState)
+        XCTAssertNil(maskedTextField.derivedCardInfo.usState)
     }
 
     func testValidation_zeroEbtCashCard() {
@@ -194,7 +194,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertTrue(maskedTextField.isValid)
         XCTAssertTrue(maskedTextField.isComplete)
         XCTAssertEqual(maskedTextField.actualPAN, "6543212312341234")
-        XCTAssertNil(maskedTextField.usState)
+        XCTAssertNil(maskedTextField.derivedCardInfo.usState)
     }
 
     // MARK: Masking
