@@ -39,7 +39,7 @@ public enum USState: String {
     case indiana = "IN"
     case iowa = "IA"
     case kansas = "KS"
-    case kentucky = "KT"
+    case kentucky = "KY"
     case louisiana = "LA"
     case maine = "ME"
     case maryland = "MD"
