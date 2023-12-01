@@ -53,6 +53,9 @@ final class ForagePANTextFieldTests: XCTestCase {
 
         XCTAssertFalse(validTextField.isEmpty)
         XCTAssertFalse(invalidTextField.isEmpty)
+        
+        XCTAssertEqual(validTextField.derivedCardInfo.usState, .maine)
+        XCTAssertNil(invalidTextField.derivedCardInfo.usState)
     }
 
     func test_textField_enterNumericString_shouldReturnTrue() {

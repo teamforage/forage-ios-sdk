@@ -24,6 +24,10 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
     @IBInspectable public var isComplete: Bool {
         enhancedTextField.isComplete
     }
+    
+    public var derivedCardInfo: DerivedCardInfo {
+        enhancedTextField.derivedCardInfo
+    }
 
     /// BorderWidth for the text field
     @IBInspectable public var borderWidth: CGFloat {
