@@ -48,6 +48,19 @@ protocol ForageSDKService: AnyObject {
         paymentReference: String,
         completion: @escaping (Result<PaymentModel, Error>) -> Void
     )
+    
+    /// Collect the pin for a given payment reference
+    ///
+    /// - Parameters:
+    ///  - foragePinTextField: A specialized text field  for securely collecting the PIN to capture the EBT payment.
+    ///  - paymentReference: The reference hash of the Payment
+    ///  TODO: WHAT IS RETURNED?
+    ///  - completion: The closure returns a `Result` containing either a `VaultResponse` or an `Error`. [Read more](https://docs.joinforage.app/reference/capture-payment)
+    func collectPin(
+        foragePinTextField: ForagePINTextField,
+        paymentReference: String,
+        completion: @escaping (Result<URLResponse, Error>) -> Void
+    )
 }
 
 extension ForageSDK: ForageSDKService {
@@ -188,6 +201,48 @@ extension ForageSDK: ForageSDKService {
 
                 responseMonitor.setForageErrorCode(error).end()
                 responseMonitor.logResult()
+
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    public func collectPin(
+        foragePinTextField: ForagePINTextField,
+        paymentReference: String,
+        completion: @escaping (Result<URLResponse, Error>) -> Void
+    ) {
+        _ = ForageSDK.logger?
+            .setPrefix("collectPin")
+            .addContext(ForageLogContext(
+                merchantRef: merchantID,
+                paymentRef: paymentReference
+            ))
+            .notice("Called ForageSDK.shared.collectPin for Payment \(paymentReference)", attributes: nil)
+
+        guard let forageService = service else {
+            reportIllegalState(for: "collectPin", dueTo: "ForageService was not initialized")
+            return
+        }
+
+        guard validatePin(foragePinTextField: foragePinTextField) else {
+            completion(.failure(CommonErrors.INCOMPLETE_PIN_ERROR))
+            return
+        }
+
+        let pinCollector = foragePinTextField.getPinCollector()
+
+        Task.init {
+            do {
+                let collectPinResult = try await forageService.collectPin(
+                    pinCollector: pinCollector,
+                    paymentReference: paymentReference
+                )
+                ForageSDK.logger?.notice("Collect pin succeeded for Payment \(paymentReference)", attributes: nil)
+
+                completion(.success(collectPinResult))
+            } catch {
+                ForageSDK.logger?.error("Collect pin failed for Payment \(paymentReference)", error: error, attributes: nil)
 
                 completion(.failure(error))
             }

@@ -97,4 +97,20 @@ protocol ForageService: AnyObject {
         pinCollector: VaultCollector,
         paymentReference: String
     ) async throws -> PaymentModel
+    
+    /// Collect the pin for a payment using the given `pinCollector` and `paymentReference`
+    ///
+    /// - Parameters:
+    ///   - pinCollector: The service responsible for securely collecting PINs.
+    ///   - paymentReference: The reference hash of the Payment.
+    ///
+    /// - Throws:
+    ///   - `ForageError`: If there's an issue at any stage of the payment capture process.
+    ///
+    /// - Returns:
+    ///   - A `PaymentModel` object containing the details of the captured payment.
+    func collectPin(
+        pinCollector: VaultCollector,
+        paymentReference: String
+    ) async throws -> URLResponse
 }

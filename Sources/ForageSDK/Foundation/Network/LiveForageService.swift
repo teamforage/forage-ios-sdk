@@ -194,6 +194,58 @@ class LiveForageService: ForageService {
     func getPayment(sessionToken: String, merchantID: String, paymentRef: String, completion: @escaping (Result<PaymentModel, Error>) -> Void) {
         do { try provider.execute(model: PaymentModel.self, endpoint: ForageAPI.getPayment(sessionToken: sessionToken, merchantID: merchantID, paymentRef: paymentRef), completion: completion) } catch { completion(.failure(error)) }
     }
+    
+    // MARK: Collect pin
+
+    func collectPin(
+        pinCollector: VaultCollector,
+        paymentReference: String
+    ) async throws -> URLResponse {
+        let sessionToken = ForageSDK.shared.sessionToken
+        let merchantID = ForageSDK.shared.merchantID
+
+        do {
+            // TODO: parallelize the first 2 requests!
+            let xKeyModel = try await awaitResult { completion in
+                self.getXKey(sessionToken: sessionToken, merchantID: merchantID, completion: completion)
+            }
+            let payment = try await awaitResult { completion in
+                self.getPayment(
+                    sessionToken: sessionToken,
+                    merchantID: merchantID,
+                    paymentRef: paymentReference,
+                    completion: completion
+                )
+            }
+            let paymentMethod = try await awaitResult { completion in
+                self.getPaymentMethod(
+                    sessionToken: sessionToken,
+                    merchantID: merchantID,
+                    paymentMethodRef: payment.paymentMethodRef,
+                    completion: completion
+                )
+            }
+
+            let cachePinRequest = ForageRequestModel(
+                authorization: sessionToken,
+                paymentMethodReference: "",
+                paymentReference: paymentReference,
+                cardNumberToken: paymentMethod.card.token,
+                merchantID: merchantID,
+                xKey: ["vgsXKey": xKeyModel.alias, "btXKey": xKeyModel.bt_alias]
+            )
+
+            let response = try await submitPinToVault(
+                pinCollector: pinCollector,
+                path: "/api/payments/\(paymentReference)/collect_pin/",
+                request: cachePinRequest
+            )
+            
+            return response.urlResponse!
+        } catch {
+            throw error
+        }
+    }
 
     // MARK: Private helper methods
 
