@@ -15,9 +15,14 @@ class ViewController: UIViewController {
     @IBOutlet private var sessionTokenTextField: UITextField!
     @IBOutlet private var merchantIdTextField: UITextField!
 
-    // MARK: IBActions
+    @IBOutlet private var startPaymentSheetFlowButton: UIButton!
 
-    @IBAction func didTapOnStartSDK(_ sender: Any) {
+    override func viewDidLoad() {
+        startPaymentSheetFlowButton.layer.borderWidth = 2
+        startPaymentSheetFlowButton.layer.borderColor = UIColor.black.cgColor
+    }
+
+    private func initializeSdk() {
         guard
             let merchantID = merchantIdTextField.text,
             let sessionToken = sessionTokenTextField.text
@@ -32,8 +37,27 @@ class ViewController: UIViewController {
                 sessionToken: sessionToken
             )
         )
+    }
+
+    // MARK: IBActions
+
+    @IBAction func didTapOnStartEbtFlow(_ sender: Any) {
+        initializeSdk()
 
         let cardNumberViewController = CardNumberViewController()
-        navigationController?.pushViewController(cardNumberViewController, animated: true)
+        navigationController?.pushViewController(
+            cardNumberViewController,
+            animated: true
+        )
+    }
+
+    @IBAction func didTapOnStartPaymentSheetFlow(_ sender: Any) {
+        initializeSdk()
+
+        let paymentSheetViewController = PaymentSheetViewController()
+        navigationController?.pushViewController(
+            paymentSheetViewController,
+            animated: true
+        )
     }
 }

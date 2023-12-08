@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="Jfb-Vk-J3O">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="22154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="Jfb-Vk-J3O">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22130"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -18,7 +18,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="PUg-Ds-slB">
-                                <rect key="frame" x="0.0" y="92" width="414" height="290"/>
+                                <rect key="frame" x="0.0" y="92" width="414" height="342"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="EsB-kA-2gw">
                                         <rect key="frame" x="0.0" y="0.0" width="414" height="119"/>
@@ -87,16 +87,16 @@
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="UNl-84-jaw">
                                                 <rect key="frame" x="24" y="5" width="366" height="42"/>
-                                                <color key="backgroundColor" systemColor="systemBlueColor"/>
+                                                <color key="backgroundColor" red="0.1019607931" green="0.25490197539999998" blue="0.19215688110000001" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                 <accessibility key="accessibilityConfiguration" identifier="bt_next" label="Next button"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="42" id="EMJ-jY-mq6"/>
                                                 </constraints>
                                                 <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <state key="normal" title="Button"/>
-                                                <buttonConfiguration key="configuration" style="plain" title="Next"/>
+                                                <buttonConfiguration key="configuration" style="plain" title="Start EBT flow"/>
                                                 <connections>
-                                                    <action selector="didTapOnStartSDK:" destination="BYZ-38-t0r" eventType="touchUpInside" id="sXS-s4-Y8v"/>
+                                                    <action selector="didTapOnStartEbtFlow:" destination="BYZ-38-t0r" eventType="touchUpInside" id="MSi-NG-ilo"/>
                                                 </connections>
                                             </button>
                                         </subviews>
@@ -106,6 +106,32 @@
                                             <constraint firstItem="UNl-84-jaw" firstAttribute="leading" secondItem="qSV-Wh-Ojy" secondAttribute="leading" constant="24" id="Bbm-fl-rRQ"/>
                                             <constraint firstItem="UNl-84-jaw" firstAttribute="top" secondItem="qSV-Wh-Ojy" secondAttribute="top" constant="5" id="SQI-O5-jZj"/>
                                             <constraint firstAttribute="bottom" secondItem="UNl-84-jaw" secondAttribute="bottom" constant="5" id="clq-NU-Qy2"/>
+                                        </constraints>
+                                    </view>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="G3w-zs-QWl">
+                                        <rect key="frame" x="0.0" y="290" width="414" height="52"/>
+                                        <subviews>
+                                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="T9q-Sv-vkb">
+                                                <rect key="frame" x="24" y="19" width="366" height="42"/>
+                                                <color key="backgroundColor" red="0.89019608500000003" green="0.99607843159999998" blue="0.88627451660000001" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                                <accessibility key="accessibilityConfiguration" identifier="bt_start_paymentsheet_flow" label="Start EBT Flow button"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="42" id="kxH-E3-HcE"/>
+                                                </constraints>
+                                                <color key="tintColor" systemColor="labelColor"/>
+                                                <state key="normal" title="Button"/>
+                                                <buttonConfiguration key="configuration" style="plain" title="Start ForagePaymentSheet flow"/>
+                                                <connections>
+                                                    <action selector="didTapOnStartPaymentSheetFlow:" destination="BYZ-38-t0r" eventType="touchUpInside" id="3tv-2D-2aM"/>
+                                                </connections>
+                                            </button>
+                                        </subviews>
+                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                        <constraints>
+                                            <constraint firstAttribute="trailing" secondItem="T9q-Sv-vkb" secondAttribute="trailing" constant="24" id="9N0-YJ-9ko"/>
+                                            <constraint firstItem="T9q-Sv-vkb" firstAttribute="top" secondItem="G3w-zs-QWl" secondAttribute="top" constant="5" id="S4n-le-3KI"/>
+                                            <constraint firstItem="T9q-Sv-vkb" firstAttribute="leading" secondItem="G3w-zs-QWl" secondAttribute="leading" constant="24" id="Zyk-ci-3AM"/>
+                                            <constraint firstAttribute="bottom" secondItem="T9q-Sv-vkb" secondAttribute="bottom" constant="5" id="yXd-rJ-43t"/>
                                         </constraints>
                                     </view>
                                 </subviews>
@@ -123,6 +149,7 @@
                     <connections>
                         <outlet property="merchantIdTextField" destination="oqE-tP-yg0" id="7OC-JT-kZ4"/>
                         <outlet property="sessionTokenTextField" destination="2Jp-Qt-zxc" id="bjP-aI-SrQ"/>
+                        <outlet property="startPaymentSheetFlowButton" destination="T9q-Sv-vkb" id="mJi-Px-9go"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -149,11 +176,11 @@
         </scene>
     </scenes>
     <resources>
+        <systemColor name="labelColor">
+            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-        </systemColor>
-        <systemColor name="systemBlueColor">
-            <color red="0.0" green="0.47843137254901963" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

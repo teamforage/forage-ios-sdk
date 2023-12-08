@@ -101,7 +101,7 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertEqual(maskedTextField.actualPAN, expectedPAN)
         XCTAssertEqual(maskedTextField.derivedCardInfo.usState, .wisconsin)
     }
-    
+
     func testValidation_stateShouldBeRemovedOnBackspace() {
         let expectedPAN = "507708"
         maskedTextField.text = expectedPAN

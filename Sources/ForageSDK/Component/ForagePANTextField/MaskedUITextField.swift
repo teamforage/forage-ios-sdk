@@ -34,7 +34,7 @@ class MaskedUITextField: FloatingTextField, ObservableState {
     @IBInspectable public private(set) var isEmpty = true
     @IBInspectable public private(set) var isValid = true
     @IBInspectable public private(set) var isComplete = false
-    public private(set) var derivedCardInfo: DerivedCardInfo = DerivedCardInfo()
+    public private(set) var derivedCardInfo: DerivedCardInfo = .init()
 
     // MARK: - Initialization
 
