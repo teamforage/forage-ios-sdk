@@ -272,19 +272,20 @@ public class ForagePANTextField: UIView, ForageTextField, ForageTextFieldDelegat
 
 // MARK: - UIResponder methods
 
-// TODO: update comments
 extension ForagePANTextField {
-    /// Set focus on the `ForagePANTextField` if ...
+    /// Makes the `ForagePANTextField` the first responder, triggering the keyboard to appear.
+    /// - Returns: A Boolean value indicating whether the `ForagePANTextField` successfully became the first responder.
     @discardableResult override public func becomeFirstResponder() -> Bool {
         enhancedTextField.becomeFirstResponder()
     }
 
-    /// Remove  focus from `ForagePANTextField`.
+    /// Resigns the first responder status of the `ForagePANTextField`, causing the keyboard to be dismissed.
+    /// - Returns: A Boolean value indicating whether the `ForagePANTextField` successfully resigned its first responder status.
     @discardableResult override public func resignFirstResponder() -> Bool {
         enhancedTextField.resignFirstResponder()
     }
 
-    /// Check if `ForagePANTextField` is focused.
+    /// Indicates whether the `ForagePANTextField` is currently the first responder.
     override public var isFirstResponder: Bool {
         enhancedTextField.isFirstResponder
     }

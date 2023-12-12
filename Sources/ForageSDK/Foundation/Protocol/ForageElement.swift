@@ -33,15 +33,16 @@ public protocol TextFieldObservableState: ObservableState {
     var isValid: Bool { get }
 }
 
-// TODO: update comments
 public protocol ForageTextField: ForageElement, TextFieldObservableState, Appearance, Style {
-    /// Clear the value in the input field.
+    /// Clears the current text in the input field.
     func clearText()
 
-    /// Request that the input field gains focus. Returns ... if
+    /// Requests the input field to become the first responder, bringing the keyboard into view.
+    /// - Returns: A Boolean value indicating whether the input field successfully became the first responder.
     func becomeFirstResponder() -> Bool
 
-    /// Request that the input field resign focus. Returns ...
+    /// Requests the input field to resign its first responder status, which will dismiss the keyboard.
+    /// - Returns: A Boolean value indicating whether the input field successfully resigned its first responder status.
     func resignFirstResponder() -> Bool
 }
 
@@ -52,10 +53,7 @@ public protocol ForageTextFieldDelegate: AnyObject {
 
 // MARK: ForageTable
 
-public protocol ForageTableDelegate: AnyObject {
-    // TODO: consider rename
-    func textFieldDidChange(_ state: ObservableState)
-}
+public protocol ForageTableDelegate: AnyObject {}
 
 public protocol ForageTableView: ForageElement {
     var delegate: ForageTableDelegate? { get set }

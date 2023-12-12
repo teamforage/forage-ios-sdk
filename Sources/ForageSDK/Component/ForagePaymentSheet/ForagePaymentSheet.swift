@@ -57,8 +57,6 @@ public class ForagePaymentSheet: UIView, ForageElement {
     override public func didMoveToSuperview() {
         if superview != nil {
             super.didMoveToSuperview()
-
-            // TODO: test with DispatchQueue.main.async
             loadFinixPaymentSheet()
         }
     }
