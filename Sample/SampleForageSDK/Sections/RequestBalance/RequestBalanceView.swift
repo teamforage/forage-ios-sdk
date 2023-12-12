@@ -264,7 +264,7 @@ class RequestBalanceView: BaseSampleView {
         )
     }
 
-    private func updateState(state: ObservableState) {
+    private func updateState(state: TextFieldObservableState) {
         isEmptyLabel.text = "isEmpty: \(state.isEmpty)"
         isCompleteLabel.text = "isComplete: \(state.isComplete)"
         isValidLabel.text = "isValid: \(state.isValid)"
@@ -274,12 +274,12 @@ class RequestBalanceView: BaseSampleView {
 
 // MARK: - ForageElementDelegate
 
-extension RequestBalanceView: ForageElementDelegate {
-    func focusDidChange(_ state: ObservableState) {
+extension RequestBalanceView: ForageTextFieldDelegate {
+    func focusDidChange(_ state: TextFieldObservableState) {
         updateState(state: state)
     }
 
-    func textFieldDidChange(_ state: ObservableState) {
+    func textFieldDidChange(_ state: TextFieldObservableState) {
         updateState(state: state)
     }
 }

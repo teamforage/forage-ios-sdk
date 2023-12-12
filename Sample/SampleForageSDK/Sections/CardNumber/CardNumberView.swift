@@ -255,7 +255,7 @@ class CardNumberView: BaseSampleView {
         button.alpha = isEnabled ? 1.0 : 0.5
     }
 
-    private func updateState(state: ObservableState) {
+    private func updateState(state: TextFieldObservableState) {
         firstResponderLabel.text = "isFirstResponder: \(state.isFirstResponder)"
         completeLabel.text = "isComplete: \(state.isComplete)"
         emptyLabel.text = "isEmpty: \(state.isEmpty)"
@@ -265,12 +265,12 @@ class CardNumberView: BaseSampleView {
 
 // MARK: - ForagePANTextFieldDelegate
 
-extension CardNumberView: ForageElementDelegate {
-    func focusDidChange(_ state: ObservableState) {
+extension CardNumberView: ForageTextFieldDelegate {
+    func focusDidChange(_ state: TextFieldObservableState) {
         updateState(state: state)
     }
 
-    func textFieldDidChange(_ state: ObservableState) {
+    func textFieldDidChange(_ state: TextFieldObservableState) {
         updateState(state: state)
     }
 }

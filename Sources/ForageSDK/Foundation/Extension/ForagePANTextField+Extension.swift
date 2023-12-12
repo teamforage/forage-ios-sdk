@@ -11,11 +11,11 @@ import UIKit
 // MARK: - UITextFieldDelegate
 
 extension ForagePANTextField: UITextFieldDelegate {
-    public func focusDidChange(_ state: ObservableState) {
+    public func focusDidChange(_ state: TextFieldObservableState) {
         delegate?.focusDidChange(self)
     }
 
-    public func textFieldDidChange(_ state: ObservableState) {
+    public func textFieldDidChange(_ state: TextFieldObservableState) {
         delegate?.textFieldDidChange(self)
     }
 

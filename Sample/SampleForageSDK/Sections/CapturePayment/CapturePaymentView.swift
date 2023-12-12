@@ -320,8 +320,8 @@ class CapturePaymentView: UIView {
 
 // MARK: - ForageElementDelegate
 
-extension CapturePaymentView: ForageElementDelegate {
-    func focusDidChange(_ state: ObservableState) {}
+extension CapturePaymentView: ForageTextFieldDelegate {
+    func focusDidChange(_ state: TextFieldObservableState) {}
 
-    func textFieldDidChange(_ state: ObservableState) {}
+    func textFieldDidChange(_ state: TextFieldObservableState) {}
 }

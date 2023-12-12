@@ -10,7 +10,7 @@ public enum CardType: String {
     case EBT = "ebt"
 }
 
-public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElementDelegate {
+public class ForagePANTextField: UIView, ForageTextField, ForageTextFieldDelegate {
     // MARK: - Properties
 
     @IBInspectable public var isEmpty: Bool {
@@ -108,7 +108,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
     // MARK: - Public Delegate
 
     /// A delegate that informs the client about the state of the entered card number (validation, focus).
-    public weak var delegate: ForageElementDelegate?
+    public weak var delegate: ForageTextFieldDelegate?
 
     // MARK: - Private components
 
@@ -272,8 +272,9 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
 
 // MARK: - UIResponder methods
 
+// TODO: update comments
 extension ForagePANTextField {
-    /// Make `ForagePANTextField` focused.
+    /// Set focus on the `ForagePANTextField` if ...
     @discardableResult override public func becomeFirstResponder() -> Bool {
         enhancedTextField.becomeFirstResponder()
     }

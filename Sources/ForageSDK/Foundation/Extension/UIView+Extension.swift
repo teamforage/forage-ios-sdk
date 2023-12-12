@@ -11,8 +11,28 @@ import UIKit
 // MARK: - UIView extension
 
 extension UIView {
+    /// Traverse through a UIView's ancestors until  a parent `UIViewController` is found.
+    var parentViewController: UIViewController? {
+        var parentResponder: UIResponder? = self
+        while parentResponder != nil {
+            parentResponder = parentResponder!.next
+            if let viewController = parentResponder as? UIViewController {
+                return viewController
+            }
+        }
+        return nil
+    }
+
+    /// Fills the entire superview by anchoring all sides and the center X axis to the corresponding anchors of the superview.
+    /// This method assumes the view is already added to a superview.
     func fillSuperview() {
-        anchor(top: superview?.topAnchor, leading: superview?.leadingAnchor, bottom: superview?.bottomAnchor, trailing: superview?.trailingAnchor, centerXAnchor: superview?.centerXAnchor)
+        anchor(
+            top: superview?.topAnchor,
+            leading: superview?.leadingAnchor,
+            bottom: superview?.bottomAnchor,
+            trailing: superview?.trailingAnchor,
+            centerXAnchor: superview?.centerXAnchor
+        )
     }
 
     func anchorSize(to view: UIView) {

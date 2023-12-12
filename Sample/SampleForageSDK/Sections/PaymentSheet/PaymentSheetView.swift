@@ -10,6 +10,10 @@ import Foundation
 import UIKit
 
 class PaymentSheetView: UIView {
+    override public var intrinsicContentSize: CGSize {
+        CGSize(width: frame.width, height: frame.height)
+    }
+
     private let contentView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -19,60 +23,18 @@ class PaymentSheetView: UIView {
 
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "ForagePaymentSheet Flow"
+        label.text = "ForagePaymentSheet"
         label.font = UIFont.systemFont(ofSize: 28, weight: .bold)
         label.accessibilityIdentifier = "lbl_title"
         label.isAccessibilityElement = true
         return label
     }()
 
-    // TODO: implement
-//    public let panNumberTextField: ForagePANTextField = {
-//        let tf = ForagePANTextField()
-//        tf.placeholder = "PAN Number"
-//        tf.accessibilityIdentifier = "tf_ebt_number"
-//        tf.isAccessibilityElement = true
-//        return tf
-//    }()
-
-    private let firstResponderLabel: UILabel = {
-        let label = UILabel()
-        label.text = "isFirstResponder: false"
-        label.textColor = .gray
-        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        label.accessibilityIdentifier = "lbl_first_responder"
-        label.isAccessibilityElement = true
-        return label
-    }()
-
-    private let completeLabel: UILabel = {
-        let label = UILabel()
-        label.text = "isComplete: false"
-        label.textColor = .gray
-        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        label.accessibilityIdentifier = "lbl_complete"
-        label.isAccessibilityElement = true
-        return label
-    }()
-
-    private let emptyLabel: UILabel = {
-        let label = UILabel()
-        label.text = "isEmpty: true"
-        label.textColor = .gray
-        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        label.accessibilityIdentifier = "lbl_empty"
-        label.isAccessibilityElement = true
-        return label
-    }()
-
-    private let validLabel: UILabel = {
-        let label = UILabel()
-        label.text = "isValid: true"
-        label.textColor = .gray
-        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        label.accessibilityIdentifier = "lbl_valid"
-        label.isAccessibilityElement = true
-        return label
+    private let foragePaymentSheet: ForagePaymentSheet = {
+        let foragePaymentSheet = ForagePaymentSheet()
+        foragePaymentSheet.accessibilityIdentifier = "view_forage_payment_sheet"
+        foragePaymentSheet.isAccessibilityElement = true
+        return foragePaymentSheet
     }()
 
     private let tokenizeSheetButton: UIButton = {
@@ -172,13 +134,13 @@ class PaymentSheetView: UIView {
 
     @objc fileprivate func sendInfo(_ gesture: UIGestureRecognizer) {
         // TODO: implement
-//        ForageSDK.shared.tokenizeEBTCard(
-//            foragePanTextField: panNumberTextField,
-//            customerID: ClientSharedData.shared.customerID,
-//            reusable: ClientSharedData.shared.isReusablePaymentMethod
-//        ) { result in
-//            self.printResult(result: result)
-//        }
+        //        ForageSDK.shared.tokenizeCard(
+        //            forageElement: foragePaymentSheet,
+        //            customerID: ClientSharedData.shared.customerID,
+        //            reusable: ClientSharedData.shared.isReusablePaymentMethod
+        //        ) { result in
+        //            self.printResult(result: result)
+        //        }
     }
 
     // MARK: Public Methods
@@ -224,12 +186,7 @@ class PaymentSheetView: UIView {
     private func setupView() {
         addSubview(contentView)
         contentView.addSubview(titleLabel)
-        // TODO: uncomment
-//        contentView.addSubview(panNumberTextField)
-        contentView.addSubview(firstResponderLabel)
-        contentView.addSubview(completeLabel)
-        contentView.addSubview(emptyLabel)
-        contentView.addSubview(validLabel)
+        contentView.addSubview(foragePaymentSheet)
         contentView.addSubview(refLabel)
         contentView.addSubview(typeLabel)
         contentView.addSubview(tokenLabel)
@@ -242,7 +199,6 @@ class PaymentSheetView: UIView {
 
     private func setupConstraints() {
         setupContentViewConstraints()
-//        completeLabel.text = "isComplete: \(foragePaymentSheet.isComplete)"
     }
 
     private func setupContentViewConstraints() {
@@ -263,37 +219,17 @@ class PaymentSheetView: UIView {
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
         )
 
-        // TODO: anchor foragePaymentSheet
-//        panNumberTextField.anchor(
-//            top: titleLabel.safeAreaLayoutGuide.bottomAnchor,
-//            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
-//            bottom: nil,
-//            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
-//            centerXAnchor: contentView.centerXAnchor,
-//            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
-//        )
-
-        // TODO: update this constraint
-        completeLabel.anchor(
+        foragePaymentSheet.anchor(
             top: titleLabel.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
             bottom: nil,
             trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
             centerXAnchor: contentView.centerXAnchor,
-            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
-        )
-
-        emptyLabel.anchor(
-            top: completeLabel.safeAreaLayoutGuide.bottomAnchor,
-            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
-            bottom: nil,
-            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
-            centerXAnchor: contentView.centerXAnchor,
-            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
+            padding: UIEdgeInsets(top: 24, left: 0, bottom: 0, right: 0)
         )
 
         refLabel.anchor(
-            top: validLabel.safeAreaLayoutGuide.bottomAnchor,
+            top: foragePaymentSheet.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
             bottom: nil,
             trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
@@ -370,22 +306,5 @@ class PaymentSheetView: UIView {
         button.isEnabled = isEnabled
         button.isUserInteractionEnabled = isEnabled
         button.alpha = isEnabled ? 1.0 : 0.5
-    }
-
-    private func updateState(state: ObservableState) {
-        firstResponderLabel.text = "isFirstResponder: \(state.isFirstResponder)"
-        completeLabel.text = "isComplete: \(state.isComplete)"
-    }
-}
-
-// MARK: - ForagePANTextFieldDelegate
-
-extension PaymentSheetView: ForageElementDelegate {
-    func focusDidChange(_ state: ObservableState) {
-        updateState(state: state)
-    }
-
-    func textFieldDidChange(_ state: ObservableState) {
-        updateState(state: state)
     }
 }

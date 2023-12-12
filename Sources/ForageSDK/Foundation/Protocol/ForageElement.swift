@@ -8,48 +8,55 @@
 
 import UIKit
 
-/// The state of an input that Forage exposes during events or statically as input instance attributes.
+// MARK: Common
+
+/// The interface that all of Forage’s input elements adhere to be it for PAN or PIN.
+public protocol ForageElement: UIView, Identifiable, ObservableState {}
+
+/// The `ObservableState` protocol defines properties reflecting the state of a `ForageElement`.
 public protocol ObservableState {
-    /// isFirstResponder is true if the input is focused, false otherwise.
-    var isFirstResponder: Bool { get }
-
-    /// isEmpty is true if the input is empty, false otherwise.
-    var isEmpty: Bool { get }
-
-    /// isValid is true when the input text does not fail any validation checks with the exception of target length;
-    /// false if any of the validation checks other than target length fail.
-    var isValid: Bool { get }
-
-    /// isComplete is true when all validation checks pass and the input is ready to be submitted.
+    /// Indicates whether all validation checks pass and the `ForageElement` is ready for submission.
     var isComplete: Bool { get }
 }
 
-/// The higher visual characteristics that apply to every Forage input and are not specific to a single input.
-public protocol Appearance {
-    var textColor: UIColor? { get set }
-    var tfTintColor: UIColor? { get set }
-    var borderWidth: CGFloat { get set }
-    var borderColor: UIColor? { get set }
-    var cornerRadius: CGFloat { get set }
-    var masksToBounds: Bool { get set }
+// MARK: ForageTextField
+
+/// The `TextFieldObservableState` protocol defines properties reflecting the state of a `ForageTextField`.
+public protocol TextFieldObservableState: ObservableState {
+    /// Indicates whether the input is focused.
+    var isFirstResponder: Bool { get }
+
+    /// Indicates whether the input is empty.
+    var isEmpty: Bool { get }
+
+    /// Indicates whether all validation checks pass, excluding the the minimum length validator.
+    var isValid: Bool { get }
 }
 
-/// The visual characteristics that require input-specific customization.
-public protocol Style {
-    var padding: UIEdgeInsets { get set }
-    var textAlignment: NSTextAlignment { get set }
-}
-
-/// The interface that all of Forage’s input elements adhere to be it for PAN or PIN.
-public protocol ForageElement: UIView, Appearance, ObservableState, Style {
-    var delegate: ForageElementDelegate? { get set }
-
+// TODO: update comments
+public protocol ForageTextField: ForageElement, TextFieldObservableState, Appearance, Style {
     /// Clear the value in the input field.
     func clearText()
 
-    /// Request that the input field gain focus.
+    /// Request that the input field gains focus. Returns ... if
     func becomeFirstResponder() -> Bool
 
-    /// Request that the input field resign focus.
+    /// Request that the input field resign focus. Returns ...
     func resignFirstResponder() -> Bool
+}
+
+public protocol ForageTextFieldDelegate: AnyObject {
+    func focusDidChange(_ state: TextFieldObservableState)
+    func textFieldDidChange(_ state: TextFieldObservableState)
+}
+
+// MARK: ForageTable
+
+public protocol ForageTableDelegate: AnyObject {
+    // TODO: consider rename
+    func textFieldDidChange(_ state: ObservableState)
+}
+
+public protocol ForageTableView: ForageElement {
+    var delegate: ForageTableDelegate? { get set }
 }
