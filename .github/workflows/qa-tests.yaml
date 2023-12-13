@@ -56,5 +56,6 @@ jobs:
           cd mobile-qa-tests
           pip3 install -r requirements.txt
           export BROWSERSTACK_CUSTOM_ID=${{ env.BROWSERSTACK_CUSTOM_ID }}
+          echo $BROWSERSTACK_CUSTOM_ID
           pytest ios/tests/test_basic_flow.py || true
           pytest --lf --last-failed-no-failures none --suppress-no-test-exit-code ios/tests/test_basic_flow.py
