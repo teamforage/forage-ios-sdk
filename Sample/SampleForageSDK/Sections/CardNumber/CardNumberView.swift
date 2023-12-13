@@ -39,15 +39,15 @@ class CardNumberView: UIView {
 
     public let panNumberTextField: ForagePANTextField = {
         let tf = ForagePANTextField()
-        tf.placeholder = "Primary Account Number (PAN)"
         tf.accessibilityIdentifier = "tf_ebt_number"
+        tf.isAccessibilityElement = true
+        
+        tf.placeholder = "Primary Account Number (PAN)"
         tf.borderColor = UIColor(red: 0.01, green: 0.26, blue: 0.19, alpha: 1.0)
         tf.borderWidth = 2.0
         tf.cornerRadius = 4.0
         tf.font = .systemFont(ofSize: 18)
-        tf.heightAnchor.constraint(equalToConstant: 70).isActive = true
         
-        tf.isAccessibilityElement = true
         return tf
     }()
 
