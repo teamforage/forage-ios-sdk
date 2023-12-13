@@ -17,7 +17,7 @@ enum MaskPattern: String {
     case noIINmatch = "#### #### #### #### ###"
 }
 
-class MaskedUITextField: FloatingTextField, ObservableState {
+class MaskedUITextField: FloatingTextField, TextFieldObservableState {
     // MARK: - Properties
 
     var actualPAN: String = ""
@@ -25,7 +25,7 @@ class MaskedUITextField: FloatingTextField, ObservableState {
     private var wasBackspacePressed = false
 
     /// A delegate that informs the client about the state of the entered card number (validation, focus)
-    public weak var forageDelegate: ForageElementDelegate? {
+    public weak var forageDelegate: ForageTextFieldDelegate? {
         didSet {
             delegate = forageDelegate as? UITextFieldDelegate
         }

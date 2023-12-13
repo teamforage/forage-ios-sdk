@@ -9,11 +9,16 @@ Pod::Spec.new do |spec|
   spec.author       = { "Rob Gormisky" => "rob@joinforage.com" }
   spec.platform     = :ios, "13.0"
   spec.readme       = "https://raw.githubusercontent.com/teamforage/forage-ios-sdk/main/README.md"
+  
   spec.source       = { :git => "https://github.com/teamforage/forage-ios-sdk.git", :tag => "4.2.0" }
   spec.source_files = ["Sources/ForageSDK/**/*.swift", "DatadogPrivate-Objc/**/*.{h,m}"]
+
   spec.dependency 'VGSCollectSDK', '~> 1.11.2'
   spec.dependency 'LaunchDarkly', '~> 8.0.1'
   spec.dependency 'BasisTheoryElements', '~> 4.0.0'
+
+  spec.vendored_frameworks = 'Frameworks/FinixPaymentSheet.xcframework'
+
   spec.resource_bundles = {
     'ForageIcon' => ['Sources/Resources/*']
   }

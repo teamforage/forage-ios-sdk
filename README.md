@@ -21,8 +21,8 @@ The ForageSDK is a Swift library for securely processing EBT payments. You can u
   - [Forage UI Elements](#forage-ui-elements)
     - [ForagePANTextField](#foragepantextfield)
       - [Initialize the `ForagePANTextField`](#initialize-the-foragepantextfield)
-      - [Subscribe to `ForageElement` state changes](#subscribe-to-forageelement-state-changes)
-      - [Set the `ForageElement` as the First Responder](#set-the-forageelement-as-the-first-responder)
+      - [Subscribe to `ForageTextField` state changes](#subscribe-to-foragetextfield-state-changes)
+      - [Set the `ForageTextField` as the First Responder](#set-the-foragetextfield-as-the-first-responder)
     - [Tokenize a customer's EBT card](#tokenize-a-customers-ebt-card)
     - [ForagePINTextField](#foragepintextfield)
       - [Initialize the `ForagePINTextField`](#initialize-the-foragepintextfield)
@@ -119,7 +119,7 @@ ForageSDK provides two UI Elements to securely communicate with the Forage API.
 
 ### ForagePANTextField
 
-A `ForageElement` that securely collects the customer's EBT PAN. This field validates the PAN based on the Issuer Identification Number (IIN).
+A `ForageTextField` that securely collects the customer's EBT PAN. This field validates the PAN based on the Issuer Identification Number (IIN).
 
 <img width="45%" alt="image" src="https://github.com/teamforage/forage-ios-sdk/assets/32694765/0a338662-9d29-4a65-882c-b09e99417b25">
 
@@ -140,11 +140,11 @@ private let foragePanTextField: ForagePANTextField = {
 }()
 ```
 
-#### Subscribe to `ForageElement` state changes
+#### Subscribe to `ForageTextField` state changes
 
-Forage validates an EBT Element’s input as a customer types. To notify customers of input validation errors, you'll need to conform to the `ForageElementDelegate` protocol.
+Forage validates an EBT Element’s input as a customer types. To notify customers of input validation errors, you'll need to conform to the `ForageTextFieldDelegate` protocol.
 
-The `focusDidChange` method is triggered when a `ForageElement` gains or loses focus.
+The `focusDidChange` method is triggered when a `ForageTextField` gains or loses focus.
 
 ```swift
 foragePanTextField.delegate = self
@@ -152,29 +152,29 @@ foragePanTextField.delegate = self
 
 ```swift
 // signature
-public protocol ForageElementDelegate: AnyObject {
-    func focusDidChange(_ state: ObservableState)
-    func textFieldDidChange(_ state: ObservableState)
+public protocol ForageTextFieldDelegate: AnyObject {
+    func focusDidChange(_ state: TextFieldObservableState)
+    func textFieldDidChange(_ state: TextFieldObservableState)
 }
 
 // usage
-extension ForagePanView: ForageElementDelegate {
-    func focusDidChange(_ state: ObservableState) {
+extension ForagePanView: ForageTextFieldDelegate {
+    func focusDidChange(_ state: TextFieldObservableState) {
         if state.isFirstResponder { ... } // element gained focus
         else { ... } // element lost focus (blurred)
     }
 
-    func textFieldDidChange(_ state: ObservableState) {
+    func textFieldDidChange(_ state: TextFieldObservableState) {
         // show an error message on blur if the input is invalid
         if !state.isValid && !state.isFirstResponder { ... }
     }
 }
 ```
 
-The `ObservableState` protocol defines properties reflecting the state of a `ForageElement`.
+The `TextFieldObservableState` protocol defines properties reflecting the state of a `ForageTextField`.
 
 ```swift
-public protocol ObservableState {
+public protocol TextFieldObservableState {
     /// Indicates whether the input is focused.
     var isFirstResponder: Bool { get }
 
@@ -184,16 +184,16 @@ public protocol ObservableState {
     /// Indicates whether all validation checks pass, excluding the the minimum length validator.
     var isValid: Bool { get }
 
-    /// Indicates whether all validation checks pass and the ForageElement is ready for submission.
+    /// Indicates whether all validation checks pass and the ForageTextField is ready for submission.
     var isComplete: Bool { get }
 }
 ```
 
 The `DerivedCardInfoProtocol` protocol defines inferred information about the `ForagePANTextField`.
 
-```
+```swift
 public protocol DerivedCardInfoProtocol {
-    
+
     /// The US state that issued the EBT card, derived from the Issuer Identification Number (IIN),
     /// also known as BIN (Bank Identification Number).
     /// The IIN is the first 6 digits of the PAN.
@@ -207,7 +207,7 @@ This field can be accessed through the `derivedCardInfo` property.
 foragePanTextField.derivedCardInfo.usState
 ```
 
-#### Set the `ForageElement` as the First Responder
+#### Set the `ForageTextField` as the First Responder
 
 Call `foragePanTextField.becomeFirstResponder()` to programmatically set focus on the `ForagePANTextField`:
 
@@ -246,7 +246,7 @@ ForageSDK.shared.tokenizeEBTCard(
 
 ### ForagePINTextField
 
-A `ForageElement` that securely collects the customer's EBT card PIN to perform a balance check or capture an EBT payment.
+A `ForageTextField` that securely collects the customer's EBT card PIN to perform a balance check or capture an EBT payment.
 
 <img width="40%" alt="image" src="https://github.com/teamforage/forage-ios-sdk/assets/32694765/aa65ead5-08ea-40ff-be6c-40d97466cfaa">
 
@@ -263,17 +263,17 @@ private let foragePinTextField: ForagePINTextField = {
 
 #### Subscribe to `ForagePINTextField` state changes
 
-Use the `ForageElementDelegate` to subscribe to input validation and element focus state changes for `ForagePINTextField`.
+Use the `ForageTextFieldDelegate` to subscribe to input validation and element focus state changes for `ForagePINTextField`.
 
 ```swift
 foragePinTextField.delegate = self
 
-extension ForagePinView: ForageElementDelegate {
-    func focusDidChange(_ state: ObservableState) {
+extension ForagePinView: ForageTextFieldDelegate {
+    func focusDidChange(_ state: TextFieldObservableState) {
         if state.isFirstResponder { ... }
     }
 
-    func textFieldDidChange(_ state: ObservableState) {
+    func textFieldDidChange(_ state: TextFieldObservableState) {
         if state.isComplete { ... }
     }
 }

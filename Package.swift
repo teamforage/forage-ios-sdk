@@ -32,7 +32,7 @@ let package = Package(
             name: "BasisTheoryElements",
             url: "https://github.com/Basis-Theory/basistheory-ios",
             from: "4.0.0"
-        )
+        ),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -43,7 +43,8 @@ let package = Package(
                 "VGSCollectSDK",
                 "LaunchDarkly",
                 "BasisTheoryElements",
-                "DatadogPrivateFork"
+                "DatadogPrivateFork",
+                "FinixPaymentSheet"
             ],
             path: "Sources",
             resources: [
@@ -60,6 +61,10 @@ let package = Package(
         .target(
             name: "DatadogPrivateFork",
             path: "DatadogPrivate-Objc"
-        )
+        ),
+        .binaryTarget(
+            name: "FinixPaymentSheet",
+            path: "./Frameworks/FinixPaymentSheet.xcframework"
+        ),
     ]
 )

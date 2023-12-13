@@ -9,8 +9,8 @@
 import XCTest
 
 final class ForageElementDelegateTests: XCTestCase {
-    var observableState: ObservableState?
-    class mockState: ObservableState {
+    var observableState: TextFieldObservableState?
+    class mockState: TextFieldObservableState {
         var _isFirstResponder = false
         var isFirstResponder: Bool {
             _isFirstResponder
@@ -93,12 +93,12 @@ final class ForageElementDelegateTests: XCTestCase {
     }
 }
 
-extension ForageElementDelegateTests: ForageElementDelegate {
-    func focusDidChange(_ state: ObservableState) {
+extension ForageElementDelegateTests: ForageTextFieldDelegate {
+    func focusDidChange(_ state: TextFieldObservableState) {
         observableState = state
     }
 
-    func textFieldDidChange(_ state: ObservableState) {
+    func textFieldDidChange(_ state: TextFieldObservableState) {
         observableState = state
     }
 }

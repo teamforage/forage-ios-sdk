@@ -11,7 +11,7 @@ import VGSCollectSDK
 import XCTest
 
 final class ForagePINTextFieldTests: XCTestCase {
-    var observableState: ObservableState?
+    var observableState: TextFieldObservableState?
     var foragePinTextField: ForagePINTextField!
 
     override func setUp() {
@@ -20,7 +20,7 @@ final class ForagePINTextFieldTests: XCTestCase {
         foragePinTextField = ForagePINTextField()
     }
 
-    class mockState: ObservableState {
+    class mockState: TextFieldObservableState {
         var _isFirstResponder = false
         var isFirstResponder: Bool {
             _isFirstResponder
@@ -291,12 +291,12 @@ final class ForagePINTextFieldTests: XCTestCase {
     }
 }
 
-extension ForagePINTextFieldTests: ForageElementDelegate {
-    func focusDidChange(_ state: ObservableState) {
+extension ForagePINTextFieldTests: ForageTextFieldDelegate {
+    func focusDidChange(_ state: TextFieldObservableState) {
         observableState = state
     }
 
-    func textFieldDidChange(_ state: ObservableState) {
+    func textFieldDidChange(_ state: TextFieldObservableState) {
         observableState = state
     }
 }

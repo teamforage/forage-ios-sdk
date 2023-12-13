@@ -6,11 +6,11 @@
 import UIKit
 import VGSCollectSDK
 
-public class ForagePINTextField: UIView, Identifiable, ForageElement {
+public class ForagePINTextField: UIView, Identifiable, ForageTextField {
     // MARK: - Properties
 
     /// Delegate that updates client's side about state of the entered pin
-    public weak var delegate: ForageElementDelegate?
+    public weak var delegate: ForageTextFieldDelegate?
 
     // MARK: - Exposed properties
 
