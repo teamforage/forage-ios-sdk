@@ -5,7 +5,7 @@ on:
     branches:
       - main
   pull_request:
-  
+
   schedule:
     - cron: '0 12 * * *' # Run every day at 7/8 AM Eastern
 
@@ -15,6 +15,10 @@ env:
 jobs:
   CI:
     runs-on: macos-13
+
+    env:
+      # Avoid concurrency issues
+      BROWSER_STACK_CUSTOMER_ID: ${{ (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch') && format('pr-{0}', github.sha) || 'iOSApp' }}
 
     steps:
       - name: Checkout repository
@@ -33,6 +37,8 @@ jobs:
           MATCH_GIT_PRIVATE_KEY: ${{ secrets.MATCH_GIT_PRIVATE_KEY }}
           BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
           BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+          BROWSER_STACK_CUSTOMER_ID: ${{ env.BROWSER_STACK_CUSTOMER_ID }}
+
         run: |
           cd Sample/
           bundle exec fastlane build_ci_app
@@ -44,9 +50,11 @@ jobs:
           ssh-key: ${{ secrets.MOBILE_QA_DEPLOY_KEY }}
           path: 'mobile-qa-tests/'
       - name: Run Integration Tests
+        env:
+          BROWSER_STACK_CUSTOMER_ID: ${{ env.BROWSER_STACK_CUSTOMER_ID }}
         run: |
           cd mobile-qa-tests
           pip3 install -r requirements.txt
+          export BROWSER_STACK_CUSTOMER_ID=${{ env.BROWSER_STACK_CUSTOMER_ID }}
           pytest ios/tests/test_basic_flow.py || true
           pytest --lf --last-failed-no-failures none --suppress-no-test-exit-code ios/tests/test_basic_flow.py
-  

@@ -54,7 +54,7 @@ platform :ios do
       browserstack_username: ENV["BROWSERSTACK_USERNAME"],
       browserstack_access_key: ENV["BROWSERSTACK_ACCESS_KEY"],
       file_path: "CI_APP.ipa",
-      custom_id: "iOSApp",
+      custom_id: ENV['BROWSER_STACK_CUSTOMER_ID'] || 'iOSApp',
     )
   end
 end
