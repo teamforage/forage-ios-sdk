@@ -18,7 +18,7 @@ jobs:
 
     env:
       # Avoid concurrency issues
-      BROWSER_STACK_CUSTOMER_ID: ${{ (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch') && format('pr-{0}', github.sha) || 'iOSApp' }}
+      BROWSERSTACK_CUSTOM_ID: ${{ (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch') && format('pr-{0}', github.sha) || 'iOSApp' }}
 
     steps:
       - name: Checkout repository
@@ -37,7 +37,7 @@ jobs:
           MATCH_GIT_PRIVATE_KEY: ${{ secrets.MATCH_GIT_PRIVATE_KEY }}
           BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
           BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
-          BROWSER_STACK_CUSTOMER_ID: ${{ env.BROWSER_STACK_CUSTOMER_ID }}
+          BROWSERSTACK_CUSTOM_ID: ${{ env.BROWSERSTACK_CUSTOM_ID }}
 
         run: |
           cd Sample/
@@ -51,10 +51,10 @@ jobs:
           path: 'mobile-qa-tests/'
       - name: Run Integration Tests
         env:
-          BROWSER_STACK_CUSTOMER_ID: ${{ env.BROWSER_STACK_CUSTOMER_ID }}
+          BROWSERSTACK_CUSTOM_ID: ${{ env.BROWSERSTACK_CUSTOM_ID }}
         run: |
           cd mobile-qa-tests
           pip3 install -r requirements.txt
-          export BROWSER_STACK_CUSTOMER_ID=${{ env.BROWSER_STACK_CUSTOMER_ID }}
+          export BROWSERSTACK_CUSTOM_ID=${{ env.BROWSERSTACK_CUSTOM_ID }}
           pytest ios/tests/test_basic_flow.py || true
           pytest --lf --last-failed-no-failures none --suppress-no-test-exit-code ios/tests/test_basic_flow.py
