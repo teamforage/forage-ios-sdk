@@ -193,7 +193,7 @@ The `DerivedCardInfoProtocol` protocol defines inferred information about the `F
 
 ```
 public protocol DerivedCardInfoProtocol {
-    
+
     /// The US state that issued the EBT card, derived from the Issuer Identification Number (IIN),
     /// also known as BIN (Bank Identification Number).
     /// The IIN is the first 6 digits of the PAN.
@@ -355,3 +355,5 @@ To get the application running:
   - [VGS-Collect-iOS](https://github.com/verygoodsecurity/vgs-collect-ios)
   - [LaunchDarkly](https://github.com/launchdarkly/ios-client-sdk.git)
   - [BasisTheory](https://github.com/Basis-Theory/basistheory-ios)
+
+Fix QA tests
