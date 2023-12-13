@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 
 class BaseSampleView: UIView {
-    internal func anchorContentViewSubviews(contentView: UIView, subviews: [UIView]) {
+    func anchorContentViewSubviews(contentView: UIView, subviews: [UIView]) {
         for (index, view) in subviews.enumerated() {
             view.anchor(
                 top:
