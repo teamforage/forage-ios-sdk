@@ -155,7 +155,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         tf.translatesAutoresizingMaskIntoConstraints = false
         tf.textColor = UIColor.black
         tf.font = UIFont.systemFont(ofSize: 14, weight: .regular)
-        tf.heightAnchor.constraint(equalToConstant: 37).isActive = true
+        tf.heightAnchor.constraint(greaterThanOrEqualToConstant: 37).isActive = true
         tf.borderStyle = .roundedRect
         tf.autocorrectionType = .no
         tf.keyboardType = UIKeyboardType.numberPad
