@@ -486,7 +486,7 @@ final class PollingServiceTests: XCTestCase {
         // Mark the expectation as fulfilled only if it failed
         failureExpectation.isInverted = true
 
-        let pollingService = MockPollingService(provider: Provider(mockSession), ldManager: MockLDManager(pollingIntervals: [100]))
+        let pollingService = MockPollingService(provider: Provider(mockSession), ldManager: MockLDManager(pollingIntervals: [500]))
 
         pollingService.waitNextAttempt {
             successExpectation.fulfill()
@@ -494,8 +494,8 @@ final class PollingServiceTests: XCTestCase {
         }
 
         // Ensure that the failureExpectation wasn't fulfilled in the extremely short period of time
-        wait(for: [failureExpectation], timeout: 0.09)
+        wait(for: [failureExpectation], timeout: 0.49)
         // Ensure that the successExpectation was fulfilled before the longer period of time
-        wait(for: [successExpectation], timeout: 0.11)
+        wait(for: [successExpectation], timeout: 0.51)
     }
 }

@@ -51,7 +51,7 @@ class ResponseMonitor: NetworkMonitor {
             ForageLoggerConfig(prefix: "Metrics")
         )
     ) {
-        self.metricsLogger = metricsLogger?.setLogKind(ForageLogKind.metric)
+        self.metricsLogger = metricsLogger?.setLogKind(ForageLogKind.metric).setPrefix("Metrics")
     }
 
     func start() {

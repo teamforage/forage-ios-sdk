@@ -91,6 +91,7 @@ extension ForageSDK: ForageSDKService {
 
         guard let forageService = service else {
             reportIllegalState(for: "checkBalance", dueTo: "ForageService was not initialized")
+            completion(.failure(CommonErrors.UNKNOWN_SERVER_ERROR))
             return
         }
 
@@ -105,7 +106,8 @@ extension ForageSDK: ForageSDKService {
         // -----------------------------------------------------
         let responseMonitor = CustomerPerceivedResponseMonitor.newMeasurement(
             vaultType: pinCollector.getVaultType(),
-            vaultAction: VaultAction.balanceCheck
+            vaultAction: VaultAction.balanceCheck,
+            metricsLogger: ForageSDK.logger
         )
         responseMonitor.start()
         // ------------------------------------------------------
@@ -148,6 +150,7 @@ extension ForageSDK: ForageSDKService {
 
         guard let forageService = service else {
             reportIllegalState(for: "capturePayment", dueTo: "ForageService was not initialized")
+            completion(.failure(CommonErrors.UNKNOWN_SERVER_ERROR))
             return
         }
 
@@ -162,7 +165,8 @@ extension ForageSDK: ForageSDKService {
         // -----------------------------------------------------
         let responseMonitor = CustomerPerceivedResponseMonitor.newMeasurement(
             vaultType: pinCollector.getVaultType(),
-            vaultAction: VaultAction.capturePayment
+            vaultAction: VaultAction.capturePayment,
+            metricsLogger: ForageSDK.logger
         )
         responseMonitor.start()
         // ------------------------------------------------------
@@ -190,7 +194,7 @@ extension ForageSDK: ForageSDKService {
         }
     }
 
-    /// Reports an illegal state by logging a critical error and triggering an assertion failure.
+    /// Reports an illegal state by logging a critical error .
     ///
     /// This method is utilized to indicate that a precondition has not been met or an object is in an
     /// illegal state when invoking a particular method, aiding in identifying and rectifying improper
@@ -202,7 +206,6 @@ extension ForageSDK: ForageSDKService {
     private func reportIllegalState(for methodName: String, dueTo reason: String) {
         let assertionMessage = "Attempted to call \(methodName), but \(reason)"
         ForageSDK.logger?.critical(assertionMessage, error: nil, attributes: nil)
-        assertionFailure(assertionMessage)
     }
 
     /// Validates the completeness of the PIN entered in the specified text field.

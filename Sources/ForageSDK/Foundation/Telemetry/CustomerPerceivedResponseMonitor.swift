@@ -25,15 +25,23 @@ final class CustomerPerceivedResponseMonitor: ResponseMonitor {
     private var eventOutcome: EventOutcome?
     private var eventName: EventName = .customerPerceivedResponse
 
-    init(vaultType: VaultType, vaultAction: VaultAction) {
+    init(vaultType: VaultType, vaultAction: VaultAction, metricsLogger: ForageLogger?) {
         self.vaultType = vaultType
         self.vaultAction = vaultAction
-        super.init()
+        super.init(metricsLogger: metricsLogger)
     }
 
     /// Factory method for creating new CustomerPerceivedResponseMonitor instances
-    static func newMeasurement(vaultType: VaultType, vaultAction: VaultAction) -> CustomerPerceivedResponseMonitor {
-        CustomerPerceivedResponseMonitor(vaultType: vaultType, vaultAction: vaultAction)
+    static func newMeasurement(
+        vaultType: VaultType,
+        vaultAction: VaultAction,
+        metricsLogger: ForageLogger? = nil
+    ) -> CustomerPerceivedResponseMonitor {
+        CustomerPerceivedResponseMonitor(
+            vaultType: vaultType,
+            vaultAction: vaultAction,
+            metricsLogger: metricsLogger
+        )
     }
 
     // override to set event_outcome to "failure" if we know the event has a forage_error_code
