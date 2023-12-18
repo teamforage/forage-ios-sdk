@@ -28,24 +28,6 @@ struct ResponseAttributes {
     var forageErrorCode: String?
 }
 
-/// Defines actions performed against the Vault (VGS or Basis Theory) Proxy.
-enum VaultAction: String {
-    case balanceCheck = "balance"
-    case capturePayment = "capture"
-    case collectPin = "collect_pin"
-
-    var endpointSuffix: String {
-        switch self {
-        case .balanceCheck:
-            return "/balance/"
-        case .capturePayment:
-            return "/capture/"
-        case .collectPin:
-            return "/collect_pin/"
-        }
-    }
-}
-
 enum EventOutcome: String {
     case success
     case failure

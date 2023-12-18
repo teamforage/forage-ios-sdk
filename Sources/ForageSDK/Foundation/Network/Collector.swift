@@ -13,6 +13,24 @@ import VGSCollectSDK
 let tokenDelimiter = ","
 let tokenKey = "card_number_token"
 
+/// Defines actions performed against the Vault (VGS or Basis Theory) Proxy.
+enum VaultAction: String {
+    case balanceCheck = "balance"
+    case capturePayment = "capture"
+    case collectPin = "collect_pin"
+
+    var endpointSuffix: String {
+        switch self {
+        case .balanceCheck:
+            return "/balance/"
+        case .capturePayment:
+            return "/capture/"
+        case .collectPin:
+            return "/collect_pin/"
+        }
+    }
+}
+
 protocol VaultCollector {
     func setCustomHeaders(headers: [String: String], xKey: [String: String])
     func sendData(
