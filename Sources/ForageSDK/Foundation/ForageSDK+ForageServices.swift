@@ -12,7 +12,7 @@ import Foundation
  Interface for Forage SDK Services
  */
 protocol ForageSDKService: AnyObject {
-    /// Tokenize an EBT Card number.
+    /// Create a Forage [PaymentMethod](https://docs.joinforage.app/reference/payment-methods#paymentmethod-object) object that represents the EBT Card number.
     ///
     /// - Parameters:
     ///  - foragePanTextField: Text field for collecting the PAN (Primary Account Number) of the EBT card.
@@ -28,9 +28,11 @@ protocol ForageSDKService: AnyObject {
 
     /// Check the balance of an EBT Card.
     ///
+    /// Returns the `snap`and `cash` (EBT Cash) balance available on the EBT Card, in addition to a timestamp for when the balance was last updated.
+    ///
     /// - Parameters:
     ///  - foragePinTextField: A text field for secure PIN collection.
-    ///  - paymentMethodReference: An identifer that refers to the tokenized representation of an EBT card.
+    ///  - paymentMethodReference: A string identifier that refers to an instance in Forage's database of a [PaymentMethod](https://docs.joinforage.app/reference/create-payment-method)
     ///  - completion: The closure returns a `Result` containing either a `BalanceModel` or an `Error`.
     func checkBalance(
         foragePinTextField: ForagePINTextField,
@@ -42,7 +44,7 @@ protocol ForageSDKService: AnyObject {
     ///
     /// - Parameters:
     ///  - foragePinTextField: A text field for secure PIN collection.
-    ///  - paymentReference: The reference hash of the `Payment` that you're capturing .
+    ///  - paymentReference: The reference hash of the `Payment` that you're capturing. Refers to an instance in Forage's database of a [Payment](https://docs.joinforage.app/reference/create-a-payment)
     ///  - completion: The closure returns a `Result` containing either a `PaymentModel` or an `Error`.
     func capturePayment(
         foragePinTextField: ForagePINTextField,
@@ -54,7 +56,7 @@ protocol ForageSDKService: AnyObject {
     ///
     /// - Parameters:
     ///  - foragePinTextField: A text field for secure PIN collection.
-    ///  - paymentReference: Reference hash for the `Payment` that you plan on capturing on the server.
+    ///  - paymentReference: Reference hash for the `Payment` that you plan on capturing on the server. Refers to an instance in Forage's database of a [Payment](https://docs.joinforage.app/reference/create-a-payment)
     ///  - completion: Completion handler returning a `Result` with either success (`Void`) or `Error`.
     func collectPinForDeferredCapture(
         foragePinTextField: ForagePINTextField,
