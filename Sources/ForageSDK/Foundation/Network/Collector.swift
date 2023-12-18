@@ -85,7 +85,7 @@ class VGSCollectWrapper: VaultCollector {
                         "http_status": code
                     ])
                     measurement.setHttpStatusCode(code).logResult()
-                    completion(VaultResponse(statusCode: code, urlResponse: urlResponse, data: data, error: error))
+                    completion(VaultResponse(statusCode: code, urlResponse: urlResponse, data: data, error: error ?? CommonErrors.UNKNOWN_SERVER_ERROR))
                 }
             }
         }
