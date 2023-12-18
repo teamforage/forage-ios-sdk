@@ -20,7 +20,7 @@ class CardNumberViewController: BaseViewCodeViewController<CardNumberView> {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        customView.panNumberTextField.becomeFirstResponder()
+        customView.foragePanTextField.becomeFirstResponder()
     }
 }
 

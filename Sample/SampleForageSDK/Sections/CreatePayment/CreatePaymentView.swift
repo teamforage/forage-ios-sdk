@@ -61,7 +61,7 @@ class CreatePaymentView: UIView {
 
     private let createSnapPaymentButton: UIButton = {
         let button = UIButton()
-        button.setTitle("Create Snap Payment", for: .normal)
+        button.setTitle("Create SNAP Payment", for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         button.tintColor = .white
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -74,7 +74,7 @@ class CreatePaymentView: UIView {
 
     private let createNonSnapPaymentButton: UIButton = {
         let button = UIButton()
-        button.setTitle("Create Non Snap Payment", for: .normal)
+        button.setTitle("Create EBT Cash Payment", for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         button.tintColor = .white
         button.translatesAutoresizingMaskIntoConstraints = false

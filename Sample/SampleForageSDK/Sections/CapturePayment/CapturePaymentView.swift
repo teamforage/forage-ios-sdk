@@ -47,7 +47,7 @@ class CapturePaymentView: UIView {
 
     private let captureSnapPaymentButton: UIButton = {
         let button = UIButton()
-        button.setTitle("Capture Snap Payment", for: .normal)
+        button.setTitle("Capture SNAP Payment", for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         button.tintColor = .white
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -60,7 +60,7 @@ class CapturePaymentView: UIView {
 
     private let captureNonSnapPaymentButton: UIButton = {
         let button = UIButton()
-        button.setTitle("Capture Non Snap Payment", for: .normal)
+        button.setTitle("Capture EBT Cash Payment", for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         button.tintColor = .white
         button.addTarget(self, action: #selector(performCaptureNonSnapPayment(_:)), for: .touchUpInside)

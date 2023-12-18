@@ -14,7 +14,7 @@ protocol RequestBalanceViewDelegate: AnyObject {
     func goToCreatePayment(_ view: RequestBalanceView)
 }
 
-class RequestBalanceView: UIView {
+class RequestBalanceView: BaseSampleView {
     // MARK: Public Properties
 
     var isPINValid: Bool = false
@@ -43,6 +43,8 @@ class RequestBalanceView: UIView {
         tf.placeholder = "PIN Field"
         tf.accessibilityIdentifier = "tf_pin_balance"
         tf.isAccessibilityElement = true
+        tf.borderWidth = 2.0
+        tf.borderColor = UIColor(red: 0.01, green: 0.26, blue: 0.19, alpha: 1.0)
         tf.font = .systemFont(ofSize: 18)
         let height = tf.heightAnchor.constraint(equalToConstant: 84)
         height.priority = UILayoutPriority.defaultHigh + 10
@@ -133,7 +135,7 @@ class RequestBalanceView: UIView {
         return label
     }()
 
-    private let nonSnapBalanceLabel: UILabel = {
+    private let ebtCashBalanceLabel: UILabel = {
         let label = UILabel()
         label.text = ""
         label.textColor = .black
@@ -188,12 +190,12 @@ class RequestBalanceView: UIView {
             switch result {
             case let .success(response):
                 self.snapBalanceLabel.text = "snap=\(response.snap)"
-                self.nonSnapBalanceLabel.text = "cash=\(response.cash)"
+                self.ebtCashBalanceLabel.text = "cash=\(response.cash)"
                 self.errorLabel.text = ""
             case let .failure(error):
                 self.errorLabel.text = "\(error)"
                 self.snapBalanceLabel.text = ""
-                self.nonSnapBalanceLabel.text = ""
+                self.ebtCashBalanceLabel.text = ""
             }
 
             self.layoutIfNeeded()
@@ -210,7 +212,7 @@ class RequestBalanceView: UIView {
         contentView.addSubview(isValidLabel)
         contentView.addSubview(isCompleteLabel)
         contentView.addSubview(snapBalanceLabel)
-        contentView.addSubview(nonSnapBalanceLabel)
+        contentView.addSubview(ebtCashBalanceLabel)
         contentView.addSubview(errorLabel)
         contentView.addSubview(requestBalanceButton)
         contentView.addSubview(nextButton)
@@ -228,87 +230,18 @@ class RequestBalanceView: UIView {
             trailing: trailingAnchor,
             centerXAnchor: centerXAnchor
         )
-
-        titleLabel.anchor(
-            top: contentView.safeAreaLayoutGuide.topAnchor,
-            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
-            bottom: nil,
-            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
-            centerXAnchor: contentView.centerXAnchor,
-            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
-        )
-
-        foragePinTextField.anchor(
-            top: titleLabel.safeAreaLayoutGuide.bottomAnchor,
-            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
-            bottom: nil,
-            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
-            centerXAnchor: contentView.centerXAnchor,
-            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
-        )
-
-        isFirstResponderLabel.anchor(
-            top: foragePinTextField.safeAreaLayoutGuide.bottomAnchor,
-            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
-            bottom: nil,
-            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
-            centerXAnchor: contentView.centerXAnchor,
-            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
-        )
-
-        isEmptyLabel.anchor(
-            top: isFirstResponderLabel.safeAreaLayoutGuide.bottomAnchor,
-            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
-            bottom: nil,
-            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
-            centerXAnchor: contentView.centerXAnchor,
-            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
-        )
-
-        isValidLabel.anchor(
-            top: isEmptyLabel.safeAreaLayoutGuide.bottomAnchor,
-            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
-            bottom: nil,
-            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
-            centerXAnchor: contentView.centerXAnchor,
-            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
-        )
-
-        isCompleteLabel.anchor(
-            top: isValidLabel.safeAreaLayoutGuide.bottomAnchor,
-            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
-            bottom: nil,
-            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
-            centerXAnchor: contentView.centerXAnchor,
-            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
-        )
-
-        snapBalanceLabel.anchor(
-            top: isCompleteLabel.safeAreaLayoutGuide.bottomAnchor,
-            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
-            bottom: nil,
-            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
-            centerXAnchor: contentView.centerXAnchor,
-            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
-        )
-
-        nonSnapBalanceLabel.anchor(
-            top: snapBalanceLabel.safeAreaLayoutGuide.bottomAnchor,
-            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
-            bottom: nil,
-            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
-            centerXAnchor: contentView.centerXAnchor,
-            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
-        )
-
-        errorLabel.anchor(
-            top: nonSnapBalanceLabel.safeAreaLayoutGuide.bottomAnchor,
-            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
-            bottom: nil,
-            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
-            centerXAnchor: contentView.centerXAnchor,
-            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
-        )
+        
+        self.anchorContentViewSubviews(contentView: contentView, subviews: [
+            titleLabel,
+            foragePinTextField,
+            isFirstResponderLabel,
+            isEmptyLabel,
+            isValidLabel,
+            isCompleteLabel,
+            snapBalanceLabel,
+            ebtCashBalanceLabel,
+            errorLabel
+        ])
 
         requestBalanceButton.anchor(
             top: nil,

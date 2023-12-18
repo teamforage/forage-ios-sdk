@@ -8,7 +8,6 @@
 
 /// Represents card information derived from the user's current Primary Account Number (PAN) input value.
 public protocol DerivedCardInfoProtocol {
-    
     /// The US state that issued the EBT card, derived from the Issuer Identification Number (IIN),
     /// also known as BIN (Bank Identification Number).
     /// The IIN is the first 6 digits of the PAN.
