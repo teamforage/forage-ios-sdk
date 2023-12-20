@@ -183,11 +183,11 @@ class CapturePaymentView: BaseSampleView {
         DispatchQueue.main.async { [self] in
             switch result {
             case let .success(response):
-                self.paymentRefLabel.text = "paymentRef=\(response.paymentRef)"
-                self.fundingTypeLabel.text = "fundingType=\(response.fundingType)"
-                self.amountLabel.text = "amount=\(response.amount)"
-                self.errorLabel.text = ""
-                self.collectPinSuccessLabel.text = ""
+                paymentRefLabel.text = "paymentRef=\(response.paymentRef)"
+                fundingTypeLabel.text = "fundingType=\(response.fundingType)"
+                amountLabel.text = "amount=\(response.amount)"
+                errorLabel.text = ""
+                collectPinSuccessLabel.text = ""
             case let .failure(error):
                 if let forageError = error as? ForageError? {
                     let firstError = forageError?.errors.first
@@ -198,18 +198,18 @@ class CapturePaymentView: BaseSampleView {
                             let snapBalanceText = snapBalance ?? "N/A"
                             let cashBalanceText = cashBalance ?? "N/A"
 
-                            self.remainingBalanceLabel.text = "firstForageError.details: remaining balances are SNAP: \(snapBalanceText), EBT Cash: \(cashBalanceText)"
+                            remainingBalanceLabel.text = "firstForageError.details: remaining balances are SNAP: \(snapBalanceText), EBT Cash: \(cashBalanceText)"
                         default:
-                            self.remainingBalanceLabel.text = "firstForageError.details: Missing insufficient funds error details!"
+                            remainingBalanceLabel.text = "firstForageError.details: Missing insufficient funds error details!"
                         }
                     }
                 }
-                self.printError(error)
+                printError(error)
             }
 
-            self.layoutIfNeeded()
-            self.layoutSubviews()
-            
+            layoutIfNeeded()
+            layoutSubviews()
+
             completion()
         }
     }

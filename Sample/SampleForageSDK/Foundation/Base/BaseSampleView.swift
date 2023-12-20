@@ -109,7 +109,7 @@ class LoadingButton: UIButton {
     private func createActivityIndicator() -> UIActivityIndicatorView {
         let activityIndicator = UIActivityIndicatorView()
         activityIndicator.hidesWhenStopped = true
-        activityIndicator.color = self.backgroundColor == .primaryColor ? .secondaryColor : .forageBlack
+        activityIndicator.color = backgroundColor == .primaryColor ? .secondaryColor : .forageBlack
         addSubview(activityIndicator)
 
         // Center the activity indicator in the button
