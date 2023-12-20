@@ -58,40 +58,29 @@ class CardNumberView: BaseSampleView {
         return tf
     }()
 
-    private static func createLabel(id: String, text: String = "") -> UILabel {
-        let label = UILabel()
-        label.text = text
-        label.textColor = .gray
-        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        label.numberOfLines = 0
-        label.accessibilityIdentifier = id
-        label.isAccessibilityElement = true
-        return label
-    }
-
     // ObservableState labels
-    private var firstResponderLabel = createLabel(id: "lbl_first_responder")
-    private var completeLabel = createLabel(id: "lbl_complete", text: "isComplete: false")
-    private var emptyLabel = createLabel(id: "lbl_empty", text: "isEmpty: true")
-    private var validLabel = createLabel(id: "lbl_valid", text: "isValid: true")
+    private var firstResponderLabel: UILabel = .create(id: "lbl_first_responder")
+    private var completeLabel: UILabel = .create(id: "lbl_complete", text: "isComplete: false")
+    private var emptyLabel: UILabel = .create(id: "lbl_empty", text: "isEmpty: true")
+    private var validLabel: UILabel = .create(id: "lbl_valid", text: "isValid: true")
 
     // Result labels
-    private var refLabel = createLabel(id: "lbl_ref")
-    private var typeLabel = createLabel(id: "lbl_type")
-    private var tokenLabel = createLabel(id: "lbl_token")
-    private var last4Label = createLabel(id: "lbl_last4")
-    private var customerIDLabel = createLabel(id: "lbl_customerID")
-    private var reusableLabel = createLabel(id: "lbl_reusable")
-    private var errorLabel = createLabel(id: "lbl_error")
+    private var refLabel: UILabel = .create(id: "lbl_ref")
+    private var typeLabel: UILabel = .create(id: "lbl_type")
+    private var tokenLabel: UILabel = .create(id: "lbl_token")
+    private var last4Label: UILabel = .create(id: "lbl_last4")
+    private var customerIDLabel: UILabel = .create(id: "lbl_customerID")
+    private var reusableLabel: UILabel = .create(id: "lbl_reusable")
+    private var errorLabel: UILabel = .create(id: "lbl_error")
 
-    private let tokenizeCardButton: UIButton = {
-        let button = UIButton()
+    private let tokenizeCardButton: LoadingButton = {
+        let button = LoadingButton()
         button.setTitle("Tokenize EBT Card", for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         button.tintColor = .white
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(sendInfo(_:)), for: .touchUpInside)
-        button.backgroundColor = .systemBlue
+        button.backgroundColor = .primaryColor
         button.isEnabled = true
         button.isUserInteractionEnabled = true
         button.alpha = 1
@@ -100,31 +89,19 @@ class CardNumberView: BaseSampleView {
         return button
     }()
 
-    private let nextButton: UIButton = {
-        let button = UIButton()
-        button.setTitle("Go To Next", for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
-        button.tintColor = .white
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.addTarget(self, action: #selector(goToBalance(_:)), for: .touchUpInside)
-        button.backgroundColor = .systemBlue
-        button.isEnabled = false
-        button.isUserInteractionEnabled = false
-        button.alpha = 0.5
-        button.accessibilityIdentifier = "bt_next"
-        button.isAccessibilityElement = true
-        return button
-    }()
+    private let nextButton: UIButton = .createNextButton(self, action: #selector(goToBalance(_:)))
 
     // MARK: Fileprivate Methods
 
     @objc fileprivate func sendInfo(_ gesture: UIGestureRecognizer) {
+        tokenizeCardButton.showLoading()
         ForageSDK.shared.tokenizeEBTCard(
             foragePanTextField: foragePanTextField,
             customerID: ClientSharedData.shared.customerID,
             reusable: ClientSharedData.shared.isReusablePaymentMethod
-        ) { result in
-            self.printResult(result: result)
+        ) { [self] result in
+            tokenizeCardButton.hideLoading()
+            printResult(result: result)
         }
     }
 
