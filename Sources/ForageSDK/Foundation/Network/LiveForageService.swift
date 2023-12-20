@@ -226,7 +226,7 @@ class LiveForageService: ForageService {
                 xKey: ["vgsXKey": xKeyModel.alias, "btXKey": xKeyModel.bt_alias]
             )
 
-            let basePath = "api/payments/\(paymentReference)"
+            let basePath = "/api/payments/\(paymentReference)"
 
             let vaultResponse = try await submitPinToVault(
                 pinCollector: pinCollector,
