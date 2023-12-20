@@ -230,8 +230,8 @@ class RequestBalanceView: BaseSampleView {
             trailing: trailingAnchor,
             centerXAnchor: centerXAnchor
         )
-        
-        self.anchorContentViewSubviews(contentView: contentView, subviews: [
+
+        anchorContentViewSubviews(contentView: contentView, subviews: [
             titleLabel,
             foragePinTextField,
             isFirstResponderLabel,
@@ -240,7 +240,7 @@ class RequestBalanceView: BaseSampleView {
             isCompleteLabel,
             snapBalanceLabel,
             ebtCashBalanceLabel,
-            errorLabel
+            errorLabel,
         ])
 
         requestBalanceButton.anchor(
