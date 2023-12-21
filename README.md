@@ -193,7 +193,7 @@ The `DerivedCardInfoProtocol` protocol defines inferred information about the `F
 
 ```
 public protocol DerivedCardInfoProtocol {
-    
+
     /// The US state that issued the EBT card, derived from the Issuer Identification Number (IIN),
     /// also known as BIN (Bank Identification Number).
     /// The IIN is the first 6 digits of the PAN.
@@ -326,6 +326,34 @@ func capturePayment(
 // Usage
 
 ForageSDK.shared.capturePayment(
+    foragePinTextField: foragePinTextField,
+    paymentReference: paymentReference
+) { result in
+    // Handle result and error here
+}
+```
+
+#### Collect an EBT Card PIN to capture a payment server-side
+
+Call `ForageSDK.shared.collectPinForDeferredCapture` to authorize a previously created `Payment`. Use this method if you're deferring payment capture to the server.
+
+```swift
+// Signature
+func collectPinForDeferredCapture(
+	foragePinTextField: ForagePINTextField,
+	paymentReference: String,
+)
+```
+
+##### Parameter definitions
+
+- `foragePinTextField`: A reference to a [`ForagePINTextField`](#foragepintextfield) component.
+- `paymentReference`: A unique string identifier for a previously created Forage [`Payment`](https://docs.joinforage.app/reference/payments) object.
+
+```swift
+// Usage
+
+ForageSDK.shared.collectPinForDeferredCapture(
     foragePinTextField: foragePinTextField,
     paymentReference: paymentReference
 ) { result in
