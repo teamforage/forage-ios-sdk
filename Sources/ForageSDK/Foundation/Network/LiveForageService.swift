@@ -78,7 +78,7 @@ class LiveForageService: ForageService {
 
             let vaultResult = try await submitPinToVault(
                 pinCollector: pinCollector,
-                vaultAction: VaultAction.balanceCheck,
+                vaultAction: .balanceCheck,
                 path: "/api/payment_methods/\(paymentMethodReference)/balance/",
                 request: balanceRequest
             )

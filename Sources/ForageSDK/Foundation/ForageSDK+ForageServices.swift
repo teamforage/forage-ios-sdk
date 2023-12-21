@@ -121,7 +121,7 @@ extension ForageSDK: ForageSDKService {
         // -----------------------------------------------------
         let responseMonitor = CustomerPerceivedResponseMonitor.newMeasurement(
             vaultType: pinCollector.getVaultType(),
-            vaultAction: VaultAction.balanceCheck,
+            vaultAction: .balanceCheck,
             metricsLogger: ForageSDK.logger
         )
         responseMonitor.start()

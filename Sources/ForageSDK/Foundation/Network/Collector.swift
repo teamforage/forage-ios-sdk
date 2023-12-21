@@ -83,7 +83,7 @@ class VGSCollectWrapper: VaultCollector {
             mutableExtraData[tokenKey] = token
         }
 
-        let measurement = VaultProxyResponseMonitor.newMeasurement(vault: VaultType.vgsVaultType, action: vaultAction)
+        let measurement = VaultProxyResponseMonitor.newMeasurement(vault: VaultType.vgs, action: vaultAction)
             .setPath(path)
             .setMethod(.post)
 
@@ -117,7 +117,7 @@ class VGSCollectWrapper: VaultCollector {
     }
 
     func getVaultType() -> VaultType {
-        VaultType.vgsVaultType
+        VaultType.vgs
     }
 }
 
@@ -189,7 +189,7 @@ class BasisTheoryWrapper: VaultCollector {
             }
         }
 
-        let measurement = VaultProxyResponseMonitor.newMeasurement(vault: VaultType.btVaultType, action: vaultAction)
+        let measurement = VaultProxyResponseMonitor.newMeasurement(vault: VaultType.basisTheory, action: vaultAction)
             .setPath(path)
             .setMethod(.post)
 
@@ -232,7 +232,7 @@ class BasisTheoryWrapper: VaultCollector {
     }
 
     func getVaultType() -> VaultType {
-        VaultType.btVaultType
+        VaultType.basisTheory
     }
 }
 

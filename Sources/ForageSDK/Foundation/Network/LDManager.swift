@@ -100,8 +100,8 @@ private enum LDMobileKey: String {
  Vault Types
  */
 enum VaultType: String {
-    case vgsVaultType = "vgs"
-    case btVaultType = "basis_theory"
+    case vgs = "vgs"
+    case basisTheory = "basis_theory"
 }
 
 /**
@@ -197,7 +197,7 @@ class LDManager: LDManagerProtocol {
             logger?.error("Defaulting to VGS. LDClient.get() was called before init()!",
                           error: nil,
                           attributes: nil)
-            return .vgsVaultType
+            return .vgs
         }
 
         // Fetch the vault percentage from LaunchDarkly
@@ -210,11 +210,11 @@ class LDManager: LDManagerProtocol {
                      attributes: nil)
 
         let randomNum = genRandomDouble()
-        vaultType = (randomNum < vaultPercentage) ? .btVaultType : .vgsVaultType
+        vaultType = (randomNum < vaultPercentage) ? .basisTheory : .vgs
 
         logVaultType(vaultType)
 
-        return vaultType ?? .vgsVaultType
+        return vaultType ?? .vgs
     }
 
     /// Determines on what interval we will poll for SQS messages based on "iso-polling-wait-intervals" feature flag.

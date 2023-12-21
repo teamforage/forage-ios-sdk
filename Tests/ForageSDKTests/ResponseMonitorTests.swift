@@ -80,7 +80,7 @@ final class ResponseMonitorTests: XCTestCase {
 
     func testLogWithResponseAttributes_whenMissingAttributes_shouldLogError() {
         let mockMetricsLogger = MockMetricsLogger()
-        let monitor = VaultProxyResponseMonitor.newMeasurement(vault: .btVaultType, action: .balanceCheck)
+        let monitor = VaultProxyResponseMonitor.newMeasurement(vault: .basisTheory, action: .balanceCheck)
 
         let attributes = ResponseAttributes(
             responseTimeMs: nil,
@@ -100,7 +100,7 @@ final class ResponseMonitorTests: XCTestCase {
 
     func testLogWithResponseAttributes_shouldLogWithAttributes() {
         let mockMetricsLogger = MockMetricsLogger()
-        let monitor = VaultProxyResponseMonitor.newMeasurement(vault: .btVaultType, action: .balanceCheck)
+        let monitor = VaultProxyResponseMonitor.newMeasurement(vault: .basisTheory, action: .balanceCheck)
 
         let attributes = ResponseAttributes(
             responseTimeMs: 123.45,
@@ -128,7 +128,7 @@ final class ResponseMonitorTests: XCTestCase {
     func testCustomerPerceivedMonitor_missingEventOutcome_logsAssertionError() {
         let mockMetricsLogger = MockMetricsLogger()
         let monitor = CustomerPerceivedResponseMonitor.newMeasurement(
-            vaultType: .btVaultType,
+            vaultType: .basisTheory,
             vaultAction: .balanceCheck
         )
         let attributes = ResponseAttributes(
@@ -146,7 +146,7 @@ final class ResponseMonitorTests: XCTestCase {
     func testCustomerPerceivedMonitor_missingForageErrorCode_logsAssertionError() {
         let mockMetricsLogger = MockMetricsLogger()
         let monitor = CustomerPerceivedResponseMonitor.newMeasurement(
-            vaultType: .btVaultType,
+            vaultType: .basisTheory,
             vaultAction: .balanceCheck
         )
         monitor.setEventOutcome(.failure)
@@ -166,7 +166,7 @@ final class ResponseMonitorTests: XCTestCase {
     func testCustomerPerceivedMonitor_successOutcome_reportsMetricEvent() {
         let mockMetricsLogger = MockMetricsLogger()
         let monitor = CustomerPerceivedResponseMonitor.newMeasurement(
-            vaultType: .btVaultType,
+            vaultType: .basisTheory,
             vaultAction: .balanceCheck
         )
         monitor.setEventOutcome(.success)
