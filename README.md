@@ -335,7 +335,7 @@ ForageSDK.shared.capturePayment(
 
 #### Collect an EBT Card PIN to capture a payment server-side
 
-Call `ForageSDK.shared.collectPinForDeferredCapture` to authorize a previously created `Payment`. Use this method if you're deferring payment capture to the server.
+Call `ForageSDK.shared.collectPinForDeferredCapture` to collect a customer's EBT Card PIN before capturing a `Payment` server-side.
 
 ```swift
 // Signature
