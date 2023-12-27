@@ -56,7 +56,7 @@ class CapturePaymentView: BaseSampleView {
     }()
 
     /// Set accessibilityIdentifier for all of the elements, used by mobile-qa-tests service.
-    private let deferPaymentCaptureResponseLabel: UILabel = .create(id: "lbl_collect_pin_success")
+    private let deferPaymentCaptureResponseLabel: UILabel = .create(id: "lbl_defer_capture_response")
     private let statusTypeLabel: UILabel = .create(id: "lbl_status_type")
     private let statusLabel: UILabel = .create(id: "lbl_status")
     private let paymentRefLabel: UILabel = .create(id: "lbl_payment_ref")
@@ -101,7 +101,7 @@ class CapturePaymentView: BaseSampleView {
 
     private lazy var collectSnapPinButton: UIButton = createSubmitButton(
         title: "Defer SNAP",
-        accessibilityIdentifier: "bt_collect_snap_pin",
+        accessibilityIdentifier: "bt_defer_capture_snap",
         fundingType: .ebtSnap,
         pinTextField: snapTextField,
         submitMethod: deferPaymentCapture
