@@ -90,7 +90,7 @@ class CapturePaymentView: BaseSampleView {
         accessibilityIdentifier: "bt_collect_snap_pin",
         fundingType: .ebtSnap,
         pinTextField: snapTextField,
-        submitMethod: collectPinForDeferredCapture
+        submitMethod: deferPaymentCapture
     )
 
     private lazy var captureSnapButton: UIButton = createSubmitButton(
@@ -106,7 +106,7 @@ class CapturePaymentView: BaseSampleView {
         accessibilityIdentifier: "bt_collect_non_snap_pin",
         fundingType: .ebtCash,
         pinTextField: ebtCashTextField,
-        submitMethod: collectPinForDeferredCapture
+        submitMethod: deferPaymentCapture
     )
 
     private lazy var captureEbtCashButton: UIButton = createSubmitButton(
@@ -129,9 +129,9 @@ class CapturePaymentView: BaseSampleView {
 
     // MARK: Private Methods
 
-    private func collectPinForDeferredCapture(pinTextField: ForagePINTextField, paymentReference: String, completion: @escaping () -> Void) {
+    private func deferPaymentCapture(pinTextField: ForagePINTextField, paymentReference: String, completion: @escaping () -> Void) {
         DispatchQueue.global(qos: .userInitiated).async {
-            ForageSDK.shared.collectPinForDeferredCapture(
+            ForageSDK.shared.deferPaymentCapture(
                 foragePinTextField: pinTextField,
                 paymentReference: paymentReference
             ) { result in
@@ -157,7 +157,7 @@ class CapturePaymentView: BaseSampleView {
         DispatchQueue.main.async {
             switch result {
             case .success:
-                self.collectPinSuccessLabel.text = "collectPinForDeferredCapture: success"
+                self.collectPinSuccessLabel.text = "deferPaymentCapture: success"
                 self.paymentRefLabel.text = ""
                 self.fundingTypeLabel.text = ""
                 self.amountLabel.text = ""
