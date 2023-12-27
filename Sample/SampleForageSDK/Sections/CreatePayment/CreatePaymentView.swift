@@ -54,7 +54,7 @@ class CreatePaymentView: UIView {
         tf.placeholder = "EBT Cash amount"
         tf.translatesAutoresizingMaskIntoConstraints = false
         tf.borderStyle = .roundedRect
-        tf.accessibilityIdentifier = "tf_non_snap_amount"
+        tf.accessibilityIdentifier = "tf_cash_amount"
         tf.isAccessibilityElement = true
         return tf
     }()
@@ -74,7 +74,7 @@ class CreatePaymentView: UIView {
 
     private lazy var createEbtCashPaymentButton: UIButton = .createPaymentButton(
         title: "Create EBT Cash Payment",
-        accessibilityIdentifier: "bt_create_non_snap_payment",
+        accessibilityIdentifier: "bt_create_cash_payment",
         fundingType: .ebtCash,
         action: { [self] completion in
             createPayment(

@@ -50,7 +50,7 @@ class CapturePaymentView: BaseSampleView {
 
     private let ebtCashTextField: ForagePINTextField = {
         let tf = ForagePINTextField()
-        tf.accessibilityIdentifier = "tf_pin_non_snap"
+        tf.accessibilityIdentifier = "tf_pin_cash"
         tf.isAccessibilityElement = true
         return tf
     }()
@@ -117,7 +117,7 @@ class CapturePaymentView: BaseSampleView {
 
     private lazy var collectEbtCashPinButton: UIButton = createSubmitButton(
         title: "Defer EBT Cash",
-        accessibilityIdentifier: "bt_collect_non_snap_pin",
+        accessibilityIdentifier: "bt_defer_capture_cash",
         fundingType: .ebtCash,
         pinTextField: ebtCashTextField,
         submitMethod: deferPaymentCapture
@@ -125,7 +125,7 @@ class CapturePaymentView: BaseSampleView {
 
     private lazy var captureEbtCashButton: UIButton = createSubmitButton(
         title: "Capture EBT Cash",
-        accessibilityIdentifier: "bt_capture_non_snap_payment",
+        accessibilityIdentifier: "bt_capture_cash_payment",
         fundingType: .ebtCash,
         pinTextField: ebtCashTextField,
         submitMethod: capturePayment

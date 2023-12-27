@@ -127,7 +127,7 @@ class RequestBalanceView: BaseSampleView {
         label.textColor = .black
         label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         label.numberOfLines = 0
-        label.accessibilityIdentifier = "lbl_non_snap_balance"
+        label.accessibilityIdentifier = "lbl_cash_balance"
         label.isAccessibilityElement = true
         return label
     }()
