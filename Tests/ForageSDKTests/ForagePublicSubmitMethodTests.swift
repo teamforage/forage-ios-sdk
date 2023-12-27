@@ -175,7 +175,7 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
         wait(for: [expectation], timeout: 1.0)
     }
 
-    func executeCollectPinForDeferredCapture(
+    func executeDeferPaymentCapture(
         doesThrow: Bool = false,
         pinComplete: Bool = true,
         description: String,
@@ -185,7 +185,7 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
         let mockPinTextField = createMockPinTextField(isComplete: pinComplete)
         let expectation = XCTestExpectation(description: description)
 
-        MockForageSDK.shared.collectPinForDeferredCapture(
+        MockForageSDK.shared.deferPaymentCapture(
             foragePinTextField: mockPinTextField,
             paymentReference: "collectPinPaymentRef123"
         ) { result in
@@ -423,10 +423,10 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
         }
     }
 
-    // MARK: collectPinForDeferredCapture tests
+    // MARK: deferPaymentCapture tests
 
-    func testCollectPinForDeferredCapture_Success() {
-        executeCollectPinForDeferredCapture(
+    func testDeferPaymentCapture_Success() {
+        executeDeferPaymentCapture(
             description: "PIN collection for deferred capture succeeds"
         ) { result in
             switch result {
@@ -438,10 +438,10 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
         }
     }
 
-    func testCollectPinForDeferredCapture_IncompletePIN() {
-        executeCollectPinForDeferredCapture(
+    func testDeferPaymentCapture_IncompletePIN() {
+        executeDeferPaymentCapture(
             pinComplete: false,
-            description: "collectPinForDeferredCapture rejects with user_error due to incomplete PIN"
+            description: "deferPaymentCapture rejects with user_error due to incomplete PIN"
         ) { result in
             switch result {
             case .success:
@@ -455,11 +455,11 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
         }
     }
 
-    func testCollectPinForDeferredCapture_IllegalState() {
+    func testDeferPaymentCapture_IllegalState() {
         MockForageSDK.shared.service = nil
 
-        executeCollectPinForDeferredCapture(
-            description: "collectPinForDeferredCapture rejects with unknown_server_error due to uninitialized service"
+        executeDeferPaymentCapture(
+            description: "deferPaymentCapture rejects with unknown_server_error due to uninitialized service"
         ) { result in
             switch result {
             case .success:
@@ -469,15 +469,15 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
                 XCTAssertEqual(forageError.code, "unknown_server_error")
                 XCTAssertEqual(forageError.message, EXPECTED_UNKNOWN_SERVER_ERROR)
                 XCTAssertEqual(forageError.httpStatusCode, 500)
-                XCTAssertEqual(self.mockLogger.lastCriticalMessage, "Attempted to call collectPinForDeferredCapture, but ForageService was not initialized")
+                XCTAssertEqual(self.mockLogger.lastCriticalMessage, "Attempted to call deferPaymentCapture, but ForageService was not initialized")
             }
         }
     }
 
-    func testCollectPinForDeferredCapture_ThrowsError() {
-        executeCollectPinForDeferredCapture(
+    func testDeferPaymentCapture_ThrowsError() {
+        executeDeferPaymentCapture(
             doesThrow: true,
-            description: "collectPinForDeferredCapture rejects with general error"
+            description: "deferPaymentCapture rejects with general error"
         ) { result in
             switch result {
             case .success:

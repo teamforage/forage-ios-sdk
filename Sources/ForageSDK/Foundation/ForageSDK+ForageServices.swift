@@ -58,7 +58,7 @@ protocol ForageSDKService: AnyObject {
     ///  - foragePinTextField: A text field for secure PIN collection.
     ///  - paymentReference: Reference hash for the `Payment` that you plan on capturing on the server. Refers to an instance in Forage's database of a [Payment](https://docs.joinforage.app/reference/create-a-payment)
     ///  - completion: Completion handler returning a `Result` with either success (`Void`) or `Error`.
-    func collectPinForDeferredCapture(
+    func deferPaymentCapture(
         foragePinTextField: ForagePINTextField,
         paymentReference: String,
         completion: @escaping (Result<Void, Error>) -> Void
@@ -209,21 +209,21 @@ extension ForageSDK: ForageSDKService {
         }
     }
 
-    public func collectPinForDeferredCapture(
+    public func deferPaymentCapture(
         foragePinTextField: ForagePINTextField,
         paymentReference: String,
         completion: @escaping (Result<Void, Error>) -> Void
     ) {
         _ = ForageSDK.logger?
-            .setPrefix("collectPinForDeferredCapture")
+            .setPrefix("deferPaymentCapture")
             .addContext(ForageLogContext(
                 merchantRef: merchantID,
                 paymentRef: paymentReference
             ))
-            .notice("Called collectPinForDeferredCapture for Payment \(paymentReference)", attributes: nil)
+            .notice("Called deferPaymentCapture for Payment \(paymentReference)", attributes: nil)
 
         guard let forageService = service else {
-            reportIllegalState(for: "collectPinForDeferredCapture", dueTo: "ForageService was not initialized")
+            reportIllegalState(for: "deferPaymentCapture", dueTo: "ForageService was not initialized")
             completion(.failure(CommonErrors.UNKNOWN_SERVER_ERROR))
             return
         }
@@ -241,11 +241,11 @@ extension ForageSDK: ForageSDKService {
                     pinCollector: pinCollector,
                     paymentReference: paymentReference
                 )
-                ForageSDK.logger?.notice("collectPinForDeferredCapture succeeded for Payment \(paymentReference)", attributes: nil)
+                ForageSDK.logger?.notice("deferPaymentCapture succeeded for Payment \(paymentReference)", attributes: nil)
 
                 completion(.success(()))
             } catch {
-                ForageSDK.logger?.error("collectPinForDeferredCapture failed for Payment \(paymentReference)", error: error, attributes: nil)
+                ForageSDK.logger?.error("deferPaymentCapture failed for Payment \(paymentReference)", error: error, attributes: nil)
 
                 completion(.failure(error))
             }
