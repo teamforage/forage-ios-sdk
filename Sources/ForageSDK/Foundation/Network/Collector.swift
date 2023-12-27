@@ -17,7 +17,7 @@ let tokenKey = "card_number_token"
 enum VaultAction: String {
     case balanceCheck = "balance"
     case capturePayment = "capture"
-    case collectPin = "collect_pin"
+    case deferCapture = "defer_capture"
 
     var endpointSuffix: String {
         switch self {
@@ -25,7 +25,7 @@ enum VaultAction: String {
             return "/balance/"
         case .capturePayment:
             return "/capture/"
-        case .collectPin:
+        case .deferCapture:
             return "/collect_pin/"
         }
     }

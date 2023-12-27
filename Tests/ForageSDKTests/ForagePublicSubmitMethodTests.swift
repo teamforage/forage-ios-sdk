@@ -187,7 +187,7 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
 
         MockForageSDK.shared.deferPaymentCapture(
             foragePinTextField: mockPinTextField,
-            paymentReference: "collectPinPaymentRef123"
+            paymentReference: "deferPaymentCapturePaymentRef123"
         ) { result in
             validation(result)
             expectation.fulfill()

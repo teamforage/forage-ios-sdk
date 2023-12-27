@@ -176,7 +176,7 @@ class LiveForageService: ForageService {
             let collectPinResult = try await collectPinForPayment(
                 pinCollector: pinCollector,
                 paymentReference: paymentReference,
-                action: .collectPin
+                action: .deferCapture
             )
             return collectPinResult.vaultResponse
         } catch {
@@ -185,7 +185,7 @@ class LiveForageService: ForageService {
     }
 
     /// Common Payment-related prologue across capturePayment and collectPin.
-    /// Both `collectPin` and `capturePayment` involve the same
+    /// Both `deferPaymentCapture` and `capturePayment` involve the same
     /// preliminerary data retrieval and a trip to the Vault (VGS or Basis Theory) Proxy
     private func collectPinForPayment(
         pinCollector: VaultCollector,
