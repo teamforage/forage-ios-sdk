@@ -56,7 +56,7 @@ class CapturePaymentView: BaseSampleView {
     }()
 
     /// Set accessibilityIdentifier for all of the elements, used by mobile-qa-tests service.
-    private let collectPinSuccessLabel: UILabel = .create(id: "lbl_collect_pin_success")
+    private let deferPaymentCaptureResponseLabel: UILabel = .create(id: "lbl_collect_pin_success")
     private let statusTypeLabel: UILabel = .create(id: "lbl_status_type")
     private let statusLabel: UILabel = .create(id: "lbl_status")
     private let paymentRefLabel: UILabel = .create(id: "lbl_payment_ref")
@@ -64,6 +64,20 @@ class CapturePaymentView: BaseSampleView {
     private let amountLabel: UILabel = .create(id: "lbl_amount")
     private let errorLabel: UILabel = .create(id: "lbl_error")
     private let remainingBalanceLabel: UILabel = .create(id: "lbl_remaining_balance")
+    
+    private let snapHeadingLabel: UILabel = {
+        let lbl = UILabel.create(id: "lbl_snap_heading")
+        lbl.text = "SNAP PIN"
+        lbl.font = .systemFont(ofSize: 20)
+        return lbl
+    }()
+    
+    private let ebtCashHeadingLabel: UILabel = {
+        let lbl = UILabel.create(id: "lbl_ebt_cash_heading")
+        lbl.text = "EBT Cash PIN"
+        lbl.font = .systemFont(ofSize: 20)
+        return lbl
+    }()
 
     // MARK: Fileprivate Methods
 
@@ -86,7 +100,7 @@ class CapturePaymentView: BaseSampleView {
     }
 
     private lazy var collectSnapPinButton: UIButton = createSubmitButton(
-        title: "Collect SNAP PIN",
+        title: "Defer SNAP",
         accessibilityIdentifier: "bt_collect_snap_pin",
         fundingType: .ebtSnap,
         pinTextField: snapTextField,
@@ -102,7 +116,7 @@ class CapturePaymentView: BaseSampleView {
     )
 
     private lazy var collectEbtCashPinButton: UIButton = createSubmitButton(
-        title: "Collect EBT Cash PIN",
+        title: "Defer EBT Cash",
         accessibilityIdentifier: "bt_collect_non_snap_pin",
         fundingType: .ebtCash,
         pinTextField: ebtCashTextField,
@@ -157,7 +171,7 @@ class CapturePaymentView: BaseSampleView {
         DispatchQueue.main.async {
             switch result {
             case .success:
-                self.collectPinSuccessLabel.text = "deferPaymentCapture: success"
+                self.deferPaymentCaptureResponseLabel.text = "deferPaymentCapture: success"
                 self.paymentRefLabel.text = ""
                 self.fundingTypeLabel.text = ""
                 self.amountLabel.text = ""
@@ -175,7 +189,7 @@ class CapturePaymentView: BaseSampleView {
             paymentRefLabel.text = ""
             fundingTypeLabel.text = ""
             amountLabel.text = ""
-            collectPinSuccessLabel.text = ""
+            deferPaymentCaptureResponseLabel.text = ""
         }
     }
 
@@ -187,7 +201,7 @@ class CapturePaymentView: BaseSampleView {
                 fundingTypeLabel.text = "fundingType=\(response.fundingType)"
                 amountLabel.text = "amount=\(response.amount)"
                 errorLabel.text = ""
-                collectPinSuccessLabel.text = ""
+                deferPaymentCaptureResponseLabel.text = ""
             case let .failure(error):
                 if let forageError = error as? ForageError? {
                     let firstError = forageError?.errors.first
@@ -218,19 +232,21 @@ class CapturePaymentView: BaseSampleView {
         addSubview(contentView)
 
         contentView.addSubview(titleLabel)
+    
+        contentView.addSubview(snapHeadingLabel)
         contentView.addSubview(snapTextField)
-
         contentView.addSubview(snapButtonContainer)
         snapButtonContainer.addSubview(collectSnapPinButton)
         snapButtonContainer.addSubview(captureSnapButton)
 
+        contentView.addSubview(ebtCashHeadingLabel)
         contentView.addSubview(ebtCashTextField)
 
         contentView.addSubview(ebtCashButtonContainer)
         ebtCashButtonContainer.addSubview(collectEbtCashPinButton)
         ebtCashButtonContainer.addSubview(captureEbtCashButton)
 
-        contentView.addSubview(collectPinSuccessLabel)
+        contentView.addSubview(deferPaymentCaptureResponseLabel)
         contentView.addSubview(statusTypeLabel)
         contentView.addSubview(statusLabel)
         contentView.addSubview(paymentRefLabel)
@@ -246,9 +262,9 @@ class CapturePaymentView: BaseSampleView {
 
     private func setupContentViewConstraints() {
         let buttonSpacing: CGFloat = 10
-        let collectButtonWidthMultiplier: CGFloat = 0.55 // 60%
-        let captureButtonWidthMultiplier: CGFloat = 0.45 // 40%
-
+        let collectButtonWidthMultiplier: CGFloat = 0.50 // 50%
+        let captureButtonWidthMultiplier: CGFloat = 0.50 // 50%
+        
         contentView.anchor(
             top: topAnchor,
             leading: leadingAnchor,
@@ -256,23 +272,14 @@ class CapturePaymentView: BaseSampleView {
             trailing: trailingAnchor,
             centerXAnchor: centerXAnchor
         )
-
-        titleLabel.anchor(
-            top: contentView.safeAreaLayoutGuide.topAnchor,
-            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
-            bottom: nil,
-            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
-            centerXAnchor: contentView.centerXAnchor,
-            padding: UIEdgeInsets(top: 24, left: 24, bottom: 12, right: 24)
-        )
-
-        snapTextField.anchor(
-            top: titleLabel.safeAreaLayoutGuide.bottomAnchor,
-            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
-            bottom: nil,
-            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
-            centerXAnchor: contentView.centerXAnchor,
-            padding: UIEdgeInsets(top: 24, left: 24, bottom: 12, right: 24)
+        
+        anchorContentViewSubviews(
+            contentView: contentView,
+            subviews: [
+                titleLabel,
+                snapHeadingLabel,
+                snapTextField
+            ]
         )
 
         snapButtonContainer.anchor(
@@ -300,9 +307,19 @@ class CapturePaymentView: BaseSampleView {
             captureSnapButton.heightAnchor.constraint(equalToConstant: 48),
             captureSnapButton.widthAnchor.constraint(equalTo: snapButtonContainer.widthAnchor, multiplier: captureButtonWidthMultiplier, constant: -(buttonSpacing / 2)),
         ])
+        
+        
+        ebtCashHeadingLabel.anchor(
+            top: captureSnapButton.safeAreaLayoutGuide.bottomAnchor,
+            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
+            bottom: nil,
+            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
+            centerXAnchor: contentView.centerXAnchor,
+            padding: UIEdgeInsets(top: 24, left: 24, bottom: 12, right: 24)
+        )
 
         ebtCashTextField.anchor(
-            top: captureSnapButton.safeAreaLayoutGuide.bottomAnchor,
+            top: ebtCashHeadingLabel.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
             bottom: nil,
             trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
@@ -355,7 +372,7 @@ class CapturePaymentView: BaseSampleView {
             captureEbtCashButton.widthAnchor.constraint(equalTo: ebtCashButtonContainer.widthAnchor, multiplier: captureButtonWidthMultiplier, constant: -(buttonSpacing / 2)),
         ])
 
-        collectPinSuccessLabel.anchor(
+        deferPaymentCaptureResponseLabel.anchor(
             top: captureEbtCashButton.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
             bottom: nil,
@@ -365,7 +382,7 @@ class CapturePaymentView: BaseSampleView {
         )
 
         statusTypeLabel.anchor(
-            top: collectPinSuccessLabel.safeAreaLayoutGuide.bottomAnchor,
+            top: deferPaymentCaptureResponseLabel.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
             bottom: nil,
             trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
