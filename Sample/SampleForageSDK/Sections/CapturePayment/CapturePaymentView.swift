@@ -64,14 +64,14 @@ class CapturePaymentView: BaseSampleView {
     private let amountLabel: UILabel = .create(id: "lbl_amount")
     private let errorLabel: UILabel = .create(id: "lbl_error")
     private let remainingBalanceLabel: UILabel = .create(id: "lbl_remaining_balance")
-    
+
     private let snapHeadingLabel: UILabel = {
         let lbl = UILabel.create(id: "lbl_snap_heading")
         lbl.text = "SNAP PIN"
         lbl.font = .systemFont(ofSize: 20)
         return lbl
     }()
-    
+
     private let ebtCashHeadingLabel: UILabel = {
         let lbl = UILabel.create(id: "lbl_ebt_cash_heading")
         lbl.text = "EBT Cash PIN"
@@ -232,7 +232,7 @@ class CapturePaymentView: BaseSampleView {
         addSubview(contentView)
 
         contentView.addSubview(titleLabel)
-    
+
         contentView.addSubview(snapHeadingLabel)
         contentView.addSubview(snapTextField)
         contentView.addSubview(snapButtonContainer)
@@ -264,7 +264,7 @@ class CapturePaymentView: BaseSampleView {
         let buttonSpacing: CGFloat = 10
         let collectButtonWidthMultiplier: CGFloat = 0.50 // 50%
         let captureButtonWidthMultiplier: CGFloat = 0.50 // 50%
-        
+
         contentView.anchor(
             top: topAnchor,
             leading: leadingAnchor,
@@ -272,13 +272,13 @@ class CapturePaymentView: BaseSampleView {
             trailing: trailingAnchor,
             centerXAnchor: centerXAnchor
         )
-        
+
         anchorContentViewSubviews(
             contentView: contentView,
             subviews: [
                 titleLabel,
                 snapHeadingLabel,
-                snapTextField
+                snapTextField,
             ]
         )
 
@@ -307,8 +307,7 @@ class CapturePaymentView: BaseSampleView {
             captureSnapButton.heightAnchor.constraint(equalToConstant: 48),
             captureSnapButton.widthAnchor.constraint(equalTo: snapButtonContainer.widthAnchor, multiplier: captureButtonWidthMultiplier, constant: -(buttonSpacing / 2)),
         ])
-        
-        
+
         ebtCashHeadingLabel.anchor(
             top: captureSnapButton.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
