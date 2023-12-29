@@ -52,14 +52,14 @@ class RequestBalanceView: BaseSampleView {
         return tf
     }()
 
-    private let requestBalanceButton: UIButton = {
-        let button = UIButton()
+    private let requestBalanceButton: LoadingButton = {
+        let button = LoadingButton()
         button.setTitle("Get Balance", for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         button.tintColor = .white
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(getBalanceInfo(_:)), for: .touchUpInside)
-        button.backgroundColor = .systemBlue
+        button.backgroundColor = .primaryColor
         button.isEnabled = true
         button.isUserInteractionEnabled = true
         button.alpha = 1.0
@@ -68,21 +68,7 @@ class RequestBalanceView: BaseSampleView {
         return button
     }()
 
-    private let nextButton: UIButton = {
-        let button = UIButton()
-        button.setTitle("Go To Next", for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
-        button.tintColor = .white
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.addTarget(self, action: #selector(goToCreatePayment(_:)), for: .touchUpInside)
-        button.backgroundColor = .systemBlue
-        button.isEnabled = true
-        button.isUserInteractionEnabled = true
-        button.alpha = 1.0
-        button.accessibilityIdentifier = "bt_next"
-        button.isAccessibilityElement = true
-        return button
-    }()
+    private let nextButton: UIButton = .createNextButton(self, action: #selector(goToCreatePayment(_:)))
 
     private let isFirstResponderLabel: UILabel = {
         let label = UILabel()
@@ -141,7 +127,7 @@ class RequestBalanceView: BaseSampleView {
         label.textColor = .black
         label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         label.numberOfLines = 0
-        label.accessibilityIdentifier = "lbl_non_snap_balance"
+        label.accessibilityIdentifier = "lbl_cash_balance"
         label.isAccessibilityElement = true
         return label
     }()
@@ -160,13 +146,16 @@ class RequestBalanceView: BaseSampleView {
     // MARK: Fileprivate Methods
 
     @objc fileprivate func getBalanceInfo(_ gesture: UIGestureRecognizer) {
+        requestBalanceButton.showLoading()
+
         DispatchQueue.global(qos: .userInitiated).async {
             ForageSDK.shared.checkBalance(
                 foragePinTextField: self.foragePinTextField,
                 paymentMethodReference: ClientSharedData.shared.paymentMethodReference
-            ) { result in
-                self.foragePinTextField.clearText()
-                self.printPINResult(result: result)
+            ) { [self] result in
+                requestBalanceButton.hideLoading()
+                foragePinTextField.clearText()
+                printPINResult(result: result)
             }
         }
     }
