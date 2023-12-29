@@ -23,7 +23,7 @@ class MockLDManager: LDManagerProtocol {
     }
 
     func getVaultType(ldClient: LDClientProtocol?, genRandomDouble: () -> Double, fromCache: Bool) -> VaultType {
-        VaultType.vgsVaultType
+        VaultType.vgs
     }
 }
 

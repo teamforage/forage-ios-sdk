@@ -45,7 +45,7 @@ class CardNumberView: BaseSampleView {
         tf.borderWidth = 2.0
         tf.cornerRadius = 4.0
         tf.clearButtonMode = .whileEditing
-        
+
         // Setting height of TextField to 52.
         // Height of 'powered by Forage' is 16 and spacing is 8
         let heightAnchor = tf.heightAnchor.constraint(equalToConstant: 76)
@@ -115,7 +115,7 @@ class CardNumberView: BaseSampleView {
         button.isAccessibilityElement = true
         return button
     }()
-    
+
     // MARK: Fileprivate Methods
 
     @objc fileprivate func sendInfo(_ gesture: UIGestureRecognizer) {
@@ -211,8 +211,8 @@ class CardNumberView: BaseSampleView {
             trailing: trailingAnchor,
             centerXAnchor: centerXAnchor
         )
-        
-        self.anchorContentViewSubviews(contentView: contentView, subviews: [
+
+        anchorContentViewSubviews(contentView: contentView, subviews: [
             titleLabel,
             foragePanTextField,
             firstResponderLabel,

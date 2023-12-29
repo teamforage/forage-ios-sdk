@@ -28,11 +28,6 @@ struct ResponseAttributes {
     var forageErrorCode: String?
 }
 
-enum VaultAction: String {
-    case balanceCheck = "balance"
-    case capturePayment = "capture"
-}
-
 enum EventOutcome: String {
     case success
     case failure

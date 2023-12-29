@@ -20,7 +20,7 @@ class MockLDClient: LDClientProtocol {
     }
 
     init(vaultType: VaultType) {
-        vaultPercentage = vaultType == VaultType.vgsVaultType ? 0 : 100
+        vaultPercentage = vaultType == VaultType.vgs ? 0 : 100
     }
 
     func doubleVariationWrapper(forKey key: String, defaultValue: Double) -> Double {
@@ -37,23 +37,23 @@ final class LDManagerTests: XCTestCase {
 
     func testGetVaultType_WhenLDClientIsNil_ShouldReturnVGSVaultType() {
         let result = LDManager.shared.getVaultType(ldClient: nil, genRandomDouble: LDManager.generateRandomDouble, fromCache: false)
-        XCTAssertEqual(result, VaultType.vgsVaultType)
+        XCTAssertEqual(result, VaultType.vgs)
     }
 
     func testGetVaultType_WhenVaultTypeIsAlreadySet_ShouldReturnCachedValue() {
-        let mockLDClient = MockLDClient(vaultType: VaultType.btVaultType)
+        let mockLDClient = MockLDClient(vaultType: VaultType.basisTheory)
         let firstVaultType = LDManager.shared.getVaultType(ldClient: mockLDClient, genRandomDouble: LDManager.generateRandomDouble, fromCache: false)
 
-        let vgsMockLdClient = MockLDClient(vaultType: VaultType.vgsVaultType)
+        let vgsMockLdClient = MockLDClient(vaultType: VaultType.vgs)
         let secondVaultType = LDManager.shared.getVaultType(
             ldClient: vgsMockLdClient,
             genRandomDouble: LDManager.generateRandomDouble,
             fromCache: true
         )
 
-        XCTAssertEqual(firstVaultType, VaultType.btVaultType)
+        XCTAssertEqual(firstVaultType, VaultType.basisTheory)
         // should still be Basis Theory
-        XCTAssertEqual(secondVaultType, VaultType.btVaultType)
+        XCTAssertEqual(secondVaultType, VaultType.basisTheory)
     }
 
     func testGetVaultType_VariationGreaterThanRandom_ShouldReturnBTVaultType() {
@@ -65,7 +65,7 @@ final class LDManagerTests: XCTestCase {
             genRandomDouble: mockRandomGenerator,
             fromCache: false
         )
-        XCTAssertEqual(result, VaultType.btVaultType)
+        XCTAssertEqual(result, VaultType.basisTheory)
     }
 
     func testGetVaultType_VariationLessThanRandom_ShouldReturnVGSVaultType() {
@@ -77,7 +77,7 @@ final class LDManagerTests: XCTestCase {
             genRandomDouble: mockRandomGenerator,
             fromCache: false
         )
-        XCTAssertEqual(result, VaultType.vgsVaultType)
+        XCTAssertEqual(result, VaultType.vgs)
     }
 
     // Test when ldClient.variation() returns a value equal to the random percent
@@ -91,7 +91,7 @@ final class LDManagerTests: XCTestCase {
             genRandomDouble: mockRandomGenerator,
             fromCache: false
         )
-        XCTAssertEqual(result, VaultType.vgsVaultType)
+        XCTAssertEqual(result, VaultType.vgs)
     }
 
     func testGetPollingIntervals_ReturnsDefaultVal() {

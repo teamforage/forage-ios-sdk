@@ -82,11 +82,11 @@ protocol ForageService: AnyObject {
         paymentMethodReference: String
     ) async throws -> BalanceModel
 
-    /// Asynchronously captures a payment using the given `pinCollector` and `paymentReference`
+    /// Immediately captures a payment using the given `pinCollector` and `paymentReference`
     ///
     /// - Parameters:
     ///   - pinCollector: The service responsible for securely collecting PINs.
-    ///   - paymentReference: The reference hash of the Payment.
+    ///   - paymentReference: The reference hash of the Payment that is being captured.
     ///
     /// - Throws:
     ///   - `ForageError`: If there's an issue at any stage of the payment capture process.
@@ -97,4 +97,20 @@ protocol ForageService: AnyObject {
         pinCollector: VaultCollector,
         paymentReference: String
     ) async throws -> PaymentModel
+
+    /// Collect the customer's PIN for a payment using the given `pinCollector` and `paymentReference`
+    ///
+    /// - Parameters:
+    ///   - pinCollector: The service responsible for securely collecting PINs.
+    ///   - paymentReference: The reference hash of the Payment that the client intends on capturing from their server.
+    ///
+    /// - Throws:
+    ///   - `ForageError`: If there's an issue at any stage of the payment capture process.
+    ///
+    /// - Returns:
+    ///   - A `VaultResponse` object containing the response from the Vault (VGS or Basis Theory) proxy.
+    func collectPinForDeferredCapture(
+        pinCollector: VaultCollector,
+        paymentReference: String
+    ) async throws -> VaultResponse
 }

@@ -143,9 +143,9 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
 
         var tf: VaultWrapper?
 
-        if vaultType == VaultType.vgsVaultType {
+        if vaultType == VaultType.vgs {
             tf = VGSTextFieldWrapper()
-        } else if vaultType == VaultType.btVaultType {
+        } else if vaultType == VaultType.basisTheory {
             tf = BasisTheoryTextFieldWrapper()
         } else {
             tf = VGSTextFieldWrapper()

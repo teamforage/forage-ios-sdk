@@ -13,6 +13,24 @@ import VGSCollectSDK
 let tokenDelimiter = ","
 let tokenKey = "card_number_token"
 
+/// Defines actions performed against the Vault (VGS or Basis Theory) Proxy.
+enum VaultAction: String {
+    case balanceCheck = "balance"
+    case capturePayment = "capture"
+    case deferCapture = "defer_capture"
+
+    var endpointSuffix: String {
+        switch self {
+        case .balanceCheck:
+            return "/balance/"
+        case .capturePayment:
+            return "/capture/"
+        case .deferCapture:
+            return "/collect_pin/"
+        }
+    }
+}
+
 protocol VaultCollector {
     func setCustomHeaders(headers: [String: String], xKey: [String: String])
     func sendData(
@@ -65,7 +83,7 @@ class VGSCollectWrapper: VaultCollector {
             mutableExtraData[tokenKey] = token
         }
 
-        let measurement = VaultProxyResponseMonitor.newMeasurement(vault: VaultType.vgsVaultType, action: vaultAction)
+        let measurement = VaultProxyResponseMonitor.newMeasurement(vault: VaultType.vgs, action: vaultAction)
             .setPath(path)
             .setMethod(.post)
 
@@ -85,7 +103,7 @@ class VGSCollectWrapper: VaultCollector {
                         "http_status": code
                     ])
                     measurement.setHttpStatusCode(code).logResult()
-                    completion(VaultResponse(statusCode: code, urlResponse: urlResponse, data: data, error: error))
+                    completion(VaultResponse(statusCode: code, urlResponse: urlResponse, data: data, error: error ?? CommonErrors.UNKNOWN_SERVER_ERROR))
                 }
             }
         }
@@ -99,7 +117,7 @@ class VGSCollectWrapper: VaultCollector {
     }
 
     func getVaultType() -> VaultType {
-        VaultType.vgsVaultType
+        VaultType.vgs
     }
 }
 
@@ -171,7 +189,7 @@ class BasisTheoryWrapper: VaultCollector {
             }
         }
 
-        let measurement = VaultProxyResponseMonitor.newMeasurement(vault: VaultType.btVaultType, action: vaultAction)
+        let measurement = VaultProxyResponseMonitor.newMeasurement(vault: VaultType.basisTheory, action: vaultAction)
             .setPath(path)
             .setMethod(.post)
 
@@ -214,7 +232,7 @@ class BasisTheoryWrapper: VaultCollector {
     }
 
     func getVaultType() -> VaultType {
-        VaultType.btVaultType
+        VaultType.basisTheory
     }
 }
 

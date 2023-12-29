@@ -78,6 +78,7 @@ class LiveForageService: ForageService {
 
             let vaultResult = try await submitPinToVault(
                 pinCollector: pinCollector,
+                vaultAction: .balanceCheck,
                 path: "/api/payment_methods/\(paymentMethodReference)/balance/",
                 request: balanceRequest
             )
@@ -134,6 +135,67 @@ class LiveForageService: ForageService {
         let merchantID = ForageSDK.shared.merchantID
 
         do {
+            let (vaultResponse, forageRequest) = try await collectPinForPayment(
+                pinCollector: pinCollector,
+                paymentReference: paymentReference,
+                action: .capturePayment
+            )
+
+            _ = try await awaitResult { completion in
+                self.pollingService.execute(
+                    vaultResponse: vaultResponse,
+                    request: forageRequest,
+                    completion: completion
+                )
+            }
+
+            return try await awaitResult { completion in
+                self.getPayment(
+                    sessionToken: sessionToken,
+                    merchantID: merchantID,
+                    paymentRef: paymentReference,
+                    completion: completion
+                )
+            }
+        } catch {
+            throw error
+        }
+    }
+
+    func getPayment(sessionToken: String, merchantID: String, paymentRef: String, completion: @escaping (Result<PaymentModel, Error>) -> Void) {
+        do { try provider.execute(model: PaymentModel.self, endpoint: ForageAPI.getPayment(sessionToken: sessionToken, merchantID: merchantID, paymentRef: paymentRef), completion: completion) } catch { completion(.failure(error)) }
+    }
+
+    // MARK: Collect PIN
+
+    func collectPinForDeferredCapture(
+        pinCollector: VaultCollector,
+        paymentReference: String
+    ) async throws -> VaultResponse {
+        do {
+            let collectPinResult = try await collectPinForPayment(
+                pinCollector: pinCollector,
+                paymentReference: paymentReference,
+                action: .deferCapture
+            )
+            return collectPinResult.vaultResponse
+        } catch {
+            throw error
+        }
+    }
+
+    /// Common Payment-related prologue across capturePayment and collectPin.
+    /// Both `deferPaymentCapture` and `capturePayment` involve the same
+    /// preliminerary data retrieval and a trip to the Vault (VGS or Basis Theory) Proxy
+    private func collectPinForPayment(
+        pinCollector: VaultCollector,
+        paymentReference: String,
+        action: VaultAction
+    ) async throws -> (vaultResponse: VaultResponse, forageRequest: ForageRequestModel) {
+        let sessionToken = ForageSDK.shared.sessionToken
+        let merchantID = ForageSDK.shared.merchantID
+
+        do {
             // TODO: parallelize the first 2 requests!
             let xKeyModel = try await awaitResult { completion in
                 self.getXKey(sessionToken: sessionToken, merchantID: merchantID, completion: completion)
@@ -155,7 +217,7 @@ class LiveForageService: ForageService {
                 )
             }
 
-            let captureRequest = ForageRequestModel(
+            let collectPinRequest = ForageRequestModel(
                 authorization: sessionToken,
                 paymentMethodReference: "",
                 paymentReference: paymentReference,
@@ -164,35 +226,18 @@ class LiveForageService: ForageService {
                 xKey: ["vgsXKey": xKeyModel.alias, "btXKey": xKeyModel.bt_alias]
             )
 
-            let vaultResult = try await submitPinToVault(
+            let basePath = "/api/payments/\(paymentReference)"
+
+            let vaultResponse = try await submitPinToVault(
                 pinCollector: pinCollector,
-                path: "/api/payments/\(paymentReference)/capture/",
-                request: captureRequest
+                vaultAction: action,
+                path: "\(basePath)\(action.endpointSuffix)",
+                request: collectPinRequest
             )
-
-            _ = try await awaitResult { completion in
-                self.pollingService.execute(
-                    vaultResponse: vaultResult,
-                    request: captureRequest,
-                    completion: completion
-                )
-            }
-
-            return try await awaitResult { completion in
-                self.getPayment(
-                    sessionToken: captureRequest.authorization,
-                    merchantID: captureRequest.merchantID,
-                    paymentRef: captureRequest.paymentReference,
-                    completion: completion
-                )
-            }
+            return (vaultResponse, collectPinRequest)
         } catch {
             throw error
         }
-    }
-
-    func getPayment(sessionToken: String, merchantID: String, paymentRef: String, completion: @escaping (Result<PaymentModel, Error>) -> Void) {
-        do { try provider.execute(model: PaymentModel.self, endpoint: ForageAPI.getPayment(sessionToken: sessionToken, merchantID: merchantID, paymentRef: paymentRef), completion: completion) } catch { completion(.failure(error)) }
     }
 
     // MARK: Private helper methods
@@ -200,10 +245,12 @@ class LiveForageService: ForageService {
     /// Submit PIN to the Vault Proxy (Basis Theory or VGS)
     /// - Parameters:
     ///   - pinCollector: The PIN collection client
-    ///   - path: The inbound HTTP path. Ends with /capture/ or /balance/
+    ///   - vaultAction: The action performed against the vault.
+    ///   - path: The inbound HTTP path. Ends with /balance/, /capture/ or /collect_pin/
     ///   - request: Model  with data to perform request.
     private func submitPinToVault(
         pinCollector: VaultCollector,
+        vaultAction: VaultAction,
         path: String,
         request: ForageRequestModel
     ) async throws -> VaultResponse {
@@ -221,7 +268,7 @@ class LiveForageService: ForageService {
             let vaultResponse = try await withCheckedThrowingContinuation { continuation in
                 pinCollector.sendData(
                     path: path,
-                    vaultAction: VaultAction.capturePayment,
+                    vaultAction: vaultAction,
                     extraData: extraData
                 ) { result in
                     continuation.resume(returning: result)
