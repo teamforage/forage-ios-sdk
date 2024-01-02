@@ -335,11 +335,11 @@ ForageSDK.shared.capturePayment(
 
 #### Collect an EBT Card PIN to capture a payment server-side
 
-Call `ForageSDK.shared.collectPinForDeferredCapture` to collect a customer's EBT Card PIN before capturing a `Payment` server-side.
+Call `ForageSDK.shared.deferPaymentCapture` to collect a customer's EBT Card PIN before capturing a `Payment` server-side.
 
 ```swift
 // Signature
-func collectPinForDeferredCapture(
+func deferPaymentCapture(
 	foragePinTextField: ForagePINTextField,
 	paymentReference: String,
 )
@@ -353,7 +353,7 @@ func collectPinForDeferredCapture(
 ```swift
 // Usage
 
-ForageSDK.shared.collectPinForDeferredCapture(
+ForageSDK.shared.deferPaymentCapture(
     foragePinTextField: foragePinTextField,
     paymentReference: paymentReference
 ) { result in
