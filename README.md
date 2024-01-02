@@ -29,6 +29,8 @@ The ForageSDK is a Swift library for securely processing EBT payments. You can u
       - [Subscribe to `ForagePINTextField` state changes](#subscribe-to-foragepintextfield-state-changes)
       - [Check the balance of an EBT card](#check-the-balance-of-an-ebt-card)
       - [Capture an EBT payment](#capture-an-ebt-payment)
+      - [Collect an EBT Card PIN to capture a payment server-side](#collect-an-ebt-card-pin-to-capture-a-payment-server-side)
+        - [Parameter definitions](#parameter-definitions)
   - [Sample Application](#sample-application)
   - [Dependencies](#dependencies)
 
@@ -51,7 +53,7 @@ pod init
 3. Add the following line to your `Podfile`:
 
 ```swift
-pod 'ForageSDK', '~> 4.2'
+pod 'ForageSDK', '~> 4.3'
 ```
 
 4. Run the following command
