@@ -81,7 +81,7 @@ extension LDValue {
 }
 
 protocol LDManagerProtocol {
-    func getVaultType(ldClient: LDClientProtocol?, genRandomDouble: () -> Double, fromCache: Bool) -> VaultType
+    func getVaultType(ldClient: LDClientProtocol?, genRandomDouble: () -> Double) -> VaultType
     func getPollingIntervals(ldClient: LDClientProtocol?) -> [Int]
 }
 
@@ -142,8 +142,6 @@ class LDManager: LDManagerProtocol {
     static let shared = LDManager()
     private var logger: ForageLogger?
 
-    private(set) var vaultType: VaultType?
-
     // MARK: - Initialization
 
     private init() {}
@@ -179,19 +177,13 @@ class LDManager: LDManagerProtocol {
     /// - Parameters:
     ///   - ldClient: An optional `LDClientProtocol` object used to fetch feature flags. Defaults to `getDefaultLDClient()`.
     ///   - genRandomDouble: A closure that returns a random double between 0 and 100. Defaults to `generateRandomDouble`.
-    ///   - fromCache: A Boolean flag indicating whether to return the cached vault type if available. Defaults to `true`.
     ///
     /// - Returns: The determined `VaultType`.
     func getVaultType(
         ldClient: LDClientProtocol?,
-        genRandomDouble: () -> Double,
-        fromCache: Bool
+        genRandomDouble: () -> Double
     ) -> VaultType {
         logger = logger?.setPrefix(LAUNCH_DARKLY_PREFIX)
-
-        if fromCache, let existingVaultType = vaultType {
-            return existingVaultType
-        }
 
         guard let ld = ldClient else {
             logger?.error("Defaulting to VGS. LDClient.get() was called before init()!",
@@ -210,11 +202,11 @@ class LDManager: LDManagerProtocol {
                      attributes: nil)
 
         let randomNum = genRandomDouble()
-        vaultType = (randomNum < vaultPercentage) ? .basisTheory : .vgs
+        let vaultType: VaultType = (randomNum < vaultPercentage) ? .basisTheory : .vgs
 
         logVaultType(vaultType)
 
-        return vaultType ?? .vgs
+        return vaultType
     }
 
     /// Determines on what interval we will poll for SQS messages based on "iso-polling-wait-intervals" feature flag.
