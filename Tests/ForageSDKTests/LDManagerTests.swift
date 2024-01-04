@@ -36,24 +36,11 @@ final class LDManagerTests: XCTestCase {
     // MARK: Test LDManager.getVaultType
 
     func testGetVaultType_WhenLDClientIsNil_ShouldReturnVGSVaultType() {
-        let result = LDManager.shared.getVaultType(ldClient: nil, genRandomDouble: LDManager.generateRandomDouble, fromCache: false)
-        XCTAssertEqual(result, VaultType.vgs)
-    }
-
-    func testGetVaultType_WhenVaultTypeIsAlreadySet_ShouldReturnCachedValue() {
-        let mockLDClient = MockLDClient(vaultType: VaultType.basisTheory)
-        let firstVaultType = LDManager.shared.getVaultType(ldClient: mockLDClient, genRandomDouble: LDManager.generateRandomDouble, fromCache: false)
-
-        let vgsMockLdClient = MockLDClient(vaultType: VaultType.vgs)
-        let secondVaultType = LDManager.shared.getVaultType(
-            ldClient: vgsMockLdClient,
-            genRandomDouble: LDManager.generateRandomDouble,
-            fromCache: true
+        let result = LDManager.shared.getVaultType(
+            ldClient: nil,
+            genRandomDouble: LDManager.generateRandomDouble
         )
-
-        XCTAssertEqual(firstVaultType, VaultType.basisTheory)
-        // should still be Basis Theory
-        XCTAssertEqual(secondVaultType, VaultType.basisTheory)
+        XCTAssertEqual(result, VaultType.vgs)
     }
 
     func testGetVaultType_VariationGreaterThanRandom_ShouldReturnBTVaultType() {
@@ -62,8 +49,7 @@ final class LDManagerTests: XCTestCase {
 
         let result = LDManager.shared.getVaultType(
             ldClient: mockLDClient,
-            genRandomDouble: mockRandomGenerator,
-            fromCache: false
+            genRandomDouble: mockRandomGenerator
         )
         XCTAssertEqual(result, VaultType.basisTheory)
     }
@@ -74,8 +60,7 @@ final class LDManagerTests: XCTestCase {
 
         let result = LDManager.shared.getVaultType(
             ldClient: mockLDClient,
-            genRandomDouble: mockRandomGenerator,
-            fromCache: false
+            genRandomDouble: mockRandomGenerator
         )
         XCTAssertEqual(result, VaultType.vgs)
     }
@@ -88,8 +73,7 @@ final class LDManagerTests: XCTestCase {
 
         let result = LDManager.shared.getVaultType(
             ldClient: mockLDClient,
-            genRandomDouble: mockRandomGenerator,
-            fromCache: false
+            genRandomDouble: mockRandomGenerator
         )
         XCTAssertEqual(result, VaultType.vgs)
     }
@@ -109,7 +93,9 @@ final class LDManagerTests: XCTestCase {
         // { "intervals": [1000] }
         // Instead it is:
         // { "intervals": 1000 }
-        let mockLDClient = MockLDClient(pollingIntervals: LDValue(dictionaryLiteral: ("intervals", 1000)))
+        let mockLDClient = MockLDClient(
+            pollingIntervals: LDValue(dictionaryLiteral: ("intervals", 1000))
+        )
 
         let result = LDManager.shared.getPollingIntervals(
             ldClient: mockLDClient
