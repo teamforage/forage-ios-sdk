@@ -342,8 +342,8 @@ Call `ForageSDK.shared.deferPaymentCapture` to collect a customer's EBT Card PIN
 ```swift
 // Signature
 func deferPaymentCapture(
-	foragePinTextField: ForagePINTextField,
-	paymentReference: String,
+    foragePinTextField: ForagePINTextField,
+    paymentReference: String,
 )
 ```
 
