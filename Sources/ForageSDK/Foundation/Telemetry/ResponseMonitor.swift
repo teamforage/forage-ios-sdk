@@ -77,7 +77,7 @@ class ResponseMonitor: NetworkMonitor {
 
     @discardableResult
     func setForageErrorCode(_ error: Error) -> ResponseMonitor {
-        responseAttributes.forageErrorCode = (error as? ForageError)?.errors.first?.code ?? UnknownErrorCode
+        responseAttributes.forageErrorCode = (error as? ForageError)?.code ?? UnknownErrorCode
         return self
     }
 

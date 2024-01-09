@@ -90,19 +90,14 @@ class PollingService: Polling {
                     if self.didReceiveCompletedMessage(message) {
                         completion(.success(message))
                     } else if didReceiveFailedMessage {
-                        let error = message.errors[0]
-                        let statusCode = error.statusCode
-                        let forageErrorCode = error.forageCode
-                        let message = error.message
-                        let details = error.details
-                        let forageError = ForageError(errors: [
-                            ForageErrorObj(
-                                httpStatusCode: statusCode,
-                                code: forageErrorCode,
-                                message: message,
-                                details: details
-                            ),
-                        ])
+                        let sqsError = message.errors[0]
+
+                        let forageError = ForageError.create(
+                            code: sqsError.forageCode,
+                            httpStatusCode: sqsError.statusCode,
+                            message: sqsError.message,
+                            details: sqsError.details
+                        )
 
                         self.logger?.error(
                             "Received SQS Error message for \(self.getLogSuffix(request))",

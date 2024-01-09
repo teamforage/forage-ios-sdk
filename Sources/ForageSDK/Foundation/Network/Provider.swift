@@ -130,7 +130,7 @@ class Provider {
 
     private func processResponse(response: URLResponse?, completion: @escaping (Result<HTTPURLResponse, Error>) -> Void) {
         guard let httpResponse = response as? HTTPURLResponse else {
-            return completion(.failure(ForageError(errors: [ForageErrorObj(httpStatusCode: 500, code: "invalid_response", message: "Invalid Response")])))
+            return completion(.failure(CommonErrors.UNKNOWN_SERVER_ERROR))
         }
 
         return completion(.success(httpResponse))
@@ -146,17 +146,30 @@ class Provider {
 
     private func processData<T: Decodable>(model: T.Type, data: Data?, response: HTTPURLResponse?, error: Error?, completion: @escaping (Result<T, Error>) -> Void) {
         guard let data = data else {
-            return completion(.failure(ForageError(errors: [ForageErrorObj(httpStatusCode: response?.statusCode ?? 500, code: "invalid_data", message: "Invalid Data")])))
+            return completion(.failure(ForageError.create(
+                code: "invalid_input_data",
+                httpStatusCode: response?.statusCode ?? 500,
+                message: "Double check the reference documentation to validate the request body, and scan your implementation for any other errors."
+            )))
         }
 
         guard let result = try? JSONDecoder().decode(T.self, from: data) else {
             // NOW TRY TO DECODE IT AS AN ERROR!
             guard let forageServiceError = try? JSONDecoder().decode(ForageServiceError.self, from: data) else {
-                return completion(.failure(ForageError(errors: [ForageErrorObj(httpStatusCode: response?.statusCode ?? 500, code: "error", message: "Could not decode payload - \(String(decoding: data, as: UTF8.self))")])))
+                return completion(.failure(ForageError.create(
+                    code: "unknown_server_error",
+                    httpStatusCode: response?.statusCode ?? 500,
+                    message: "Could not decode payload - \(String(decoding: data, as: UTF8.self))"
+                )
+                ))
             }
             let code = forageServiceError.errors[0].code
             let message = forageServiceError.errors[0].message
-            return completion(.failure(ForageError(errors: [ForageErrorObj(httpStatusCode: response?.statusCode ?? 500, code: code, message: message)])))
+            return completion(.failure(ForageError.create(
+                code: code,
+                httpStatusCode: response?.statusCode ?? 500,
+                message: message
+            )))
         }
 
         return completion(.success(result))
@@ -181,18 +194,30 @@ class Provider {
         }
 
         guard let data = data else {
-            return completion(.failure(ForageError(errors: [ForageErrorObj(httpStatusCode: httpResponse?.statusCode ?? 500, code: "invalid_data", message: "Invalid Data")])))
+            return completion(.failure(ForageError.create(
+                code: "invalid_input_data",
+                httpStatusCode: httpResponse?.statusCode ?? 500,
+                message: "Double check the reference documentation to validate the request body, and scan your implementation for any other errors."
+            )))
         }
 
         guard let result = try? JSONDecoder().decode(T.self, from: data) else {
             // NOW TRY TO DECODE IT AS AN ERROR!
             guard let forageServiceError = try? JSONDecoder().decode(ForageServiceError.self, from: data) else {
-                return completion(.failure(ForageError(errors: [ForageErrorObj(httpStatusCode: httpResponse?.statusCode ?? 500, code: "error", message: "Could not decode payload - \(String(decoding: data, as: UTF8.self))")])))
+                return completion(.failure(ForageError.create(
+                    code: "unknown_server_error",
+                    httpStatusCode: httpResponse?.statusCode ?? 500,
+                    message: "Could not decode payload - \(String(decoding: data, as: UTF8.self))"
+                )))
             }
 
             let code = forageServiceError.errors[0].code
             let message = forageServiceError.errors[0].message
-            return completion(.failure(ForageError(errors: [ForageErrorObj(httpStatusCode: httpResponse?.statusCode ?? 500, code: code, message: message)])))
+            return completion(.failure(ForageError.create(
+                code: code,
+                httpStatusCode: httpResponse?.statusCode ?? 500,
+                message: message
+            )))
         }
 
         return completion(.success(result))

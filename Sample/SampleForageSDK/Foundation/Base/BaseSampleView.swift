@@ -5,6 +5,7 @@
 //  Created by Danilo Joksimovic on 2023-12-13.
 //
 
+import ForageSDK
 import Foundation
 import UIKit
 
@@ -137,6 +138,14 @@ class BaseSampleView: UIView {
                 centerXAnchor: contentView.centerXAnchor,
                 padding: UIEdgeInsets(top: index == 0 ? 0 : 24, left: 24, bottom: 0, right: 24)
             )
+        }
+    }
+
+    func logForageError(_ error: Error) {
+        if let forageError = error as? ForageError {
+            print("Forage Error! code = \(forageError.code), httpStatusCode = \(forageError.httpStatusCode), message = \(forageError.message)")
+        } else {
+            print("Unexpected Error Type: Expected ForageError, received \(type(of: error)). Error details: \(error.localizedDescription)")
         }
     }
 }
