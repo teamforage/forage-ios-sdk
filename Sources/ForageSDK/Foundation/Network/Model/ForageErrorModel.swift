@@ -26,14 +26,15 @@ struct ForageErrorSource: Codable {
 
 /// Represents an error that occurs when a request to submit a `ForageElement` to the Forage API fails.
 public struct ForageError: Error, Codable {
-    /// A short string explaining why the request failed.
+    /// A short string that helps identify the cause of the error.
     /// [Learn more about SDK error codes](https://docs.joinforage.app/reference/errors#code-and-message-pairs-1)
+    /// Example: 'ebt_error_55' signifies that a user entered an invalid EBT Card PIN
     public let code: String
 
     /// The HTTP status that the Forage API returns in response to the request.
     public let httpStatusCode: Int
 
-    /// A developer-facing message about the error.
+    /// A developer-facing description of the error.
     public let message: String
 
     /// Additional details about the error, included for your convenience.
