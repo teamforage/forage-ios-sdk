@@ -28,6 +28,7 @@ struct ForageErrorSource: Codable {
 public struct ForageError: Error, Codable {
     /// A short string that helps identify the cause of the error.
     /// [Learn more about SDK error codes](https://docs.joinforage.app/reference/errors#code-and-message-pairs-1)
+    ///
     /// Example: 'ebt_error_55' signifies that a user entered an invalid EBT Card PIN
     public let code: String
 
@@ -109,6 +110,7 @@ public struct ForageErrorObj: Codable {
 
     /// A short string that helps identify the cause of the error.
     /// [Learn more about SDK error codes](https://docs.joinforage.app/reference/errors#code-and-message-pairs-1)
+    ///
     /// Example: 'ebt_error_55' signifies that a user entered an invalid EBT Card PIN
     public let code: String
 
