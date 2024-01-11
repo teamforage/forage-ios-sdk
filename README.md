@@ -243,6 +243,14 @@ ForageSDK.shared.tokenizeEBTCard(
     reusable: true
 ) { result in
     // Handle result and error here
+    switch result {
+    case .success(let paymentMethod):
+        // Handle the PaymentMethod here (balance, card, reusable, etc.)
+    case .failure(let error):
+        if let forageError = error as? ForageError {
+            // handle forageError.code, forageError.httpStatusCode and forageError.message
+        }
+    }
 }
 ```
 

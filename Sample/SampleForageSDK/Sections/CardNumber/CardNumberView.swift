@@ -137,6 +137,7 @@ class CardNumberView: BaseSampleView {
                 ClientSharedData.shared.paymentMethodReference = response.paymentMethodIdentifier
                 self.updateButtonState(isEnabled: true, button: self.nextButton)
             case let .failure(error):
+                self.logForageError(error)
                 self.errorLabel.text = "error: \n\(error)"
                 self.refLabel.text = ""
                 self.typeLabel.text = ""

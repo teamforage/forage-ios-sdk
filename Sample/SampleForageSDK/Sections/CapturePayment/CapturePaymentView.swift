@@ -185,6 +185,7 @@ class CapturePaymentView: BaseSampleView {
 
     private func printError(_ error: Error) {
         DispatchQueue.main.async { [self] in
+            logForageError(error)
             errorLabel.text = "\(error)"
             paymentRefLabel.text = ""
             fundingTypeLabel.text = ""
@@ -204,10 +205,8 @@ class CapturePaymentView: BaseSampleView {
                 deferPaymentCaptureResponseLabel.text = ""
             case let .failure(error):
                 if let forageError = error as? ForageError? {
-                    let firstError = forageError?.errors.first
-
-                    if firstError?.code == "ebt_error_51" {
-                        switch firstError?.details {
+                    if forageError?.code == "ebt_error_51" && forageError?.httpStatusCode == 400 {
+                        switch forageError?.details {
                         case let .ebtError51(snapBalance, cashBalance):
                             let snapBalanceText = snapBalance ?? "N/A"
                             let cashBalanceText = cashBalance ?? "N/A"

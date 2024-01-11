@@ -182,6 +182,7 @@ class RequestBalanceView: BaseSampleView {
                 self.ebtCashBalanceLabel.text = "cash=\(response.cash)"
                 self.errorLabel.text = ""
             case let .failure(error):
+                self.logForageError(error)
                 self.errorLabel.text = "\(error)"
                 self.snapBalanceLabel.text = ""
                 self.ebtCashBalanceLabel.text = ""

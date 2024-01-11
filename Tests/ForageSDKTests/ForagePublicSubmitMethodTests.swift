@@ -18,8 +18,8 @@ class MockForageService: LiveForageService {
     override func checkBalance(pinCollector: VaultCollector, paymentMethodReference: String) async throws -> BalanceModel {
         if doesCheckBalanceThrow {
             throw ForageError.create(
-                httpStatusCode: 400,
                 code: "ebt_error_55",
+                httpStatusCode: 400,
                 message: "Invalid PIN or PIN not selected - Invalid PIN"
             )
         }
@@ -30,8 +30,8 @@ class MockForageService: LiveForageService {
     override func tokenizeEBTCard(request: ForagePANRequestModel, completion: @escaping (Result<PaymentMethodModel, Error>) -> Void) {
         if doesTokenizeEBTCardThrow {
             let error = ForageError.create(
-                httpStatusCode: 400,
                 code: "card_not_reusable",
+                httpStatusCode: 400,
                 message: "Payment method acdef123 is not reusable"
             )
 
@@ -50,8 +50,8 @@ class MockForageService: LiveForageService {
     override func capturePayment(pinCollector: VaultCollector, paymentReference: String) async throws -> PaymentModel {
         if doesCapturePaymentThrow {
             throw ForageError.create(
-                httpStatusCode: 400,
                 code: "ebt_error_43",
+                httpStatusCode: 400,
                 message: "Lost/stolen card - Cannot Process - Call Customer Service"
             )
         }
@@ -69,8 +69,8 @@ class MockForageService: LiveForageService {
     ) async throws -> VaultResponse {
         if doesCollectPinThrow {
             throw ForageError.create(
-                httpStatusCode: 429,
                 code: "too_many_requests",
+                httpStatusCode: 429,
                 message: "Request was throttled, please try again later."
             )
         }
@@ -238,11 +238,17 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
             case .success:
                 XCTFail("Expected ForageError but got \(String(describing: result))")
             case let .failure(error):
+                // continue to test the legacy path until .errors (list) is deprecated!
                 let firstForageError = (error as! ForageError).errors.first!
-
                 XCTAssertEqual(firstForageError.code, "card_not_reusable")
                 XCTAssertEqual(firstForageError.message, "Payment method acdef123 is not reusable")
                 XCTAssertEqual(firstForageError.httpStatusCode, 400)
+
+                let forageError = (error as! ForageError)
+
+                XCTAssertEqual(forageError.code, "card_not_reusable")
+                XCTAssertEqual(forageError.message, "Payment method acdef123 is not reusable")
+                XCTAssertEqual(forageError.httpStatusCode, 400)
                 expectation.fulfill()
             }
         }
@@ -281,11 +287,11 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
             case .success:
                 XCTFail("Expected user_error but got \(String(describing: result))")
             case let .failure(error):
-                let firstForageError = (error as! ForageError).errors.first!
+                let forageError = (error as! ForageError)
 
-                XCTAssertEqual(firstForageError.code, "user_error")
-                XCTAssertEqual(firstForageError.message, EXPECTED_INCOMPLETE_PIN_MESSAGE)
-                XCTAssertEqual(firstForageError.httpStatusCode, 400)
+                XCTAssertEqual(forageError.code, "user_error")
+                XCTAssertEqual(forageError.message, EXPECTED_INCOMPLETE_PIN_MESSAGE)
+                XCTAssertEqual(forageError.httpStatusCode, 400)
             }
         }
     }
@@ -301,11 +307,11 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
             case .success:
                 XCTFail("Expected unknown_server_error but got \(String(describing: result))")
             case let .failure(error):
-                let firstForageError = (error as! ForageError).errors.first!
+                let forageError = (error as! ForageError)
 
-                XCTAssertEqual(firstForageError.code, "unknown_server_error")
-                XCTAssertEqual(firstForageError.message, EXPECTED_UNKNOWN_SERVER_ERROR)
-                XCTAssertEqual(firstForageError.httpStatusCode, 500)
+                XCTAssertEqual(forageError.code, "unknown_server_error")
+                XCTAssertEqual(forageError.message, EXPECTED_UNKNOWN_SERVER_ERROR)
+                XCTAssertEqual(forageError.httpStatusCode, 500)
 
                 XCTAssertEqual(self.mockLogger.lastCriticalMessage, "Attempted to call checkBalance, but ForageService was not initialized")
             }
@@ -321,12 +327,12 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
             case .success:
                 XCTFail("Expected ebt_error_55 but got \(String(describing: result))")
             case let .failure(error):
-                let firstForageError = (error as! ForageError).errors.first!
+                let forageError = (error as! ForageError)
 
                 // Assert ForageError response
-                XCTAssertEqual(firstForageError.code, "ebt_error_55")
-                XCTAssertEqual(firstForageError.message, "Invalid PIN or PIN not selected - Invalid PIN")
-                XCTAssertEqual(firstForageError.httpStatusCode, 400)
+                XCTAssertEqual(forageError.code, "ebt_error_55")
+                XCTAssertEqual(forageError.message, "Invalid PIN or PIN not selected - Invalid PIN")
+                XCTAssertEqual(forageError.httpStatusCode, 400)
 
                 XCTAssertEqual(self.mockLogger.lastErrorMsg, "Balance check failed for PaymentMethod abcdef123")
 
@@ -369,10 +375,10 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
             case .success:
                 XCTFail("Expected user_error but got \(String(describing: result))")
             case let .failure(error):
-                let firstForageError = (error as! ForageError).errors.first!
-                XCTAssertEqual(firstForageError.code, "user_error")
-                XCTAssertEqual(firstForageError.message, EXPECTED_INCOMPLETE_PIN_MESSAGE)
-                XCTAssertEqual(firstForageError.httpStatusCode, 400)
+                let forageError = (error as! ForageError)
+                XCTAssertEqual(forageError.code, "user_error")
+                XCTAssertEqual(forageError.message, EXPECTED_INCOMPLETE_PIN_MESSAGE)
+                XCTAssertEqual(forageError.httpStatusCode, 400)
             }
         }
     }
@@ -386,10 +392,10 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
             case .success:
                 XCTFail("Expected ebt_error_43 but got \(String(describing: result))")
             case let .failure(error):
-                let firstForageError = (error as! ForageError).errors.first!
-                XCTAssertEqual(firstForageError.code, "ebt_error_43")
-                XCTAssertEqual(firstForageError.message, "Lost/stolen card - Cannot Process - Call Customer Service")
-                XCTAssertEqual(firstForageError.httpStatusCode, 400)
+                let forageError = (error as! ForageError)
+                XCTAssertEqual(forageError.code, "ebt_error_43")
+                XCTAssertEqual(forageError.message, "Lost/stolen card - Cannot Process - Call Customer Service")
+                XCTAssertEqual(forageError.httpStatusCode, 400)
 
                 // Are metrics-related events being reported correctly?
                 XCTAssertEqual(self.mockLogger.lastInfoMsg, "Reported customer-perceived response event")
@@ -412,11 +418,11 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
             case .success:
                 XCTFail("Expected unknown_server_error but got \(String(describing: result))")
             case let .failure(error):
-                let firstForageError = (error as! ForageError).errors.first!
+                let forageError = (error as! ForageError)
 
-                XCTAssertEqual(firstForageError.code, "unknown_server_error")
-                XCTAssertEqual(firstForageError.message, EXPECTED_UNKNOWN_SERVER_ERROR)
-                XCTAssertEqual(firstForageError.httpStatusCode, 500)
+                XCTAssertEqual(forageError.code, "unknown_server_error")
+                XCTAssertEqual(forageError.message, EXPECTED_UNKNOWN_SERVER_ERROR)
+                XCTAssertEqual(forageError.httpStatusCode, 500)
 
                 XCTAssertEqual(self.mockLogger.lastCriticalMessage, "Attempted to call capturePayment, but ForageService was not initialized")
             }
@@ -447,7 +453,12 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
             case .success:
                 XCTFail("Expected failure due to incomplete PIN but got success")
             case let .failure(error):
-                let forageError = (error as! ForageError).errors.first!
+                let firstForageError = (error as! ForageError).errors.first!
+                XCTAssertEqual(firstForageError.code, "user_error")
+                XCTAssertEqual(firstForageError.message, EXPECTED_INCOMPLETE_PIN_MESSAGE)
+                XCTAssertEqual(firstForageError.httpStatusCode, 400)
+
+                let forageError = (error as! ForageError)
                 XCTAssertEqual(forageError.code, "user_error")
                 XCTAssertEqual(forageError.message, EXPECTED_INCOMPLETE_PIN_MESSAGE)
                 XCTAssertEqual(forageError.httpStatusCode, 400)
@@ -465,7 +476,7 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
             case .success:
                 XCTFail("Expected unknown_server_error but got success")
             case let .failure(error):
-                let forageError = (error as! ForageError).errors.first!
+                let forageError = (error as! ForageError)
                 XCTAssertEqual(forageError.code, "unknown_server_error")
                 XCTAssertEqual(forageError.message, EXPECTED_UNKNOWN_SERVER_ERROR)
                 XCTAssertEqual(forageError.httpStatusCode, 500)

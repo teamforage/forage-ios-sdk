@@ -26,23 +26,45 @@ struct ForageErrorSource: Codable {
 
 /// Represents an error that occurs when a request to submit a `ForageElement` to the Forage API fails.
 public struct ForageError: Error, Codable {
+    /// A short string that helps identify the cause of the error.
+    /// [Learn more about SDK error codes](https://docs.joinforage.app/reference/errors#code-and-message-pairs-1)
+    ///
+    /// Example: 'ebt_error_55' signifies that a user entered an invalid EBT Card PIN
+    public let code: String
+
+    /// The HTTP status that the Forage API returns in response to the request.
+    public let httpStatusCode: Int
+
+    /// A developer-facing description of the error.
+    public let message: String
+
+    /// Additional details about the error, included for your convenience.
+    /// Not nil when details are available, e.g. when the error code is [ebt_error_51](https://docs.joinforage.app/reference/errors#ebt_error_51)
+    public let details: ForageErrorDetails?
+
     /// An array of error objects returned from the Forage API.
+    @available(*, deprecated, message: "Access forageError.code directly instead of unpacking the .errors list")
     public let errors: [ForageErrorObj]
 
     /// Creates a `ForageError` instance with a single `ForageErrorObj` object
     static func create(
-        httpStatusCode: Int,
         code: String,
-        message: String
+        httpStatusCode: Int,
+        message: String,
+        details: ForageErrorDetails? = nil
     ) -> ForageError {
-        ForageError(
-            errors: [
-                ForageErrorObj(
-                    httpStatusCode: httpStatusCode,
-                    code: code,
-                    message: message
-                ),
-            ]
+        let firstErrorObj = ForageErrorObj(
+            httpStatusCode: httpStatusCode,
+            code: code,
+            message: message,
+            details: details
+        )
+        return ForageError(
+            code: firstErrorObj.code,
+            httpStatusCode: firstErrorObj.httpStatusCode,
+            message: firstErrorObj.message,
+            details: firstErrorObj.details,
+            errors: [firstErrorObj]
         )
     }
 }
@@ -81,15 +103,18 @@ public struct EbtError51Details: Codable {
 /// Represents a detailed error object returned by the Forage API.
 /// Provides additional context about the HTTP status, error code, and developer-facing message.
 /// [Learn more about SDK errors](https://docs.joinforage.app/reference/errors#sdk-errors)
+@available(*, deprecated, renamed: "ForageError")
 public struct ForageErrorObj: Codable {
     /// The HTTP status that the Forage API returns in response to the request.
     public let httpStatusCode: Int
 
-    /// A short string explaining why the request failed. The error code string corresponds to the HTTP status code.
+    /// A short string that helps identify the cause of the error.
     /// [Learn more about SDK error codes](https://docs.joinforage.app/reference/errors#code-and-message-pairs-1)
+    ///
+    /// Example: 'ebt_error_55' signifies that a user entered an invalid EBT Card PIN
     public let code: String
 
-    /// A developer-facing message about the error, not to be displayed to customers.
+    /// A developer-facing description of the error.
     public let message: String
 
     /// Additional details about the error, included for your convenience.
