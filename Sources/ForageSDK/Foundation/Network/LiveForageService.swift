@@ -79,6 +79,7 @@ class LiveForageService: ForageService {
             let vaultResult = try await submitPinToVault(
                 pinCollector: pinCollector,
                 vaultAction: .balanceCheck,
+                idempotencyKey: UUID().uuidString,
                 path: "/api/payment_methods/\(paymentMethodReference)/balance/",
                 request: balanceRequest
             )
@@ -231,6 +232,7 @@ class LiveForageService: ForageService {
             let vaultResponse = try await submitPinToVault(
                 pinCollector: pinCollector,
                 vaultAction: action,
+                idempotencyKey: paymentReference,
                 path: "\(basePath)\(action.endpointSuffix)",
                 request: collectPinRequest
             )
@@ -246,16 +248,18 @@ class LiveForageService: ForageService {
     /// - Parameters:
     ///   - pinCollector: The PIN collection client
     ///   - vaultAction: The action performed against the vault.
+    ///   - idempotencyKey: The value for the IDEMPOTENCY-KEY header
     ///   - path: The inbound HTTP path. Ends with /balance/, /capture/ or /collect_pin/
     ///   - request: Model  with data to perform request.
     private func submitPinToVault(
         pinCollector: VaultCollector,
         vaultAction: VaultAction,
+        idempotencyKey: String,
         path: String,
         request: ForageRequestModel
     ) async throws -> VaultResponse {
         pinCollector.setCustomHeaders(headers: [
-            "IDEMPOTENCY-KEY": UUID().uuidString,
+            "IDEMPOTENCY-KEY": idempotencyKey,
             "Merchant-Account": request.merchantID,
             "x-datadog-trace-id": ForageSDK.shared.traceId,
         ], xKey: request.xKey)
