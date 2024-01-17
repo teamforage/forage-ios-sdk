@@ -139,6 +139,7 @@ class LiveForageService: ForageService {
             let (vaultResponse, forageRequest) = try await collectPinForPayment(
                 pinCollector: pinCollector,
                 paymentReference: paymentReference,
+                idempotencyKey: paymentReference,
                 action: .capturePayment
             )
 
@@ -177,6 +178,7 @@ class LiveForageService: ForageService {
             let collectPinResult = try await collectPinForPayment(
                 pinCollector: pinCollector,
                 paymentReference: paymentReference,
+                idempotencyKey: UUID().uuidString,
                 action: .deferCapture
             )
             return collectPinResult.vaultResponse
@@ -191,6 +193,7 @@ class LiveForageService: ForageService {
     private func collectPinForPayment(
         pinCollector: VaultCollector,
         paymentReference: String,
+        idempotencyKey: String,
         action: VaultAction
     ) async throws -> (vaultResponse: VaultResponse, forageRequest: ForageRequestModel) {
         let sessionToken = ForageSDK.shared.sessionToken
@@ -232,7 +235,7 @@ class LiveForageService: ForageService {
             let vaultResponse = try await submitPinToVault(
                 pinCollector: pinCollector,
                 vaultAction: action,
-                idempotencyKey: paymentReference,
+                idempotencyKey: idempotencyKey,
                 path: "\(basePath)\(action.endpointSuffix)",
                 request: collectPinRequest
             )
