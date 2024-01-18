@@ -56,7 +56,7 @@ class ForagePANValidations {
         StateIIN(state: USState.newMexico, panNumber: "586616", panLength: 16),
         StateIIN(state: USState.newYork, panNumber: "600486", panLength: 19),
         StateIIN(state: USState.northCarolina, panNumber: "508161", panLength: 16),
-        StateIIN(state: USState.northDakotaSouthDakota, panNumber: "508132", panLength: 16),
+        StateIIN(state: USState.southDakota, panNumber: "508132", panLength: 16),
         StateIIN(state: USState.ohio, panNumber: "507700", panLength: 16),
         StateIIN(state: USState.oklahoma, panNumber: "508147", panLength: 16),
         StateIIN(state: USState.oregon, panNumber: "507693", panLength: 16),
