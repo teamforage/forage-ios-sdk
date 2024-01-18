@@ -57,6 +57,26 @@ final class ForagePANTextFieldTests: XCTestCase {
         XCTAssertEqual(validTextField.derivedCardInfo.usState, .maine)
         XCTAssertNil(invalidTextField.derivedCardInfo.usState)
     }
+    
+    func test_southDakota_shouldBeValidCard() {
+        let validTextField = ForagePANTextField()
+
+        validTextField.enhancedTextField.text = "5081321111111111"
+
+        validTextField.enhancedTextField.textFieldDidChange()
+
+        XCTAssertEqual(validTextField.enhancedTextField.actualPAN, "5081321111111111")
+
+        XCTAssertEqual(validTextField.enhancedTextField.text, "5081 3211 1111 1111")
+
+        XCTAssertTrue(validTextField.isValid)
+
+        XCTAssertTrue(validTextField.isComplete)
+
+        XCTAssertFalse(validTextField.isEmpty)
+        
+        XCTAssertEqual(validTextField.derivedCardInfo.usState, .southDakota)
+    }
 
     func test_textField_enterNumericString_shouldReturnTrue() {
         let changesAllowed = foragePANTextField.textField(UITextField(), shouldChangeCharactersIn: NSRange(), replacementString: "1234")

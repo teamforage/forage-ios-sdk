@@ -55,7 +55,6 @@ public enum USState: String {
     case newMexico = "NM"
     case newYork = "NY"
     case northCarolina = "NC"
-    case northDakota = "ND"
     case ohio = "OH"
     case oklahoma = "OK"
     case oregon = "OR"

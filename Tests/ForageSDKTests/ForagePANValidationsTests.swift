@@ -40,7 +40,7 @@ final class ForagePANValidationsTests: XCTestCase {
 
     func test_panNumbers_shouldHaveAllUsaStates() {
         let panNumbers = ForagePANValidations.panNumbers
-        let expectedQtdStates = 53
+        let expectedQtdStates = 52
         XCTAssertEqual(expectedQtdStates, panNumbers.count)
     }
 }
