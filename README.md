@@ -361,6 +361,10 @@ ForageSDK.shared.deferPaymentCapture(
 }
 ```
 
+> More resources
+>
+> - [Forage guide to deferred payment capture](https://docs.joinforage.app/docs/capture-ebt-payments-server-side)
+
 ## Sample Application
 
 The Forage iOS SDK sample application can be <a href="https://github.com/teamforage/forage-ios-sdk/tree/main/Sample">found here</a>.
