@@ -361,9 +361,9 @@ ForageSDK.shared.deferPaymentCapture(
 }
 ```
 
-> More resources
->
-> - [Forage guide to deferred payment capture](https://docs.joinforage.app/docs/capture-ebt-payments-server-side)
+##### Step-by-step deferred payment capture instructions
+
+- [Forage guide to deferred payment capture](https://docs.joinforage.app/docs/capture-ebt-payments-server-side)
 
 ## Sample Application
 
