@@ -21,17 +21,17 @@ let package = Package(
         .package(
             name: "VGSCollectSDK",
             url: "https://github.com/verygoodsecurity/vgs-collect-ios.git",
-            from: "1.11.0"
+            .exact("1.15.3")
         ),
         .package(
             name: "LaunchDarkly",
             url: "https://github.com/launchdarkly/ios-client-sdk.git",
-            from: "8.0.1"
+            .exact("8.0.1")
         ),
         .package(
             name: "BasisTheoryElements",
             url: "https://github.com/Basis-Theory/basistheory-ios",
-            from: "4.0.2"
+            .exact("4.1.0")
         )
     ],
     targets: [
