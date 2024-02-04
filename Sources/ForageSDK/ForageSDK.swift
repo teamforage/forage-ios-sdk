@@ -37,16 +37,10 @@ public class ForageSDK {
         VGSCollectLogger.shared.disableAllLoggers()
 
         let provider = Provider(logger: ForageSDK.logger)
-        let pollingService = PollingService(
-            provider: provider,
-            logger: ForageSDK.logger,
-            ldManager: LDManager.shared
-        )
         service = LiveForageService(
             provider: provider,
             logger: ForageSDK.logger,
-            ldManager: LDManager.shared,
-            pollingService: pollingService
+            ldManager: LDManager.shared
         )
     }
 

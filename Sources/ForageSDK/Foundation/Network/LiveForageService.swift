@@ -15,18 +15,15 @@ class LiveForageService: ForageService {
 
     private var logger: ForageLogger?
     private var ldManager: LDManagerProtocol
-    private var pollingService: Polling
 
     init(
         provider: Provider = Provider(),
         logger: ForageLogger? = nil,
-        ldManager: LDManagerProtocol,
-        pollingService: Polling
+        ldManager: LDManagerProtocol
     ) {
         self.provider = provider
         self.logger = logger?.setPrefix("")
         self.ldManager = ldManager
-        self.pollingService = pollingService
     }
 
     // MARK: Tokenize EBT card
@@ -76,42 +73,40 @@ class LiveForageService: ForageService {
                 xKey: ["vgsXKey": xKeyModel.alias, "btXKey": xKeyModel.bt_alias]
             )
 
-            let vaultResult = try await submitPinToVault(
+            let vaultResponse = try await submitPinToVault(
                 pinCollector: pinCollector,
                 vaultAction: .balanceCheck,
                 idempotencyKey: UUID().uuidString,
                 path: "/api/payment_methods/\(paymentMethodReference)/balance/",
                 request: balanceRequest
             )
+            
+            // You should already have the Balance object here and can return!
+            
+            guard let data = vaultResponse.data else {
+                    let forageError = CommonErrors.UNKNOWN_SERVER_ERROR
+                    logger?.error(
+                        "Balance check failed for Payment Method \(paymentMethodReference). Balance not attached",
+                        error: forageError,
+                        attributes: nil
+                    )
+                    throw forageError
+                }
 
-            _ = try await awaitResult { completion in
-                self.pollingService.execute(
-                    vaultResponse: vaultResult,
-                    request: balanceRequest,
-                    completion: completion
-                )
-            }
-
-            let paymentMethodResult = try await awaitResult { completion in
-                self.getPaymentMethod(
-                    sessionToken: balanceRequest.authorization,
-                    merchantID: balanceRequest.merchantID,
-                    paymentMethodRef: paymentMethodReference,
-                    completion: completion
-                )
-            }
-
-            guard let balance = paymentMethodResult.balance else {
-                let forageError = CommonErrors.UNKNOWN_SERVER_ERROR
-                logger?.error(
-                    "Balance check failed for Payment Method \(paymentMethodReference). Balance not attached",
-                    error: forageError,
-                    attributes: nil
-                )
-                throw forageError
-            }
-
-            return balance
+                do {
+                    let decoder = JSONDecoder()
+                    let rawBalanceModel = try decoder.decode(RawBalanceModel.self, from: data)
+                    
+                    return rawBalanceModel.balance
+                } catch {
+                    let forageError = CommonErrors.UNKNOWN_SERVER_ERROR
+                    logger?.error(
+                        "Balance check failed for Payment Method \(paymentMethodReference). Balance not attached",
+                        error: forageError,
+                        attributes: nil
+                    )
+                    throw forageError
+                }
         } catch {
             throw error
         }
@@ -136,29 +131,37 @@ class LiveForageService: ForageService {
         let merchantID = ForageSDK.shared.merchantID
 
         do {
-            let (vaultResponse, forageRequest) = try await collectPinForPayment(
+            let vaultResponse = try await collectPinForPayment(
                 pinCollector: pinCollector,
                 paymentReference: paymentReference,
                 idempotencyKey: paymentReference,
                 action: .capturePayment
             )
+            
+            // You should already have the Payment object here and can return
 
-            _ = try await awaitResult { completion in
-                self.pollingService.execute(
-                    vaultResponse: vaultResponse,
-                    request: forageRequest,
-                    completion: completion
-                )
-            }
+            guard let data = vaultResponse.data else {
+                    let forageError = CommonErrors.UNKNOWN_SERVER_ERROR
+                    logger?.error(
+                        "Capture payment failed for Payment \(paymentReference)",
+                        error: forageError,
+                        attributes: nil
+                    )
+                    throw forageError
+                }
 
-            return try await awaitResult { completion in
-                self.getPayment(
-                    sessionToken: sessionToken,
-                    merchantID: merchantID,
-                    paymentRef: paymentReference,
-                    completion: completion
-                )
-            }
+                do {
+                    let decoder = JSONDecoder()
+                    return try decoder.decode(PaymentModel.self, from: data)
+                } catch {
+                    let forageError = CommonErrors.UNKNOWN_SERVER_ERROR
+                    logger?.error(
+                        "Capture payment failed for Payment \(paymentReference)",
+                        error: forageError,
+                        attributes: nil
+                    )
+                    throw forageError
+                }
         } catch {
             throw error
         }
@@ -175,13 +178,12 @@ class LiveForageService: ForageService {
         paymentReference: String
     ) async throws -> VaultResponse {
         do {
-            let collectPinResult = try await collectPinForPayment(
+            return try await collectPinForPayment(
                 pinCollector: pinCollector,
                 paymentReference: paymentReference,
                 idempotencyKey: UUID().uuidString,
                 action: .deferCapture
             )
-            return collectPinResult.vaultResponse
         } catch {
             throw error
         }
@@ -195,7 +197,7 @@ class LiveForageService: ForageService {
         paymentReference: String,
         idempotencyKey: String,
         action: VaultAction
-    ) async throws -> (vaultResponse: VaultResponse, forageRequest: ForageRequestModel) {
+    ) async throws -> VaultResponse {
         let sessionToken = ForageSDK.shared.sessionToken
         let merchantID = ForageSDK.shared.merchantID
 
@@ -232,14 +234,13 @@ class LiveForageService: ForageService {
 
             let basePath = "/api/payments/\(paymentReference)"
 
-            let vaultResponse = try await submitPinToVault(
+            return try await submitPinToVault(
                 pinCollector: pinCollector,
                 vaultAction: action,
                 idempotencyKey: idempotencyKey,
                 path: "\(basePath)\(action.endpointSuffix)",
                 request: collectPinRequest
             )
-            return (vaultResponse, collectPinRequest)
         } catch {
             throw error
         }
@@ -265,7 +266,7 @@ class LiveForageService: ForageService {
             "IDEMPOTENCY-KEY": idempotencyKey,
             "Merchant-Account": request.merchantID,
             "x-datadog-trace-id": ForageSDK.shared.traceId,
-            "API-VERSION": "default"
+            "API-VERSION": "2024-01-08"
         ], xKey: request.xKey)
 
         let extraData = [
