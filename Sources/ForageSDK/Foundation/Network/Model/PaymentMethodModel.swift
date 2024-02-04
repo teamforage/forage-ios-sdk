@@ -8,6 +8,11 @@
 
 import Foundation
 
+public struct RawBalanceModel: Codable {
+    public let ref: String
+    public let balance: BalanceModel
+}
+
 public struct BalanceModel: Codable {
     public let snap: String
     public let cash: String

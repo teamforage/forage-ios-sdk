@@ -109,8 +109,7 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
     func createMockService() -> MockForageService {
         MockForageService(
             provider: Provider(URLSessionMock()),
-            ldManager: MockLDManager(),
-            pollingService: MockPollingService(ldManager: MockLDManager())
+            ldManager: MockLDManager()
         )
     }
 
