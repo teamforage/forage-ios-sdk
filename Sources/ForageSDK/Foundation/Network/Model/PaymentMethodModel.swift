@@ -10,7 +10,32 @@ import Foundation
 
 public struct RawBalanceModel: Codable {
     public let ref: String
-    public let balance: BalanceModel
+    public let balance: BalanceModel?
+    public let errors: BalanceError?
+}
+
+public struct BalanceError: Codable {
+    public let message: String
+    public let statusCode: Int
+    public let forageCode: String
+    public let details: TestDetails?
+    
+    private enum CodingKeys: String, CodingKey {
+        case message
+        case statusCode = "status_code"
+        case forageCode = "forage_code"
+        case details
+    }
+}
+
+public struct TestDetails: Codable {
+    public let cashBalance: String?
+    public let snapBalance: String?
+    
+    private enum CodingKeys: String, CodingKey {
+        case cashBalance = "cash_balance"
+        case snapBalance = "snap_balance"
+    }
 }
 
 public struct BalanceModel: Codable {

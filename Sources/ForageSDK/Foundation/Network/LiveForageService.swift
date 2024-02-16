@@ -81,32 +81,53 @@ class LiveForageService: ForageService {
                 request: balanceRequest
             )
             
-            // You should already have the Balance object here and can return!
-            
+            // If there was a vaultResponse.error, it was already thrown in the function call above!
             guard let data = vaultResponse.data else {
-                    let forageError = CommonErrors.UNKNOWN_SERVER_ERROR
+                let forageError = CommonErrors.UNKNOWN_SERVER_ERROR
+                logger?.error(
+                    "Balance check failed for Payment Method \(paymentMethodReference). No data or error from vault.",
+                    error: forageError,
+                    attributes: nil
+                )
+                throw forageError
+            }
+            
+            // Data is either a forage error or the balance model
+            var error: ForageError? = nil
+            do {
+                let decoder = JSONDecoder()
+                let rawBalanceModel = try decoder.decode(RawBalanceModel.self, from: data)
+                if let balance = rawBalanceModel.balance {
+                    return balance
+                } else if let errors = rawBalanceModel.errors {
+                    error = ForageError.create(code: errors.forageCode, httpStatusCode: errors.statusCode, message: errors.message)
                     logger?.error(
-                        "Balance check failed for Payment Method \(paymentMethodReference). Balance not attached",
-                        error: forageError,
+                        "Balance check failed for Payment Method \(paymentMethodReference).",
+                        error: error,
                         attributes: nil
                     )
-                    throw forageError
                 }
-
-                do {
-                    let decoder = JSONDecoder()
-                    let rawBalanceModel = try decoder.decode(RawBalanceModel.self, from: data)
-                    
-                    return rawBalanceModel.balance
-                } catch {
-                    let forageError = CommonErrors.UNKNOWN_SERVER_ERROR
-                    logger?.error(
-                        "Balance check failed for Payment Method \(paymentMethodReference). Balance not attached",
-                        error: forageError,
-                        attributes: nil
-                    )
-                    throw forageError
-                }
+            } catch {}
+            
+            if (error != nil) {
+                throw error!
+            }
+            
+            do {
+                let decoder = JSONDecoder()
+                throw try decoder.decode(ForageError.self, from: data)
+            } catch {}
+            
+            let forageError = CommonErrors.UNKNOWN_SERVER_ERROR
+            logger?.error(
+                "Balance check failed for Payment Method \(paymentMethodReference). No data or error from vault.",
+                error: forageError,
+                attributes: nil
+            )
+            throw forageError
+            // If data is null, the error was that we couldn't send the request to the proxy. There will be an error field,
+            // but we will already have thrown that error in the function above.
+            // Therefore, data is always non-null and can be a balance object or a forage error.
         } catch {
             throw error
         }
@@ -127,9 +148,6 @@ class LiveForageService: ForageService {
         pinCollector: VaultCollector,
         paymentReference: String
     ) async throws -> PaymentModel {
-        let sessionToken = ForageSDK.shared.sessionToken
-        let merchantID = ForageSDK.shared.merchantID
-
         do {
             let vaultResponse = try await collectPinForPayment(
                 pinCollector: pinCollector,
@@ -138,30 +156,35 @@ class LiveForageService: ForageService {
                 action: .capturePayment
             )
             
-            // You should already have the Payment object here and can return
-
-            guard let data = vaultResponse.data else {
-                    let forageError = CommonErrors.UNKNOWN_SERVER_ERROR
-                    logger?.error(
-                        "Capture payment failed for Payment \(paymentReference)",
-                        error: forageError,
-                        attributes: nil
-                    )
-                    throw forageError
-                }
-
+            if let data = vaultResponse.data {
                 do {
                     let decoder = JSONDecoder()
                     return try decoder.decode(PaymentModel.self, from: data)
                 } catch {
                     let forageError = CommonErrors.UNKNOWN_SERVER_ERROR
                     logger?.error(
-                        "Capture payment failed for Payment \(paymentReference)",
+                        "Capture payment failed for Payment \(paymentReference). Unknown reponse from vault.",
                         error: forageError,
                         attributes: nil
                     )
                     throw forageError
                 }
+            } else if let error = vaultResponse.error {
+                logger?.error(
+                    "Capture payment failed for Payment Method \(paymentReference).",
+                    error: error,
+                    attributes: nil
+                )
+                throw error
+            } else {
+                let forageError = CommonErrors.UNKNOWN_SERVER_ERROR
+                logger?.error(
+                    "Capture payment failed for Payment \(paymentReference). No data or error from vault.",
+                    error: forageError,
+                    attributes: nil
+                )
+                throw forageError
+            }
         } catch {
             throw error
         }
