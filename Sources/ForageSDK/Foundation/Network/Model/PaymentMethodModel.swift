@@ -8,6 +8,12 @@
 
 import Foundation
 
+struct RawBalanceResponseModel: Codable {
+    let ref: String?
+    let balance: BalanceModel?
+    let error: VaultError?
+}
+
 public struct BalanceModel: Codable {
     public let snap: String
     public let cash: String

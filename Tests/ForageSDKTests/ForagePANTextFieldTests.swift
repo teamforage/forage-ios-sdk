@@ -57,7 +57,7 @@ final class ForagePANTextFieldTests: XCTestCase {
         XCTAssertEqual(validTextField.derivedCardInfo.usState, .maine)
         XCTAssertNil(invalidTextField.derivedCardInfo.usState)
     }
-    
+
     func test_southDakota_shouldBeValidCard() {
         let validTextField = ForagePANTextField()
 
@@ -74,7 +74,7 @@ final class ForagePANTextFieldTests: XCTestCase {
         XCTAssertTrue(validTextField.isComplete)
 
         XCTAssertFalse(validTextField.isEmpty)
-        
+
         XCTAssertEqual(validTextField.derivedCardInfo.usState, .southDakota)
     }
 

@@ -121,21 +121,6 @@ class VGSCollectWrapper: VaultCollector {
     }
 }
 
-func convertJsonToDictionary(_ json: JSON) -> [String: Any] {
-    var result: [String: Any] = [:]
-
-    if case let .dictionaryValue(dictionary) = json {
-        for (key, value) in dictionary {
-            if case let .rawValue(rawValue) = value {
-                result[key] = rawValue
-            } else {
-                result[key] = convertJsonToDictionary(value)
-            }
-        }
-    }
-    return result
-}
-
 // Wrapper class for BasisTheory
 class BasisTheoryWrapper: VaultCollector {
     func getPaymentMethodToken(paymentMethodToken: String) throws -> String {
@@ -217,7 +202,7 @@ class BasisTheoryWrapper: VaultCollector {
 
                 var rawData: Data?
                 if let data = data {
-                    let dataDictionary = convertJsonToDictionary(data)
+                    let dataDictionary = JSON.convertJsonToDictionary(data)
                     rawData = try? JSONSerialization.data(withJSONObject: dataDictionary, options: [])
                 }
                 let vaultResponse = VaultResponse(

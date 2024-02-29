@@ -11,12 +11,10 @@ import XCTest
 @testable import LaunchDarkly
 
 class MockLDClient: LDClientProtocol {
-    var pollingIntervals: LDValue?
     var vaultPercentage: Double
 
-    init(vaultPercentage: Double = 0.0, pollingIntervals: LDValue? = nil) {
+    init(vaultPercentage: Double = 0.0) {
         self.vaultPercentage = vaultPercentage
-        self.pollingIntervals = pollingIntervals
     }
 
     init(vaultType: VaultType) {
@@ -25,10 +23,6 @@ class MockLDClient: LDClientProtocol {
 
     func doubleVariationWrapper(forKey key: String, defaultValue: Double) -> Double {
         vaultPercentage
-    }
-
-    func jsonVariationWrapper(forKey key: String, defaultValue: LDValue) -> LDValue {
-        pollingIntervals ?? defaultValue
     }
 }
 
@@ -76,43 +70,6 @@ final class LDManagerTests: XCTestCase {
             genRandomDouble: mockRandomGenerator
         )
         XCTAssertEqual(result, VaultType.vgs)
-    }
-
-    func testGetPollingIntervals_ReturnsDefaultVal() {
-        let mockLDClient = MockLDClient()
-
-        let result = LDManager.shared.getPollingIntervals(
-            ldClient: mockLDClient
-        )
-        let defatulVal: [Int] = []
-        XCTAssertEqual(result, defatulVal)
-    }
-
-    func testGetPollingIntervals_InvalidFlagValueReturnsDefault() {
-        // Structure of the flag value is incorrect! The object should be:
-        // { "intervals": [1000] }
-        // Instead it is:
-        // { "intervals": 1000 }
-        let mockLDClient = MockLDClient(
-            pollingIntervals: LDValue(dictionaryLiteral: ("intervals", 1000))
-        )
-
-        let result = LDManager.shared.getPollingIntervals(
-            ldClient: mockLDClient
-        )
-        let defatulVal: [Int] = []
-        XCTAssertEqual(result, defatulVal)
-    }
-
-    func testGetPollingIntervals_ValidFlagValueIsReturned() {
-        let defVal = LDValue(dictionaryLiteral: ("intervals", [250, 250, 500, 500, 1000]))
-        let mockLDClient = MockLDClient(pollingIntervals: defVal)
-
-        let result = LDManager.shared.getPollingIntervals(
-            ldClient: mockLDClient
-        )
-        let expectedValue: [Int] = [250, 250, 500, 500, 1000]
-        XCTAssertEqual(result, expectedValue)
     }
 
     // MARK: Test LDManager.Initialize
