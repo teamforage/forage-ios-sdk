@@ -100,6 +100,22 @@ public struct EbtError51Details: Codable {
     }
 }
 
+// Forage API errors received from the vault
+// resembles the shape of an SQSError
+struct VaultError: Codable {
+    public let message: String
+    public let statusCode: Int
+    public let forageCode: String
+    public let details: EbtError51Details?
+
+    private enum CodingKeys: String, CodingKey {
+        case message
+        case statusCode = "status_code"
+        case forageCode = "forage_code"
+        case details
+    }
+}
+
 /// Represents a detailed error object returned by the Forage API.
 /// Provides additional context about the HTTP status, error code, and developer-facing message.
 /// [Learn more about SDK errors](https://docs.joinforage.app/reference/errors#sdk-errors)
