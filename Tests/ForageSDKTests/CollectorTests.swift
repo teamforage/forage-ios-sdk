@@ -67,4 +67,38 @@ class VaultCollectorTests: XCTestCase {
         let resultToken = try basisTheoryWrapper.getPaymentMethodToken(paymentMethodToken: token)
         XCTAssertEqual(resultToken, "789012")
     }
+
+    // MARK: JSON.convertJsonToDictionary
+
+    func testConvertJsonToDictionary_testEmptyDictionary() {
+        let json: JSON = .dictionaryValue([:])
+        let result = JSON.convertJsonToDictionary(json)
+        XCTAssertTrue(result.isEmpty)
+    }
+
+    func testConvertJsonToDictionary_testRawValue() {
+        let json: JSON = .dictionaryValue(["key": .rawValue("value")])
+        let result = JSON.convertJsonToDictionary(json)
+        XCTAssertEqual(result["key"] as? String, "value")
+    }
+
+    func testConvertJsonToDictionary_testArrayValue() {
+        let json: JSON = .dictionaryValue(["array": .arrayValue([.rawValue("item1"), .rawValue("item2")])])
+        let result = JSON.convertJsonToDictionary(json)
+        let array = result["array"] as? [String]
+        XCTAssertEqual(array, ["item1", "item2"])
+    }
+
+    func testConvertJsonToDictionary_testNestedDictionary() {
+        let nestedJson: JSON = .dictionaryValue(["nestedKey": .rawValue("nestedValue")])
+        let json: JSON = .dictionaryValue(["key": nestedJson])
+        let result = JSON.convertJsonToDictionary(json)
+        let nestedDict = result["key"] as? [String: Any]
+        XCTAssertEqual(nestedDict?["nestedKey"] as? String, "nestedValue")
+    }
+
+    func testConvertJsonToDictionary_testNilJSON() {
+        let result = JSON.convertJsonToDictionary(nil)
+        XCTAssertTrue(result.isEmpty)
+    }
 }
