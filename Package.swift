@@ -47,7 +47,8 @@ let package = Package(
             ],
             path: "Sources",
             resources: [
-                .process("Resources/Media.xcassets")
+                .process("Resources/Media.xcassets"),
+                .copy("Resources/PrivacyInfo.xcprivacy")
             ],
             swiftSettings: [.define("SPM_BUILD")]
         ),
