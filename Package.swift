@@ -26,7 +26,7 @@ let package = Package(
         .package(
             name: "LaunchDarkly",
             url: "https://github.com/launchdarkly/ios-client-sdk.git",
-            .exact("8.0.1")
+            .exact("9.6.0")
         ),
         .package(
             name: "BasisTheoryElements",
