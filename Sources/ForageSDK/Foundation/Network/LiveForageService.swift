@@ -265,6 +265,7 @@ class LiveForageService: ForageService {
             "IDEMPOTENCY-KEY": idempotencyKey,
             "Merchant-Account": request.merchantID,
             "x-datadog-trace-id": ForageSDK.shared.traceId,
+            "API-VERSION": "default"
         ], xKey: request.xKey)
 
         let extraData = [
