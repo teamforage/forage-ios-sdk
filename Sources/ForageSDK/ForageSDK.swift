@@ -18,7 +18,7 @@ public class ForageSDK {
 
     public var environment: Environment = .sandbox
     // Don't update! Only updated when releasing.
-    public static let version = "4.4.2"
+    public static let version = "4.4.3"
     public static let shared = ForageSDK()
 
     // MARK: Init
