@@ -241,7 +241,7 @@ class LDManager: LDManagerProtocol {
     }
 
     private func createLDConfig(for environment: Environment) -> LDConfig {
-        LDConfig(mobileKey: getLDMobileKey(environment).rawValue)
+        LDConfig(mobileKey: getLDMobileKey(environment).rawValue, autoEnvAttributes: .enabled)
     }
 
     private func createLDContext() -> LDContext? {
