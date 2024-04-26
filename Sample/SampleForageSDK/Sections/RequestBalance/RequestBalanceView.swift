@@ -40,7 +40,6 @@ class RequestBalanceView: BaseSampleView {
 
     public let foragePinTextField: ForagePINTextField = {
         let tf = ForagePINTextField()
-        tf.placeholder = "PIN Field"
         tf.accessibilityIdentifier = "tf_pin_balance"
         tf.isAccessibilityElement = true
         tf.borderWidth = 2.0

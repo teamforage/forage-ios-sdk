@@ -51,6 +51,7 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
     }
 
     /// Placeholder for the text field
+    @available(*, deprecated, message: "Setting the placeholder on the PIN textfield is no longer supported.")
     @IBInspectable public var placeholder: String? {
         get { textField.placeholder }
         set { textField.placeholder = newValue }
