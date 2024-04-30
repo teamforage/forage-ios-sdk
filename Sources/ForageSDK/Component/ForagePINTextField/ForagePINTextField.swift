@@ -143,14 +143,13 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
 
         var tf: VaultWrapper?
 
-//        if vaultType == VaultType.vgs {
-//            tf = VGSTextFieldWrapper()
-//        } else if vaultType == VaultType.basisTheory {
-//            tf = BasisTheoryTextFieldWrapper()
-//        } else {
-//            tf = VGSTextFieldWrapper()
-//        }
-        tf = VGSTextFieldWrapper()
+        if vaultType == VaultType.vgs {
+            tf = VGSTextFieldWrapper()
+        } else if vaultType == VaultType.basisTheory {
+            tf = BasisTheoryTextFieldWrapper()
+        } else {
+            tf = VGSTextFieldWrapper()
+        }
 
         tf?.textColor = UIColor.black
         tf?.font = UIFont.systemFont(ofSize: 14, weight: .regular)
