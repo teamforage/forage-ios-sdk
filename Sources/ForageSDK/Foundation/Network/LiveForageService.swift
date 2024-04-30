@@ -46,81 +46,58 @@ class LiveForageService: ForageService {
         pinCollector: VaultCollector,
         paymentMethodReference: String
     ) async throws -> BalanceModel {
-        let sessionToken = ForageSDK.shared.sessionToken
-        let merchantID = ForageSDK.shared.merchantID
+        let vaultResponse: VaultResponse?
+        do {
+            vaultResponse = try await collectPinForBalance(
+                pinCollector: pinCollector,
+                paymentMethodReference: paymentMethodReference
+            )
+        } catch {
+            throw error
+        }
+        
+        guard let vaultData = vaultResponse?.data else {
+            logger?.error(
+                "\(pinCollector.getVaultType()) proxy error. Balance check failed for Payment Method \(paymentMethodReference). No data or error from vault.",
+                error: CommonErrors.UNKNOWN_SERVER_ERROR,
+                attributes: nil
+            )
+            throw CommonErrors.UNKNOWN_SERVER_ERROR
+        }
+        
+        let rawBalanceModel: RawBalanceResponseModel?
+        do {
+            let decoder = JSONDecoder()
+            rawBalanceModel = try decoder.decode(
+                RawBalanceResponseModel.self,
+                from: vaultData
+            )
+        } catch {
+            logger?.critical(
+                "Failed to decode API response. Balance check failed for Payment Method \(paymentMethodReference).",
+                error: CommonErrors.UNKNOWN_SERVER_ERROR,
+                attributes: nil
+            )
+            throw CommonErrors.UNKNOWN_SERVER_ERROR
+        }
+        
+        if let balance = rawBalanceModel?.balance {
+            return balance
+        } else if let vaultError = rawBalanceModel?.error {
+            let forageError = ForageError.create(
+                code: vaultError.forageCode,
+                httpStatusCode: vaultError.statusCode,
+                message: vaultError.message
+            )
+            logger?.error(
+                "Balance check failed for Payment Method \(paymentMethodReference).",
+                error: forageError,
+                attributes: nil
+            )
+            throw forageError
+        }
 
         do {
-            // TODO: parallelize the first 2 requests!
-
-            let xKeyModel = try await awaitResult { completion in
-                self.getXKey(sessionToken: sessionToken, merchantID: merchantID, completion: completion)
-            }
-            let paymentMethod = try await awaitResult { completion in
-                self.getPaymentMethod(
-                    sessionToken: sessionToken,
-                    merchantID: merchantID,
-                    paymentMethodRef: paymentMethodReference,
-                    completion: completion
-                )
-            }
-
-            let balanceRequest = ForageRequestModel(
-                authorization: sessionToken,
-                paymentMethodReference: paymentMethodReference,
-                paymentReference: "",
-                cardNumberToken: paymentMethod.card.token,
-                merchantID: merchantID,
-                xKey: ["vgsXKey": xKeyModel.alias, "btXKey": xKeyModel.bt_alias]
-            )
-
-            let vaultResponse = try await submitPinToVault(
-                pinCollector: pinCollector,
-                vaultAction: .balanceCheck,
-                idempotencyKey: UUID().uuidString,
-                path: "/api/payment_methods/\(paymentMethodReference)/balance/",
-                request: balanceRequest
-            )
-
-            // If there was a vaultResponse.error, the error was already thrown in the function call above!
-            guard let vaultData = vaultResponse.data else {
-                logger?.error(
-                    "\(pinCollector.getVaultType()) proxy error. Balance check failed for Payment Method \(paymentMethodReference). No data or error from vault.",
-                    error: CommonErrors.UNKNOWN_SERVER_ERROR,
-                    attributes: nil
-                )
-                throw CommonErrors.UNKNOWN_SERVER_ERROR
-            }
-
-            do {
-                let decoder = JSONDecoder()
-                let rawBalanceModel = try decoder.decode(
-                    RawBalanceResponseModel.self,
-                    from: vaultData
-                )
-                if let balance = rawBalanceModel.balance {
-                    return balance
-                } else if let vaultError = rawBalanceModel.error {
-                    let forageError = ForageError.create(
-                        code: vaultError.forageCode,
-                        httpStatusCode: vaultError.statusCode,
-                        message: vaultError.message
-                    )
-                    logger?.error(
-                        "Balance check failed for Payment Method \(paymentMethodReference).",
-                        error: forageError,
-                        attributes: nil
-                    )
-                    throw forageError
-                }
-            } catch {
-                logger?.critical(
-                    "Failed to decode API response. Balance check failed for Payment Method \(paymentMethodReference).",
-                    error: CommonErrors.UNKNOWN_SERVER_ERROR,
-                    attributes: nil
-                )
-                throw CommonErrors.UNKNOWN_SERVER_ERROR
-            }
-
             let forageError = CommonErrors.UNKNOWN_SERVER_ERROR
             logger?.critical(
                 "Received malformed API response",
@@ -148,63 +125,57 @@ class LiveForageService: ForageService {
         pinCollector: VaultCollector,
         paymentReference: String
     ) async throws -> PaymentModel {
+        let vaultResponse: VaultResponse?
         do {
-            let vaultResponse = try await collectPinForPayment(
+            vaultResponse = try await collectPinForPayment(
                 pinCollector: pinCollector,
                 paymentReference: paymentReference,
                 idempotencyKey: paymentReference,
                 action: .capturePayment
             )
-
-            guard let vaultData = vaultResponse.data else {
-                let forageError = CommonErrors.UNKNOWN_SERVER_ERROR
-                logger?.error(
-                    "\(pinCollector.getVaultType()) proxy error. Failed to capture Payment \(paymentReference). No data or error from vault.",
-                    error: forageError,
-                    attributes: nil
-                )
-                throw forageError
-            }
-
-            do {
-                let decoder = JSONDecoder()
-                let rawPaymentResponse = try decoder.decode(RawPaymentResponseModel.self, from: vaultData)
-
-                if let payment = rawPaymentResponse.payment {
-                    return payment
-                } else if let vaultError = rawPaymentResponse.error {
-                    let forageError = ForageError.create(
-                        code: vaultError.forageCode,
-                        httpStatusCode: vaultError.statusCode,
-                        message: vaultError.message
-                    )
-                    logger?.error(
-                        "Failed to capture Payment \(paymentReference).",
-                        error: forageError,
-                        attributes: nil
-                    )
-                    throw forageError
-                }
-            } catch {
-                let forageError = CommonErrors.UNKNOWN_SERVER_ERROR
-                logger?.critical(
-                    "Failed to decode API response. Failed to capture Payment \(paymentReference).",
-                    error: error,
-                    attributes: nil
-                )
-                throw forageError
-            }
-
+        } catch {
+            throw error
+        }
+        
+        guard let vaultData = vaultResponse?.data else {
             let forageError = CommonErrors.UNKNOWN_SERVER_ERROR
-            logger?.critical(
-                "Received malformed API response. Failed to capture Payment \(paymentReference)",
+            logger?.error(
+                "\(pinCollector.getVaultType()) proxy error. Failed to capture Payment \(paymentReference). No data or error from vault.",
                 error: forageError,
                 attributes: nil
             )
             throw forageError
-        } catch {
-            throw error
         }
+        
+        let rawPaymentResponse: RawPaymentResponseModel?
+        
+        do {
+            let decoder = JSONDecoder()
+            rawPaymentResponse = try decoder.decode(RawPaymentResponseModel.self, from: vaultData)
+        } catch {
+            logger?.critical(
+                "Failed to decode API response. Failed to capture Payment \(paymentReference).",
+                error: error,
+                attributes: nil
+            )
+            throw CommonErrors.UNKNOWN_SERVER_ERROR
+        }
+        
+        if let vaultError = rawPaymentResponse?.error {
+            let forageError = ForageError.create(
+                code: vaultError.forageCode,
+                httpStatusCode: vaultError.statusCode,
+                message: vaultError.message
+            )
+            logger?.error(
+                "Failed to capture Payment \(paymentReference).",
+                error: forageError,
+                attributes: nil
+            )
+            throw forageError
+        }
+        
+        return PaymentModel(from: rawPaymentResponse!)
     }
 
     func getPayment(sessionToken: String, merchantID: String, paymentRef: String, completion: @escaping (Result<PaymentModel, Error>) -> Void) {
@@ -287,6 +258,49 @@ class LiveForageService: ForageService {
     }
 
     // MARK: Private helper methods
+    
+    private func collectPinForBalance(
+        pinCollector: VaultCollector,
+        paymentMethodReference: String
+    ) async throws -> VaultResponse {
+        let sessionToken = ForageSDK.shared.sessionToken
+        let merchantID = ForageSDK.shared.merchantID
+
+        do {
+            // TODO: parallelize the first 2 requests!
+
+            let xKeyModel = try await awaitResult { completion in
+                self.getXKey(sessionToken: sessionToken, merchantID: merchantID, completion: completion)
+            }
+            let paymentMethod = try await awaitResult { completion in
+                self.getPaymentMethod(
+                    sessionToken: sessionToken,
+                    merchantID: merchantID,
+                    paymentMethodRef: paymentMethodReference,
+                    completion: completion
+                )
+            }
+
+            let balanceRequest = ForageRequestModel(
+                authorization: sessionToken,
+                paymentMethodReference: paymentMethodReference,
+                paymentReference: "",
+                cardNumberToken: paymentMethod.card.token,
+                merchantID: merchantID,
+                xKey: ["vgsXKey": xKeyModel.alias, "btXKey": xKeyModel.bt_alias]
+            )
+
+            return try await submitPinToVault(
+                pinCollector: pinCollector,
+                vaultAction: .balanceCheck,
+                idempotencyKey: UUID().uuidString,
+                path: "/api/payment_methods/\(paymentMethodReference)/balance/",
+                request: balanceRequest
+            )
+        } catch {
+            throw error
+        }
+    }
 
     /// Submit PIN to the Vault Proxy (Basis Theory or VGS)
     /// - Parameters:
@@ -314,7 +328,7 @@ class LiveForageService: ForageService {
         ]
 
         do {
-            let vaultResponse = try await withCheckedThrowingContinuation { continuation in
+            return try await withCheckedThrowingContinuation { continuation in
                 pinCollector.sendData(
                     path: path,
                     vaultAction: vaultAction,
@@ -323,13 +337,8 @@ class LiveForageService: ForageService {
                     continuation.resume(returning: result)
                 }
             }
-
-            if let error = vaultResponse.error {
-                throw error
-            }
-
-            return vaultResponse
         } catch {
+            // TODO: What would this error be???
             throw error
         }
     }

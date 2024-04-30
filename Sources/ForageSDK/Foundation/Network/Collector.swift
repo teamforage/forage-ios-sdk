@@ -99,11 +99,8 @@ class VGSCollectWrapper: VaultCollector {
                     completion(VaultResponse(statusCode: code, urlResponse: urlResponse, data: data, error: nil))
                 case let .failure(code, data, urlResponse, error):
                     measurement.end()
-                    self.logger?.error("Failed to send data to VGS proxy", error: error, attributes: [
-                        "http_status": code
-                    ])
                     measurement.setHttpStatusCode(code).logResult()
-                    completion(VaultResponse(statusCode: code, urlResponse: urlResponse, data: data, error: error ?? CommonErrors.UNKNOWN_SERVER_ERROR))
+                    completion(VaultResponse(statusCode: code, urlResponse: urlResponse, data: data, error: error))
                 }
             }
         }
