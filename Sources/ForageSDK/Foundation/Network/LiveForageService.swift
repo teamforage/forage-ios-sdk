@@ -48,9 +48,14 @@ class LiveForageService: ForageService {
     ) async throws -> BalanceModel {
         let vaultResponse: VaultResponse?
         do {
-            vaultResponse = try await collectPinForBalance(
+            let balanceRequest = try await requestPreamble(using: onlyGetPaymentMethod, tokenRef: paymentMethodReference)
+
+            vaultResponse = try await submitPinToVault(
                 pinCollector: pinCollector,
-                paymentMethodReference: paymentMethodReference
+                vaultAction: .balanceCheck,
+                idempotencyKey: UUID().uuidString,
+                path: "/api/payment_methods/\(paymentMethodReference)/balance/",
+                request: balanceRequest
             )
         } catch {
             throw error
@@ -181,6 +186,57 @@ class LiveForageService: ForageService {
     func getPayment(sessionToken: String, merchantID: String, paymentRef: String, completion: @escaping (Result<PaymentModel, Error>) -> Void) {
         do { try provider.execute(model: PaymentModel.self, endpoint: ForageAPI.getPayment(sessionToken: sessionToken, merchantID: merchantID, paymentRef: paymentRef), completion: completion) } catch { completion(.failure(error)) }
     }
+    
+    func getBothPaymentAndPaymentMethod(paymentRef: String) async throws -> String {
+        let sessionToken = ForageSDK.shared.sessionToken
+        let merchantID = ForageSDK.shared.merchantID
+        
+        do {
+            let payment = try await awaitResult { completion in
+                self.getPayment(
+                    sessionToken: sessionToken,
+                    merchantID: merchantID,
+                    paymentRef: paymentRef,
+                    completion: completion
+                )
+            }
+            
+            let paymentMethod = try await awaitResult { completion in
+                self.getPaymentMethod(
+                    sessionToken: sessionToken,
+                    merchantID: merchantID,
+                    paymentMethodRef: payment.paymentMethodRef,
+                    completion: completion
+                )
+            }
+            
+            return paymentMethod.card.token
+        } catch {
+            throw error
+        }
+    }
+    
+    func onlyGetPaymentMethod(paymentMethodRef: String) async throws -> String {
+        let sessionToken = ForageSDK.shared.sessionToken
+        let merchantID = ForageSDK.shared.merchantID
+        
+        do {
+            let paymentMethod = try await awaitResult { completion in
+                self.getPaymentMethod(
+                    sessionToken: sessionToken,
+                    merchantID: merchantID,
+                    paymentMethodRef: paymentMethodRef,
+                    completion: completion
+                )
+            }
+            
+            return paymentMethod.card.token
+        } catch {
+            throw error
+        }
+    }
+    
+    typealias CollectTokenFunc = (_ reference: String) async throws -> String
 
     // MARK: Collect PIN
 
@@ -199,6 +255,37 @@ class LiveForageService: ForageService {
             throw error
         }
     }
+    
+    /// `ForageRequestModel` used for compose ForageSDK requests
+    struct ForageRequestModel: Codable {
+        let authorization: String
+        let cardNumberToken: String
+        let merchantID: String
+        let xKey: [String: String]
+    }
+    
+    private func requestPreamble(
+        using collectTokenFunc: CollectTokenFunc,
+        tokenRef: String
+    ) async throws -> ForageRequestModel {
+        let sessionToken = ForageSDK.shared.sessionToken
+        let merchantID = ForageSDK.shared.merchantID
+
+        do {
+            let xKeyModel = try await awaitResult { completion in
+                self.getXKey(sessionToken: sessionToken, merchantID: merchantID, completion: completion)
+            }
+            
+            let token = try await collectTokenFunc(tokenRef)
+            
+            return ForageRequestModel(
+                authorization: sessionToken,
+                cardNumberToken: token,
+                merchantID: merchantID,
+                xKey: ["vgsXKey": xKeyModel.alias, "btXKey": xKeyModel.bt_alias]
+            )
+        }
+    }
 
     /// Common Payment-related prologue across capturePayment and collectPin.
     /// Both `deferPaymentCapture` and `capturePayment` involve the same
@@ -209,39 +296,8 @@ class LiveForageService: ForageService {
         idempotencyKey: String,
         action: VaultAction
     ) async throws -> VaultResponse {
-        let sessionToken = ForageSDK.shared.sessionToken
-        let merchantID = ForageSDK.shared.merchantID
-
         do {
-            // TODO: parallelize the first 2 requests!
-            let xKeyModel = try await awaitResult { completion in
-                self.getXKey(sessionToken: sessionToken, merchantID: merchantID, completion: completion)
-            }
-            let payment = try await awaitResult { completion in
-                self.getPayment(
-                    sessionToken: sessionToken,
-                    merchantID: merchantID,
-                    paymentRef: paymentReference,
-                    completion: completion
-                )
-            }
-            let paymentMethod = try await awaitResult { completion in
-                self.getPaymentMethod(
-                    sessionToken: sessionToken,
-                    merchantID: merchantID,
-                    paymentMethodRef: payment.paymentMethodRef,
-                    completion: completion
-                )
-            }
-
-            let collectPinRequest = ForageRequestModel(
-                authorization: sessionToken,
-                paymentMethodReference: "",
-                paymentReference: paymentReference,
-                cardNumberToken: paymentMethod.card.token,
-                merchantID: merchantID,
-                xKey: ["vgsXKey": xKeyModel.alias, "btXKey": xKeyModel.bt_alias]
-            )
+            let collectPinRequest = try await requestPreamble(using: getBothPaymentAndPaymentMethod, tokenRef: paymentReference)
 
             let basePath = "/api/payments/\(paymentReference)"
 
@@ -258,49 +314,6 @@ class LiveForageService: ForageService {
     }
 
     // MARK: Private helper methods
-    
-    private func collectPinForBalance(
-        pinCollector: VaultCollector,
-        paymentMethodReference: String
-    ) async throws -> VaultResponse {
-        let sessionToken = ForageSDK.shared.sessionToken
-        let merchantID = ForageSDK.shared.merchantID
-
-        do {
-            // TODO: parallelize the first 2 requests!
-
-            let xKeyModel = try await awaitResult { completion in
-                self.getXKey(sessionToken: sessionToken, merchantID: merchantID, completion: completion)
-            }
-            let paymentMethod = try await awaitResult { completion in
-                self.getPaymentMethod(
-                    sessionToken: sessionToken,
-                    merchantID: merchantID,
-                    paymentMethodRef: paymentMethodReference,
-                    completion: completion
-                )
-            }
-
-            let balanceRequest = ForageRequestModel(
-                authorization: sessionToken,
-                paymentMethodReference: paymentMethodReference,
-                paymentReference: "",
-                cardNumberToken: paymentMethod.card.token,
-                merchantID: merchantID,
-                xKey: ["vgsXKey": xKeyModel.alias, "btXKey": xKeyModel.bt_alias]
-            )
-
-            return try await submitPinToVault(
-                pinCollector: pinCollector,
-                vaultAction: .balanceCheck,
-                idempotencyKey: UUID().uuidString,
-                path: "/api/payment_methods/\(paymentMethodReference)/balance/",
-                request: balanceRequest
-            )
-        } catch {
-            throw error
-        }
-    }
 
     /// Submit PIN to the Vault Proxy (Basis Theory or VGS)
     /// - Parameters:
