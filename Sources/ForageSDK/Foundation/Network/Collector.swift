@@ -33,11 +33,11 @@ enum VaultAction: String {
 
 protocol VaultCollector {
     func setCustomHeaders(headers: [String: String], xKey: [String: String])
-    func sendData(
+    func sendData<T: Decodable>(
         path: String,
         vaultAction: VaultAction,
         extraData: [String: Any],
-        completion: @escaping (VaultResponse) -> Void
+        completion: @escaping (T?) -> Void
     )
     func getPaymentMethodToken(paymentMethodToken: String) throws -> String
     func getVaultType() -> VaultType
@@ -68,17 +68,64 @@ class VGSCollectWrapper: VaultCollector {
         mutableHeaders["X-KEY"] = xKey["vgsXKey"]
         vgsCollect.customHeaders = mutableHeaders
     }
+    
+    private func handleResponse<T: Decodable>(code: Int, data: Data?, error: Error?, measurement: NetworkMonitor, completion: (T?) -> Void) {
+        measurement.end()
+        measurement.setHttpStatusCode(code).logResult()
+        
+        // If an error is explicitly returned from VGS, log the error and return
+        if let error = error {
+            logger?.critical(
+                "VGS proxy failed with an error",
+                error: error,
+                attributes: nil
+            )
+            return completion(nil)
+        }
 
-    func sendData(path: String, vaultAction: VaultAction, extraData: [String: Any], completion: @escaping (VaultResponse) -> Void) {
+        // If there was no error AND no data was returned, something went wrong and we should log and return
+        guard let data = data else {
+            logger?.critical(
+                "VGS failed to respond with a data object",
+                error: nil,
+                attributes: nil
+            )
+            return completion(nil)
+        }
+
+        // Try to decode the response and return the expected object
+        do {
+            // TRY TO DECODE A GENERIC FORAGE ERROR!
+//            if let decodedForageApiError = try? JSONDecoder().decode(ForageServiceError.self, from: data) {
+//                let firstError = decodedForageApiError.errors[0]
+//                return completion(VaultError(message: firstError.message, statusCode: code, forageCode: firstError.code, details: nil) as T)
+//            }
+            
+            let decoder = JSONDecoder()
+            let decodedResponse = try decoder.decode(T.self, from: data)
+            completion(decodedResponse)
+        } catch {
+            // If we are unable to decode whatever was returned, log and return
+            logger?.critical(
+                "Failed to decode VGS response data.",
+                error: CommonErrors.UNKNOWN_SERVER_ERROR,
+                attributes: nil
+            )
+            completion(nil)
+        }
+    }
+
+    func sendData<T: Decodable>(path: String, vaultAction: VaultAction, extraData: [String: Any], completion: @escaping (T?) -> Void) {
         var mutableExtraData = extraData
         if let paymentMethodToken = extraData[tokenKey] as? String {
             let token = getPaymentMethodToken(paymentMethodToken: paymentMethodToken)
             if token.isEmpty {
-                logger?.error(
+                logger?.critical(
                     "Failed to send data. VGS token not found on card",
                     error: nil,
                     attributes: nil
                 )
+                return completion(nil)
             }
             mutableExtraData[tokenKey] = token
         }
@@ -91,16 +138,12 @@ class VGSCollectWrapper: VaultCollector {
 
         // VGS performs UI actions in this method, which should run on the main thread
         DispatchQueue.main.async { [self] in
-            vgsCollect.sendData(path: path, extraData: mutableExtraData) { response in
+            vgsCollect.sendData(path: path, extraData: mutableExtraData) { [self] response in
                 switch response {
-                case let .success(code, data, urlResponse):
-                    measurement.end()
-                    measurement.setHttpStatusCode(code).logResult()
-                    completion(VaultResponse(statusCode: code, urlResponse: urlResponse, data: data, error: nil))
-                case let .failure(code, data, urlResponse, error):
-                    measurement.end()
-                    measurement.setHttpStatusCode(code).logResult()
-                    completion(VaultResponse(statusCode: code, urlResponse: urlResponse, data: data, error: error))
+                case let .success(code, data, _):
+                    handleResponse(code: code, data: data, error: nil, measurement: measurement, completion: completion)
+                case let .failure(code, data, _, error):
+                    handleResponse(code: code, data: data, error: error, measurement: measurement, completion: completion)
                 }
             }
         }
@@ -145,7 +188,7 @@ class BasisTheoryWrapper: VaultCollector {
         self.logger = logger
     }
 
-    func sendData(path: String, vaultAction: VaultAction, extraData: [String: Any], completion: @escaping (VaultResponse) -> Void) {
+    func sendData<T: Decodable>(path: String, vaultAction: VaultAction, extraData: [String: Any], completion: @escaping (T?) -> Void) {
         var body: [String: Any] = ["pin": textElement]
         for (key, value) in extraData {
             if key == tokenKey, let paymentMethodToken = value as? String {
@@ -153,18 +196,12 @@ class BasisTheoryWrapper: VaultCollector {
                     let token = try getPaymentMethodToken(paymentMethodToken: paymentMethodToken)
                     body[key] = token
                 } catch {
-                    logger?.error(
+                    logger?.critical(
                         "Failed to send data to Basis Theory proxy. BT token not found on card",
                         error: error,
                         attributes: nil
                     )
-                    completion(VaultResponse(
-                        statusCode: nil,
-                        urlResponse: nil,
-                        data: nil,
-                        error: error
-                    ))
-                    return
+                    return completion(nil)
                 }
             } else {
                 body[key] = value
@@ -185,30 +222,43 @@ class BasisTheoryWrapper: VaultCollector {
                 apiKey: basisTheoryConfig.publicKey,
                 proxyKey: basisTheoryConfig.proxyKey,
                 proxyHttpRequest: proxyHttpRequest
-            ) { response, data, error in
+            ) { [self] response, data, error in
                 measurement.end()
 
                 let httpStatusCode = (response as? HTTPURLResponse)?.statusCode
                 measurement.setHttpStatusCode(httpStatusCode).logResult()
 
-                if error != nil {
-                    self.logger?.error("Failed to send data to Basis Theory proxy", error: error, attributes: [
+                // If the BT proxy responded with an error, log and return
+                if let btError = error {
+                    logger?.error("Basis Theory proxy failed with an error", error: btError, attributes: [
                         "http_status": httpStatusCode
                     ])
+                    return completion(nil)
                 }
-
-                var rawData: Data?
-                if let data = data {
+                
+                guard let data = data else {
+                    logger?.error("Basis Theory failed to respond with a data object", error: nil, attributes: [
+                        "http_status": httpStatusCode
+                    ])
+                    return completion(nil)
+                }
+                
+                // Try to decode the response and return the expected object
+                do {
                     let dataDictionary = JSON.convertJsonToDictionary(data)
-                    rawData = try? JSONSerialization.data(withJSONObject: dataDictionary, options: [])
+                    let rawData = try JSONSerialization.data(withJSONObject: dataDictionary, options: [])
+                    let decoder = JSONDecoder()
+                    let decodedResponse = try decoder.decode(T.self, from: rawData)
+                    completion(decodedResponse)
+                } catch {
+                    // If we are unable to decode whatever was returned, log and return
+                    logger?.critical(
+                        "Failed to decode Basis Theory response data.",
+                        error: nil,
+                        attributes: nil
+                    )
+                    completion(nil)
                 }
-                let vaultResponse = VaultResponse(
-                    statusCode: httpStatusCode,
-                    urlResponse: response,
-                    data: rawData,
-                    error: error
-                )
-                completion(vaultResponse)
             }
         }
     }
