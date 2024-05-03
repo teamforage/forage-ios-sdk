@@ -40,7 +40,7 @@ class LiveForageService: ForageService {
         pinCollector: VaultCollector,
         paymentMethodReference: String
     ) async throws -> BalanceModel {
-        let rawBalanceModel: RawBalanceResponseModel
+        let rawBalanceModel: RawBalanceResponseModel?
         do {
             // If any of the preamble requests fail, return back a generic response to the user
             let balanceRequest = try await createRequestModel(using: getTokenFromPaymentMethod, tokenRef: paymentMethodReference)
@@ -55,6 +55,15 @@ class LiveForageService: ForageService {
             )
         } catch {
             throw error
+        }
+        
+        guard let rawBalanceModel = rawBalanceModel else {
+            logger?.critical(
+                "Received malformed Vault response",
+                error: CommonErrors.UNKNOWN_SERVER_ERROR,
+                attributes: nil
+            )
+            throw CommonErrors.UNKNOWN_SERVER_ERROR
         }
         
         // Return the balance back to the user
@@ -90,7 +99,7 @@ class LiveForageService: ForageService {
     ) async throws -> PaymentModel {
         // If the vault request fails for some unforeseen reason or the preamble requests fail,
         // return back a generic response to the user
-        let rawPaymentResponse: RawPaymentResponseModel
+        let rawPaymentResponse: RawPaymentResponseModel?
         do {
             rawPaymentResponse = try await collectPinForPayment(
                 pinCollector: pinCollector,
@@ -100,6 +109,15 @@ class LiveForageService: ForageService {
             )
         } catch {
             throw error
+        }
+        
+        guard let rawPaymentResponse = rawPaymentResponse else {
+            logger?.critical(
+                "Received malformed Vault response",
+                error: CommonErrors.UNKNOWN_SERVER_ERROR,
+                attributes: nil
+            )
+            throw CommonErrors.UNKNOWN_SERVER_ERROR
         }
         
         // Return back the expected EBT Network error to the user
@@ -118,13 +136,13 @@ class LiveForageService: ForageService {
     typealias CollectTokenFunc = (_ sessionToken: String, _ merchantID: String, _ reference: String) async throws -> String
 
     // MARK: Collect PIN
-
+    
     func collectPinForDeferredCapture(
         pinCollector: VaultCollector,
         paymentReference: String
     ) async throws -> Void {
         do {
-            let _: Empty = try await collectPinForPayment(
+            let _: Empty? = try await collectPinForPayment(
                 pinCollector: pinCollector,
                 paymentReference: paymentReference,
                 idempotencyKey: UUID().uuidString,
@@ -139,7 +157,7 @@ class LiveForageService: ForageService {
     // MARK: Private structs
     
     /// `Empty` used to signify a generic, decodable type that returns nothing
-    struct Empty: Decodable {}
+    private struct Empty: Decodable {}
     
     /// `ForageRequestModel` used for compose ForageSDK requests
     private struct ForageRequestModel: Codable {
@@ -191,7 +209,7 @@ class LiveForageService: ForageService {
         paymentReference: String,
         idempotencyKey: String,
         action: VaultAction
-    ) async throws -> (T) {
+    ) async throws -> T? {
         do {
             let collectPinRequest = try await createRequestModel(using: getTokenFromPayment, tokenRef: paymentReference)
             
@@ -223,7 +241,7 @@ class LiveForageService: ForageService {
         idempotencyKey: String,
         path: String,
         request: ForageRequestModel
-    ) async throws -> T {
+    ) async throws -> T? {
         pinCollector.setCustomHeaders(headers: [
             "IDEMPOTENCY-KEY": idempotencyKey,
             "Merchant-Account": request.merchantID,
@@ -248,15 +266,6 @@ class LiveForageService: ForageService {
             
             if let error = error {
                 throw error
-            }
-            
-            guard let result = result else {
-                logger?.critical(
-                    "Vault request returned with an unknown structure.",
-                    error: nil,
-                    attributes: nil
-                )
-                throw CommonErrors.UNKNOWN_SERVER_ERROR
             }
             
             return result

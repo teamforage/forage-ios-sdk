@@ -103,6 +103,12 @@ class VGSCollectWrapper: VaultCollector {
             ))
         }
         
+        // If the code is a 204, we got a successful response from the deferred capture flow.
+        // In this scenario, we should just return
+        if (code == 204) {
+            return completion(nil, nil)
+        }
+        
         // Try to decode the response and return the expected object
         do {
             let decoder = JSONDecoder()
@@ -205,7 +211,7 @@ class BasisTheoryWrapper: VaultCollector {
                         error: error,
                         attributes: nil
                     )
-                    return completion(nil, nil)
+                    return completion(nil, CommonErrors.UNKNOWN_SERVER_ERROR)
                 }
             } else {
                 body[key] = value
@@ -244,6 +250,10 @@ class BasisTheoryWrapper: VaultCollector {
                     logger?.error("Basis Theory failed to respond with a data object", error: nil, attributes: [
                         "http_status": httpStatusCode
                     ])
+                    return completion(nil, nil)
+                }
+                
+                if (httpStatusCode == 204) {
                     return completion(nil, nil)
                 }
                 
