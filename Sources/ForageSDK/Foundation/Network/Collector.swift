@@ -37,7 +37,7 @@ protocol VaultCollector {
         path: String,
         vaultAction: VaultAction,
         extraData: [String: Any],
-        completion: @escaping (T?) -> Void
+        completion: @escaping (T?, ForageError?) -> Void
     )
     func getPaymentMethodToken(paymentMethodToken: String) throws -> String
     func getVaultType() -> VaultType
@@ -69,7 +69,7 @@ class VGSCollectWrapper: VaultCollector {
         vgsCollect.customHeaders = mutableHeaders
     }
     
-    private func handleResponse<T: Decodable>(code: Int, data: Data?, error: Error?, measurement: NetworkMonitor, completion: (T?) -> Void) {
+    private func handleResponse<T: Decodable>(code: Int, data: Data?, error: Error?, measurement: NetworkMonitor, completion: (T?, ForageError?) -> Void) {
         measurement.end()
         measurement.setHttpStatusCode(code).logResult()
         
@@ -80,7 +80,7 @@ class VGSCollectWrapper: VaultCollector {
                 error: error,
                 attributes: nil
             )
-            return completion(nil)
+            return completion(nil, CommonErrors.UNKNOWN_SERVER_ERROR)
         }
 
         // If there was no error AND no data was returned, something went wrong and we should log and return
@@ -90,20 +90,24 @@ class VGSCollectWrapper: VaultCollector {
                 error: nil,
                 attributes: nil
             )
-            return completion(nil)
+            return completion(nil, CommonErrors.UNKNOWN_SERVER_ERROR)
         }
-
+        
+        if let forageServiceError = try? JSONDecoder().decode(ForageServiceError.self, from: data) {
+            let forageCode = forageServiceError.errors[0].code
+            let message = forageServiceError.errors[0].message
+            return completion(nil, ForageError.create(
+                code: forageCode,
+                httpStatusCode: code,
+                message: message
+            ))
+        }
+        
         // Try to decode the response and return the expected object
         do {
-            // TRY TO DECODE A GENERIC FORAGE ERROR!
-//            if let decodedForageApiError = try? JSONDecoder().decode(ForageServiceError.self, from: data) {
-//                let firstError = decodedForageApiError.errors[0]
-//                return completion(VaultError(message: firstError.message, statusCode: code, forageCode: firstError.code, details: nil) as T)
-//            }
-            
             let decoder = JSONDecoder()
             let decodedResponse = try decoder.decode(T.self, from: data)
-            completion(decodedResponse)
+            completion(decodedResponse, nil)
         } catch {
             // If we are unable to decode whatever was returned, log and return
             logger?.critical(
@@ -111,11 +115,11 @@ class VGSCollectWrapper: VaultCollector {
                 error: CommonErrors.UNKNOWN_SERVER_ERROR,
                 attributes: nil
             )
-            completion(nil)
+            return completion(nil, CommonErrors.UNKNOWN_SERVER_ERROR)
         }
     }
 
-    func sendData<T: Decodable>(path: String, vaultAction: VaultAction, extraData: [String: Any], completion: @escaping (T?) -> Void) {
+    func sendData<T: Decodable>(path: String, vaultAction: VaultAction, extraData: [String: Any], completion: @escaping (T?, ForageError?) -> Void) {
         var mutableExtraData = extraData
         if let paymentMethodToken = extraData[tokenKey] as? String {
             let token = getPaymentMethodToken(paymentMethodToken: paymentMethodToken)
@@ -125,7 +129,7 @@ class VGSCollectWrapper: VaultCollector {
                     error: nil,
                     attributes: nil
                 )
-                return completion(nil)
+                return completion(nil, CommonErrors.UNKNOWN_SERVER_ERROR)
             }
             mutableExtraData[tokenKey] = token
         }
@@ -188,7 +192,7 @@ class BasisTheoryWrapper: VaultCollector {
         self.logger = logger
     }
 
-    func sendData<T: Decodable>(path: String, vaultAction: VaultAction, extraData: [String: Any], completion: @escaping (T?) -> Void) {
+    func sendData<T: Decodable>(path: String, vaultAction: VaultAction, extraData: [String: Any], completion: @escaping (T?, ForageError?) -> Void) {
         var body: [String: Any] = ["pin": textElement]
         for (key, value) in extraData {
             if key == tokenKey, let paymentMethodToken = value as? String {
@@ -201,7 +205,7 @@ class BasisTheoryWrapper: VaultCollector {
                         error: error,
                         attributes: nil
                     )
-                    return completion(nil)
+                    return completion(nil, nil)
                 }
             } else {
                 body[key] = value
@@ -233,14 +237,14 @@ class BasisTheoryWrapper: VaultCollector {
                     logger?.error("Basis Theory proxy failed with an error", error: btError, attributes: [
                         "http_status": httpStatusCode
                     ])
-                    return completion(nil)
+                    return completion(nil, nil)
                 }
                 
                 guard let data = data else {
                     logger?.error("Basis Theory failed to respond with a data object", error: nil, attributes: [
                         "http_status": httpStatusCode
                     ])
-                    return completion(nil)
+                    return completion(nil, nil)
                 }
                 
                 // Try to decode the response and return the expected object
@@ -249,7 +253,7 @@ class BasisTheoryWrapper: VaultCollector {
                     let rawData = try JSONSerialization.data(withJSONObject: dataDictionary, options: [])
                     let decoder = JSONDecoder()
                     let decodedResponse = try decoder.decode(T.self, from: rawData)
-                    completion(decodedResponse)
+                    completion(decodedResponse, nil)
                 } catch {
                     // If we are unable to decode whatever was returned, log and return
                     logger?.critical(
@@ -257,7 +261,7 @@ class BasisTheoryWrapper: VaultCollector {
                         error: nil,
                         attributes: nil
                     )
-                    completion(nil)
+                    completion(nil, nil)
                 }
             }
         }

@@ -40,25 +40,21 @@ class LiveForageService: ForageService {
         pinCollector: VaultCollector,
         paymentMethodReference: String
     ) async throws -> BalanceModel {
-        // If any of the preamble requests fail, return back a generic response to the user
-        guard let balanceRequest = await createRequestModel(using: getTokenFromPaymentMethod, tokenRef: paymentMethodReference) else {
-            throw CommonErrors.UNKNOWN_SERVER_ERROR
-        }
-        
-        // If the vault request fails for some unforeseen reason, return back a generic response to the user
-        guard let rawBalanceModel: RawBalanceResponseModel = await submitPinToVault(
-            pinCollector: pinCollector,
-            vaultAction: .balanceCheck,
-            idempotencyKey: UUID().uuidString,
-            path: "/api/payment_methods/\(paymentMethodReference)/balance/",
-            request: balanceRequest
-        ) else {
-            logger?.error(
-                "\(pinCollector.getVaultType()) proxy error. Balance check failed for Payment Method \(paymentMethodReference). No data or error from vault.",
-                error: CommonErrors.UNKNOWN_SERVER_ERROR,
-                attributes: nil
+        let rawBalanceModel: RawBalanceResponseModel
+        do {
+            // If any of the preamble requests fail, return back a generic response to the user
+            let balanceRequest = try await createRequestModel(using: getTokenFromPaymentMethod, tokenRef: paymentMethodReference)
+            
+            // If the vault request fails for some unforeseen reason, return back a generic response to the user
+            rawBalanceModel = try await submitPinToVault(
+                pinCollector: pinCollector,
+                vaultAction: .balanceCheck,
+                idempotencyKey: UUID().uuidString,
+                path: "/api/payment_methods/\(paymentMethodReference)/balance/",
+                request: balanceRequest
             )
-            throw CommonErrors.UNKNOWN_SERVER_ERROR
+        } catch {
+            throw error
         }
         
         // Return the balance back to the user
@@ -94,18 +90,16 @@ class LiveForageService: ForageService {
     ) async throws -> PaymentModel {
         // If the vault request fails for some unforeseen reason or the preamble requests fail,
         // return back a generic response to the user
-        guard let rawPaymentResponse: RawPaymentResponseModel = await collectPinForPayment(
-            pinCollector: pinCollector,
-            paymentReference: paymentReference,
-            idempotencyKey: paymentReference,
-            action: .capturePayment
-        ) else {
-            logger?.error(
-                "\(pinCollector.getVaultType()) proxy error. Payment capture failed for Payment \(paymentReference). No data or error from vault.",
-                error: CommonErrors.UNKNOWN_SERVER_ERROR,
-                attributes: nil
+        let rawPaymentResponse: RawPaymentResponseModel
+        do {
+            rawPaymentResponse = try await collectPinForPayment(
+                pinCollector: pinCollector,
+                paymentReference: paymentReference,
+                idempotencyKey: paymentReference,
+                action: .capturePayment
             )
-            throw CommonErrors.UNKNOWN_SERVER_ERROR
+        } catch {
+            throw error
         }
         
         // Return back the expected EBT Network error to the user
@@ -129,19 +123,17 @@ class LiveForageService: ForageService {
         pinCollector: VaultCollector,
         paymentReference: String
     ) async throws -> Void {
-        guard let _: Empty? = await collectPinForPayment(
-            pinCollector: pinCollector,
-            paymentReference: paymentReference,
-            idempotencyKey: UUID().uuidString,
-            action: .deferCapture
-        ) else {
-            logger?.error(
-                "\(pinCollector.getVaultType()) proxy error. Deferred capture failed for Payment \(paymentReference). No data or error from vault.",
-                error: CommonErrors.UNKNOWN_SERVER_ERROR,
-                attributes: nil
+        do {
+            let _: Empty = try await collectPinForPayment(
+                pinCollector: pinCollector,
+                paymentReference: paymentReference,
+                idempotencyKey: UUID().uuidString,
+                action: .deferCapture
             )
-            return
+        } catch {
+            throw error
         }
+        
     }
 
     // MARK: Private structs
@@ -163,7 +155,7 @@ class LiveForageService: ForageService {
     private func createRequestModel(
         using collectTokenFunc: CollectTokenFunc,
         tokenRef: String
-    ) async -> ForageRequestModel? {
+    ) async throws -> ForageRequestModel {
         let sessionToken = ForageSDK.shared.sessionToken
         let merchantID = ForageSDK.shared.merchantID
 
@@ -187,7 +179,7 @@ class LiveForageService: ForageService {
                 error: nil,
                 attributes: nil
             )
-            return nil
+            throw error
         }
     }
     
@@ -199,20 +191,23 @@ class LiveForageService: ForageService {
         paymentReference: String,
         idempotencyKey: String,
         action: VaultAction
-    ) async -> T? {
-        guard let collectPinRequest = await createRequestModel(using: getTokenFromPayment, tokenRef: paymentReference) else {
-            return nil
+    ) async throws -> (T) {
+        do {
+            let collectPinRequest = try await createRequestModel(using: getTokenFromPayment, tokenRef: paymentReference)
+            
+            let basePath = "/api/payments/\(paymentReference)"
+
+            return try await submitPinToVault(
+                pinCollector: pinCollector,
+                vaultAction: action,
+                idempotencyKey: idempotencyKey,
+                path: "\(basePath)\(action.endpointSuffix)",
+                request: collectPinRequest
+            )
+        } catch {
+            throw error
         }
         
-        let basePath = "/api/payments/\(paymentReference)"
-
-        return await submitPinToVault(
-            pinCollector: pinCollector,
-            vaultAction: action,
-            idempotencyKey: idempotencyKey,
-            path: "\(basePath)\(action.endpointSuffix)",
-            request: collectPinRequest
-        )
     }
 
     /// Submit PIN to the Vault Proxy (Basis Theory or VGS)
@@ -228,7 +223,7 @@ class LiveForageService: ForageService {
         idempotencyKey: String,
         path: String,
         request: ForageRequestModel
-    ) async -> T? {
+    ) async throws -> T {
         pinCollector.setCustomHeaders(headers: [
             "IDEMPOTENCY-KEY": idempotencyKey,
             "Merchant-Account": request.merchantID,
@@ -241,17 +236,30 @@ class LiveForageService: ForageService {
         ]
 
         do {
-            return try await withCheckedThrowingContinuation { continuation in
+            let (result, error) = try await withCheckedThrowingContinuation { continuation in
                 pinCollector.sendData(
                     path: path,
                     vaultAction: vaultAction,
                     extraData: extraData
-                ) { (result: T?) in
-                    continuation.resume(returning: result)
+                ) { (result: T?, error: ForageError?) in
+                    continuation.resume(returning: (result, error))
                 }
             }
-        } catch {
-            return nil
+            
+            if let error = error {
+                throw error
+            }
+            
+            guard let result = result else {
+                logger?.critical(
+                    "Vault request returned with an unknown structure.",
+                    error: nil,
+                    attributes: nil
+                )
+                throw CommonErrors.UNKNOWN_SERVER_ERROR
+            }
+            
+            return result
         }
     }
     
