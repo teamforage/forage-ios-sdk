@@ -245,7 +245,8 @@ class BasisTheoryWrapper: VaultCollector {
         let httpStatusCode = (response as? HTTPURLResponse)?.statusCode
         measurement.setHttpStatusCode(httpStatusCode).logResult()
 
-        // If the BT proxy responded with an error, log and return
+        // If the BT proxy responded with an error, log and return.
+        // Danny (5/7/2024): I've never been able to trigger this
         if let btError = error {
             logger?.critical("Basis Theory proxy failed with an error", error: btError, attributes: [
                 "http_status": httpStatusCode
@@ -260,12 +261,18 @@ class BasisTheoryWrapper: VaultCollector {
             return completion(nil, CommonErrors.UNKNOWN_SERVER_ERROR)
         }
         
+        // If the code is a 204, we got a successful response from the deferred capture flow.
+        // In this scenario, we should just return
         if (httpStatusCode == 204) {
             return completion(nil, nil)
         }
         
+        // If we found `proxy_error` in the response, we know there was an issue with the BT proxy.
+        // We can't currently access any of the information returned from BT in this state.
         if data["proxy_error"] != nil {
-            // If we found `proxy_error` in the response, we know there was an issue with BT.
+            logger?.critical("Basis Theory proxy script failed", error: nil, attributes: [
+                "http_status": httpStatusCode
+            ])
             return completion(nil, CommonErrors.UNKNOWN_SERVER_ERROR)
         }
         

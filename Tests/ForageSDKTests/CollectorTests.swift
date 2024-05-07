@@ -195,6 +195,35 @@ class VaultCollectorTests: XCTestCase {
         }
     }
     
+    func testBasisTheoryWrapper_handleResponse_proxyError () {
+        let textElement = TextElementUITextField()
+        let config = BasisTheoryConfig(publicKey: "key1", proxyKey: "key2")
+        let logger = MockLogger()
+        let basisTheoryWrapper = BasisTheoryWrapper(textElement: textElement, basisTheoryconfig: config, logger: logger)
+        let response = HTTPURLResponse(url: URL(string: "https://example.com")!, statusCode: 500, httpVersion: nil, headerFields: nil)
+        
+        // THIS IS NOT THE CORRECT FORMAT. Swap all `rawValue` types for `elementValueReference`, an internal BT type that we can't replicate or access.
+        // This mock is just for testing purposes
+        let mockData = JSON.dictionaryValue([
+            "proxy_error" : JSON.dictionaryValue([
+                "errors": JSON.dictionaryValue([
+                    "error": JSON.arrayValue([
+                        JSON.rawValue("")
+                    ])
+                ])
+            ]),
+            "title": JSON.rawValue(""),
+            "status": JSON.rawValue(""),
+            "detail": JSON.rawValue("")
+        ])
+        
+        basisTheoryWrapper.handleResponse(response: response, data: mockData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+            XCTAssertNil(result)
+            XCTAssertEqual(error, CommonErrors.UNKNOWN_SERVER_ERROR)
+            XCTAssertEqual(logger.lastCriticalMessage, "Basis Theory proxy script failed")
+        }
+    }
+    
     func testBasisTheoryWrapper_handleResponse_204Success () {
         let textElement = TextElementUITextField()
         let config = BasisTheoryConfig(publicKey: "key1", proxyKey: "key2")
