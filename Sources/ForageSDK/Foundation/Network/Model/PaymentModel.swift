@@ -64,12 +64,12 @@ public struct PaymentModel: Codable {
     public let paymentRef: String
     public let merchantID: String
     public let fundingType: String
-    public let amount: String
+    public let amount: String?
     public let description: String
     public let metadata: [String: String]
     public let paymentMethodRef: String
-    public let deliveryAddress: ForageAddress
-    public let isDelivery: Bool
+    public let deliveryAddress: ForageAddress?
+    public let isDelivery: Bool?
     public let createdDate: String
     public let updatedDate: String
     public let status: String
