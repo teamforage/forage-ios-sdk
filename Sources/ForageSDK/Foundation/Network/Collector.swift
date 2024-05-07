@@ -234,88 +234,80 @@ class BasisTheoryWrapper: VaultCollector {
                 proxyKey: basisTheoryConfig.proxyKey,
                 proxyHttpRequest: proxyHttpRequest
             ) { [self] response, data, error in
-                measurement.end()
-
-                let httpStatusCode = (response as? HTTPURLResponse)?.statusCode
-                measurement.setHttpStatusCode(httpStatusCode).logResult()
-
-                // If the BT proxy responded with an error, log and return
-                if let btError = error {
-                    logger?.error("Basis Theory proxy failed with an error", error: btError, attributes: [
-                        "http_status": httpStatusCode
-                    ])
-                    return completion(nil, CommonErrors.UNKNOWN_SERVER_ERROR)
-                }
-                
-                guard let data = data else {
-                    logger?.error("Basis Theory failed to respond with a data object", error: nil, attributes: [
-                        "http_status": httpStatusCode
-                    ])
-                    return completion(nil, CommonErrors.UNKNOWN_SERVER_ERROR)
-                }
-                
-                if (httpStatusCode == 204) {
-                    return completion(nil, nil)
-                }
-                
-                // TODO: BasisTheory won't let me access their errors yet, so we are going to
-                // handle this case specifically.
-                if (httpStatusCode == 429) {
-                    return completion(nil, ForageError.create(
-                        code: "too_many_requests",
-                        httpStatusCode: 429,
-                        message: "Request was throttled, please try again later."
-                    ))
-                }
-                
-                // TODO: Actually learn how to parse these or just better handle the error scenario!
-                if data["proxy_error"] != nil {
-                    // If we found `proxy_error` in the response, we know there was an issue with BT.
-                    return completion(nil, CommonErrors.UNKNOWN_SERVER_ERROR)
-                }
-                
-                let dataObject: Data
-                // Try to decode the response and return the expected object
-                do {
-                    let dataDictionary = JSON.convertJsonToDictionary(data)
-                    dataObject = try JSONSerialization.data(withJSONObject: dataDictionary, options: [])
-                } catch {
-                    // If we are unable to decode whatever was returned, log and return
-                    logger?.critical(
-                        "Basis Theory response data couldn't be decoded.",
-                        error: nil,
-                        attributes: nil
-                    )
-                    return completion(nil, CommonErrors.UNKNOWN_SERVER_ERROR)
-                }
-                
-                // If the response was a Forage error (ex. 429 throttled), catch it here and return
-                if let forageServiceError = try? JSONDecoder().decode(BTProxyError.self, from: dataObject) {
-                    let test = forageServiceError.proxyError[0]
-                    let forageCode = test.errors[0].code
-                    let message = test.errors[0].message
-                    return completion(nil, ForageError.create(
-                        code: forageCode,
-                        httpStatusCode: httpStatusCode ?? 500,
-                        message: message
-                    ))
-                }
-                
-                // Try to decode the response and return the expected object
-                do {
-                    let decoder = JSONDecoder()
-                    let decodedResponse = try decoder.decode(T.self, from: dataObject)
-                    completion(decodedResponse, nil)
-                } catch {
-                    // If we are unable to decode whatever was returned, log and return
-                    logger?.critical(
-                        "Received an unknown response structure from Basis Theory",
-                        error: nil,
-                        attributes: nil
-                    )
-                    completion(nil, CommonErrors.UNKNOWN_SERVER_ERROR)
-                }
+                handleResponse(response: response, data: data, error: error, measurement: measurement, completion: completion)
             }
+        }
+    }
+    
+    internal func handleResponse<T: Decodable>(response: URLResponse?, data: JSON?, error: Error?, measurement: NetworkMonitor, completion: (T?, ForageError?) -> Void) {
+        measurement.end()
+
+        let httpStatusCode = (response as? HTTPURLResponse)?.statusCode
+        measurement.setHttpStatusCode(httpStatusCode).logResult()
+
+        // If the BT proxy responded with an error, log and return
+        if let btError = error {
+            logger?.critical("Basis Theory proxy failed with an error", error: btError, attributes: [
+                "http_status": httpStatusCode
+            ])
+            return completion(nil, CommonErrors.UNKNOWN_SERVER_ERROR)
+        }
+        
+        guard let data = data else {
+            logger?.critical("Basis Theory failed to respond with a data object", error: nil, attributes: [
+                "http_status": httpStatusCode
+            ])
+            return completion(nil, CommonErrors.UNKNOWN_SERVER_ERROR)
+        }
+        
+        if (httpStatusCode == 204) {
+            return completion(nil, nil)
+        }
+        
+        if data["proxy_error"] != nil {
+            // If we found `proxy_error` in the response, we know there was an issue with BT.
+            return completion(nil, CommonErrors.UNKNOWN_SERVER_ERROR)
+        }
+        
+        let dataObject: Data
+        // Try to decode the response and return the expected object
+        do {
+            let dataDictionary = JSON.convertJsonToDictionary(data)
+            dataObject = try JSONSerialization.data(withJSONObject: dataDictionary, options: [])
+        } catch {
+            // If we are unable to decode whatever was returned, log and return
+            logger?.critical(
+                "Basis Theory response data couldn't be decoded.",
+                error: nil,
+                attributes: nil
+            )
+            return completion(nil, CommonErrors.UNKNOWN_SERVER_ERROR)
+        }
+        
+        // If the response was a Forage error (ex. 429 throttled), catch it here and return
+        if let forageServiceError = try? JSONDecoder().decode(ForageServiceError.self, from: dataObject) {
+            let forageCode = forageServiceError.errors[0].code
+            let message = forageServiceError.errors[0].message
+            return completion(nil, ForageError.create(
+                code: forageCode,
+                httpStatusCode: httpStatusCode ?? 500,
+                message: message
+            ))
+        }
+        
+        // Try to decode the response and return the expected object
+        do {
+            let decoder = JSONDecoder()
+            let decodedResponse = try decoder.decode(T.self, from: dataObject)
+            completion(decodedResponse, nil)
+        } catch {
+            // If we are unable to decode whatever was returned, log and return
+            logger?.critical(
+                "Received an unknown response structure from Basis Theory",
+                error: nil,
+                attributes: nil
+            )
+            completion(nil, CommonErrors.UNKNOWN_SERVER_ERROR)
         }
     }
 

@@ -36,6 +36,103 @@ class VaultCollectorTests: XCTestCase {
 
         XCTAssertEqual(vgsWrapper.vgsCollect.customHeaders?["X-KEY"], "VgsXKeyValue")
     }
+    
+    func testVGSCollectWrapper_handleResponse_vgsError() {
+        let config = VGSCollectConfig(id: "identifier", environment: .sandbox)
+        let logger = MockLogger()
+        let vgsWrapper = VGSCollectWrapper(config: config, logger: logger)
+        
+        let vgsError = CommonErrors.UNKNOWN_SERVER_ERROR
+        
+        vgsWrapper.handleResponse(code: 500, data: nil, error: vgsError, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+            XCTAssertNil(result)
+            XCTAssertEqual(error, CommonErrors.UNKNOWN_SERVER_ERROR)
+            XCTAssertEqual(logger.lastCriticalMessage, "VGS proxy failed with an error")
+        }
+    }
+    
+    func testVGSCollectWrapper_handleResponse_noData() {
+        let config = VGSCollectConfig(id: "identifier", environment: .sandbox)
+        let logger = MockLogger()
+        let vgsWrapper = VGSCollectWrapper(config: config, logger: logger)
+        
+        vgsWrapper.handleResponse(code: 500, data: nil, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+            XCTAssertNil(result)
+            XCTAssertEqual(error, CommonErrors.UNKNOWN_SERVER_ERROR)
+            XCTAssertEqual(logger.lastCriticalMessage, "VGS failed to respond with a data object")
+        }
+    }
+    
+    func testVGSCollectWrapper_handleResponse_forageServiceError() {
+        let config = VGSCollectConfig(id: "identifier", environment: .sandbox)
+        let logger = MockLogger()
+        let vgsWrapper = VGSCollectWrapper(config: config, logger: logger)
+        
+        let forageErrorData = """
+                {
+                    "path": "test/path",
+                    "errors": [
+                        {
+                            "code": "too_many_requests",
+                            "message": "Request was throttled, please try again later."
+                        }
+                    ]
+                }
+                """.data(using: .utf8)!
+        
+        
+        vgsWrapper.handleResponse(code: 429, data: forageErrorData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+            XCTAssertNil(result)
+            XCTAssertEqual(error, THROTTLE_ERROR)
+        }
+    }
+    
+    func testVGSCollectWrapper_handleResponse_204Success() {
+        let config = VGSCollectConfig(id: "identifier", environment: .sandbox)
+        let logger = MockLogger()
+        let vgsWrapper = VGSCollectWrapper(config: config, logger: logger)
+        
+        vgsWrapper.handleResponse(code: 204, data: "".data(using: .utf8)!, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+            XCTAssertNil(result)
+            XCTAssertNil(error)
+        }
+    }
+    
+    func testVGSCollectWrapper_handleResponse_success() {
+        let config = VGSCollectConfig(id: "identifier", environment: .sandbox)
+        let logger = MockLogger()
+        let vgsWrapper = VGSCollectWrapper(config: config, logger: logger)
+        
+        let validData = """
+            {
+                "id": "12345"
+            }
+            """.data(using: .utf8)!
+
+        let expectedModel = MockDecodableModel(id: "12345")
+        vgsWrapper.handleResponse(code: 200, data: validData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+            XCTAssertNil(error)
+            XCTAssertEqual(result, expectedModel)
+        }
+    }
+    
+    func testVGSCollectWrapper_handleResponse_invalidResponseStructure() {
+        let config = VGSCollectConfig(id: "identifier", environment: .sandbox)
+        let logger = MockLogger()
+        let vgsWrapper = VGSCollectWrapper(config: config, logger: logger)
+        
+        let invalidData = """
+                {
+                    "this": "is invalid"
+                }
+                """.data(using: .utf8)!
+        
+        vgsWrapper.handleResponse(code: 200, data: invalidData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+            XCTAssertNil(result)
+            XCTAssertEqual(error, CommonErrors.UNKNOWN_SERVER_ERROR)
+            XCTAssertEqual(logger.lastCriticalMessage, "Failed to decode VGS response data.")
+        }
+    }
 
     func testBasisTheoryWrapper_SetCustomHeaders_HeaderKey() {
         let textElement = TextElementUITextField()
@@ -66,6 +163,111 @@ class VaultCollectorTests: XCTestCase {
         let token = "123456,789012"
         let resultToken = try basisTheoryWrapper.getPaymentMethodToken(paymentMethodToken: token)
         XCTAssertEqual(resultToken, "789012")
+    }
+    
+    func testBasisTheoryWrapper_handleResponse_btError () {
+        let textElement = TextElementUITextField()
+        let config = BasisTheoryConfig(publicKey: "key1", proxyKey: "key2")
+        let logger = MockLogger()
+        let basisTheoryWrapper = BasisTheoryWrapper(textElement: textElement, basisTheoryconfig: config, logger: logger)
+        let response = HTTPURLResponse(url: URL(string: "https://example.com")!, statusCode: 500, httpVersion: nil, headerFields: nil)
+        
+        let testBTError = CommonErrors.UNKNOWN_SERVER_ERROR
+        
+        basisTheoryWrapper.handleResponse(response: response, data: nil, error: testBTError, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+            XCTAssertNil(result)
+            XCTAssertEqual(error, CommonErrors.UNKNOWN_SERVER_ERROR)
+            XCTAssertEqual(logger.lastCriticalMessage, "Basis Theory proxy failed with an error")
+        }
+    }
+    
+    func testBasisTheoryWrapper_handleResponse_noData () {
+        let textElement = TextElementUITextField()
+        let config = BasisTheoryConfig(publicKey: "key1", proxyKey: "key2")
+        let logger = MockLogger()
+        let basisTheoryWrapper = BasisTheoryWrapper(textElement: textElement, basisTheoryconfig: config, logger: logger)
+        let response = HTTPURLResponse(url: URL(string: "https://example.com")!, statusCode: 500, httpVersion: nil, headerFields: nil)
+        
+        basisTheoryWrapper.handleResponse(response: response, data: nil, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+            XCTAssertNil(result)
+            XCTAssertEqual(error, CommonErrors.UNKNOWN_SERVER_ERROR)
+            XCTAssertEqual(logger.lastCriticalMessage, "Basis Theory failed to respond with a data object")
+        }
+    }
+    
+    func testBasisTheoryWrapper_handleResponse_204Success () {
+        let textElement = TextElementUITextField()
+        let config = BasisTheoryConfig(publicKey: "key1", proxyKey: "key2")
+        let logger = MockLogger()
+        let basisTheoryWrapper = BasisTheoryWrapper(textElement: textElement, basisTheoryconfig: config, logger: logger)
+        let response = HTTPURLResponse(url: URL(string: "https://example.com")!, statusCode: 204, httpVersion: nil, headerFields: nil)
+        
+        // BT returns an empty dict
+        let mockData = JSON.dictionaryValue([:])
+        
+        basisTheoryWrapper.handleResponse(response: response, data: mockData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+            XCTAssertNil(result)
+            XCTAssertNil(error)
+        }
+    }
+    
+    func testBasisTheoryWrapper_handleResponse_429Error () {
+        let textElement = TextElementUITextField()
+        let config = BasisTheoryConfig(publicKey: "key1", proxyKey: "key2")
+        let logger = MockLogger()
+        let basisTheoryWrapper = BasisTheoryWrapper(textElement: textElement, basisTheoryconfig: config, logger: logger)
+        let response = HTTPURLResponse(url: URL(string: "https://example.com")!, statusCode: 429, httpVersion: nil, headerFields: nil)
+        
+        let mockData = JSON.dictionaryValue([
+            "path" : JSON.rawValue("test/path"),
+            "errors": JSON.arrayValue([
+                JSON.dictionaryValue([
+                    "code": JSON.rawValue("too_many_requests"),
+                    "message": JSON.rawValue("Request was throttled, please try again later.")
+                ])
+            ])
+        ])
+        
+        basisTheoryWrapper.handleResponse(response: response, data: mockData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+            XCTAssertNil(result)
+            XCTAssertEqual(error, THROTTLE_ERROR)
+        }
+    }
+    
+    func testBasisTheoryWrapper_handleResponse_invalidData () {
+        let textElement = TextElementUITextField()
+        let config = BasisTheoryConfig(publicKey: "key1", proxyKey: "key2")
+        let logger = MockLogger()
+        let basisTheoryWrapper = BasisTheoryWrapper(textElement: textElement, basisTheoryconfig: config, logger: logger)
+        let response = HTTPURLResponse(url: URL(string: "https://example.com")!, statusCode: 429, httpVersion: nil, headerFields: nil)
+        
+        let mockData = JSON.dictionaryValue([
+            "this": JSON.rawValue("Is an invalid structure!")
+        ])
+        
+        
+        basisTheoryWrapper.handleResponse(response: response, data: mockData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+            XCTAssertNil(result)
+            XCTAssertEqual(error, CommonErrors.UNKNOWN_SERVER_ERROR)
+            XCTAssertEqual(logger.lastCriticalMessage, "Received an unknown response structure from Basis Theory")
+        }
+    }
+    
+    func testBasisTheoryWrapper_handleResponse_validData () {
+        let textElement = TextElementUITextField()
+        let config = BasisTheoryConfig(publicKey: "key1", proxyKey: "key2")
+        let logger = MockLogger()
+        let basisTheoryWrapper = BasisTheoryWrapper(textElement: textElement, basisTheoryconfig: config, logger: logger)
+        let response = HTTPURLResponse(url: URL(string: "https://example.com")!, statusCode: 429, httpVersion: nil, headerFields: nil)
+        
+        let mockData = JSON.dictionaryValue([
+            "id": JSON.rawValue("12345")
+        ])
+        
+        basisTheoryWrapper.handleResponse(response: response, data: mockData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+            XCTAssertNil(error)
+            XCTAssertEqual(result, MockDecodableModel(id: "12345"))
+        }
     }
 
     // MARK: JSON.convertJsonToDictionary
