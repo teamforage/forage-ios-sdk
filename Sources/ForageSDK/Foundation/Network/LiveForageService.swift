@@ -99,9 +99,9 @@ class LiveForageService: ForageService {
     ) async throws -> PaymentModel {
         // If the vault request fails for some unforeseen reason or the preamble requests fail,
         // return back a generic response to the user
-        let rawPaymentResponse: RawPaymentResponseModel?
+        let paymentResponse: PaymentModel?
         do {
-            rawPaymentResponse = try await collectPinForPayment(
+            paymentResponse = try await collectPinForPayment(
                 pinCollector: pinCollector,
                 paymentReference: paymentReference,
                 idempotencyKey: paymentReference,
@@ -111,7 +111,7 @@ class LiveForageService: ForageService {
             throw error
         }
         
-        guard let rawPaymentResponse = rawPaymentResponse else {
+        guard let paymentResponse = paymentResponse else {
             logger?.critical(
                 "Received malformed Vault response",
                 error: CommonErrors.UNKNOWN_SERVER_ERROR,
@@ -121,7 +121,7 @@ class LiveForageService: ForageService {
         }
         
         // Return back the expected EBT Network error to the user
-        if let vaultError = rawPaymentResponse.error {
+        if let vaultError = paymentResponse.error {
             let forageError = ForageError.create(
                 code: vaultError.forageCode,
                 httpStatusCode: vaultError.statusCode,
@@ -130,7 +130,7 @@ class LiveForageService: ForageService {
             throw forageError
         }
         
-        return PaymentModel(from: rawPaymentResponse)
+        return paymentResponse
     }
     
     typealias CollectTokenFunc = (_ sessionToken: String, _ merchantID: String, _ reference: String) async throws -> String
