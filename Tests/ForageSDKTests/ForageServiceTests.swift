@@ -184,7 +184,7 @@ final class ForageServiceTests: XCTestCase {
         let service = createTestService(mockSession)
 
         let expectation = XCTestExpectation(description: "Get the Payment - should succeed")
-        service.getPayment(sessionToken: "auth1234", merchantID: "1234567", paymentRef: "11767381fd") { result in
+        service.getPayment(sessionToken: "auth1234", merchantID: "1234567", paymentRef: "11767381fd") { (result: Result<PaymentModel, Error>) in
             switch result {
             case let .success(payment):
                 XCTAssertEqual(payment.paymentMethodRef, "81dab02290")
@@ -199,6 +199,26 @@ final class ForageServiceTests: XCTestCase {
         }
         wait(for: [expectation], timeout: 1.0)
     }
+    
+    func test_getThinPayment_onSuccess_checkExpectedPayload() {
+        let mockSession = URLSessionMock()
+        mockSession.data = forageMocks.capturePaymentSuccess
+        mockSession.response = forageMocks.mockSuccessResponse
+        let service = createTestService(mockSession)
+
+        let expectation = XCTestExpectation(description: "Get the Payment - should succeed")
+        service.getPayment(sessionToken: "auth1234", merchantID: "1234567", paymentRef: "11767381fd") { (result: Result<ThinPaymentModel, Error>) in
+            switch result {
+            case let .success(payment):
+                XCTAssertEqual(payment.paymentMethodRef, "81dab02290")
+                expectation.fulfill()
+            case .failure:
+                XCTFail("Expected success")
+            }
+        }
+        wait(for: [expectation], timeout: 1.0)
+    }
+
 
     func test_getPayment_onFailure_shouldReturnFailure() {
         let mockSession = URLSessionMock()
@@ -207,7 +227,7 @@ final class ForageServiceTests: XCTestCase {
         let service = createTestService(mockSession)
 
         let expectation = XCTestExpectation(description: "Get the Payment - result should be failure")
-        service.getPayment(sessionToken: "auth1234", merchantID: "1234567", paymentRef: "11767381fd") { result in
+        service.getPayment(sessionToken: "auth1234", merchantID: "1234567", paymentRef: "11767381fd") { (result: Result<PaymentModel, Error>) in
             switch result {
             case .success:
                 XCTFail("Expected failure")
