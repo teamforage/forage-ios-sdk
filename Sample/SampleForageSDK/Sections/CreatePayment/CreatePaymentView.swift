@@ -86,10 +86,10 @@ class CreatePaymentView: UIView {
     
     private lazy var addSnapPaymentRefButton: UIButton = .createPaymentButton(
         title: "Set SNAP Ref",
-        accessibilityIdentifier: "bt_add_snap_payment_ref",
+        accessibilityIdentifier: "bt_set_snap_payment_ref",
         fundingType: .ebtSnap,
         action: { [self] completion in
-            addPaymentRef(
+            setPaymentRef(
                 fundingType: .ebtSnap,
                 amountTextField: snapTextField,
                 completion: completion
@@ -98,7 +98,7 @@ class CreatePaymentView: UIView {
     )
 
     private lazy var createEbtCashPaymentButton: UIButton = .createPaymentButton(
-        title: "Set Cash Amount",
+        title: "Set EBT Cash Amount",
         accessibilityIdentifier: "bt_create_cash_payment",
         fundingType: .ebtCash,
         action: { [self] completion in
@@ -111,11 +111,11 @@ class CreatePaymentView: UIView {
     )
     
     private lazy var addEbtCashPaymentRefButton: UIButton = .createPaymentButton(
-        title: "Set Cash Ref",
-        accessibilityIdentifier: "bt_create_cash_payment_ref",
+        title: "Set EBT Cash Ref",
+        accessibilityIdentifier: "bt_set_cash_payment_ref",
         fundingType: .ebtCash,
         action: { [self] completion in
-            addPaymentRef(
+            setPaymentRef(
                 fundingType: .ebtCash,
                 amountTextField: ebtCashTextField,
                 completion: completion
@@ -206,7 +206,7 @@ class CreatePaymentView: UIView {
 
     // MARK: Private Methods
     
-    private func addPaymentRef(fundingType: FundingType, amountTextField: UITextField, completion: @escaping () -> Void) {
+    private func setPaymentRef(fundingType: FundingType, amountTextField: UITextField, completion: @escaping () -> Void) {
         let paymentReference = amountTextField.text ?? "Unknown value"
         DispatchQueue.main.async {
             self.paymentIdentifierLabel.text = "paymentIdentifier=\(paymentReference)"
