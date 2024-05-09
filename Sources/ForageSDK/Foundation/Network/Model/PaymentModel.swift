@@ -105,3 +105,17 @@ public struct PaymentModel: Codable {
         case error
     }
 }
+
+/// When using the deferred capture flow
+/// the Payment may not have some `null` properties
+/// (`amount`, `delivery_address`, `is_delivery`, ...)  until the
+/// payment is updated and captured on the server-side.
+/// In turn, we only grab what we need from `ThinPaymentModel` for
+/// intermediate internal SDK requests to `GET /payments/`
+internal struct ThinPaymentModel: Codable {
+    internal let paymentMethodRef: String
+    
+    private enum CodingKeys: String, CodingKey {
+        case paymentMethodRef = "payment_method"
+    }
+}
