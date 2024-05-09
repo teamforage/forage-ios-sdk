@@ -59,7 +59,7 @@ public struct Receipt: Codable {
     }
 }
 
-/// `PaymentModel` used to represent a tokenized EBT Card
+/// `PaymentModel` used to represent a [Forage Payment object](https://docs.joinforage.app/reference/create-a-payment)
 public struct PaymentModel: Codable {
     public let paymentRef: String
     public let merchantID: String
@@ -80,6 +80,7 @@ public struct PaymentModel: Codable {
     public let merchantFixedSettlement: String?
     public let platformFixedSettlement: String?
     public let refunds: [String]
+    internal let error: VaultError?
 
     private enum CodingKeys: String, CodingKey {
         case paymentRef = "ref"
@@ -101,5 +102,6 @@ public struct PaymentModel: Codable {
         case merchantFixedSettlement = "merchant_fixed_settlement"
         case platformFixedSettlement = "platform_fixed_settlement"
         case refunds
+        case error
     }
 }

@@ -66,7 +66,7 @@ class MockForageService: LiveForageService {
     override func collectPinForDeferredCapture(
         pinCollector: VaultCollector,
         paymentReference: String
-    ) async throws -> VaultResponse {
+    ) async throws -> Void {
         if doesCollectPinThrow {
             throw ForageError.create(
                 code: "too_many_requests",
@@ -74,7 +74,6 @@ class MockForageService: LiveForageService {
                 message: "Request was throttled, please try again later."
             )
         }
-        return VaultResponse()
     }
 }
 
@@ -109,8 +108,7 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
     func createMockService() -> MockForageService {
         MockForageService(
             provider: Provider(URLSessionMock()),
-            ldManager: MockLDManager(),
-            pollingService: MockPollingService(ldManager: MockLDManager())
+            ldManager: MockLDManager()
         )
     }
 

@@ -12,31 +12,11 @@ import VGSCollectSDK
 import XCTest
 
 class MockLDManager: LDManagerProtocol {
-    var pollingIntervals: [Int]
-
-    init(pollingIntervals: [Int] = [1000, 1000, 1000]) {
-        self.pollingIntervals = pollingIntervals
-    }
-
-    func getPollingIntervals(ldClient: LDClientProtocol?) -> [Int] {
-        pollingIntervals
-    }
-
     func getVaultType(
         ldClient: LDClientProtocol?,
         genRandomDouble: () -> Double
     ) -> VaultType {
         VaultType.vgs
-    }
-}
-
-class MockPollingService: PollingService {
-    override func execute(vaultResponse: VaultResponse, request: ForageRequestModel, completion: @escaping (Result<Data?, Error>) -> Void) {
-        completion(.success(nil))
-    }
-
-    override func jitterAmountInSeconds() -> Double {
-        0.0
     }
 }
 
@@ -51,8 +31,7 @@ final class ForageServiceTests: XCTestCase {
     func createTestService(_ mockSession: URLSessionMock) -> ForageService {
         LiveForageService(
             provider: Provider(mockSession),
-            ldManager: MockLDManager(),
-            pollingService: MockPollingService(ldManager: MockLDManager())
+            ldManager: MockLDManager()
         )
     }
 

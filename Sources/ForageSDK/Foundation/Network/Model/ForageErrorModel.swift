@@ -25,7 +25,11 @@ struct ForageErrorSource: Codable {
 }
 
 /// Represents an error that occurs when a request to submit a `ForageElement` to the Forage API fails.
-public struct ForageError: Error, Codable {
+public struct ForageError: Error, Codable, Equatable {
+    public static func == (lhs: ForageError, rhs: ForageError) -> Bool {
+        return lhs.code == rhs.code && lhs.httpStatusCode == rhs.httpStatusCode && lhs.message == rhs.message && lhs.details == rhs.details
+    }
+    
     /// A short string that helps identify the cause of the error.
     /// [Learn more about SDK error codes](https://docs.joinforage.app/reference/errors#code-and-message-pairs-1)
     ///
@@ -71,7 +75,7 @@ public struct ForageError: Error, Codable {
 
 /// Contains additional details about a Forage API error.
 ///
-public enum ForageErrorDetails: Codable {
+public enum ForageErrorDetails: Codable, Equatable {
     /// Use this to display the SNAP and EBT Cash balances when an [ebt_error_51](https://docs.joinforage.app/reference/errors#ebt_error_51) error occurs
     case ebtError51(snapBalance: String?, cashBalance: String?)
 
@@ -97,6 +101,22 @@ public struct EbtError51Details: Codable {
     private enum CodingKeys: String, CodingKey {
         case snapBalance = "snap_balance"
         case cashBalance = "cash_balance"
+    }
+}
+
+// Forage API errors received from the vault
+// resembles the shape of an SQSError
+struct VaultError: Codable {
+    public let message: String
+    public let statusCode: Int
+    public let forageCode: String
+    public let details: EbtError51Details?
+
+    private enum CodingKeys: String, CodingKey {
+        case message
+        case statusCode = "status_code"
+        case forageCode = "forage_code"
+        case details
     }
 }
 

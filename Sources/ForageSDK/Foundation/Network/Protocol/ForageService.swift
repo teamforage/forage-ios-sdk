@@ -112,5 +112,5 @@ protocol ForageService: AnyObject {
     func collectPinForDeferredCapture(
         pinCollector: VaultCollector,
         paymentReference: String
-    ) async throws -> VaultResponse
+    ) async throws -> Void
 }
