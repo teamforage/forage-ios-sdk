@@ -85,7 +85,7 @@ class CreatePaymentView: UIView {
     )
     
     private lazy var addSnapPaymentRefButton: UIButton = .createPaymentButton(
-        title: "Set Payment Ref",
+        title: "Set SNAP Ref",
         accessibilityIdentifier: "bt_add_snap_payment_ref",
         fundingType: .ebtSnap,
         action: { [self] completion in
