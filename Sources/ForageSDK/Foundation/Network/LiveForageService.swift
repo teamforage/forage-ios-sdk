@@ -274,7 +274,11 @@ class LiveForageService: ForageService {
     
     private func getTokenFromPayment(sessionToken: String, merchantID: String, paymentRef: String) async throws -> String {
         do {
-            let payment = try await awaitResult { completion in
+            /// We only decode what we need here using `ThinPaymentModel`
+            /// (e.g. the associated `paymentMethodRef`)
+            /// beacuse many of the `PaymentModel` properties (e.g. `amount`) may be `nil`
+            /// until the Payment is updated and captured.
+            let payment: ThinPaymentModel = try await awaitResult { completion in
                 self.getPayment(
                     sessionToken: sessionToken,
                     merchantID: merchantID,
@@ -306,8 +310,8 @@ class LiveForageService: ForageService {
         }
     }
     
-    internal func getPayment(sessionToken: String, merchantID: String, paymentRef: String, completion: @escaping (Result<PaymentModel, Error>) -> Void) {
-        do { try provider.execute(model: PaymentModel.self, endpoint: ForageAPI.getPayment(sessionToken: sessionToken, merchantID: merchantID, paymentRef: paymentRef), completion: completion) } catch { completion(.failure(error)) }
+    internal func getPayment<T : Decodable>(sessionToken: String, merchantID: String, paymentRef: String, completion: @escaping (Result<T, Error>) -> Void) {
+        do { try provider.execute(model: T.self, endpoint: ForageAPI.getPayment(sessionToken: sessionToken, merchantID: merchantID, paymentRef: paymentRef), completion: completion) } catch { completion(.failure(error)) }
     }
     
     internal func getPaymentMethod(
