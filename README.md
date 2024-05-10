@@ -53,7 +53,7 @@ pod init
 3. Add the following line to your `Podfile`:
 
 ```swift
-pod 'ForageSDK', '~> 4.4.3'
+pod 'ForageSDK', '~> 4.4.4'
 ```
 
 4. Run the following command
