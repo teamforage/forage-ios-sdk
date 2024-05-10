@@ -44,7 +44,7 @@ extension ForageAPI: ServiceProtocol {
             "content-type": "application/json",
             "accept": "application/json",
             "x-datadog-trace-id": ForageSDK.shared.traceId,
-            "API-VERSION": "default"
+            "API-VERSION": "default",
         ])
         switch self {
         case let .tokenizeNumber(

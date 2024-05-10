@@ -66,7 +66,7 @@ class MockForageService: LiveForageService {
     override func collectPinForDeferredCapture(
         pinCollector: VaultCollector,
         paymentReference: String
-    ) async throws -> Void {
+    ) async throws {
         if doesCollectPinThrow {
             throw ForageError.create(
                 code: "too_many_requests",

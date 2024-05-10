@@ -199,7 +199,7 @@ final class ForageServiceTests: XCTestCase {
         }
         wait(for: [expectation], timeout: 1.0)
     }
-    
+
     func test_getThinPayment_onSuccess_checkExpectedPayload() {
         let mockSession = URLSessionMock()
         mockSession.data = forageMocks.capturePaymentSuccess
@@ -218,7 +218,6 @@ final class ForageServiceTests: XCTestCase {
         }
         wait(for: [expectation], timeout: 1.0)
     }
-
 
     func test_getPayment_onFailure_shouldReturnFailure() {
         let mockSession = URLSessionMock()

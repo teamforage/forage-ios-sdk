@@ -49,7 +49,7 @@ protocol ForageService: AnyObject {
     ///  - merchantID: The unique ID of the Merchant.
     ///  - paymentRef: The reference hash of the Payment.
     ///  - completion: The closure returns a `Result` containing either a `PaymentModel` or an `Error`. [Read more](https://docs.joinforage.app/reference/get-payment-details)
-    func getPayment<T : Decodable>(
+    func getPayment<T: Decodable>(
         sessionToken: String,
         merchantID: String,
         paymentRef: String,
@@ -112,5 +112,5 @@ protocol ForageService: AnyObject {
     func collectPinForDeferredCapture(
         pinCollector: VaultCollector,
         paymentReference: String
-    ) async throws -> Void
+    ) async throws
 }
