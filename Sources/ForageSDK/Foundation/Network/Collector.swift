@@ -68,11 +68,11 @@ class VGSCollectWrapper: VaultCollector {
         mutableHeaders["X-KEY"] = xKey["vgsXKey"]
         vgsCollect.customHeaders = mutableHeaders
     }
-    
-    internal func handleResponse<T: Decodable>(code: Int, data: Data?, error: Error?, measurement: NetworkMonitor, completion: (T?, ForageError?) -> Void) {
+
+    func handleResponse<T: Decodable>(code: Int, data: Data?, error: Error?, measurement: NetworkMonitor, completion: (T?, ForageError?) -> Void) {
         measurement.end()
         measurement.setHttpStatusCode(code).logResult()
-        
+
         // If an error is explicitly returned from VGS, log the error and return
         if let error = error {
             logger?.critical(
@@ -92,7 +92,7 @@ class VGSCollectWrapper: VaultCollector {
             )
             return completion(nil, CommonErrors.UNKNOWN_SERVER_ERROR)
         }
-        
+
         // If the response was a Forage error (ex. 429 throttled), catch it here and return
         if let forageServiceError = try? JSONDecoder().decode(ForageServiceError.self, from: data) {
             let forageCode = forageServiceError.errors[0].code
@@ -103,13 +103,13 @@ class VGSCollectWrapper: VaultCollector {
                 message: message
             ))
         }
-        
+
         // If the code is a 204, we got a successful response from the deferred capture flow.
         // In this scenario, we should just return
-        if (code == 204) {
+        if code == 204 {
             return completion(nil, nil)
         }
-        
+
         // Try to decode the response and return the expected object
         do {
             let decoder = JSONDecoder()
@@ -238,8 +238,8 @@ class BasisTheoryWrapper: VaultCollector {
             }
         }
     }
-    
-    internal func handleResponse<T: Decodable>(response: URLResponse?, data: JSON?, error: Error?, measurement: NetworkMonitor, completion: (T?, ForageError?) -> Void) {
+
+    func handleResponse<T: Decodable>(response: URLResponse?, data: JSON?, error: Error?, measurement: NetworkMonitor, completion: (T?, ForageError?) -> Void) {
         measurement.end()
 
         let httpStatusCode = (response as? HTTPURLResponse)?.statusCode
@@ -253,20 +253,20 @@ class BasisTheoryWrapper: VaultCollector {
             ])
             return completion(nil, CommonErrors.UNKNOWN_SERVER_ERROR)
         }
-        
+
         guard let data = data else {
             logger?.critical("Basis Theory failed to respond with a data object", error: nil, attributes: [
                 "http_status": httpStatusCode
             ])
             return completion(nil, CommonErrors.UNKNOWN_SERVER_ERROR)
         }
-        
+
         // If the code is a 204, we got a successful response from the deferred capture flow.
         // In this scenario, we should just return
-        if (httpStatusCode == 204) {
+        if httpStatusCode == 204 {
             return completion(nil, nil)
         }
-        
+
         // If we found `proxy_error` in the response, we know there was an issue with the BT proxy.
         // We can't currently access any of the information returned from BT in this state.
         if data["proxy_error"] != nil {
@@ -275,7 +275,7 @@ class BasisTheoryWrapper: VaultCollector {
             ])
             return completion(nil, CommonErrors.UNKNOWN_SERVER_ERROR)
         }
-        
+
         let dataObject: Data
         // Try to decode the response and return the expected object
         do {
@@ -290,7 +290,7 @@ class BasisTheoryWrapper: VaultCollector {
             )
             return completion(nil, CommonErrors.UNKNOWN_SERVER_ERROR)
         }
-        
+
         // If the response was a Forage error (ex. 429 throttled), catch it here and return
         if let forageServiceError = try? JSONDecoder().decode(ForageServiceError.self, from: dataObject) {
             let forageCode = forageServiceError.errors[0].code
@@ -301,7 +301,7 @@ class BasisTheoryWrapper: VaultCollector {
                 message: message
             ))
         }
-        
+
         // Try to decode the response and return the expected object
         do {
             let decoder = JSONDecoder()

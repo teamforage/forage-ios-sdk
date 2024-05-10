@@ -44,7 +44,7 @@ class LiveForageService: ForageService {
         do {
             // If any of the preamble requests fail, return back a generic response to the user
             let balanceRequest = try await createRequestModel(using: getTokenFromPaymentMethod, tokenRef: paymentMethodReference)
-            
+
             // If the vault request fails for some unforeseen reason, return back a generic response to the user
             rawBalanceModel = try await submitPinToVault(
                 pinCollector: pinCollector,
@@ -56,7 +56,7 @@ class LiveForageService: ForageService {
         } catch {
             throw error
         }
-        
+
         guard let rawBalanceModel = rawBalanceModel else {
             logger?.critical(
                 "Received malformed Vault response",
@@ -65,12 +65,12 @@ class LiveForageService: ForageService {
             )
             throw CommonErrors.UNKNOWN_SERVER_ERROR
         }
-        
+
         // Return the balance back to the user
         if let balance = rawBalanceModel.balance {
             return balance
         }
-        
+
         // ELSE return back the expected EBT Network error to the user
         if let vaultError = rawBalanceModel.error {
             let forageError = ForageError.create(
@@ -110,7 +110,7 @@ class LiveForageService: ForageService {
         } catch {
             throw error
         }
-        
+
         guard let paymentResponse = paymentResponse else {
             logger?.critical(
                 "Received malformed Vault response",
@@ -119,7 +119,7 @@ class LiveForageService: ForageService {
             )
             throw CommonErrors.UNKNOWN_SERVER_ERROR
         }
-        
+
         // Return back the expected EBT Network error to the user
         if let vaultError = paymentResponse.error {
             let forageError = ForageError.create(
@@ -129,18 +129,18 @@ class LiveForageService: ForageService {
             )
             throw forageError
         }
-        
+
         return paymentResponse
     }
-    
+
     typealias CollectTokenFunc = (_ sessionToken: String, _ merchantID: String, _ reference: String) async throws -> String
 
     // MARK: Collect PIN
-    
+
     func collectPinForDeferredCapture(
         pinCollector: VaultCollector,
         paymentReference: String
-    ) async throws -> Void {
+    ) async throws {
         do {
             let _: Empty? = try await collectPinForPayment(
                 pinCollector: pinCollector,
@@ -151,14 +151,13 @@ class LiveForageService: ForageService {
         } catch {
             throw error
         }
-        
     }
 
     // MARK: Private structs
-    
+
     /// `Empty` used to signify a generic, decodable type that returns nothing
     private struct Empty: Decodable {}
-    
+
     /// `ForageRequestModel` used for compose ForageSDK requests
     private struct ForageRequestModel: Codable {
         let authorization: String
@@ -168,7 +167,7 @@ class LiveForageService: ForageService {
     }
 
     // MARK: Private helper methods
-    
+
     /// Common logic required for all requests to the proxy.
     private func createRequestModel(
         using collectTokenFunc: CollectTokenFunc,
@@ -182,9 +181,9 @@ class LiveForageService: ForageService {
             let xKeyModel = try await awaitResult { completion in
                 self.getXKey(sessionToken: sessionToken, merchantID: merchantID, completion: completion)
             }
-            
+
             let token = try await collectTokenFunc(sessionToken, merchantID, tokenRef)
-            
+
             return ForageRequestModel(
                 authorization: sessionToken,
                 cardNumberToken: token,
@@ -200,7 +199,7 @@ class LiveForageService: ForageService {
             throw error
         }
     }
-    
+
     /// Common Payment-related prologue across capturePayment and collectPin.
     /// Both `deferPaymentCapture` and `capturePayment` involve the same
     /// preliminerary data retrieval and a trip to the Vault (VGS or Basis Theory) Proxy
@@ -212,7 +211,7 @@ class LiveForageService: ForageService {
     ) async throws -> T? {
         do {
             let collectPinRequest = try await createRequestModel(using: getTokenFromPayment, tokenRef: paymentReference)
-            
+
             let basePath = "/api/payments/\(paymentReference)"
 
             return try await submitPinToVault(
@@ -225,7 +224,6 @@ class LiveForageService: ForageService {
         } catch {
             throw error
         }
-        
     }
 
     /// Submit PIN to the Vault Proxy (Basis Theory or VGS)
@@ -263,15 +261,15 @@ class LiveForageService: ForageService {
                     continuation.resume(returning: (result, error))
                 }
             }
-            
+
             if let error = error {
                 throw error
             }
-            
+
             return result
         }
     }
-    
+
     private func getTokenFromPayment(sessionToken: String, merchantID: String, paymentRef: String) async throws -> String {
         do {
             /// We only decode what we need here using `ThinPaymentModel`
@@ -286,13 +284,13 @@ class LiveForageService: ForageService {
                     completion: completion
                 )
             }
-            
+
             return try await getTokenFromPaymentMethod(sessionToken: sessionToken, merchantID: merchantID, paymentMethodRef: payment.paymentMethodRef)
         } catch {
             throw error
         }
     }
-    
+
     private func getTokenFromPaymentMethod(sessionToken: String, merchantID: String, paymentMethodRef: String) async throws -> String {
         do {
             let paymentMethod = try await awaitResult { completion in
@@ -303,18 +301,18 @@ class LiveForageService: ForageService {
                     completion: completion
                 )
             }
-            
+
             return paymentMethod.card.token
         } catch {
             throw error
         }
     }
-    
-    internal func getPayment<T : Decodable>(sessionToken: String, merchantID: String, paymentRef: String, completion: @escaping (Result<T, Error>) -> Void) {
+
+    func getPayment<T: Decodable>(sessionToken: String, merchantID: String, paymentRef: String, completion: @escaping (Result<T, Error>) -> Void) {
         do { try provider.execute(model: T.self, endpoint: ForageAPI.getPayment(sessionToken: sessionToken, merchantID: merchantID, paymentRef: paymentRef), completion: completion) } catch { completion(.failure(error)) }
     }
-    
-    internal func getPaymentMethod(
+
+    func getPaymentMethod(
         sessionToken: String,
         merchantID: String,
         paymentMethodRef: String,
@@ -322,8 +320,8 @@ class LiveForageService: ForageService {
     ) {
         do { try provider.execute(model: PaymentMethodModel.self, endpoint: ForageAPI.getPaymentMethod(sessionToken: sessionToken, merchantID: merchantID, paymentMethodRef: paymentMethodRef), completion: completion) } catch { completion(.failure(error)) }
     }
-    
-    internal func getXKey(sessionToken: String, merchantID: String, completion: @escaping (Result<ForageXKeyModel, Error>) -> Void) {
+
+    func getXKey(sessionToken: String, merchantID: String, completion: @escaping (Result<ForageXKeyModel, Error>) -> Void) {
         do { try provider.execute(model: ForageXKeyModel.self, endpoint: ForageAPI.xKey(sessionToken: sessionToken, merchantID: merchantID), completion: completion) } catch { completion(.failure(error)) }
     }
 }

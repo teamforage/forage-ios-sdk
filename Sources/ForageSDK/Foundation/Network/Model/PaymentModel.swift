@@ -80,7 +80,7 @@ public struct PaymentModel: Codable {
     public let merchantFixedSettlement: String?
     public let platformFixedSettlement: String?
     public let refunds: [String]
-    internal let error: VaultError?
+    let error: VaultError?
 
     private enum CodingKeys: String, CodingKey {
         case paymentRef = "ref"
@@ -112,9 +112,9 @@ public struct PaymentModel: Codable {
 /// payment is updated and captured on the server-side.
 /// In turn, we only grab what we need from `ThinPaymentModel` for
 /// intermediate internal SDK requests to `GET /payments/`
-internal struct ThinPaymentModel: Codable {
-    internal let paymentMethodRef: String
-    
+struct ThinPaymentModel: Codable {
+    let paymentMethodRef: String
+
     private enum CodingKeys: String, CodingKey {
         case paymentMethodRef = "payment_method"
     }

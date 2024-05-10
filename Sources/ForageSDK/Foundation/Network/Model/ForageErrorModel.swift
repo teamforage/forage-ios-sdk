@@ -26,10 +26,10 @@ struct ForageErrorSource: Codable {
 
 /// Represents an error that occurs when a request to submit a `ForageElement` to the Forage API fails.
 public struct ForageError: Error, Codable, Equatable {
-    public static func == (lhs: ForageError, rhs: ForageError) -> Bool {
-        return lhs.code == rhs.code && lhs.httpStatusCode == rhs.httpStatusCode && lhs.message == rhs.message && lhs.details == rhs.details
+    public static func ==(lhs: ForageError, rhs: ForageError) -> Bool {
+        lhs.code == rhs.code && lhs.httpStatusCode == rhs.httpStatusCode && lhs.message == rhs.message && lhs.details == rhs.details
     }
-    
+
     /// A short string that helps identify the cause of the error.
     /// [Learn more about SDK error codes](https://docs.joinforage.app/reference/errors#code-and-message-pairs-1)
     ///
