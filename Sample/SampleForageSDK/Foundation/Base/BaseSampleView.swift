@@ -60,7 +60,7 @@ extension UIButton {
     ) -> LoadingButton {
         let button = LoadingButton()
         button.setTitle(title, for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
 
         button.setTitleColor(fundingType == .ebtSnap ? .white : .forageBlack, for: .normal)
         button.tintColor = .offWhite
