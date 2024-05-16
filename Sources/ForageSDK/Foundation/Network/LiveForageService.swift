@@ -245,7 +245,7 @@ class LiveForageService: ForageService {
             "Merchant-Account": request.merchantID,
             "x-datadog-trace-id": ForageSDK.shared.traceId,
             "API-VERSION": "2024-01-08",
-            "Session-Token": request.authorization,
+            "Session-Token": "Bearer \(request.authorization)",
         ], xKey: request.xKey)
 
         let extraData = [
