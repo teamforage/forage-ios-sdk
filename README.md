@@ -23,6 +23,5 @@ To get the application running:
 - iOS 13 or above
 - Swift 5.5
 - 3rd party libraries:
-  - [VGS-Collect-iOS](https://github.com/verygoodsecurity/vgs-collect-ios)
   - [LaunchDarkly](https://github.com/launchdarkly/ios-client-sdk.git)
   - [BasisTheory](https://github.com/Basis-Theory/basistheory-ios)
