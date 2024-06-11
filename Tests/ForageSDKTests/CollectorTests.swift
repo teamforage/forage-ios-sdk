@@ -16,6 +16,8 @@ class VaultCollectorTests: XCTestCase {
     override func setUp() {
         setUpForageSDK()
     }
+    
+    // MARK: VGSWrapper
 
     func testVGSCollectWrapper_SetCustomHeaders_HeaderKey() {
         let vgsWrapper = CollectorFactory.createVGS(environment: Environment.sandbox)
@@ -132,6 +134,8 @@ class VaultCollectorTests: XCTestCase {
             XCTAssertEqual(logger.lastCriticalMessage, "Failed to decode VGS response data.")
         }
     }
+    
+    // MARK: BasisTheoryWrapper
 
     func testBasisTheoryWrapper_SetCustomHeaders_HeaderKey() {
         let textElement = TextElementUITextField()
@@ -292,6 +296,137 @@ class VaultCollectorTests: XCTestCase {
         ])
 
         basisTheoryWrapper.handleResponse(response: response, data: mockData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+            XCTAssertNil(error)
+            XCTAssertEqual(result, MockDecodableModel(id: "12345"))
+        }
+    }
+    
+    // MARK: ForageWrapper
+    
+    func testForageWrapper_SetCustomHeaders_HeaderKey() {
+        let textElement = UITextField()
+        let forageWrapper = CollectorFactory.createForage(environment: Environment.sandbox, textElement: textElement)
+
+        let headers = ["HeaderKey": "HeaderValue"]
+        let xKey = [String: String]()
+        forageWrapper.setCustomHeaders(headers: headers, xKey: xKey)
+
+        XCTAssertEqual(forageWrapper.customHeaders["HeaderKey"], "HeaderValue")
+    }
+
+    func testForageWrapper_GetPaymentMethodToken() throws {
+        let textElement = UITextField()
+        let forageWrapper = CollectorFactory.createForage(environment: Environment.sandbox, textElement: textElement)
+
+        let token = "123456,789012,345678"
+        let resultToken = try forageWrapper.getPaymentMethodToken(paymentMethodToken: token)
+        XCTAssertEqual(resultToken, "345678")
+    }
+
+    func testForageWrapper_handleResponse_rosettaError() {
+        let textElement = UITextField()
+        let config = ForageVaultConfig(environment: .sandbox)
+        let logger = MockLogger()
+        let forageWrapper = ForageVaultWrapper(textElement: textElement, forageVaultConfig: config, logger: logger)
+        let response = HTTPURLResponse(url: URL(string: "https://example.com")!, statusCode: 500, httpVersion: nil, headerFields: nil)
+
+        let testRosettaError = CommonErrors.UNKNOWN_SERVER_ERROR
+
+        forageWrapper.handleResponse(response: response, data: nil, error: testRosettaError, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+            XCTAssertNil(result)
+            XCTAssertEqual(error, CommonErrors.UNKNOWN_SERVER_ERROR)
+            XCTAssertEqual(logger.lastCriticalMessage, "Rosetta proxy failed with an error")
+        }
+    }
+
+    func testForageWrapper_handleResponse_noData() {
+        let textElement = UITextField()
+        let config = ForageVaultConfig(environment: .sandbox)
+        let logger = MockLogger()
+        let forageWrapper = ForageVaultWrapper(textElement: textElement, forageVaultConfig: config, logger: logger)
+        let response = HTTPURLResponse(url: URL(string: "https://example.com")!, statusCode: 500, httpVersion: nil, headerFields: nil)
+
+        forageWrapper.handleResponse(response: response, data: nil, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+            XCTAssertNil(result)
+            XCTAssertEqual(error, CommonErrors.UNKNOWN_SERVER_ERROR)
+            XCTAssertEqual(logger.lastCriticalMessage, "Rosetta failed to respond with a data object")
+        }
+    }
+
+    func testForageWrapper_handleResponse_204Success() {
+        let textElement = UITextField()
+        let config = ForageVaultConfig(environment: .sandbox)
+        let logger = MockLogger()
+        let forageWrapper = ForageVaultWrapper(textElement: textElement, forageVaultConfig: config, logger: logger)
+        let response = HTTPURLResponse(url: URL(string: "https://example.com")!, statusCode: 204, httpVersion: nil, headerFields: nil)
+
+        let mockData = "".data(using: .utf8)!
+
+        forageWrapper.handleResponse(response: response, data: mockData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+            XCTAssertNil(result)
+            XCTAssertNil(error)
+        }
+    }
+
+    func testForageWrapper_handleResponse_429Error() {
+        let textElement = UITextField()
+        let config = ForageVaultConfig(environment: .sandbox)
+        let logger = MockLogger()
+        let forageWrapper = ForageVaultWrapper(textElement: textElement, forageVaultConfig: config, logger: logger)
+        let response = HTTPURLResponse(url: URL(string: "https://example.com")!, statusCode: 429, httpVersion: nil, headerFields: nil)
+
+        let mockData = """
+        {
+            "path": "test/path",
+            "errors": [
+                {
+                    "code": "too_many_requests",
+                    "message": "Request was throttled, please try again later."
+                }
+            ]
+        }
+        """.data(using: .utf8)!
+
+        forageWrapper.handleResponse(response: response, data: mockData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+            XCTAssertNil(result)
+            XCTAssertEqual(error, THROTTLE_ERROR)
+        }
+    }
+
+    func testForageWrapper_handleResponse_invalidData() {
+        let textElement = UITextField()
+        let config = ForageVaultConfig(environment: .sandbox)
+        let logger = MockLogger()
+        let forageWrapper = ForageVaultWrapper(textElement: textElement, forageVaultConfig: config, logger: logger)
+        let response = HTTPURLResponse(url: URL(string: "https://example.com")!, statusCode: 500, httpVersion: nil, headerFields: nil)
+
+        let mockData = """
+        {
+            "this": "is invalid"
+        }
+        """.data(using: .utf8)!
+        
+        forageWrapper.handleResponse(response: response, data: mockData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+            XCTAssertNil(result)
+            XCTAssertEqual(error, CommonErrors.UNKNOWN_SERVER_ERROR)
+            XCTAssertEqual(logger.lastCriticalMessage, "Failed to decode Rosetta response data.")
+        }
+    }
+
+    func testForageWrapper_handleResponse_validData() {
+        let textElement = UITextField()
+        let config = ForageVaultConfig(environment: .sandbox)
+        let logger = MockLogger()
+        let forageWrapper = ForageVaultWrapper(textElement: textElement, forageVaultConfig: config, logger: logger)
+        let response = HTTPURLResponse(url: URL(string: "https://example.com")!, statusCode: 500, httpVersion: nil, headerFields: nil)
+
+        let mockData = """
+        {
+            "id": "12345"
+        }
+        """.data(using: .utf8)!
+        
+        forageWrapper.handleResponse(response: response, data: mockData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(error)
             XCTAssertEqual(result, MockDecodableModel(id: "12345"))
         }
