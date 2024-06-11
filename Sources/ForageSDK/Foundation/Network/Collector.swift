@@ -360,6 +360,12 @@ class ForageVaultWrapper: VaultCollector {
         let semaphore = DispatchSemaphore(value: 0)
         var pin = ""
         
+        let measurement = VaultProxyResponseMonitor.newMeasurement(vault: VaultType.forage, action: vaultAction)
+            .setPath(path)
+            .setMethod(.post)
+        
+        measurement.start()
+        
         DispatchQueue.main.async {
             guard let textElementValue = self.textElement.text else {
                 return completion(nil, CommonErrors.INCOMPLETE_PIN_ERROR)
@@ -388,12 +394,6 @@ class ForageVaultWrapper: VaultCollector {
                 }
             }
         }
-        
-        let measurement = VaultProxyResponseMonitor.newMeasurement(vault: VaultType.forage, action: vaultAction)
-            .setPath(path)
-            .setMethod(.post)
-        
-        measurement.start()
         
         let url = URL(string: "https://\(forageVaultConfig.vaultBaseURL)/proxy\(path)")!
         var request = URLRequest(url: url)
