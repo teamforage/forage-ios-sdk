@@ -109,9 +109,6 @@ class ForageTextFieldWrapper: UIView, VaultWrapper, UITextFieldDelegate {
     func clearText() {
         DispatchQueue.main.async {
             self.textField.text = ""
-            self._isEmpty = true
-            self._isValid = false
-            self._isComplete = false
         }
     }
     
