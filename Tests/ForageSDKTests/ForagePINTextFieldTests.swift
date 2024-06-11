@@ -111,6 +111,15 @@ final class ForagePINTextFieldTests: XCTestCase {
         // Test BasisTheoryTextFieldWrapper background color = nil
         btTextFieldWrapper.backgroundColor = nil
         XCTAssertEqual(btTextFieldWrapper.backgroundColor, nil)
+        
+        // Test ForageTextFieldWrapper background color
+        let forageTextFieldWrapper = ForageTextFieldWrapper()
+        forageTextFieldWrapper.backgroundColor = .lightGray
+        XCTAssertEqual(forageTextFieldWrapper.backgroundColor, .lightGray)
+        
+        // Test ForageTextFieldWrapper background color = nil
+        forageTextFieldWrapper.backgroundColor = nil
+        XCTAssertEqual(forageTextFieldWrapper.backgroundColor, nil)
     }
 
     func test_CornerRadius() {
@@ -127,6 +136,11 @@ final class ForagePINTextFieldTests: XCTestCase {
         let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
         btTextFieldWrapper.cornerRadius = 10
         XCTAssertEqual(btTextFieldWrapper.cornerRadius, 10)
+        
+        // Test ForageTextFieldWrapper corner radius
+        let forageTextFieldWrapper = ForageTextFieldWrapper()
+        forageTextFieldWrapper.cornerRadius = 10
+        XCTAssertEqual(forageTextFieldWrapper.cornerRadius, 10)
     }
 
     func test_MasksToBounds() {
@@ -142,6 +156,10 @@ final class ForagePINTextFieldTests: XCTestCase {
         let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
         btTextFieldWrapper.masksToBounds = newVal
         XCTAssertEqual(btTextFieldWrapper.masksToBounds, newVal)
+        
+        let forageTextFieldWrapper = ForageTextFieldWrapper()
+        forageTextFieldWrapper.masksToBounds = newVal
+        XCTAssertEqual(forageTextFieldWrapper.masksToBounds, newVal)
     }
 
     func test_borderColor() {
@@ -159,6 +177,15 @@ final class ForagePINTextFieldTests: XCTestCase {
         // Test BasisTheoryTextFieldWrapper border color = .none
         btTextFieldWrapper.borderColor = .none
         XCTAssertEqual(btTextFieldWrapper.borderColor, nil)
+        
+        // Test ForageTextFieldWrapper border color
+        let forageTextFieldWrapper = ForageTextFieldWrapper()
+        forageTextFieldWrapper.borderColor = .blue
+        XCTAssertEqual(forageTextFieldWrapper.borderColor, .blue)
+        
+        // Test ForageTextFieldWrapper border color = .none
+        forageTextFieldWrapper.borderColor = .none
+        XCTAssertEqual(forageTextFieldWrapper.borderColor, nil)
     }
 
     func test_borderWidth() {
@@ -177,6 +204,11 @@ final class ForagePINTextFieldTests: XCTestCase {
         let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
         btTextFieldWrapper.borderWidth = 10
         XCTAssertEqual(btTextFieldWrapper.borderWidth, 10)
+        
+        // Test ForageTextFieldWrapper border width
+        let forageTextFieldWrapper = ForageTextFieldWrapper()
+        forageTextFieldWrapper.borderWidth = 10
+        XCTAssertEqual(forageTextFieldWrapper.borderWidth, 10)
     }
 
     func test_tintColor() {
@@ -203,6 +235,11 @@ final class ForagePINTextFieldTests: XCTestCase {
         let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
         btTextFieldWrapper.textAlignment = .center
         XCTAssertEqual(btTextFieldWrapper.textAlignment, .center)
+        
+        // Test ForageTextFieldWrapper text alignment
+        let forageTextFieldWrapper = ForageTextFieldWrapper()
+        forageTextFieldWrapper.textAlignment = .center
+        XCTAssertEqual(forageTextFieldWrapper.textAlignment, .center)
     }
 
     func test_padding() {
@@ -210,6 +247,11 @@ final class ForagePINTextFieldTests: XCTestCase {
         let vgsTextFieldWrapper = VGSTextFieldWrapper()
         vgsTextFieldWrapper.padding = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
         XCTAssertEqual(vgsTextFieldWrapper.padding, UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10))
+        
+        // Test ForageTextFieldWrapper padding
+        let forageTextFieldWrapper = ForageTextFieldWrapper()
+        forageTextFieldWrapper.padding = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+        XCTAssertEqual(forageTextFieldWrapper.padding, UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10))
     }
 
     func test_font() {
@@ -224,6 +266,12 @@ final class ForagePINTextFieldTests: XCTestCase {
         let btFont = UIFont.systemFont(ofSize: 20, weight: .bold)
         btTextFieldWrapper.font = btFont
         XCTAssertEqual(btTextFieldWrapper.font, btFont)
+        
+        // Test ForageTextFieldWrapper font
+        let forageTextFieldWrapper = ForageTextFieldWrapper()
+        let forageFont = UIFont.systemFont(ofSize: 20, weight: .bold)
+        forageTextFieldWrapper.font = btFont
+        XCTAssertEqual(forageTextFieldWrapper.font, btFont)
     }
 
     func test_textColor() {
@@ -237,6 +285,11 @@ final class ForagePINTextFieldTests: XCTestCase {
         let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
         btTextFieldWrapper.textColor = .blue
         XCTAssertEqual(btTextFieldWrapper.textColor, .blue)
+        
+        // Test ForageTextFieldWrapper text color
+        let forageTextFieldWrapper = ForageTextFieldWrapper()
+        forageTextFieldWrapper.textColor = .blue
+        XCTAssertEqual(forageTextFieldWrapper.textColor, .blue)
     }
 
     func test_placeholder() {
@@ -263,12 +316,21 @@ final class ForagePINTextFieldTests: XCTestCase {
 
         // assert that it does not cause crash and resets isComplete=false!
         XCTAssertEqual(btTextFieldWrapper.isComplete, false)
+        
+        // Forage
+        let forageTextFieldWrapper = ForageTextFieldWrapper()
+        forageTextFieldWrapper.clearText()
+        forageTextFieldWrapper.clearText()
+
+        // assert that it does not cause crash and resets isComplete=false!
+        XCTAssertEqual(forageTextFieldWrapper.isComplete, false)
     }
 
     // because we force clearText to run on the main thread!
     func test_clientCallsClearText_onBackgroundThread_doesNotCrash() {
         let vgsTextFieldWrapper = VGSTextFieldWrapper()
         let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
+        let forageTextFieldWrapper = ForageTextFieldWrapper()
 
         let expectation = XCTestExpectation(description: "should clear text without crashing")
 
@@ -278,10 +340,14 @@ final class ForagePINTextFieldTests: XCTestCase {
 
             btTextFieldWrapper.clearText()
             btTextFieldWrapper.clearText()
+            
+            forageTextFieldWrapper.clearText()
+            forageTextFieldWrapper.clearText()
 
             DispatchQueue.main.async {
                 XCTAssertFalse(vgsTextFieldWrapper.isComplete)
                 XCTAssertFalse(btTextFieldWrapper.isComplete)
+                XCTAssertFalse(forageTextFieldWrapper.isComplete)
 
                 expectation.fulfill()
             }
