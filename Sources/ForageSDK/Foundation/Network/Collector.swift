@@ -360,12 +360,6 @@ class ForageVaultWrapper: VaultCollector {
         let semaphore = DispatchSemaphore(value: 0)
         var pin = ""
         
-        let measurement = VaultProxyResponseMonitor.newMeasurement(vault: VaultType.forage, action: vaultAction)
-            .setPath(path)
-            .setMethod(.post)
-        
-        measurement.start()
-        
         DispatchQueue.main.async {
             guard let textElementValue = self.textElement.text else {
                 return completion(nil, CommonErrors.INCOMPLETE_PIN_ERROR)
@@ -408,6 +402,12 @@ class ForageVaultWrapper: VaultCollector {
         }
         request.httpBody = try! JSONSerialization.data(withJSONObject: body)
         
+        let measurement = VaultProxyResponseMonitor.newMeasurement(vault: VaultType.forage, action: vaultAction)
+            .setPath(path)
+            .setMethod(.post)
+        
+        measurement.start()
+        
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             self.handleResponse(response: response, data: data, error: error, measurement: measurement, completion: completion)
         }
@@ -424,7 +424,7 @@ class ForageVaultWrapper: VaultCollector {
 
         // If an error is explicitly returned from Rosetta, log the error and return
         if let error = error {
-            logger?.critical(
+            logger?.error(
                 "Rosetta proxy failed with an error",
                 error: error,
                 attributes: nil
