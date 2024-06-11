@@ -47,7 +47,7 @@ enum VaultType: String {
  Flag Types
  */
 enum FlagType: String {
-    case vaultPrimaryTrafficPercentage = "vault-primary-traffic-percentage"
+    case rosettaTrafficPercentage = "rosetta-traffic-percentage"
 }
 
 /**
@@ -119,23 +119,23 @@ class LDManager: LDManagerProtocol {
         logger = logger?.setPrefix(LAUNCH_DARKLY_PREFIX)
 
         guard let ld = ldClient else {
-            logger?.error("Defaulting to VGS. LDClient.get() was called before init()!",
+            logger?.error("Defaulting to Forage. LDClient.get() was called before init()!",
                           error: nil,
                           attributes: nil)
-            return .vgs
+            return .forage
         }
 
         // Fetch the vault percentage from LaunchDarkly
-        let vaultPercentage = ld.doubleVariationWrapper(
-            forKey: FlagType.vaultPrimaryTrafficPercentage.rawValue,
-            defaultValue: 0.0
+        let rosettaPercentage = ld.doubleVariationWrapper(
+            forKey: FlagType.rosettaTrafficPercentage.rawValue,
+            defaultValue: 100.0
         )
 
-        logger?.info("Evaluated \(FlagType.vaultPrimaryTrafficPercentage) = \(vaultPercentage)%",
+        logger?.info("Evaluated \(FlagType.rosettaTrafficPercentage) = \(rosettaPercentage)%",
                      attributes: nil)
 
         let randomNum = genRandomDouble()
-        let vaultType: VaultType = (randomNum < vaultPercentage) ? .basisTheory : .vgs
+        let vaultType: VaultType = (randomNum <= rosettaPercentage) ? .forage : .basisTheory
 
         logVaultType(vaultType)
 
