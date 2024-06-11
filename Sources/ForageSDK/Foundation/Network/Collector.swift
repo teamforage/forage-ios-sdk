@@ -337,7 +337,7 @@ class BasisTheoryWrapper: VaultCollector {
     }
 }
 
-// Wrapper class for Forage internlal vault
+// Wrapper class for Forage internal vault
 class ForageVaultWrapper: VaultCollector {
     var customHeaders: [String: String] = [:]
     let textElement: UITextField

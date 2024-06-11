@@ -37,7 +37,7 @@ final class LDManagerTests: XCTestCase {
         XCTAssertEqual(result, VaultType.forage)
     }
 
-    func testGetVaultType_VariationGreaterThanRandom_ShouldReturnBTVaultType() {
+    func testGetVaultType_VariationGreaterThanRandom_ShouldReturnForageVaultType() {
         let mockLDClient = MockLDClient(vaultPercentage: 2)
         let mockRandomGenerator = { 1.00 }
 
@@ -48,7 +48,7 @@ final class LDManagerTests: XCTestCase {
         XCTAssertEqual(result, VaultType.forage)
     }
 
-    func testGetVaultType_VariationLessThanRandom_ShouldReturnForageVaultType() {
+    func testGetVaultType_VariationLessThanRandom_ShouldReturnBTVaultType() {
         let mockLDClient = MockLDClient(vaultPercentage: 2)
         let mockRandomGenerator = { 3.00 }
 

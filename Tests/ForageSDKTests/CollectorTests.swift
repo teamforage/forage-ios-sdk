@@ -418,7 +418,7 @@ class VaultCollectorTests: XCTestCase {
         let config = ForageVaultConfig(environment: .sandbox)
         let logger = MockLogger()
         let forageWrapper = ForageVaultWrapper(textElement: textElement, forageVaultConfig: config, logger: logger)
-        let response = HTTPURLResponse(url: URL(string: "https://example.com")!, statusCode: 500, httpVersion: nil, headerFields: nil)
+        let response = HTTPURLResponse(url: URL(string: "https://example.com")!, statusCode: 200, httpVersion: nil, headerFields: nil)
 
         let mockData = """
         {
