@@ -303,6 +303,19 @@ class VaultCollectorTests: XCTestCase {
     
     // MARK: ForageWrapper
     
+    func testForageWrapper_VaultConfigBaseURL() {
+        var config = ForageVaultConfig(environment: .dev)
+        XCTAssertEqual(config.vaultBaseURL, "vault.dev.joinforage.app")
+        config = ForageVaultConfig(environment: .staging)
+        XCTAssertEqual(config.vaultBaseURL, "vault.staging.joinforage.app")
+        config = ForageVaultConfig(environment: .sandbox)
+        XCTAssertEqual(config.vaultBaseURL, "vault.sandbox.joinforage.app")
+        config = ForageVaultConfig(environment: .cert)
+        XCTAssertEqual(config.vaultBaseURL, "vault.cert.joinforage.app")
+        config = ForageVaultConfig(environment: .prod)
+        XCTAssertEqual(config.vaultBaseURL, "vault.joinforage.app")
+    }
+    
     func testForageWrapper_SetCustomHeaders_HeaderKey() {
         let textElement = UITextField()
         let forageWrapper = CollectorFactory.createForage(environment: Environment.sandbox, textElement: textElement)
@@ -321,6 +334,63 @@ class VaultCollectorTests: XCTestCase {
         let token = "123456,789012,345678"
         let resultToken = try forageWrapper.getPaymentMethodToken(paymentMethodToken: token)
         XCTAssertEqual(resultToken, "345678")
+    }
+    
+    func testForageWrapper_sendData_PaymentMethodTokenError() {
+        let textElement = UITextField()
+        let config = ForageVaultConfig(environment: .sandbox)
+        let logger = MockLogger()
+        let session = MockURLSession()
+        let forageWrapper = ForageVaultWrapper(textElement: textElement, forageVaultConfig: config, logger: logger, session: session)
+        
+        let expectation = self.expectation(description: "Completion handler called")
+        
+        forageWrapper.sendData(path: "/test/path", vaultAction: .balanceCheck, extraData: ["card_number_token": "1,2"]) { (result: MockDecodableModel?, error: ForageError?) in
+            XCTAssertNil(result)
+            XCTAssertEqual(error?.code, "unknown_server_error")
+            expectation.fulfill()
+        }
+        
+        waitForExpectations(timeout: 1)
+        
+        XCTAssertEqual(logger.lastCriticalMessage, "Failed to send data to Rosetta proxy. Rosetta token not found on card")
+        XCTAssertNil(session.lastRequest)
+    }
+    
+    func testForageWrapper_sendData_VaultProxyCallSuccess() {
+        let textElement = UITextField()
+        let config = ForageVaultConfig(environment: .sandbox)
+        let logger = MockLogger()
+        let session = MockURLSession()
+        let forageWrapper = ForageVaultWrapper(textElement: textElement, forageVaultConfig: config, logger: logger, session: session)
+        
+        forageWrapper.customHeaders = [
+            "Session-Token": "test session token",
+            "Merchant-Account": "mid/test-merchant-id"
+        ]
+        textElement.text = "1234"
+
+        let expectation = self.expectation(description: "Completion handler called")
+        
+        forageWrapper.sendData(path: "/test/path", vaultAction: .balanceCheck, extraData: ["card_number_token": "1,2,3"]) { (result: MockDecodableModel?, error: ForageError?) in
+            expectation.fulfill()
+        }
+        
+        waitForExpectations(timeout: 1, handler: nil)
+        
+        let url = URL(string: "https://vault.sandbox.joinforage.app/proxy/test/path")!
+        let expectedBody = ["card_number_token": "3", "pin": "1234"]
+        let actualBody = try! JSONSerialization.jsonObject(with: (session.lastRequest?.httpBody)!) as! [String: String]
+        
+        XCTAssertEqual(session.lastRequest?.url, url)
+        XCTAssertEqual(session.lastRequest?.httpMethod, "POST")
+        XCTAssertEqual(actualBody, expectedBody)
+        XCTAssertEqual(session.lastRequest?.allHTTPHeaderFields, [
+            "Content-Type": "application/json",
+            "Authorization": "test session token",
+            "Merchant-Account": "mid/test-merchant-id"
+        ])
+        
     }
 
     func testForageWrapper_handleResponse_rosettaError() {

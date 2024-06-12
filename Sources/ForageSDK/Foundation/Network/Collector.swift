@@ -344,12 +344,20 @@ class ForageVaultWrapper: VaultCollector {
     
     private let forageVaultConfig: ForageVaultConfig
     private let logger: ForageLogger?
+    private let session: URLSession
     
-    init(textElement: UITextField, forageVaultConfig: ForageVaultConfig, logger: ForageLogger? = DatadogLogger(ForageLoggerConfig(prefix: "Rosetta"))) {
+    init(
+        textElement: UITextField,
+        forageVaultConfig: ForageVaultConfig,
+        logger: ForageLogger? = DatadogLogger(ForageLoggerConfig(prefix: "Rosetta")),
+        // Taking session as an injected dependency to make this easier to test
+        session: URLSession = .shared
+    ) {
         self.textElement = textElement
         self.customHeaders = [:]
         self.forageVaultConfig = forageVaultConfig
         self.logger = logger
+        self.session = session
     }
     
     func setCustomHeaders(headers: [String : String], xKey: [String : String]) {
@@ -407,10 +415,9 @@ class ForageVaultWrapper: VaultCollector {
             request.httpBody = try! JSONSerialization.data(withJSONObject: body)
             
             // make the request to the vault proxy
-            let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            self.session.dataTask(with: request) { data, response, error in
                 self.handleResponse(response: response, data: data, error: error, measurement: measurement, completion: completion)
-            }
-            task.resume()
+            }.resume()
             
         }
     }
@@ -477,7 +484,12 @@ class ForageVaultWrapper: VaultCollector {
     
     func getPaymentMethodToken(paymentMethodToken: String) throws -> String {
         if paymentMethodToken.contains(tokenDelimiter) {
-            return paymentMethodToken.components(separatedBy: tokenDelimiter)[2]
+            let tokens = paymentMethodToken.components(separatedBy: tokenDelimiter)
+            if tokens.count > 2 {
+                return tokens[2]
+            } else {
+                throw ServiceError.parseError
+            }
         }
         throw ServiceError.parseError
     }
