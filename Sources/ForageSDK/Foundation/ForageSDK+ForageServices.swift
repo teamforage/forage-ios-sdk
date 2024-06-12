@@ -140,8 +140,8 @@ extension ForageSDK: ForageSDKService {
 
                 completion(.success(balanceResult))
             } catch {
-                ForageSDK.logger?.error("Balance check failed for PaymentMethod \(paymentMethodReference)", error: error, attributes: nil)
-
+                logErrorResponse("Balance check failed for PaymentMethod \(paymentMethodReference)", error: error, attributes: nil)
+                
                 responseMonitor.setForageErrorCode(error).end()
                 responseMonitor.logResult()
 
@@ -199,7 +199,7 @@ extension ForageSDK: ForageSDKService {
 
                 completion(.success(paymentResult))
             } catch {
-                ForageSDK.logger?.error("Capture failed for Payment \(paymentReference)", error: error, attributes: nil)
+                logErrorResponse("Capture failed for Payment \(paymentReference)", error: error, attributes: nil)
 
                 responseMonitor.setForageErrorCode(error).end()
                 responseMonitor.logResult()
@@ -245,7 +245,7 @@ extension ForageSDK: ForageSDKService {
 
                 completion(.success(()))
             } catch {
-                ForageSDK.logger?.error("deferPaymentCapture failed for Payment \(paymentReference)", error: error, attributes: nil)
+                logErrorResponse("deferPaymentCapture failed for Payment \(paymentReference)", error: error, attributes: nil)
 
                 completion(.failure(error))
             }
@@ -278,5 +278,15 @@ extension ForageSDK: ForageSDKService {
             attributes: nil
         )
         return false
+    }
+    
+    /// Determine if we should log an error or a warning
+    private func logErrorResponse(_ message: String, error: Error?, attributes: [String: Encodable]?) {
+        let statusCode = (error as? ForageError)?.httpStatusCode ?? 500
+        if (statusCode >= 400 && statusCode < 500) {
+            ForageSDK.logger?.warn(message, error: error, attributes: nil)
+        } else {
+            ForageSDK.logger?.error(message, error: error, attributes: nil)
+        }
     }
 }
