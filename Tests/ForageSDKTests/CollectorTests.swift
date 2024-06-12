@@ -316,6 +316,12 @@ class VaultCollectorTests: XCTestCase {
         XCTAssertEqual(config.vaultBaseURL, "vault.joinforage.app")
     }
     
+    func testForageWrapper_GetVaultType() {
+        let forageWrapper = CollectorFactory.createForage(environment: .sandbox, textElement: UITextField())
+        let vaultType = forageWrapper.getVaultType()
+        XCTAssertEqual(vaultType, VaultType.forage)
+    }
+    
     func testForageWrapper_SetCustomHeaders_HeaderKey() {
         let textElement = UITextField()
         let forageWrapper = CollectorFactory.createForage(environment: Environment.sandbox, textElement: textElement)
@@ -327,13 +333,29 @@ class VaultCollectorTests: XCTestCase {
         XCTAssertEqual(forageWrapper.customHeaders["HeaderKey"], "HeaderValue")
     }
 
-    func testForageWrapper_GetPaymentMethodToken() throws {
+    func testForageWrapper_GetPaymentMethodToken_Success() throws {
         let textElement = UITextField()
         let forageWrapper = CollectorFactory.createForage(environment: Environment.sandbox, textElement: textElement)
 
         let token = "123456,789012,345678"
         let resultToken = try forageWrapper.getPaymentMethodToken(paymentMethodToken: token)
         XCTAssertEqual(resultToken, "345678")
+    }
+    
+    func testForageWrapper_GetPaymentMethodToken_NoDelimiterError() throws {
+        let textElement = UITextField()
+        let forageWrapper = CollectorFactory.createForage(environment: Environment.sandbox, textElement: textElement)
+
+        let token = "123456"
+        XCTAssertThrowsError(try forageWrapper.getPaymentMethodToken(paymentMethodToken: token))
+    }
+    
+    func testForageWrapper_GetPaymentMethodToken_NoRosettaError() throws {
+        let textElement = UITextField()
+        let forageWrapper = CollectorFactory.createForage(environment: Environment.sandbox, textElement: textElement)
+
+        let token = "123456,789012"
+        XCTAssertThrowsError(try forageWrapper.getPaymentMethodToken(paymentMethodToken: token))
     }
     
     func testForageWrapper_sendData_PaymentMethodTokenError() {
