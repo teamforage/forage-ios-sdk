@@ -335,7 +335,7 @@ class VaultCollectorTests: XCTestCase {
         forageWrapper.handleResponse(response: response, data: nil, error: testRosettaError, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(result)
             XCTAssertEqual(error, CommonErrors.UNKNOWN_SERVER_ERROR)
-            XCTAssertEqual(logger.lastCriticalMessage, "Rosetta proxy failed with an error")
+            XCTAssertEqual(logger.lastErrorMsg, "Rosetta proxy failed with an error")
         }
     }
 
