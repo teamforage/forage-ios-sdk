@@ -394,22 +394,24 @@ class ForageVaultWrapper: VaultCollector {
             .setPath(path)
             .setMethod(.post)
         
-        // read the pin value from the main queue and add it to the request body
+        measurement.start()
+        
+        // making sure this runs on the main queue since we're reading from a UI element
         DispatchQueue.main.async {
+            
+            // grab the pin value entered and add it to the request body
             guard let textElementValue = self.textElement.text else {
                 return completion(nil, CommonErrors.INCOMPLETE_PIN_ERROR)
             }
             body["pin"] = textElementValue
             request.httpBody = try! JSONSerialization.data(withJSONObject: body)
             
-            // go to a background queue for vault proxy request
-            DispatchQueue.global().async {
-                let task = URLSession.shared.dataTask(with: request) { data, response, error in
-                    self.handleResponse(response: response, data: data, error: error, measurement: measurement, completion: completion)
-                }
-                measurement.start()
-                task.resume()
+            // make the request to the vault proxy
+            let task = URLSession.shared.dataTask(with: request) { data, response, error in
+                self.handleResponse(response: response, data: data, error: error, measurement: measurement, completion: completion)
             }
+            task.resume()
+            
         }
     }
     
