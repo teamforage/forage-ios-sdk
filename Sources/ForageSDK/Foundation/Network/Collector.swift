@@ -357,22 +357,9 @@ class ForageVaultWrapper: VaultCollector {
     }
     
     func sendData<T: Decodable>(path: String, vaultAction: VaultAction, extraData: [String : Any], completion: @escaping (T?, ForageError?) -> Void) {
-        let semaphore = DispatchSemaphore(value: 0)
-        var pin = ""
-        
-        DispatchQueue.main.async {
-            guard let textElementValue = self.textElement.text else {
-                return completion(nil, CommonErrors.INCOMPLETE_PIN_ERROR)
-            }
-            pin = textElementValue
-            semaphore.signal()
-        }
+        var body = [String: String]()
 
-        // waiting for the value of the text field to be read from the main queue and saved in `pin`
-        semaphore.wait()
-
-        var body: [String: String] = ["pin": pin]
-
+        // grab the payment method token and add it to the request body
         for (key, value) in extraData {
             if key == tokenKey, let paymentMethodToken = value as? String {
                 do {
@@ -389,6 +376,7 @@ class ForageVaultWrapper: VaultCollector {
             }
         }
         
+        // build the request to the vault proxy
         let url = URL(string: "https://\(forageVaultConfig.vaultBaseURL)/proxy\(path)")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -400,19 +388,29 @@ class ForageVaultWrapper: VaultCollector {
                 request.setValue(header.value, forHTTPHeaderField: header.key)
             }
         }
-        request.httpBody = try! JSONSerialization.data(withJSONObject: body)
         
+        // measure the response time
         let measurement = VaultProxyResponseMonitor.newMeasurement(vault: VaultType.forage, action: vaultAction)
             .setPath(path)
             .setMethod(.post)
         
-        measurement.start()
-        
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            self.handleResponse(response: response, data: data, error: error, measurement: measurement, completion: completion)
+        // read the pin value from the main queue and add it to the request body
+        DispatchQueue.main.async {
+            guard let textElementValue = self.textElement.text else {
+                return completion(nil, CommonErrors.INCOMPLETE_PIN_ERROR)
+            }
+            body["pin"] = textElementValue
+            request.httpBody = try! JSONSerialization.data(withJSONObject: body)
+            
+            // go to a background queue for vault proxy request
+            DispatchQueue.global().async {
+                let task = URLSession.shared.dataTask(with: request) { data, response, error in
+                    self.handleResponse(response: response, data: data, error: error, measurement: measurement, completion: completion)
+                }
+                measurement.start()
+                task.resume()
+            }
         }
-        
-        task.resume()
     }
     
     func handleResponse<T: Decodable>(response: URLResponse?, data: Data?, error: Error?, measurement: NetworkMonitor, completion: (T?, ForageError?) -> Void) {
