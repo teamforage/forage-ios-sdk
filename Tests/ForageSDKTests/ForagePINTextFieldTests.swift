@@ -306,24 +306,30 @@ final class ForagePINTextFieldTests: XCTestCase {
         vgsTextFieldWrapper.clearText()
         vgsTextFieldWrapper.clearText()
 
-        // assert that it does not cause crash and resets isComplete=false!
+        // assert that it does not cause crash and resets status fields!
         XCTAssertEqual(vgsTextFieldWrapper.isComplete, false)
+        XCTAssertEqual(vgsTextFieldWrapper.isEmpty, true)
+        XCTAssertEqual(vgsTextFieldWrapper.isValid, false)
 
         // Basis Theory
         let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
         btTextFieldWrapper.clearText()
         btTextFieldWrapper.clearText()
 
-        // assert that it does not cause crash and resets isComplete=false!
+        // assert that it does not cause crash and resets status fields!
         XCTAssertEqual(btTextFieldWrapper.isComplete, false)
+        XCTAssertEqual(btTextFieldWrapper.isEmpty, true)
+        XCTAssertEqual(btTextFieldWrapper.isValid, false)
         
         // Forage
         let forageTextFieldWrapper = ForageTextFieldWrapper()
         forageTextFieldWrapper.clearText()
         forageTextFieldWrapper.clearText()
 
-        // assert that it does not cause crash and resets isComplete=false!
+        // assert that it does not cause crash and resets status fields!
         XCTAssertEqual(forageTextFieldWrapper.isComplete, false)
+        XCTAssertEqual(forageTextFieldWrapper.isEmpty, true)
+        XCTAssertEqual(forageTextFieldWrapper.isValid, false)
     }
 
     // because we force clearText to run on the main thread!
@@ -354,6 +360,30 @@ final class ForagePINTextFieldTests: XCTestCase {
         }
 
         wait(for: [expectation], timeout: 3.0)
+    }
+    
+    func test_RosettaPINTextField_rejectsNonNumbers() {
+        let forageTextFieldWrapper = ForageTextFieldWrapper()
+        let result = forageTextFieldWrapper.textField(UITextField(), shouldChangeCharactersIn: NSRange(), replacementString: "a")
+        XCTAssertEqual(result, false)
+    }
+    
+    func test_RosettaPINTextField_allowsNumbers() {
+        let forageTextFieldWrapper = ForageTextFieldWrapper()
+        let result = forageTextFieldWrapper.textField(UITextField(), shouldChangeCharactersIn: NSRange(), replacementString: "1")
+        XCTAssertEqual(result, true)
+    }
+    
+    func test_RosettaPINTextField_rejectsOverFourDigits() {
+        let forageTextFieldWrapper = ForageTextFieldWrapper()
+        let result = forageTextFieldWrapper.textField(UITextField(), shouldChangeCharactersIn: NSRange(), replacementString: "12345")
+        XCTAssertEqual(result, false)
+    }
+    
+    func test_RosettaPINTextField_allowsFourDigits() {
+        let forageTextFieldWrapper = ForageTextFieldWrapper()
+        let result = forageTextFieldWrapper.textField(UITextField(), shouldChangeCharactersIn: NSRange(), replacementString: "1234")
+        XCTAssertEqual(result, true)
     }
 }
 
