@@ -344,14 +344,14 @@ class ForageVaultWrapper: VaultCollector {
     
     private let forageVaultConfig: ForageVaultConfig
     private let logger: ForageLogger?
-    private let session: URLSession
+    private let session: URLSessionProtocol
     
     init(
         textElement: UITextField,
         forageVaultConfig: ForageVaultConfig,
         logger: ForageLogger? = DatadogLogger(ForageLoggerConfig(prefix: "Rosetta")),
         // Taking session as an injected dependency to make this easier to test
-        session: URLSession = .shared
+        session: URLSessionProtocol = URLSession.shared
     ) {
         self.textElement = textElement
         self.customHeaders = [:]

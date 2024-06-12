@@ -340,7 +340,7 @@ class VaultCollectorTests: XCTestCase {
         let textElement = UITextField()
         let config = ForageVaultConfig(environment: .sandbox)
         let logger = MockLogger()
-        let session = MockURLSession()
+        let session = URLSessionMock()
         let forageWrapper = ForageVaultWrapper(textElement: textElement, forageVaultConfig: config, logger: logger, session: session)
         
         let expectation = self.expectation(description: "Completion handler called")
@@ -361,7 +361,7 @@ class VaultCollectorTests: XCTestCase {
         let textElement = UITextField()
         let config = ForageVaultConfig(environment: .sandbox)
         let logger = MockLogger()
-        let session = MockURLSession()
+        let session = URLSessionMock()
         let forageWrapper = ForageVaultWrapper(textElement: textElement, forageVaultConfig: config, logger: logger, session: session)
         
         forageWrapper.customHeaders = [
