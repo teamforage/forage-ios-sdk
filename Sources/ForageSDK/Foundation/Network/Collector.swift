@@ -338,7 +338,7 @@ class BasisTheoryWrapper: VaultCollector {
 }
 
 // Wrapper class for Forage internal vault
-class ForageVaultWrapper: VaultCollector {
+class RosettaPINSubmitter: VaultCollector {
     var customHeaders: [String: String] = [:]
     let textElement: UITextField
     
@@ -589,7 +589,7 @@ enum CollectorFactory {
         return BasisTheoryWrapper(textElement: textElement, basisTheoryconfig: config)
     }
     
-    static func createForage(environment: Environment, textElement: UITextField) -> ForageVaultWrapper {
-        return ForageVaultWrapper(textElement: textElement, forageVaultConfig: ForageVaultConfig(environment: environment))
+    static func createForage(environment: Environment, textElement: UITextField) -> RosettaPINSubmitter {
+        return RosettaPINSubmitter(textElement: textElement, forageVaultConfig: ForageVaultConfig(environment: environment))
     }
 }

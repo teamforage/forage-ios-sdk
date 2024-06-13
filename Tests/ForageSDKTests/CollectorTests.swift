@@ -363,11 +363,11 @@ class VaultCollectorTests: XCTestCase {
         let config = ForageVaultConfig(environment: .sandbox)
         let logger = MockLogger()
         let session = URLSessionMock()
-        let forageWrapper = ForageVaultWrapper(textElement: textElement, forageVaultConfig: config, logger: logger, session: session)
+        let rosettaSubmitter = RosettaPINSubmitter(textElement: textElement, forageVaultConfig: config, logger: logger, session: session)
         
         let expectation = self.expectation(description: "Completion handler called")
         
-        forageWrapper.sendData(path: "/test/path", vaultAction: .balanceCheck, extraData: ["card_number_token": "1,2"]) { (result: MockDecodableModel?, error: ForageError?) in
+        rosettaSubmitter.sendData(path: "/test/path", vaultAction: .balanceCheck, extraData: ["card_number_token": "1,2"]) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(result)
             XCTAssertEqual(error?.code, "unknown_server_error")
             expectation.fulfill()
@@ -384,9 +384,9 @@ class VaultCollectorTests: XCTestCase {
         let config = ForageVaultConfig(environment: .sandbox)
         let logger = MockLogger()
         let session = URLSessionMock()
-        let forageWrapper = ForageVaultWrapper(textElement: textElement, forageVaultConfig: config, logger: logger, session: session)
+        let rosettaSubmitter = RosettaPINSubmitter(textElement: textElement, forageVaultConfig: config, logger: logger, session: session)
         
-        forageWrapper.customHeaders = [
+        rosettaSubmitter.customHeaders = [
             "Session-Token": "test session token",
             "Merchant-Account": "mid/test-merchant-id"
         ]
@@ -394,7 +394,7 @@ class VaultCollectorTests: XCTestCase {
 
         let expectation = self.expectation(description: "Completion handler called")
         
-        forageWrapper.sendData(path: "/test/path", vaultAction: .balanceCheck, extraData: ["card_number_token": "1,2,3"]) { (result: MockDecodableModel?, error: ForageError?) in
+        rosettaSubmitter.sendData(path: "/test/path", vaultAction: .balanceCheck, extraData: ["card_number_token": "1,2,3"]) { (result: MockDecodableModel?, error: ForageError?) in
             expectation.fulfill()
         }
         
@@ -419,12 +419,12 @@ class VaultCollectorTests: XCTestCase {
         let textElement = UITextField()
         let config = ForageVaultConfig(environment: .sandbox)
         let logger = MockLogger()
-        let forageWrapper = ForageVaultWrapper(textElement: textElement, forageVaultConfig: config, logger: logger)
+        let rosettaSubmitter = RosettaPINSubmitter(textElement: textElement, forageVaultConfig: config, logger: logger)
         let response = HTTPURLResponse(url: URL(string: "https://example.com")!, statusCode: 500, httpVersion: nil, headerFields: nil)
 
         let testRosettaError = CommonErrors.UNKNOWN_SERVER_ERROR
 
-        forageWrapper.handleResponse(response: response, data: nil, error: testRosettaError, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+        rosettaSubmitter.handleResponse(response: response, data: nil, error: testRosettaError, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(result)
             XCTAssertEqual(error, CommonErrors.UNKNOWN_SERVER_ERROR)
             XCTAssertEqual(logger.lastErrorMsg, "Rosetta proxy failed with an error")
@@ -435,10 +435,10 @@ class VaultCollectorTests: XCTestCase {
         let textElement = UITextField()
         let config = ForageVaultConfig(environment: .sandbox)
         let logger = MockLogger()
-        let forageWrapper = ForageVaultWrapper(textElement: textElement, forageVaultConfig: config, logger: logger)
+        let rosettaSubmitter = RosettaPINSubmitter(textElement: textElement, forageVaultConfig: config, logger: logger)
         let response = HTTPURLResponse(url: URL(string: "https://example.com")!, statusCode: 500, httpVersion: nil, headerFields: nil)
 
-        forageWrapper.handleResponse(response: response, data: nil, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+        rosettaSubmitter.handleResponse(response: response, data: nil, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(result)
             XCTAssertEqual(error, CommonErrors.UNKNOWN_SERVER_ERROR)
             XCTAssertEqual(logger.lastCriticalMessage, "Rosetta failed to respond with a data object")
@@ -449,12 +449,12 @@ class VaultCollectorTests: XCTestCase {
         let textElement = UITextField()
         let config = ForageVaultConfig(environment: .sandbox)
         let logger = MockLogger()
-        let forageWrapper = ForageVaultWrapper(textElement: textElement, forageVaultConfig: config, logger: logger)
+        let rosettaSubmitter = RosettaPINSubmitter(textElement: textElement, forageVaultConfig: config, logger: logger)
         let response = HTTPURLResponse(url: URL(string: "https://example.com")!, statusCode: 204, httpVersion: nil, headerFields: nil)
 
         let mockData = "".data(using: .utf8)!
 
-        forageWrapper.handleResponse(response: response, data: mockData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+        rosettaSubmitter.handleResponse(response: response, data: mockData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(result)
             XCTAssertNil(error)
         }
@@ -464,7 +464,7 @@ class VaultCollectorTests: XCTestCase {
         let textElement = UITextField()
         let config = ForageVaultConfig(environment: .sandbox)
         let logger = MockLogger()
-        let forageWrapper = ForageVaultWrapper(textElement: textElement, forageVaultConfig: config, logger: logger)
+        let rosettaSubmitter = RosettaPINSubmitter(textElement: textElement, forageVaultConfig: config, logger: logger)
         let response = HTTPURLResponse(url: URL(string: "https://example.com")!, statusCode: 429, httpVersion: nil, headerFields: nil)
 
         let mockData = """
@@ -479,7 +479,7 @@ class VaultCollectorTests: XCTestCase {
         }
         """.data(using: .utf8)!
 
-        forageWrapper.handleResponse(response: response, data: mockData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+        rosettaSubmitter.handleResponse(response: response, data: mockData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(result)
             XCTAssertEqual(error, THROTTLE_ERROR)
         }
@@ -489,7 +489,7 @@ class VaultCollectorTests: XCTestCase {
         let textElement = UITextField()
         let config = ForageVaultConfig(environment: .sandbox)
         let logger = MockLogger()
-        let forageWrapper = ForageVaultWrapper(textElement: textElement, forageVaultConfig: config, logger: logger)
+        let rosettaSubmitter = RosettaPINSubmitter(textElement: textElement, forageVaultConfig: config, logger: logger)
         let response = HTTPURLResponse(url: URL(string: "https://example.com")!, statusCode: 500, httpVersion: nil, headerFields: nil)
 
         let mockData = """
@@ -498,7 +498,7 @@ class VaultCollectorTests: XCTestCase {
         }
         """.data(using: .utf8)!
         
-        forageWrapper.handleResponse(response: response, data: mockData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+        rosettaSubmitter.handleResponse(response: response, data: mockData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(result)
             XCTAssertEqual(error, CommonErrors.UNKNOWN_SERVER_ERROR)
             XCTAssertEqual(logger.lastCriticalMessage, "Failed to decode Rosetta response data.")
@@ -509,7 +509,7 @@ class VaultCollectorTests: XCTestCase {
         let textElement = UITextField()
         let config = ForageVaultConfig(environment: .sandbox)
         let logger = MockLogger()
-        let forageWrapper = ForageVaultWrapper(textElement: textElement, forageVaultConfig: config, logger: logger)
+        let rosettaSubmitter = RosettaPINSubmitter(textElement: textElement, forageVaultConfig: config, logger: logger)
         let response = HTTPURLResponse(url: URL(string: "https://example.com")!, statusCode: 200, httpVersion: nil, headerFields: nil)
 
         let mockData = """
@@ -518,7 +518,7 @@ class VaultCollectorTests: XCTestCase {
         }
         """.data(using: .utf8)!
         
-        forageWrapper.handleResponse(response: response, data: mockData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+        rosettaSubmitter.handleResponse(response: response, data: mockData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(error)
             XCTAssertEqual(result, MockDecodableModel(id: "12345"))
         }
