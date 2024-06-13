@@ -362,6 +362,36 @@ final class ForagePINTextFieldTests: XCTestCase {
         wait(for: [expectation], timeout: 3.0)
     }
     
+    func test_RosettaPINTextField_isComplete() {
+        let rosettaPINTextField = RosettaPINTextField()
+        let textField = UITextField()
+        
+        textField.text = "1234"
+        rosettaPINTextField.textFieldDidChange(textField)
+        XCTAssertTrue(rosettaPINTextField.isComplete)
+        
+        textField.text = "123"
+        rosettaPINTextField.textFieldDidChange(textField)
+        XCTAssertFalse(rosettaPINTextField.isComplete)
+    }
+    
+    func test_RosettaPINTextField_isValid() {
+        let rosettaPINTextField = RosettaPINTextField()
+        let textField = UITextField()
+        
+        textField.text = "1234"
+        rosettaPINTextField.textFieldDidChange(textField)
+        XCTAssertTrue(rosettaPINTextField.isValid)
+        
+        textField.text = "123"
+        rosettaPINTextField.textFieldDidChange(textField)
+        XCTAssertFalse(rosettaPINTextField.isValid)
+        
+        textField.text = "12ab"
+        rosettaPINTextField.textFieldDidChange(textField)
+        XCTAssertFalse(rosettaPINTextField.isValid)
+    }
+    
     func test_RosettaPINTextField_rejectsNonNumbers() {
         let rosettaPINTextField = RosettaPINTextField()
         let result = rosettaPINTextField.textField(UITextField(), shouldChangeCharactersIn: NSRange(), replacementString: "a")
