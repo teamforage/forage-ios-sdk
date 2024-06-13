@@ -29,13 +29,13 @@ class CreatePaymentView: UIView {
         view.backgroundColor = UIColor.white
         return view
     }()
-    
+
     private let snapButtonContainer: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
-    
+
     private let ebtCashButtonContainer: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -83,7 +83,7 @@ class CreatePaymentView: UIView {
             )
         }
     )
-    
+
     private lazy var addSnapPaymentRefButton: UIButton = .createPaymentButton(
         title: "Set SNAP Ref",
         accessibilityIdentifier: "bt_set_snap_payment_ref",
@@ -109,7 +109,7 @@ class CreatePaymentView: UIView {
             )
         }
     )
-    
+
     private lazy var addEbtCashPaymentRefButton: UIButton = .createPaymentButton(
         title: "Set EBT Cash Ref",
         accessibilityIdentifier: "bt_set_cash_payment_ref",
@@ -205,13 +205,13 @@ class CreatePaymentView: UIView {
     }
 
     // MARK: Private Methods
-    
+
     private func setPaymentRef(fundingType: FundingType, amountTextField: UITextField, completion: @escaping () -> Void) {
         let paymentReference = amountTextField.text ?? "Unknown value"
         DispatchQueue.main.async {
             self.paymentIdentifierLabel.text = "paymentIdentifier=\(paymentReference)"
             ClientSharedData.shared.paymentReference[fundingType] = paymentReference
-            
+
             completion()
             self.layoutIfNeeded()
             self.layoutSubviews()
@@ -306,7 +306,7 @@ class CreatePaymentView: UIView {
         let buttonSpacing: CGFloat = 10
         let collectButtonWidthMultiplier: CGFloat = 0.50 // 50%
         let captureButtonWidthMultiplier: CGFloat = 0.50 // 50%
-        
+
         contentView.anchor(
             top: topAnchor,
             leading: leadingAnchor,
@@ -333,7 +333,7 @@ class CreatePaymentView: UIView {
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 12, right: 24),
             size: .init(width: 0, height: 42)
         )
-        
+
         snapButtonContainer.anchor(
             top: snapTextField.bottomAnchor,
             leading: contentView.leadingAnchor,
@@ -369,7 +369,7 @@ class CreatePaymentView: UIView {
             padding: UIEdgeInsets(top: 24, left: 24, bottom: 12, right: 24),
             size: .init(width: 0, height: 42)
         )
-        
+
         ebtCashButtonContainer.anchor(
             top: ebtCashTextField.bottomAnchor,
             leading: contentView.leadingAnchor,
