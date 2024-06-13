@@ -486,7 +486,12 @@ class RosettaPINSubmitter: VaultCollector {
         if paymentMethodToken.contains(tokenDelimiter) {
             let tokens = paymentMethodToken.components(separatedBy: tokenDelimiter)
             if tokens.count > 2 {
-                return tokens[2]
+                let rosettaToken = tokens[2]
+                if rosettaToken.isEmpty {
+                    throw ServiceError.parseError
+                } else {
+                    return rosettaToken
+                }
             } else {
                 throw ServiceError.parseError
             }

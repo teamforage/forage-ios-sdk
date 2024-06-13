@@ -303,7 +303,7 @@ class VaultCollectorTests: XCTestCase {
     
     // MARK: ForageWrapper
     
-    func testForageWrapper_VaultConfigBaseURL() {
+    func testRosettaSubmitter_VaultConfigBaseURL() {
         var config = ForageVaultConfig(environment: .dev)
         XCTAssertEqual(config.vaultBaseURL, "vault.dev.joinforage.app")
         config = ForageVaultConfig(environment: .staging)
@@ -316,49 +316,57 @@ class VaultCollectorTests: XCTestCase {
         XCTAssertEqual(config.vaultBaseURL, "vault.joinforage.app")
     }
     
-    func testForageWrapper_GetVaultType() {
-        let forageWrapper = CollectorFactory.createRosettaPINSubmitter(environment: .sandbox, textElement: UITextField())
-        let vaultType = forageWrapper.getVaultType()
+    func testRosettaSubmitter_GetVaultType() {
+        let rosettaSubmitter = CollectorFactory.createRosettaPINSubmitter(environment: .sandbox, textElement: UITextField())
+        let vaultType = rosettaSubmitter.getVaultType()
         XCTAssertEqual(vaultType, VaultType.forage)
     }
     
-    func testForageWrapper_SetCustomHeaders_HeaderKey() {
+    func testRosettaSubmitter_SetCustomHeaders_HeaderKey() {
         let textElement = UITextField()
-        let forageWrapper = CollectorFactory.createRosettaPINSubmitter(environment: Environment.sandbox, textElement: textElement)
+        let rosettaSubmitter = CollectorFactory.createRosettaPINSubmitter(environment: Environment.sandbox, textElement: textElement)
 
         let headers = ["HeaderKey": "HeaderValue"]
         let xKey = [String: String]()
-        forageWrapper.setCustomHeaders(headers: headers, xKey: xKey)
+        rosettaSubmitter.setCustomHeaders(headers: headers, xKey: xKey)
 
-        XCTAssertEqual(forageWrapper.customHeaders["HeaderKey"], "HeaderValue")
+        XCTAssertEqual(rosettaSubmitter.customHeaders["HeaderKey"], "HeaderValue")
     }
 
-    func testForageWrapper_GetPaymentMethodToken_Success() throws {
+    func testRosettaSubmitter_GetPaymentMethodToken_Success() throws {
         let textElement = UITextField()
-        let forageWrapper = CollectorFactory.createRosettaPINSubmitter(environment: Environment.sandbox, textElement: textElement)
+        let rosettaSubmitter = CollectorFactory.createRosettaPINSubmitter(environment: Environment.sandbox, textElement: textElement)
 
         let token = "123456,789012,345678"
-        let resultToken = try forageWrapper.getPaymentMethodToken(paymentMethodToken: token)
+        let resultToken = try rosettaSubmitter.getPaymentMethodToken(paymentMethodToken: token)
         XCTAssertEqual(resultToken, "345678")
     }
     
-    func testForageWrapper_GetPaymentMethodToken_NoDelimiterError() throws {
+    func testRosettaSubmitter_GetPaymentMethodToken_NoDelimiterError() throws {
         let textElement = UITextField()
-        let forageWrapper = CollectorFactory.createRosettaPINSubmitter(environment: Environment.sandbox, textElement: textElement)
+        let rosettaSubmitter = CollectorFactory.createRosettaPINSubmitter(environment: Environment.sandbox, textElement: textElement)
 
         let token = "123456"
-        XCTAssertThrowsError(try forageWrapper.getPaymentMethodToken(paymentMethodToken: token))
+        XCTAssertThrowsError(try rosettaSubmitter.getPaymentMethodToken(paymentMethodToken: token))
     }
     
-    func testForageWrapper_GetPaymentMethodToken_NoRosettaError() throws {
+    func testRosettaSubmitter_GetPaymentMethodToken_NoRosettaError() throws {
         let textElement = UITextField()
-        let forageWrapper = CollectorFactory.createRosettaPINSubmitter(environment: Environment.sandbox, textElement: textElement)
+        let rosettaSubmitter = CollectorFactory.createRosettaPINSubmitter(environment: Environment.sandbox, textElement: textElement)
 
         let token = "123456,789012"
-        XCTAssertThrowsError(try forageWrapper.getPaymentMethodToken(paymentMethodToken: token))
+        XCTAssertThrowsError(try rosettaSubmitter.getPaymentMethodToken(paymentMethodToken: token))
     }
     
-    func testForageWrapper_sendData_PaymentMethodTokenError() {
+    func testRosettaSubmitter_GetPaymentMethodToken_EmptyRosettaError() throws {
+        let textElement = UITextField()
+        let rosettaSubmitter = CollectorFactory.createRosettaPINSubmitter(environment: Environment.sandbox, textElement: textElement)
+
+        let token = "123456,789012,"
+        XCTAssertThrowsError(try rosettaSubmitter.getPaymentMethodToken(paymentMethodToken: token))
+    }
+    
+    func testRosettaSubmitter_sendData_PaymentMethodTokenError() {
         let textElement = UITextField()
         let config = ForageVaultConfig(environment: .sandbox)
         let logger = MockLogger()
@@ -379,7 +387,7 @@ class VaultCollectorTests: XCTestCase {
         XCTAssertNil(session.lastRequest)
     }
     
-    func testForageWrapper_sendData_VaultProxyCallSuccess() {
+    func testRosettaSubmitter_sendData_VaultProxyCallSuccess() {
         let textElement = UITextField()
         let config = ForageVaultConfig(environment: .sandbox)
         let logger = MockLogger()
@@ -415,7 +423,7 @@ class VaultCollectorTests: XCTestCase {
         
     }
 
-    func testForageWrapper_handleResponse_rosettaError() {
+    func testRosettaSubmitter_handleResponse_rosettaError() {
         let textElement = UITextField()
         let config = ForageVaultConfig(environment: .sandbox)
         let logger = MockLogger()
@@ -431,7 +439,7 @@ class VaultCollectorTests: XCTestCase {
         }
     }
 
-    func testForageWrapper_handleResponse_noData() {
+    func testRosettaSubmitter_handleResponse_noData() {
         let textElement = UITextField()
         let config = ForageVaultConfig(environment: .sandbox)
         let logger = MockLogger()
@@ -445,7 +453,7 @@ class VaultCollectorTests: XCTestCase {
         }
     }
 
-    func testForageWrapper_handleResponse_204Success() {
+    func testRosettaSubmitter_handleResponse_204Success() {
         let textElement = UITextField()
         let config = ForageVaultConfig(environment: .sandbox)
         let logger = MockLogger()
@@ -460,7 +468,7 @@ class VaultCollectorTests: XCTestCase {
         }
     }
 
-    func testForageWrapper_handleResponse_429Error() {
+    func testRosettaSubmitter_handleResponse_429Error() {
         let textElement = UITextField()
         let config = ForageVaultConfig(environment: .sandbox)
         let logger = MockLogger()
@@ -485,7 +493,7 @@ class VaultCollectorTests: XCTestCase {
         }
     }
 
-    func testForageWrapper_handleResponse_invalidData() {
+    func testRosettaSubmitter_handleResponse_invalidData() {
         let textElement = UITextField()
         let config = ForageVaultConfig(environment: .sandbox)
         let logger = MockLogger()
@@ -505,7 +513,7 @@ class VaultCollectorTests: XCTestCase {
         }
     }
 
-    func testForageWrapper_handleResponse_validData() {
+    func testRosettaSubmitter_handleResponse_validData() {
         let textElement = UITextField()
         let config = ForageVaultConfig(environment: .sandbox)
         let logger = MockLogger()
