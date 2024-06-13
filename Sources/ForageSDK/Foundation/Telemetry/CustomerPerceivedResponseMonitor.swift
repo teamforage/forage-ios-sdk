@@ -64,7 +64,8 @@ final class CustomerPerceivedResponseMonitor: ResponseMonitor {
     ) {
         guard
             let responseTimeMs = responseAttributes.responseTimeMs,
-            let eventOutcome = eventOutcome
+            let eventOutcome = eventOutcome,
+            let httpStatus = responseAttributes.code
         else {
             metricsLogger?.error("Incomplete or missing response attributes. Could not report metric event.", error: nil, attributes: nil)
             return
@@ -81,6 +82,7 @@ final class CustomerPerceivedResponseMonitor: ResponseMonitor {
                 .eventName: eventName.rawValue,
                 .eventOutcome: eventOutcome.rawValue,
                 .forageErrorCode: responseAttributes.forageErrorCode,
+                .httpStatus: httpStatus,
                 .logType: ForageLogKind.metric.rawValue,
                 .responseTimeMs: responseTimeMs,
                 .vaultType: vaultType.rawValue,
