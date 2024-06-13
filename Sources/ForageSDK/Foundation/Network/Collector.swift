@@ -411,6 +411,13 @@ class RosettaPINSubmitter: VaultCollector {
             guard let textElementValue = self.textElement.text else {
                 return completion(nil, CommonErrors.INCOMPLETE_PIN_ERROR)
             }
+
+            // validate the PIN entered, return error early if PIN is invalid
+            let isValidPIN = self.validate(pin: textElementValue)
+            if !isValidPIN {
+                return completion(nil, CommonErrors.INCOMPLETE_PIN_ERROR)
+            }
+            
             body["pin"] = textElementValue
             request.httpBody = try! JSONSerialization.data(withJSONObject: body)
             
@@ -503,6 +510,12 @@ class RosettaPINSubmitter: VaultCollector {
         VaultType.forage
     }
     
+    func validate(pin: String) -> Bool {
+        let isFourCharacters = pin.count == 4
+        let isOnlyNumeric = pin.allSatisfy { $0.isNumber }
+        let isValidPIN = isFourCharacters && isOnlyNumeric
+        return isValidPIN
+    }
 }
 
 enum CollectorFactory {

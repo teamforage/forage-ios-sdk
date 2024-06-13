@@ -316,6 +316,13 @@ class VaultCollectorTests: XCTestCase {
         XCTAssertEqual(config.vaultBaseURL, "vault.joinforage.app")
     }
     
+    func testRosettaSubmitter_ValidatePIN() {
+        let rosettaSubmitter = CollectorFactory.createRosettaPINSubmitter(environment: .sandbox, textElement: UITextField())
+        XCTAssertTrue(rosettaSubmitter.validate(pin: "1234"))
+        XCTAssertFalse(rosettaSubmitter.validate(pin: "12"))
+        XCTAssertFalse(rosettaSubmitter.validate(pin: "ab12"))
+    }
+    
     func testRosettaSubmitter_GetVaultType() {
         let rosettaSubmitter = CollectorFactory.createRosettaPINSubmitter(environment: .sandbox, textElement: UITextField())
         let vaultType = rosettaSubmitter.getVaultType()
@@ -384,6 +391,30 @@ class VaultCollectorTests: XCTestCase {
         waitForExpectations(timeout: 1)
         
         XCTAssertEqual(logger.lastCriticalMessage, "Failed to send data to Rosetta proxy. Rosetta token not found on card")
+        XCTAssertNil(session.lastRequest)
+    }
+    
+    func testRosettaSubmitter_sendData_IncompletePINError() {
+        let textElement = UITextField()
+        let config = ForageVaultConfig(environment: .sandbox)
+        let logger = MockLogger()
+        let session = URLSessionMock()
+        let rosettaSubmitter = RosettaPINSubmitter(textElement: textElement, forageVaultConfig: config, logger: logger, session: session)
+        
+        textElement.text = "12"
+        
+        let expectation = self.expectation(description: "Completion handler called")
+        
+        rosettaSubmitter.sendData(path: "/test/path", vaultAction: .balanceCheck, extraData: ["card_number_token": "1,2,3"]) { (result: MockDecodableModel?, error: ForageError?) in
+            XCTAssertNil(result)
+            XCTAssertEqual(error?.code, "user_error")
+            XCTAssertEqual(error?.httpStatusCode, 400)
+            XCTAssertEqual(error?.message, "Invalid EBT Card PIN entered. Please enter your 4-digit PIN.")
+            expectation.fulfill()
+        }
+        
+        waitForExpectations(timeout: 1)
+        
         XCTAssertNil(session.lastRequest)
     }
     
