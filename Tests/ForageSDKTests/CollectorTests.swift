@@ -509,52 +509,76 @@ class VaultCollectorTests: XCTestCase {
         let logger = MockLogger()
         let rosettaSubmitter = RosettaPINSubmitter(textElement: textElement, forageVaultConfig: config, logger: logger)
         let response = HTTPURLResponse(url: URL(string: "https://example.com")!, statusCode: 500, httpVersion: nil, headerFields: nil)
-
+        let measurement = createMockVaultMonitor()
         let testRosettaError = CommonErrors.UNKNOWN_SERVER_ERROR
-
-        rosettaSubmitter.handleResponse(response: response, data: nil, error: testRosettaError, measurement: createMockVaultMonitor()) { (result: MockDecodableModel?, error: ForageError?) in
+        
+        // this is called by sendData, so we have to simulate that since we're only calling handleResponse in this test
+        measurement.start()
+        
+        rosettaSubmitter.handleResponse(response: response, data: nil, error: testRosettaError, measurement: measurement) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(result)
             XCTAssertEqual(error, CommonErrors.UNKNOWN_SERVER_ERROR)
             XCTAssertEqual(logger.lastErrorMsg, "Rosetta proxy failed with an error")
         }
+        
+        XCTAssertNotNil(measurement.lastLoggedAttributes?.responseTimeMs)
+        XCTAssertEqual(measurement.lastLoggedAttributes?.code, 500)
     }
 
     func testRosettaSubmitter_handleResponse_noData() {
         let textElement = UITextField()
         let config = ForageVaultConfig(environment: .sandbox)
         let logger = MockLogger()
+        let measurement = createMockVaultMonitor()
         let rosettaSubmitter = RosettaPINSubmitter(textElement: textElement, forageVaultConfig: config, logger: logger)
         let response = HTTPURLResponse(url: URL(string: "https://example.com")!, statusCode: 500, httpVersion: nil, headerFields: nil)
 
-        rosettaSubmitter.handleResponse(response: response, data: nil, error: nil, measurement: createMockVaultMonitor()) { (result: MockDecodableModel?, error: ForageError?) in
+        // this is called by sendData, so we have to simulate that since we're only calling handleResponse in this test
+        measurement.start()
+        
+        rosettaSubmitter.handleResponse(response: response, data: nil, error: nil, measurement: measurement) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(result)
             XCTAssertEqual(error, CommonErrors.UNKNOWN_SERVER_ERROR)
             XCTAssertEqual(logger.lastCriticalMessage, "Rosetta failed to respond with a data object")
         }
+        
+        XCTAssertNotNil(measurement.lastLoggedAttributes?.responseTimeMs)
+        XCTAssertEqual(measurement.lastLoggedAttributes?.code, 500)
     }
 
     func testRosettaSubmitter_handleResponse_204Success() {
         let textElement = UITextField()
         let config = ForageVaultConfig(environment: .sandbox)
         let logger = MockLogger()
+        let measurement = createMockVaultMonitor()
         let rosettaSubmitter = RosettaPINSubmitter(textElement: textElement, forageVaultConfig: config, logger: logger)
         let response = HTTPURLResponse(url: URL(string: "https://example.com")!, statusCode: 204, httpVersion: nil, headerFields: nil)
 
-        let mockData = "".data(using: .utf8)!
+        // this is called by sendData, so we have to simulate that since we're only calling handleResponse in this test
+        measurement.start()
 
-        rosettaSubmitter.handleResponse(response: response, data: mockData, error: nil, measurement: createMockVaultMonitor()) { (result: MockDecodableModel?, error: ForageError?) in
+        let mockData = "".data(using: .utf8)!
+        
+        rosettaSubmitter.handleResponse(response: response, data: mockData, error: nil, measurement: measurement) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(result)
             XCTAssertNil(error)
         }
+        
+        XCTAssertNotNil(measurement.lastLoggedAttributes?.responseTimeMs)
+        XCTAssertEqual(measurement.lastLoggedAttributes?.code, 204)
     }
 
     func testRosettaSubmitter_handleResponse_429Error() {
         let textElement = UITextField()
         let config = ForageVaultConfig(environment: .sandbox)
         let logger = MockLogger()
+        let measurement = createMockVaultMonitor()
         let rosettaSubmitter = RosettaPINSubmitter(textElement: textElement, forageVaultConfig: config, logger: logger)
         let response = HTTPURLResponse(url: URL(string: "https://example.com")!, statusCode: 429, httpVersion: nil, headerFields: nil)
 
+        // this is called by sendData, so we have to simulate that since we're only calling handleResponse in this test
+        measurement.start()
+        
         let mockData = """
         {
             "path": "test/path",
@@ -567,49 +591,66 @@ class VaultCollectorTests: XCTestCase {
         }
         """.data(using: .utf8)!
 
-        rosettaSubmitter.handleResponse(response: response, data: mockData, error: nil, measurement: createMockVaultMonitor()) { (result: MockDecodableModel?, error: ForageError?) in
+        rosettaSubmitter.handleResponse(response: response, data: mockData, error: nil, measurement: measurement) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(result)
             XCTAssertEqual(error, THROTTLE_ERROR)
         }
+        
+        XCTAssertNotNil(measurement.lastLoggedAttributes?.responseTimeMs)
+        XCTAssertEqual(measurement.lastLoggedAttributes?.code, 429)
     }
 
     func testRosettaSubmitter_handleResponse_invalidData() {
         let textElement = UITextField()
         let config = ForageVaultConfig(environment: .sandbox)
         let logger = MockLogger()
+        let measurement = createMockVaultMonitor()
         let rosettaSubmitter = RosettaPINSubmitter(textElement: textElement, forageVaultConfig: config, logger: logger)
         let response = HTTPURLResponse(url: URL(string: "https://example.com")!, statusCode: 500, httpVersion: nil, headerFields: nil)
 
+        // this is called by sendData, so we have to simulate that since we're only calling handleResponse in this test
+        measurement.start()
+        
         let mockData = """
         {
             "this": "is invalid"
         }
         """.data(using: .utf8)!
         
-        rosettaSubmitter.handleResponse(response: response, data: mockData, error: nil, measurement: createMockVaultMonitor()) { (result: MockDecodableModel?, error: ForageError?) in
+        rosettaSubmitter.handleResponse(response: response, data: mockData, error: nil, measurement: measurement) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(result)
             XCTAssertEqual(error, CommonErrors.UNKNOWN_SERVER_ERROR)
             XCTAssertEqual(logger.lastCriticalMessage, "Failed to decode Rosetta response data.")
         }
+        
+        XCTAssertNotNil(measurement.lastLoggedAttributes?.responseTimeMs)
+        XCTAssertEqual(measurement.lastLoggedAttributes?.code, 500)
     }
 
     func testRosettaSubmitter_handleResponse_validData() {
         let textElement = UITextField()
         let config = ForageVaultConfig(environment: .sandbox)
         let logger = MockLogger()
+        let measurement = createMockVaultMonitor()
         let rosettaSubmitter = RosettaPINSubmitter(textElement: textElement, forageVaultConfig: config, logger: logger)
         let response = HTTPURLResponse(url: URL(string: "https://example.com")!, statusCode: 200, httpVersion: nil, headerFields: nil)
 
+        // this is called by sendData, so we have to simulate that since we're only calling handleResponse in this test
+        measurement.start()
+        
         let mockData = """
         {
             "id": "12345"
         }
         """.data(using: .utf8)!
         
-        rosettaSubmitter.handleResponse(response: response, data: mockData, error: nil, measurement: createMockVaultMonitor()) { (result: MockDecodableModel?, error: ForageError?) in
+        rosettaSubmitter.handleResponse(response: response, data: mockData, error: nil, measurement: measurement) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(error)
             XCTAssertEqual(result, MockDecodableModel(id: "12345"))
         }
+        
+        XCTAssertNotNil(measurement.lastLoggedAttributes?.responseTimeMs)
+        XCTAssertEqual(measurement.lastLoggedAttributes?.code, 200)
     }
 
     // MARK: JSON.convertJsonToDictionary
