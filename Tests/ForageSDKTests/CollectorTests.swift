@@ -316,11 +316,24 @@ class VaultCollectorTests: XCTestCase {
         XCTAssertEqual(config.vaultBaseURL, "vault.joinforage.app")
     }
     
-    func testRosettaSubmitter_ValidatePIN() {
-        let rosettaSubmitter = CollectorFactory.createRosettaPINSubmitter(environment: .sandbox, textElement: UITextField())
-        XCTAssertTrue(rosettaSubmitter.validate(pin: "1234"))
-        XCTAssertFalse(rosettaSubmitter.validate(pin: "12"))
-        XCTAssertFalse(rosettaSubmitter.validate(pin: "ab12"))
+    func testRosettaSubmitter_GetValidatedPIN() {
+        let textElement = UITextField()
+        let rosettaSubmitter = CollectorFactory.createRosettaPINSubmitter(environment: .sandbox, textElement: textElement)
+        
+        // valid pin, should return pin
+        textElement.text = "1234"
+        var result = rosettaSubmitter.getValidatedPIN()
+        XCTAssertEqual(result, "1234")
+        
+        // too short, should return nil
+        textElement.text = "12"
+        result = rosettaSubmitter.getValidatedPIN()
+        XCTAssertNil(result)
+        
+        // includes non-numeric characters, should return nil
+        textElement.text = "ab12"
+        result = rosettaSubmitter.getValidatedPIN()
+        XCTAssertNil(result)
     }
     
     func testRosettaSubmitter_GetVaultType() {
@@ -338,6 +351,35 @@ class VaultCollectorTests: XCTestCase {
         rosettaSubmitter.setCustomHeaders(headers: headers, xKey: xKey)
 
         XCTAssertEqual(rosettaSubmitter.customHeaders["HeaderKey"], "HeaderValue")
+    }
+    
+    func testRosettaSubmitter_BuildRequestBody_Error() {
+        let rosettaSubmitter = CollectorFactory.createRosettaPINSubmitter(environment: .sandbox, textElement: UITextField())
+        XCTAssertThrowsError(try rosettaSubmitter.buildRequestBody(with: ["card_number_token": ""]))
+    }
+    
+    func testRosettaSubmitter_BuildRequestBody_Success() throws {
+        let rosettaSubmitter = CollectorFactory.createRosettaPINSubmitter(environment: .sandbox, textElement: UITextField())
+        let data = ["card_number_token": "1,2,3"]
+        let body = try rosettaSubmitter.buildRequestBody(with: data)
+        XCTAssertEqual(body, ["card_number_token": "3"])
+    }
+    
+    func testRosettaSubmitter_BuildRequest() {
+        let rosettaSubmitter = CollectorFactory.createRosettaPINSubmitter(environment: .sandbox, textElement: UITextField())
+        rosettaSubmitter.customHeaders = ["Session-Token": "some-session-token", "Something": "Else"]
+        let request = rosettaSubmitter.buildRequest(for: "/test/path")
+        
+        XCTAssertEqual(request.url, URL(string: "https://vault.sandbox.joinforage.app/proxy/test/path"))
+        XCTAssertEqual(request.httpMethod, "POST")
+        XCTAssertEqual(request.allHTTPHeaderFields, [
+            "Content-Type": "application/json",
+            "Authorization": "some-session-token",
+            "Something": "Else"
+        ])
+        XCTAssertFalse(request.allHTTPHeaderFields?.contains(where: { (key: String, value: String) in
+            key == "Session-Token"
+        }) ?? true)
     }
 
     func testRosettaSubmitter_GetPaymentMethodToken_Success() throws {

@@ -365,38 +365,11 @@ class RosettaPINSubmitter: VaultCollector {
     }
     
     func sendData<T: Decodable>(path: String, vaultAction: VaultAction, extraData: [String : Any], completion: @escaping (T?, ForageError?) -> Void) {
-        var body = [String: String]()
-
-        // grab the payment method token and add it to the request body
-        for (key, value) in extraData {
-            if key == tokenKey, let paymentMethodToken = value as? String {
-                do {
-                    let token = try getPaymentMethodToken(paymentMethodToken: paymentMethodToken)
-                    body[key] = token
-                } catch {
-                    logger?.critical(
-                        "Failed to send data to Rosetta proxy. Rosetta token not found on card",
-                        error: error,
-                        attributes: nil
-                    )
-                    return completion(nil, CommonErrors.UNKNOWN_SERVER_ERROR)
-                }
-            }
+        guard var requestBody = try? buildRequestBody(with: extraData) else {
+            return completion(nil, CommonErrors.UNKNOWN_SERVER_ERROR)
         }
         
-        // build the request to the vault proxy
-        let url = URL(string: "https://\(forageVaultConfig.vaultBaseURL)/proxy\(path)")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        for header in customHeaders {
-            if header.key == "Session-Token" {
-                // intentionally omitting `Session-Token` header since we only need `Authorization` for Rosetta
-                request.setValue(header.value, forHTTPHeaderField: "Authorization")
-            } else {
-                request.setValue(header.value, forHTTPHeaderField: header.key)
-            }
-        }
+        var request = buildRequest(for: path)
         
         // measure the response time
         let measurement = VaultProxyResponseMonitor.newMeasurement(vault: VaultType.forage, action: vaultAction)
@@ -407,20 +380,12 @@ class RosettaPINSubmitter: VaultCollector {
         
         // making sure this runs on the main queue since we're reading from a UI element
         DispatchQueue.main.async {
-            
-            // grab the pin value entered and add it to the request body
-            guard let textElementValue = self.textElement.text else {
-                return completion(nil, CommonErrors.INCOMPLETE_PIN_ERROR)
-            }
-
-            // validate the PIN entered, return error early if PIN is invalid
-            let isValidPIN = self.validate(pin: textElementValue)
-            if !isValidPIN {
+            guard let validatedPIN = self.getValidatedPIN() else {
                 return completion(nil, CommonErrors.INCOMPLETE_PIN_ERROR)
             }
             
-            body["pin"] = textElementValue
-            request.httpBody = try! JSONSerialization.data(withJSONObject: body)
+            requestBody["pin"] = validatedPIN
+            request.httpBody = try! JSONSerialization.data(withJSONObject: requestBody)
             
             // make the request to the vault proxy
             self.session.dataTask(with: request) { data, response, error in
@@ -511,11 +476,62 @@ class RosettaPINSubmitter: VaultCollector {
         VaultType.forage
     }
     
-    func validate(pin: String) -> Bool {
+    func getValidatedPIN() -> String? {
+        guard let pin = textElement.text else {
+            return nil
+        }
+
         let isFourCharacters = pin.count == 4
         let isOnlyNumeric = pin.allSatisfy { $0.isNumber }
         let isValidPIN = isFourCharacters && isOnlyNumeric
-        return isValidPIN
+        
+        if isValidPIN {
+            return pin
+        } else {
+            return nil
+        }
+    }
+    
+    func buildRequestBody(with extraData: [String: Any]) throws -> [String: String] {
+        var body = [String: String]()
+        
+        // grab the payment method token and add it to the request body, throw if there isn't a rosetta token
+        for (key, value) in extraData {
+            if key == tokenKey, let paymentMethodToken = value as? String {
+                do {
+                    let token = try getPaymentMethodToken(paymentMethodToken: paymentMethodToken)
+                    body[key] = token
+                } catch {
+                    logger?.critical(
+                        "Failed to send data to Rosetta proxy. Rosetta token not found on card",
+                        error: error,
+                        attributes: nil
+                    )
+                    throw CommonErrors.UNKNOWN_SERVER_ERROR
+                }
+            }
+        }
+        
+        return body
+    }
+    
+    func buildRequest(for path: String) -> URLRequest {
+        let url = URL(string: "https://\(forageVaultConfig.vaultBaseURL)/proxy\(path)")!
+        var request = URLRequest(url: url)
+        
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        for header in customHeaders {
+            if header.key == "Session-Token" {
+                // intentionally omitting `Session-Token` header since we only need `Authorization` for Rosetta
+                request.setValue(header.value, forHTTPHeaderField: "Authorization")
+            } else {
+                request.setValue(header.value, forHTTPHeaderField: header.key)
+            }
+        }
+        
+        return request
     }
 }
 
