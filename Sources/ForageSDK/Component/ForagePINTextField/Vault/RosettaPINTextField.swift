@@ -25,7 +25,6 @@ class ForageTextFieldWrapper: UIView, VaultWrapper, UITextFieldDelegate {
     private let textField: UITextField
     private var inputWidthConstraint: NSLayoutConstraint?
     private var inputHeightConstraint: NSLayoutConstraint?
-    private var cancellables = Set<AnyCancellable>()
     
     var delegate: VaultWrapperDelegate?
     var collector: VaultCollector
