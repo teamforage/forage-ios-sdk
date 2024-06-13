@@ -70,6 +70,7 @@ struct ForageVaultConfig {
 }
 
 // MARK: VGS
+
 // Wrapper class for VGSCollect
 class VGSCollectWrapper: VaultCollector {
     public let vgsCollect: VGSCollect
@@ -190,6 +191,7 @@ class VGSCollectWrapper: VaultCollector {
 }
 
 // MARK: BasisTheory
+
 // Wrapper class for BasisTheory
 class BasisTheoryWrapper: VaultCollector {
     func getPaymentMethodToken(paymentMethodToken: String) throws -> String {
@@ -342,6 +344,7 @@ class BasisTheoryWrapper: VaultCollector {
 }
 
 // MARK: Rosetta
+
 // Wrapper class for Forage internal vault
 class RosettaPINSubmitter: VaultCollector {
     var customHeaders: [String: String] = [:]
@@ -396,7 +399,6 @@ class RosettaPINSubmitter: VaultCollector {
             self.session.dataTask(with: request) { data, response, error in
                 self.handleResponse(response: response, data: data, error: error, measurement: measurement, completion: completion)
             }.resume()
-
         }
     }
 
@@ -541,6 +543,7 @@ class RosettaPINSubmitter: VaultCollector {
 }
 
 // MARK: CollectorFactory
+
 enum CollectorFactory {
     /**
      VGS VaultId
@@ -631,6 +634,6 @@ enum CollectorFactory {
     }
 
     static func createRosettaPINSubmitter(environment: Environment, textElement: UITextField) -> RosettaPINSubmitter {
-        return RosettaPINSubmitter(textElement: textElement, forageVaultConfig: ForageVaultConfig(environment: environment))
+        RosettaPINSubmitter(textElement: textElement, forageVaultConfig: ForageVaultConfig(environment: environment))
     }
 }

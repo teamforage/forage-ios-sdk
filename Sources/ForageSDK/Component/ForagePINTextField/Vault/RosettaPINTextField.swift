@@ -10,7 +10,6 @@ import Combine
 import UIKit
 
 class ForageTextFieldWrapper: UIView, VaultWrapper, UITextFieldDelegate {
-
     // MARK: - Properties
 
     private var _isEmpty = true
@@ -65,6 +64,7 @@ class ForageTextFieldWrapper: UIView, VaultWrapper, UITextFieldDelegate {
     }
 
     // MARK: - UITextFieldDelegate protocol methods
+
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         let currentValue = textField.text ?? ""
         guard let valueRange = Range(range, in: currentValue) else { return false }
@@ -156,7 +156,6 @@ class ForageTextFieldWrapper: UIView, VaultWrapper, UITextFieldDelegate {
         get { textField.textAlignment }
         set { textField.textAlignment = newValue }
     }
-
 }
 
 // MARK: - UIResponder methods
