@@ -135,16 +135,12 @@ extension ForageSDK: ForageSDKService {
                 )
                 ForageSDK.logger?.notice("Balance check succeeded for PaymentMethod \(paymentMethodReference)", attributes: nil)
 
-                responseMonitor.setEventOutcome(.success).end()
+                responseMonitor.setEventOutcome(.success).setHttpStatusCode(200).end()
                 responseMonitor.logResult()
 
                 completion(.success(balanceResult))
             } catch {
-                ForageSDK.logger?.error("Balance check failed for PaymentMethod \(paymentMethodReference)", error: error, attributes: nil)
-
-                responseMonitor.setForageErrorCode(error).end()
-                responseMonitor.logResult()
-
+                logErrorResponse("Balance check failed for PaymentMethod \(paymentMethodReference)", error: error, attributes: nil, responseMonitor: responseMonitor)
                 completion(.failure(error))
             }
         }
@@ -194,16 +190,12 @@ extension ForageSDK: ForageSDKService {
                 )
                 ForageSDK.logger?.notice("Capture succeeded for Payment \(paymentReference)", attributes: nil)
 
-                responseMonitor.setEventOutcome(.success).end()
+                responseMonitor.setEventOutcome(.success).setHttpStatusCode(200).end()
                 responseMonitor.logResult()
 
                 completion(.success(paymentResult))
             } catch {
-                ForageSDK.logger?.error("Capture failed for Payment \(paymentReference)", error: error, attributes: nil)
-
-                responseMonitor.setForageErrorCode(error).end()
-                responseMonitor.logResult()
-
+                logErrorResponse("Capture failed for Payment \(paymentReference)", error: error, attributes: nil, responseMonitor: responseMonitor)
                 completion(.failure(error))
             }
         }
@@ -245,8 +237,7 @@ extension ForageSDK: ForageSDKService {
 
                 completion(.success(()))
             } catch {
-                ForageSDK.logger?.error("deferPaymentCapture failed for Payment \(paymentReference)", error: error, attributes: nil)
-
+                logErrorResponse("deferPaymentCapture failed for Payment \(paymentReference)", error: error, attributes: nil, responseMonitor: nil)
                 completion(.failure(error))
             }
         }
@@ -278,5 +269,21 @@ extension ForageSDK: ForageSDKService {
             attributes: nil
         )
         return false
+    }
+    
+    /// Determine if we should log an error or a warning
+    internal func logErrorResponse(_ message: String, error: Error, attributes: [String: Encodable]?, responseMonitor: ResponseMonitor?) {
+        responseMonitor?.setForageErrorCode(error)
+        if let statusCode = (error as? ForageError)?.httpStatusCode, let forageLogger = ForageSDK.logger {
+            responseMonitor?.setHttpStatusCode(statusCode)
+            let isWarningLevelStatusCode = [400, 429]
+            let logLevel = isWarningLevelStatusCode.contains(statusCode) ? forageLogger.warn : forageLogger.error
+            logLevel(message, error, nil)
+        } else {
+            ForageSDK.logger?.error(message, error: error, attributes: nil)
+        }
+        
+        responseMonitor?.end()
+        responseMonitor?.logResult()
     }
 }

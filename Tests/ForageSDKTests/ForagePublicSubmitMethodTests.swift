@@ -270,6 +270,8 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
                 XCTAssertNotEqual(self.mockLogger.lastAttributes!["response_time_ms"] as! Double, 0.0)
                 XCTAssertEqual(self.mockLogger.lastAttributes!["log_type"] as! String, "metric")
                 XCTAssertEqual(self.mockLogger.lastAttributes!["action"] as! String, "balance")
+                XCTAssertTrue(self.mockLogger.lastAttributes!["http_status"] is Int)
+                XCTAssertEqual(self.mockLogger.lastAttributes!["http_status"] as! Int, 200)
             case .failure:
                 XCTFail("Expected success but got \(String(describing: result))")
             }
@@ -332,7 +334,7 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
                 XCTAssertEqual(forageError.message, "Invalid PIN or PIN not selected - Invalid PIN")
                 XCTAssertEqual(forageError.httpStatusCode, 400)
 
-                XCTAssertEqual(self.mockLogger.lastErrorMsg, "Balance check failed for PaymentMethod abcdef123")
+                XCTAssertEqual(self.mockLogger.lastWarnMsg, "Balance check failed for PaymentMethod abcdef123")
 
                 // Are metrics-related events being reported correctly?
                 XCTAssertEqual(self.mockLogger.lastInfoMsg, "Reported customer-perceived response event")
@@ -340,6 +342,8 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
                 XCTAssertNotEqual(self.mockLogger.lastAttributes!["response_time_ms"] as! Double, 0.0)
                 XCTAssertEqual(self.mockLogger.lastAttributes!["log_type"] as! String, "metric")
                 XCTAssertEqual(self.mockLogger.lastAttributes!["action"] as! String, "balance")
+                XCTAssertTrue(self.mockLogger.lastAttributes!["http_status"] is Int)
+                XCTAssertEqual(self.mockLogger.lastAttributes!["http_status"] as! Int, 400)
             }
         }
     }
@@ -358,6 +362,8 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
                 XCTAssertNotEqual(self.mockLogger.lastAttributes!["response_time_ms"] as! Double, 0.0)
                 XCTAssertEqual(self.mockLogger.lastAttributes!["log_type"] as! String, "metric")
                 XCTAssertEqual(self.mockLogger.lastAttributes!["action"] as! String, "capture")
+                XCTAssertTrue(self.mockLogger.lastAttributes!["http_status"] is Int)
+                XCTAssertEqual(self.mockLogger.lastAttributes!["http_status"] as! Int, 200)
             } else {
                 XCTFail("Expected success but got \(String(describing: result))")
             }
@@ -401,6 +407,8 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
                 XCTAssertNotEqual(self.mockLogger.lastAttributes!["response_time_ms"] as! Double, 0.0)
                 XCTAssertEqual(self.mockLogger.lastAttributes!["log_type"] as! String, "metric")
                 XCTAssertEqual(self.mockLogger.lastAttributes!["action"] as! String, "capture")
+                XCTAssertTrue(self.mockLogger.lastAttributes!["http_status"] is Int)
+                XCTAssertEqual(self.mockLogger.lastAttributes!["http_status"] as! Int, 400)
             }
         }
     }

@@ -10,6 +10,7 @@ import Foundation
 class MockLogger: NoopLogger {
     var lastInfoMsg: String = ""
     var lastErrorMsg: String = ""
+    var lastWarnMsg: String = ""
     var lastCriticalMessage: String = ""
     var lastNoticeMsg: String = ""
     var lastAttributes: [String: Encodable]? = nil
@@ -30,6 +31,11 @@ class MockLogger: NoopLogger {
 
     override func critical(_ message: String, error: Error?, attributes: [String: Encodable]?) {
         lastCriticalMessage = message
+        lastAttributes = attributes
+    }
+    
+    override func warn(_ message: String, error: (any Error)?, attributes: [String : any Encodable]?) {
+        lastWarnMsg = message
         lastAttributes = attributes
     }
 
