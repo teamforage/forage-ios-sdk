@@ -270,7 +270,7 @@ final class ForagePINTextFieldTests: XCTestCase {
         // Test ForageTextFieldWrapper font
         let forageTextFieldWrapper = ForageTextFieldWrapper()
         let forageFont = UIFont.systemFont(ofSize: 20, weight: .bold)
-        forageTextFieldWrapper.font = btFont
+        forageTextFieldWrapper.font = forageFont
         XCTAssertEqual(forageTextFieldWrapper.font, btFont)
     }
 
