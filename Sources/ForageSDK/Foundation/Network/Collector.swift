@@ -44,6 +44,8 @@ protocol VaultCollector {
     func getVaultType() -> VaultType
 }
 
+// MARK: Vault Configs
+
 struct VGSCollectConfig {
     let id: String
     let environment: VGSCollectSDK.Environment
@@ -67,6 +69,7 @@ struct ForageVaultConfig {
     }
 }
 
+// MARK: VGS
 // Wrapper class for VGSCollect
 class VGSCollectWrapper: VaultCollector {
     public let vgsCollect: VGSCollect
@@ -186,6 +189,7 @@ class VGSCollectWrapper: VaultCollector {
     }
 }
 
+// MARK: BasisTheory
 // Wrapper class for BasisTheory
 class BasisTheoryWrapper: VaultCollector {
     func getPaymentMethodToken(paymentMethodToken: String) throws -> String {
@@ -337,6 +341,7 @@ class BasisTheoryWrapper: VaultCollector {
     }
 }
 
+// MARK: Rosetta
 // Wrapper class for Forage internal vault
 class RosettaPINSubmitter: VaultCollector {
     var customHeaders: [String: String] = [:]
@@ -535,6 +540,7 @@ class RosettaPINSubmitter: VaultCollector {
     }
 }
 
+// MARK: CollectorFactory
 enum CollectorFactory {
     /**
      VGS VaultId
