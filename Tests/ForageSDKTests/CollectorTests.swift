@@ -17,6 +17,10 @@ class VaultCollectorTests: XCTestCase {
         setUpForageSDK()
     }
     
+    func createMockVaultMonitor() -> TestableResponseMonitor {
+        TestableResponseMonitor(metricsLogger: MockLogger())
+    }
+    
     // MARK: VGSWrapper
 
     func testVGSCollectWrapper_SetCustomHeaders_HeaderKey() {
@@ -46,7 +50,7 @@ class VaultCollectorTests: XCTestCase {
 
         let vgsError = CommonErrors.UNKNOWN_SERVER_ERROR
 
-        vgsWrapper.handleResponse(code: 500, data: nil, error: vgsError, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+        vgsWrapper.handleResponse(code: 500, data: nil, error: vgsError, measurement: createMockVaultMonitor()) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(result)
             XCTAssertEqual(error, CommonErrors.UNKNOWN_SERVER_ERROR)
             XCTAssertEqual(logger.lastCriticalMessage, "VGS proxy failed with an error")
@@ -58,7 +62,7 @@ class VaultCollectorTests: XCTestCase {
         let logger = MockLogger()
         let vgsWrapper = VGSCollectWrapper(config: config, logger: logger)
 
-        vgsWrapper.handleResponse(code: 500, data: nil, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+        vgsWrapper.handleResponse(code: 500, data: nil, error: nil, measurement: createMockVaultMonitor()) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(result)
             XCTAssertEqual(error, CommonErrors.UNKNOWN_SERVER_ERROR)
             XCTAssertEqual(logger.lastCriticalMessage, "VGS failed to respond with a data object")
@@ -82,7 +86,7 @@ class VaultCollectorTests: XCTestCase {
         }
         """.data(using: .utf8)!
 
-        vgsWrapper.handleResponse(code: 429, data: forageErrorData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+        vgsWrapper.handleResponse(code: 429, data: forageErrorData, error: nil, measurement: createMockVaultMonitor()) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(result)
             XCTAssertEqual(error, THROTTLE_ERROR)
         }
@@ -93,7 +97,7 @@ class VaultCollectorTests: XCTestCase {
         let logger = MockLogger()
         let vgsWrapper = VGSCollectWrapper(config: config, logger: logger)
 
-        vgsWrapper.handleResponse(code: 204, data: "".data(using: .utf8)!, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+        vgsWrapper.handleResponse(code: 204, data: "".data(using: .utf8)!, error: nil, measurement: createMockVaultMonitor()) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(result)
             XCTAssertNil(error)
         }
@@ -111,7 +115,7 @@ class VaultCollectorTests: XCTestCase {
         """.data(using: .utf8)!
 
         let expectedModel = MockDecodableModel(id: "12345")
-        vgsWrapper.handleResponse(code: 200, data: validData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+        vgsWrapper.handleResponse(code: 200, data: validData, error: nil, measurement: createMockVaultMonitor()) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(error)
             XCTAssertEqual(result, expectedModel)
         }
@@ -128,7 +132,7 @@ class VaultCollectorTests: XCTestCase {
         }
         """.data(using: .utf8)!
 
-        vgsWrapper.handleResponse(code: 200, data: invalidData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+        vgsWrapper.handleResponse(code: 200, data: invalidData, error: nil, measurement: createMockVaultMonitor()) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(result)
             XCTAssertEqual(error, CommonErrors.UNKNOWN_SERVER_ERROR)
             XCTAssertEqual(logger.lastCriticalMessage, "Failed to decode VGS response data.")
@@ -177,7 +181,7 @@ class VaultCollectorTests: XCTestCase {
 
         let testBTError = CommonErrors.UNKNOWN_SERVER_ERROR
 
-        basisTheoryWrapper.handleResponse(response: response, data: nil, error: testBTError, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+        basisTheoryWrapper.handleResponse(response: response, data: nil, error: testBTError, measurement: createMockVaultMonitor()) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(result)
             XCTAssertEqual(error, CommonErrors.UNKNOWN_SERVER_ERROR)
             XCTAssertEqual(logger.lastCriticalMessage, "Basis Theory proxy failed with an error")
@@ -191,7 +195,7 @@ class VaultCollectorTests: XCTestCase {
         let basisTheoryWrapper = BasisTheoryWrapper(textElement: textElement, basisTheoryconfig: config, logger: logger)
         let response = HTTPURLResponse(url: URL(string: "https://example.com")!, statusCode: 500, httpVersion: nil, headerFields: nil)
 
-        basisTheoryWrapper.handleResponse(response: response, data: nil, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+        basisTheoryWrapper.handleResponse(response: response, data: nil, error: nil, measurement: createMockVaultMonitor()) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(result)
             XCTAssertEqual(error, CommonErrors.UNKNOWN_SERVER_ERROR)
             XCTAssertEqual(logger.lastCriticalMessage, "Basis Theory failed to respond with a data object")
@@ -220,7 +224,7 @@ class VaultCollectorTests: XCTestCase {
             "detail": JSON.rawValue("")
         ])
 
-        basisTheoryWrapper.handleResponse(response: response, data: mockData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+        basisTheoryWrapper.handleResponse(response: response, data: mockData, error: nil, measurement: createMockVaultMonitor()) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(result)
             XCTAssertEqual(error, CommonErrors.UNKNOWN_SERVER_ERROR)
             XCTAssertEqual(logger.lastCriticalMessage, "Basis Theory proxy script failed")
@@ -237,7 +241,7 @@ class VaultCollectorTests: XCTestCase {
         // BT returns an empty dict
         let mockData = JSON.dictionaryValue([:])
 
-        basisTheoryWrapper.handleResponse(response: response, data: mockData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+        basisTheoryWrapper.handleResponse(response: response, data: mockData, error: nil, measurement: createMockVaultMonitor()) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(result)
             XCTAssertNil(error)
         }
@@ -260,7 +264,7 @@ class VaultCollectorTests: XCTestCase {
             ])
         ])
 
-        basisTheoryWrapper.handleResponse(response: response, data: mockData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+        basisTheoryWrapper.handleResponse(response: response, data: mockData, error: nil, measurement: createMockVaultMonitor()) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(result)
             XCTAssertEqual(error, THROTTLE_ERROR)
         }
@@ -277,7 +281,7 @@ class VaultCollectorTests: XCTestCase {
             "this": JSON.rawValue("Is an invalid structure!")
         ])
 
-        basisTheoryWrapper.handleResponse(response: response, data: mockData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+        basisTheoryWrapper.handleResponse(response: response, data: mockData, error: nil, measurement: createMockVaultMonitor()) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(result)
             XCTAssertEqual(error, CommonErrors.UNKNOWN_SERVER_ERROR)
             XCTAssertEqual(logger.lastCriticalMessage, "Received an unknown response structure from Basis Theory")
@@ -295,7 +299,7 @@ class VaultCollectorTests: XCTestCase {
             "id": JSON.rawValue("12345")
         ])
 
-        basisTheoryWrapper.handleResponse(response: response, data: mockData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+        basisTheoryWrapper.handleResponse(response: response, data: mockData, error: nil, measurement: createMockVaultMonitor()) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(error)
             XCTAssertEqual(result, MockDecodableModel(id: "12345"))
         }
@@ -493,6 +497,9 @@ class VaultCollectorTests: XCTestCase {
             "Authorization": "test session token",
             "Merchant-Account": "mid/test-merchant-id"
         ])
+        XCTAssertFalse(session.lastRequest?.allHTTPHeaderFields?.contains(where: { (key: String, value: String) in
+            key == "Session-Token"
+        }) ?? true)
         
     }
 
@@ -505,7 +512,7 @@ class VaultCollectorTests: XCTestCase {
 
         let testRosettaError = CommonErrors.UNKNOWN_SERVER_ERROR
 
-        rosettaSubmitter.handleResponse(response: response, data: nil, error: testRosettaError, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+        rosettaSubmitter.handleResponse(response: response, data: nil, error: testRosettaError, measurement: createMockVaultMonitor()) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(result)
             XCTAssertEqual(error, CommonErrors.UNKNOWN_SERVER_ERROR)
             XCTAssertEqual(logger.lastErrorMsg, "Rosetta proxy failed with an error")
@@ -519,7 +526,7 @@ class VaultCollectorTests: XCTestCase {
         let rosettaSubmitter = RosettaPINSubmitter(textElement: textElement, forageVaultConfig: config, logger: logger)
         let response = HTTPURLResponse(url: URL(string: "https://example.com")!, statusCode: 500, httpVersion: nil, headerFields: nil)
 
-        rosettaSubmitter.handleResponse(response: response, data: nil, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+        rosettaSubmitter.handleResponse(response: response, data: nil, error: nil, measurement: createMockVaultMonitor()) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(result)
             XCTAssertEqual(error, CommonErrors.UNKNOWN_SERVER_ERROR)
             XCTAssertEqual(logger.lastCriticalMessage, "Rosetta failed to respond with a data object")
@@ -535,7 +542,7 @@ class VaultCollectorTests: XCTestCase {
 
         let mockData = "".data(using: .utf8)!
 
-        rosettaSubmitter.handleResponse(response: response, data: mockData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+        rosettaSubmitter.handleResponse(response: response, data: mockData, error: nil, measurement: createMockVaultMonitor()) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(result)
             XCTAssertNil(error)
         }
@@ -560,7 +567,7 @@ class VaultCollectorTests: XCTestCase {
         }
         """.data(using: .utf8)!
 
-        rosettaSubmitter.handleResponse(response: response, data: mockData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+        rosettaSubmitter.handleResponse(response: response, data: mockData, error: nil, measurement: createMockVaultMonitor()) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(result)
             XCTAssertEqual(error, THROTTLE_ERROR)
         }
@@ -579,7 +586,7 @@ class VaultCollectorTests: XCTestCase {
         }
         """.data(using: .utf8)!
         
-        rosettaSubmitter.handleResponse(response: response, data: mockData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+        rosettaSubmitter.handleResponse(response: response, data: mockData, error: nil, measurement: createMockVaultMonitor()) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(result)
             XCTAssertEqual(error, CommonErrors.UNKNOWN_SERVER_ERROR)
             XCTAssertEqual(logger.lastCriticalMessage, "Failed to decode Rosetta response data.")
@@ -599,7 +606,7 @@ class VaultCollectorTests: XCTestCase {
         }
         """.data(using: .utf8)!
         
-        rosettaSubmitter.handleResponse(response: response, data: mockData, error: nil, measurement: TestableResponseMonitor(metricsLogger: MockLogger())) { (result: MockDecodableModel?, error: ForageError?) in
+        rosettaSubmitter.handleResponse(response: response, data: mockData, error: nil, measurement: createMockVaultMonitor()) { (result: MockDecodableModel?, error: ForageError?) in
             XCTAssertNil(error)
             XCTAssertEqual(result, MockDecodableModel(id: "12345"))
         }
