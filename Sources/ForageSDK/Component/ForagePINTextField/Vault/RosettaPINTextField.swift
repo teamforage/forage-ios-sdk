@@ -9,7 +9,7 @@
 import Combine
 import UIKit
 
-class ForageTextFieldWrapper: UIView, VaultWrapper, UITextFieldDelegate {
+class RosettaPINTextField: UIView, VaultWrapper, UITextFieldDelegate {
     // MARK: - Properties
 
     private var _isEmpty = true
@@ -160,7 +160,7 @@ class ForageTextFieldWrapper: UIView, VaultWrapper, UITextFieldDelegate {
 
 // MARK: - UIResponder methods
 
-extension ForageTextFieldWrapper {
+extension RosettaPINTextField {
     @discardableResult override public func becomeFirstResponder() -> Bool {
         textField.becomeFirstResponder()
     }

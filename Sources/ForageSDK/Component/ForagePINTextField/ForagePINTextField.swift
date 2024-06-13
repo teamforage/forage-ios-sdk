@@ -148,7 +148,7 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
         } else if vaultType == VaultType.basisTheory {
             tf = BasisTheoryTextFieldWrapper()
         } else {
-            tf = ForageTextFieldWrapper()
+            tf = RosettaPINTextField()
         }
 
         tf?.textColor = UIColor.black
@@ -159,7 +159,7 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
         tf?.borderColor = .clear
         tf?.backgroundColor = .systemGray6
 
-        return tf ?? ForageTextFieldWrapper()
+        return tf ?? RosettaPINTextField()
     }()
 
     private lazy var imageView: UIImageView = {
