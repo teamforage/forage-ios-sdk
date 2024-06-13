@@ -283,7 +283,8 @@ extension ForageSDK: ForageSDKService {
     /// Determine if we should log an error or a warning
     private func logErrorResponse(_ message: String, error: Error?, attributes: [String: Encodable]?) {
         let statusCode = (error as? ForageError)?.httpStatusCode ?? 500
-        if (statusCode >= 400 && statusCode < 500) {
+        let isWarningLevelStatusCode = [400, 429].contains(statusCode)
+        if (isWarningLevelStatusCode) {
             ForageSDK.logger?.warn(message, error: error, attributes: nil)
         } else {
             ForageSDK.logger?.error(message, error: error, attributes: nil)
