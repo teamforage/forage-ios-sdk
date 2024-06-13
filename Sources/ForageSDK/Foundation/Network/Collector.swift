@@ -391,6 +391,7 @@ class RosettaPINSubmitter: VaultCollector {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         for header in customHeaders {
             if header.key == "Session-Token" {
+                // intentionally omitting `Session-Token` header since we only need `Authorization` for Rosetta
                 request.setValue(header.value, forHTTPHeaderField: "Authorization")
             } else {
                 request.setValue(header.value, forHTTPHeaderField: header.key)
