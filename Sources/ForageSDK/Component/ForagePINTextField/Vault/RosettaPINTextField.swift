@@ -52,14 +52,14 @@ class ForageTextFieldWrapper: UIView, VaultWrapper, UITextFieldDelegate {
     
     override init(frame: CGRect) {
         textField = UITextField()
-        collector = CollectorFactory.createForage(environment: ForageSDK.shared.environment, textElement: textField)
+        collector = CollectorFactory.createRosettaPINSubmitter(environment: ForageSDK.shared.environment, textElement: textField)
         super.init(frame: frame)
         commonInit()
     }
     
     required init?(coder aDecoder: NSCoder) {
         textField = UITextField()
-        collector = CollectorFactory.createForage(environment: ForageSDK.shared.environment, textElement: textField)
+        collector = CollectorFactory.createRosettaPINSubmitter(environment: ForageSDK.shared.environment, textElement: textField)
         super.init(coder: aDecoder)
         commonInit()
     }

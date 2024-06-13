@@ -589,7 +589,7 @@ enum CollectorFactory {
         return BasisTheoryWrapper(textElement: textElement, basisTheoryconfig: config)
     }
     
-    static func createForage(environment: Environment, textElement: UITextField) -> RosettaPINSubmitter {
+    static func createRosettaPINSubmitter(environment: Environment, textElement: UITextField) -> RosettaPINSubmitter {
         return RosettaPINSubmitter(textElement: textElement, forageVaultConfig: ForageVaultConfig(environment: environment))
     }
 }

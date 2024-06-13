@@ -317,14 +317,14 @@ class VaultCollectorTests: XCTestCase {
     }
     
     func testForageWrapper_GetVaultType() {
-        let forageWrapper = CollectorFactory.createForage(environment: .sandbox, textElement: UITextField())
+        let forageWrapper = CollectorFactory.createRosettaPINSubmitter(environment: .sandbox, textElement: UITextField())
         let vaultType = forageWrapper.getVaultType()
         XCTAssertEqual(vaultType, VaultType.forage)
     }
     
     func testForageWrapper_SetCustomHeaders_HeaderKey() {
         let textElement = UITextField()
-        let forageWrapper = CollectorFactory.createForage(environment: Environment.sandbox, textElement: textElement)
+        let forageWrapper = CollectorFactory.createRosettaPINSubmitter(environment: Environment.sandbox, textElement: textElement)
 
         let headers = ["HeaderKey": "HeaderValue"]
         let xKey = [String: String]()
@@ -335,7 +335,7 @@ class VaultCollectorTests: XCTestCase {
 
     func testForageWrapper_GetPaymentMethodToken_Success() throws {
         let textElement = UITextField()
-        let forageWrapper = CollectorFactory.createForage(environment: Environment.sandbox, textElement: textElement)
+        let forageWrapper = CollectorFactory.createRosettaPINSubmitter(environment: Environment.sandbox, textElement: textElement)
 
         let token = "123456,789012,345678"
         let resultToken = try forageWrapper.getPaymentMethodToken(paymentMethodToken: token)
@@ -344,7 +344,7 @@ class VaultCollectorTests: XCTestCase {
     
     func testForageWrapper_GetPaymentMethodToken_NoDelimiterError() throws {
         let textElement = UITextField()
-        let forageWrapper = CollectorFactory.createForage(environment: Environment.sandbox, textElement: textElement)
+        let forageWrapper = CollectorFactory.createRosettaPINSubmitter(environment: Environment.sandbox, textElement: textElement)
 
         let token = "123456"
         XCTAssertThrowsError(try forageWrapper.getPaymentMethodToken(paymentMethodToken: token))
@@ -352,7 +352,7 @@ class VaultCollectorTests: XCTestCase {
     
     func testForageWrapper_GetPaymentMethodToken_NoRosettaError() throws {
         let textElement = UITextField()
-        let forageWrapper = CollectorFactory.createForage(environment: Environment.sandbox, textElement: textElement)
+        let forageWrapper = CollectorFactory.createRosettaPINSubmitter(environment: Environment.sandbox, textElement: textElement)
 
         let token = "123456,789012"
         XCTAssertThrowsError(try forageWrapper.getPaymentMethodToken(paymentMethodToken: token))
