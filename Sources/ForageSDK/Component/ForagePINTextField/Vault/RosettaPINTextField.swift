@@ -73,6 +73,14 @@ class RosettaPINTextField: UIView, VaultWrapper, UITextFieldDelegate {
         let isFourOrFewer = newValue.count <= 4
         return isOnlyNumeric && isFourOrFewer
     }
+    
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        self.delegate?.firstResponderDidChange(self)
+    }
+    
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        self.delegate?.firstResponderDidChange(self)
+    }
 
     // MARK: - Private API
 
