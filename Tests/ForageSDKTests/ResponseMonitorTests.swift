@@ -152,7 +152,7 @@ final class ResponseMonitorTests: XCTestCase {
         monitor.setEventOutcome(.failure)
         // set to failure, but missing forage_error_code!
 
-        let attributes = ResponseAttributes(responseTimeMs: 123)
+        let attributes = ResponseAttributes(responseTimeMs: 123, code: 400)
 
         monitor.logWithResponseAttributes(
             metricsLogger: mockMetricsLogger,
@@ -171,7 +171,7 @@ final class ResponseMonitorTests: XCTestCase {
         )
         monitor.setEventOutcome(.success)
 
-        let attributes = ResponseAttributes(responseTimeMs: 123.23)
+        let attributes = ResponseAttributes(responseTimeMs: 123.23, code: 200)
         monitor.logWithResponseAttributes(metricsLogger: mockMetricsLogger, responseAttributes: attributes)
 
         XCTAssertEqual(mockMetricsLogger.loggedInfos.count, 1)
