@@ -21,8 +21,10 @@ class URLSessionMock: URLSessionProtocol {
     var data: Data?
     var error: Error?
     var response: HTTPURLResponse? = nil
+    var lastRequest: URLRequest?
 
     func dataTask(with request: URLRequest, completionHandler: @escaping CompletionHandler) -> URLSessionDataTask {
+        self.lastRequest = request
         defer { completionHandler(data, response, error) }
         return DataTaskMock()
     }

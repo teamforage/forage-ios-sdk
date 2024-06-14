@@ -34,12 +34,23 @@ final class LDManagerTests: XCTestCase {
             ldClient: nil,
             genRandomDouble: LDManager.generateRandomDouble
         )
-        XCTAssertEqual(result, VaultType.vgs)
+        XCTAssertEqual(result, VaultType.forage)
     }
 
-    func testGetVaultType_VariationGreaterThanRandom_ShouldReturnBTVaultType() {
+    func testGetVaultType_VariationGreaterThanRandom_ShouldReturnForageVaultType() {
         let mockLDClient = MockLDClient(vaultPercentage: 2)
         let mockRandomGenerator = { 1.00 }
+
+        let result = LDManager.shared.getVaultType(
+            ldClient: mockLDClient,
+            genRandomDouble: mockRandomGenerator
+        )
+        XCTAssertEqual(result, VaultType.forage)
+    }
+
+    func testGetVaultType_VariationLessThanRandom_ShouldReturnBTVaultType() {
+        let mockLDClient = MockLDClient(vaultPercentage: 2)
+        let mockRandomGenerator = { 3.00 }
 
         let result = LDManager.shared.getVaultType(
             ldClient: mockLDClient,
@@ -48,20 +59,9 @@ final class LDManagerTests: XCTestCase {
         XCTAssertEqual(result, VaultType.basisTheory)
     }
 
-    func testGetVaultType_VariationLessThanRandom_ShouldReturnVGSVaultType() {
-        let mockLDClient = MockLDClient(vaultPercentage: 2)
-        let mockRandomGenerator = { 3.00 }
-
-        let result = LDManager.shared.getVaultType(
-            ldClient: mockLDClient,
-            genRandomDouble: mockRandomGenerator
-        )
-        XCTAssertEqual(result, VaultType.vgs)
-    }
-
     // Test when ldClient.variation() returns a value equal to the random percent
     // Assuming you can mock or control the random number generation
-    func testGetVaultType_VariationEqualToRandom_ShouldReturnVGSVaultType() {
+    func testGetVaultType_VariationEqualToRandom_ShouldReturnForageVaultType() {
         let mockLDClient = MockLDClient(vaultPercentage: 50)
         let mockRandomGenerator = { 50.00 }
 
@@ -69,7 +69,7 @@ final class LDManagerTests: XCTestCase {
             ldClient: mockLDClient,
             genRandomDouble: mockRandomGenerator
         )
-        XCTAssertEqual(result, VaultType.vgs)
+        XCTAssertEqual(result, VaultType.forage)
     }
 
     // MARK: Test LDManager.Initialize
