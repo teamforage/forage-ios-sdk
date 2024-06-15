@@ -416,16 +416,37 @@ final class ForagePINTextFieldTests: XCTestCase {
         XCTAssertEqual(result, true)
     }
     
-    func test_RosettaPINTextField_firstResponderState() {
-        DispatchQueue.main.async {
-            let rosettaPINTextField = RosettaPINTextField()
-            let textField = UITextField()
-            XCTAssertFalse(rosettaPINTextField.isFirstResponder)
-            rosettaPINTextField.editingBegan(textField)
-            XCTAssertTrue(rosettaPINTextField.isFirstResponder)
-            rosettaPINTextField.editingEnded(textField)
-            XCTAssertFalse(rosettaPINTextField.isFirstResponder)
+    func test_RosettaPINTextField_delegateMethodCalls() {
+        class MockDelegate: VaultWrapperDelegate {
+            var textFieldDidChangeCalledTimes = 0
+            var firstResponderDidChangeCalledTimes = 0
+            
+            func textFieldDidChange(_ textField: any VaultWrapper) {
+                textFieldDidChangeCalledTimes += 1
+            }
+            
+            func firstResponderDidChange(_ textField: any VaultWrapper) {
+                firstResponderDidChangeCalledTimes += 1
+            }
+
         }
+        
+        let rosettaPINTextField = RosettaPINTextField()
+        let mockDelegate = MockDelegate()
+        let textField = UITextField()
+
+        rosettaPINTextField.delegate = mockDelegate
+        
+        // textFieldDidChange
+        rosettaPINTextField.textFieldDidChange(textField)
+        XCTAssertEqual(mockDelegate.textFieldDidChangeCalledTimes, 1)
+        
+        // firstResponderDidChange
+        rosettaPINTextField.editingBegan(textField)
+        XCTAssertEqual(mockDelegate.firstResponderDidChangeCalledTimes, 1)
+        
+        rosettaPINTextField.editingEnded(textField)
+        XCTAssertEqual(mockDelegate.firstResponderDidChangeCalledTimes, 2)
     }
 }
 

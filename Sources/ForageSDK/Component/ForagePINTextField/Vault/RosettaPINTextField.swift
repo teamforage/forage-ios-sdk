@@ -106,11 +106,11 @@ class RosettaPINTextField: UIView, VaultWrapper, UITextFieldDelegate {
         self._isComplete = self._isValid
         self.delegate?.textFieldDidChange(self)
     }
-    
+
     @objc func editingBegan(_ textField: UITextField) {
         self.delegate?.firstResponderDidChange(self)
     }
-    
+
     @objc func editingEnded(_ textField: UITextField) {
         self.delegate?.firstResponderDidChange(self)
     }
