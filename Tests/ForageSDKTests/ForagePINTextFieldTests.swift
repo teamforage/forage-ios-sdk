@@ -415,6 +415,18 @@ final class ForagePINTextFieldTests: XCTestCase {
         let result = rosettaPINTextField.textField(UITextField(), shouldChangeCharactersIn: NSRange(), replacementString: "1234")
         XCTAssertEqual(result, true)
     }
+    
+    func test_RosettaPINTextField_firstResponderState() {
+        DispatchQueue.main.async {
+            let rosettaPINTextField = RosettaPINTextField()
+            let textField = UITextField()
+            XCTAssertFalse(rosettaPINTextField.isFirstResponder)
+            rosettaPINTextField.editingBegan(textField)
+            XCTAssertTrue(rosettaPINTextField.isFirstResponder)
+            rosettaPINTextField.editingEnded(textField)
+            XCTAssertFalse(rosettaPINTextField.isFirstResponder)
+        }
+    }
 }
 
 extension ForagePINTextFieldTests: ForageElementDelegate {

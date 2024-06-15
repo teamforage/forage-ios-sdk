@@ -73,14 +73,6 @@ class RosettaPINTextField: UIView, VaultWrapper, UITextFieldDelegate {
         let isFourOrFewer = newValue.count <= 4
         return isOnlyNumeric && isFourOrFewer
     }
-    
-    func textFieldDidBeginEditing(_ textField: UITextField) {
-        self.delegate?.firstResponderDidChange(self)
-    }
-    
-    func textFieldDidEndEditing(_ textField: UITextField) {
-        self.delegate?.firstResponderDidChange(self)
-    }
 
     // MARK: - Private API
 
@@ -104,6 +96,8 @@ class RosettaPINTextField: UIView, VaultWrapper, UITextFieldDelegate {
         inputHeightConstraint = textField.heightAnchor.constraint(greaterThanOrEqualToConstant: 36)
         inputHeightConstraint?.isActive = true
         textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+        textField.addTarget(self, action: #selector(editingBegan), for: .editingDidBegin)
+        textField.addTarget(self, action: #selector(editingEnded), for: .editingDidEnd)
     }
 
     @objc func textFieldDidChange(_ textField: UITextField) {
@@ -111,6 +105,14 @@ class RosettaPINTextField: UIView, VaultWrapper, UITextFieldDelegate {
         self._isValid = textField.text?.count == 4 && (textField.text?.allSatisfy { $0.isNumber } ?? false)
         self._isComplete = self._isValid
         self.delegate?.textFieldDidChange(self)
+    }
+    
+    @objc func editingBegan(_ textField: UITextField) {
+        self.delegate?.firstResponderDidChange(self)
+    }
+    
+    @objc func editingEnded(_ textField: UITextField) {
+        self.delegate?.firstResponderDidChange(self)
     }
 
     func clearText() {
