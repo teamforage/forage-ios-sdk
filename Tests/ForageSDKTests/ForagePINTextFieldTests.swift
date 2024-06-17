@@ -434,19 +434,39 @@ final class ForagePINTextFieldTests: XCTestCase {
         let rosettaPINTextField = RosettaPINTextField()
         let mockDelegate = MockDelegate()
         let textField = UITextField()
-
+        let window = UIWindow()
+        
         rosettaPINTextField.delegate = mockDelegate
+        window.addSubview(rosettaPINTextField)
         
         // textFieldDidChange
         rosettaPINTextField.textFieldDidChange(textField)
         XCTAssertEqual(mockDelegate.textFieldDidChangeCalledTimes, 1)
         
         // firstResponderDidChange
+        XCTAssertFalse(rosettaPINTextField.isFirstResponder)
+
+        // simulating the system firing the .editingDidBegin event
+        rosettaPINTextField.becomeFirstResponder()
         rosettaPINTextField.editingBegan(textField)
-        XCTAssertEqual(mockDelegate.firstResponderDidChangeCalledTimes, 1)
         
+        // wait for the responder chain to update
+        RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.1))
+        
+        // Assert that we called the right delegate methods and the isFirstResponder status was updated
+        XCTAssertEqual(mockDelegate.firstResponderDidChangeCalledTimes, 1)
+        XCTAssertTrue(rosettaPINTextField.isFirstResponder)
+        
+        // simulating the system firing the .editingDidEnd event
+        rosettaPINTextField.resignFirstResponder()
         rosettaPINTextField.editingEnded(textField)
+        
+        // wait for the responder chain to update
+        RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.1))
+        
+        // Assert that we called the right delegate methods and the isFirstResponder status was updated
         XCTAssertEqual(mockDelegate.firstResponderDidChangeCalledTimes, 2)
+        XCTAssertFalse(rosettaPINTextField.isFirstResponder)
     }
 }
 
