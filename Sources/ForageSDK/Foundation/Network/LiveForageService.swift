@@ -156,7 +156,10 @@ class LiveForageService: ForageService {
     // MARK: Private structs
 
     /// `Empty` used to signify a generic, decodable type that returns nothing
-    private struct Empty: Decodable {}
+    private struct Empty: Decodable {
+        // stopgap to catch malformed responses, because Decodable {} (empty) treats every response as decodable
+        let dummyResponse: String
+    }
 
     /// `ForageRequestModel` used for compose ForageSDK requests
     private struct ForageRequestModel: Codable {
