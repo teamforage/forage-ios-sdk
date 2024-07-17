@@ -32,11 +32,12 @@ class ViewController: UIViewController {
         ClientSharedData.shared.sessionToken = sessionToken
         
         /// CHANGE WITH CAUTION
-        /// we intentionall call ``ForageSDK.setup``` with the wrong values first to ensure that we can update
-        /// the config values later on in the render (
+        /// we intentionall call ``ForageSDK.setup`` with invalid values first to ensure that we can update
+        /// the config values later on in the ``CardNumberViewController.viewDidAppear`` method
         ForageSDK.setup(
             ForageSDK.Config(
                 merchantID: "invalid mid/...",
+                // intentionally omitted environment prefix from this sessionToken
                 sessionToken: "invalid session Token with no environment prefix"
             )
         )
