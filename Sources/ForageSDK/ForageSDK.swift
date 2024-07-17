@@ -70,12 +70,28 @@ public class ForageSDK {
     ///
     /// - Use ``updateMerchantID(_:)`` to update the merchant ID after configuring.
     /// - Use ``updateSessionToken(_:)`` to update the session token after it expires.
-    public class func setup(_ config: Config) {
+    public static func setup(_ config: Config) {
         ForageSDK.config = config
         let environment = Environment(sessionToken: config.sessionToken)
-
-        initializeLogger(environment)
-        initializeLaunchDarkly(environment)
+        
+        if (isValidSessionToken(config.sessionToken)) {
+            // CHANGE WITH CAUTION:
+            
+            // Our sample app first supplies an invalid session token (with no environment prefix)
+            // and then later supplies a valid one once the first sample (PAN entry) view is loaded
+            
+            // We can only initialize the logger and LaunchDarkly once
+            // So this if-statement allows us to ensure the logger and LaunchDarkly
+            // are configured against the right environment.
+            
+            // It also allows us to ensure that calls to setup() reliably update the session token and merchantID
+            initializeLogger(environment)
+            initializeLaunchDarkly(environment)
+        }
+        
+        // We need to manually do this to ensure that the member variables get updated!
+        updateMerchantID(config.merchantID)
+        updateSessionToken(config.sessionToken)
 
         ForageSDK.logger?
             .setPrefix("ForageSDK")

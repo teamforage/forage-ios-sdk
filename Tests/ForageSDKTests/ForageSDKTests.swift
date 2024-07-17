@@ -34,6 +34,19 @@ final class ForageSDKTests: XCTestCase {
 
         XCTAssertEqual(MockForageSDK.shared.sessionToken, "dev_authToken123")
     }
+    
+    func testSetup_shouldUpdateSessionTokenAndMerchantID() {
+        setupMockSDK()
+        
+        ForageSDK.setup(ForageSDK.Config(
+            merchantID: "mid/super-duper-new",
+            sessionToken: "dev_newToken"
+        ))
+        
+        XCTAssertEqual(MockForageSDK.shared.sessionToken, "dev_newToken")
+        XCTAssertEqual(MockForageSDK.shared.merchantID, "mid/super-duper-new")
+
+    }
 
     func testInit_shouldInitializeLogger() {
         setupMockSDK()

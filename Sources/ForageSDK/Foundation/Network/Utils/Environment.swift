@@ -45,13 +45,28 @@ public enum Environment: String {
 /// - Parameter sessionToken: The session token to be converted.
 /// - Returns: The corresponding `Environment` value.
 private func sessionTokenToEnv(_ sessionToken: String?) -> Environment {
-    guard let sessionToken = sessionToken, !sessionToken.isEmpty else {
+    guard isValidSessionToken(sessionToken) else {
         return Environment.sandbox
     }
-    let parts = sessionToken.split(separator: "_")
-    guard !parts.isEmpty else {
-        return Environment.sandbox
-    }
+    let parts = sessionToken!.split(separator: "_")
     let prefix = String(parts[0])
     return Environment(rawValue: prefix) ?? Environment.sandbox
 }
+
+/// Checks if the session token is valid.
+///
+/// - Parameter sessionToken: The session token to be checked.
+/// - Returns: A boolean indicating whether the session token is valid.
+internal func isValidSessionToken(_ sessionToken: String?) -> Bool {
+    guard let sessionToken = sessionToken, !sessionToken.isEmpty else {
+        return false
+    }
+    let parts = sessionToken.split(separator: "_")
+    guard !parts.isEmpty else {
+        return false
+    }
+    let prefix = String(parts[0])
+    return Environment(rawValue: prefix) != nil
+}
+
+

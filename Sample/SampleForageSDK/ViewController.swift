@@ -30,11 +30,14 @@ class ViewController: UIViewController {
 
         ClientSharedData.shared.merchantID = merchantID
         ClientSharedData.shared.sessionToken = sessionToken
-
+        
+        /// CHANGE WITH CAUTION
+        /// we intentionall call ``ForageSDK.setup``` with the wrong values first to ensure that we can update
+        /// the config values later on in the render (
         ForageSDK.setup(
             ForageSDK.Config(
-                merchantID: merchantID,
-                sessionToken: sessionToken
+                merchantID: "invalid mid/...",
+                sessionToken: "invalid session Token with no environment prefix"
             )
         )
     }
