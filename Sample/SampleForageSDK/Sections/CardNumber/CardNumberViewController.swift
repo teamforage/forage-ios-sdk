@@ -24,7 +24,7 @@ class CardNumberViewController: BaseViewCodeViewController<CardNumberView> {
         customView.foragePanTextField.becomeFirstResponder()
         
         /// Recall in `ViewController` that we intentionally set the wrong SDK values.
-        /// We defer the "later" .setup call to the first `viewDidAppear` in the sample app
+        /// We defer the "later" .setup call (this one) to the first `viewDidAppear` of the sample app
         /// - to ensure that .setup can update the values accurately.
         ForageSDK.setup(
             ForageSDK.Config(
