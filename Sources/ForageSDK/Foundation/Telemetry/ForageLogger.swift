@@ -27,7 +27,7 @@ struct ForageLoggerConfig {
     var prefix: String?
     var context: ForageLogContext?
 
-    init(environment: Environment? = ForageSDK.shared.environment, prefix: String? = nil, context: ForageLogContext? = nil) {
+    init(environment: Environment? = nil, prefix: String? = nil, context: ForageLogContext? = nil) {
         forageEnvironment = environment
         self.context = context
         self.prefix = prefix

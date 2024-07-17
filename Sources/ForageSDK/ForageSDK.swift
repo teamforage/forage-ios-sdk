@@ -19,6 +19,9 @@ public class ForageSDK {
     public var environment: Environment = .sandbox
     // Don't update! Only updated when releasing.
     public static let version = "4.4.7"
+    
+    /// Until we migrate away from the singleton pattern in `ForageSDK`
+    /// ...Reference `shared` with caution! It can have dangerous side effects
     public static let shared = ForageSDK()
 
     // MARK: Init
@@ -74,6 +77,12 @@ public class ForageSDK {
         ForageSDK.config = config
         let environment = Environment(sessionToken: config.sessionToken)
         
+        // We need to manually update to to ensure that the ForageSDK.shared.
+        // member variables get updated!
+        updateMerchantID(config.merchantID)
+        updateSessionToken(config.sessionToken)
+        ForageSDK.shared.environment = environment
+        
         if (isValidSessionToken(config.sessionToken)) {
             // CHANGE WITH CAUTION:
             
@@ -84,14 +93,10 @@ public class ForageSDK {
             // So this if-statement allows us to ensure the logger and LaunchDarkly
             // are configured against the right environment.
             
-            // It also allows us to ensure that calls to setup() reliably update the session token and merchantID
+            // This also allows us to ensure that calls to setup() reliably update the session token and merchantID end-to-end.
             initializeLogger(environment)
             initializeLaunchDarkly(environment)
         }
-        
-        // We need to manually do this to ensure that the member variables get updated!
-        updateMerchantID(config.merchantID)
-        updateSessionToken(config.sessionToken)
 
         ForageSDK.logger?
             .setPrefix("ForageSDK")
@@ -140,7 +145,7 @@ public class ForageSDK {
         ForageSDK.shared.environment = Environment(sessionToken: newSessionToken)
     }
 
-    class func initializeLogger(_ environment: Environment) {
+    static func initializeLogger(_ environment: Environment) {
         ForageSDK.logger = DatadogLogger(
             ForageLoggerConfig(
                 environment: environment,
@@ -149,7 +154,7 @@ public class ForageSDK {
         )
     }
 
-    class func initializeLaunchDarkly(_ environment: Environment) {
+    static func initializeLaunchDarkly(_ environment: Environment) {
         LDManager.shared.initialize(environment, logger: ForageSDK.logger)
     }
 }
