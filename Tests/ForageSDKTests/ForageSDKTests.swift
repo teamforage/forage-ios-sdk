@@ -71,4 +71,29 @@ final class ForageSDKTests: XCTestCase {
         XCTAssertEqual(mockLogger.lastNoticeMsg, "Called updateSessionToken")
         XCTAssertEqual(MockForageSDK.shared.environment, .staging)
     }
+    
+    func testSetup_shouldUpdateMerchantIDAndSessionToken() {
+        ForageSDK.setup(
+            ForageSDK.Config(merchantID: "mid/first", sessionToken: "dev_first_token")
+        )
+        
+        /// NOTE: We access ForageSDK.shared. to make sure that config updates still work after ``ForageSDK.init`` is invoked
+        XCTAssertEqual(ForageSDK.shared.environment, .dev)
+        XCTAssertEqual(ForageSDK.shared.merchantID, "mid/first")
+
+        ForageSDK.setup(
+            ForageSDK.Config(merchantID: "mid/second", sessionToken: "staging_second_token")
+        )
+        
+        XCTAssertEqual(ForageSDK.shared.environment, .staging)
+        XCTAssertEqual(ForageSDK.shared.merchantID, "mid/second")
+        
+        // one more time!
+        ForageSDK.setup(
+            ForageSDK.Config(merchantID: "mid/third", sessionToken: "sandbox_second_token")
+        )
+        
+        XCTAssertEqual(ForageSDK.shared.environment, .sandbox)
+        XCTAssertEqual(ForageSDK.shared.merchantID, "mid/third")
+    }
 }
