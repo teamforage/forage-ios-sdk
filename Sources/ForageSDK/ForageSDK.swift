@@ -24,7 +24,7 @@ public class ForageSDK {
     // MARK: Init
 
     private init() {
-        guard let config = ForageSDK.config else {
+        guard ForageSDK.config != nil else {
             assertionFailure("ForageSDK is not initialized - call ForageSDK.setup() before accessing ForageSDK.shared")
             return
         }
