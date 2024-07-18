@@ -89,11 +89,10 @@ protocol ForageLogger {
 class DatadogLogger: ForageLogger {
     private static let DD_CLIENT_TOKEN: String = "pub1e4572ba0f5e53df108c333d5ec66c02"
     private static let DD_SERVICE_NAME: String = "ios-sdk"
-    private static let DD_SDK_INSTANCE_NAME: String = "forage"
-
+    
     // DO NOT UPDATE! Generate 1 TraceID per living session of the app
     static let traceId: String = generateTraceID()
-
+    
     private var logger: LoggerProtocol?
     private var config: ForageLoggerConfig?
 
@@ -190,7 +189,7 @@ class DatadogLogger: ForageLogger {
     /// Initializes and returns a Datadog instance for the given environment. If an instance with the specified name already exists,
     /// it returns the existing instance.
     private func initDatadog(_ environment: Environment) -> DatadogCoreProtocol {
-        let instanceName = DatadogLogger.DD_SDK_INSTANCE_NAME
+        let instanceName = buildInstanceName(environment: environment)
 
         if Datadog.isInitialized(instanceName: instanceName) {
             return Datadog.sdkInstance(named: instanceName)
@@ -209,6 +208,12 @@ class DatadogLogger: ForageLogger {
         Logs.enable(in: datadogInstance)
         return datadogInstance
     }
+    
+    // ensure logger is re-initialized if the environment changes!
+    private func buildInstanceName(environment: Environment) -> String {
+        return "forage-\(environment.rawValue)"
+    }
+
 
     private func getMessageWithPrefix(_ message: String) -> String {
         if let prefix = config?.prefix {

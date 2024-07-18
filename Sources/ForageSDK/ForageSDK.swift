@@ -12,8 +12,8 @@ public class ForageSDK {
     private static var config: Config?
     static var logger: ForageLogger?
     var service: ForageService?
-    var merchantID: String = ""
-    var sessionToken: String = ""
+    var merchantID: String = config?.merchantID ?? ""
+    var sessionToken: String = config?.sessionToken ?? ""
     var traceId: String = ""
 
     public var environment: Environment = .sandbox
@@ -24,14 +24,10 @@ public class ForageSDK {
     // MARK: Init
 
     private init() {
-        guard let config = ForageSDK.config else {
+        guard ForageSDK.config != nil else {
             assertionFailure("ForageSDK is not initialized - call ForageSDK.setup() before accessing ForageSDK.shared")
             return
         }
-        environment = Environment(sessionToken: config.sessionToken)
-        merchantID = config.merchantID
-        sessionToken = config.sessionToken
-
         traceId = ForageSDK.logger?.getTraceID() ?? ""
 
         VGSCollectLogger.shared.disableAllLoggers()
@@ -73,6 +69,9 @@ public class ForageSDK {
     public class func setup(_ config: Config) {
         ForageSDK.config = config
         let environment = Environment(sessionToken: config.sessionToken)
+        
+        updateMerchantID(config.merchantID)
+        updateSessionToken(config.sessionToken)
 
         initializeLogger(environment)
         initializeLaunchDarkly(environment)
