@@ -69,7 +69,7 @@ class RosettaPINTextField: UIView, VaultWrapper, UITextFieldDelegate {
         let currentValue = textField.text ?? ""
         guard let valueRange = Range(range, in: currentValue) else { return false }
         let newValue = currentValue.replacingCharacters(in: valueRange, with: string)
-        let isOnlyNumeric = newValue.allSatisfy { $0.isNumber }
+        let isOnlyNumeric = newValue.allSatisfy(\.isNumber)
         let isFourOrFewer = newValue.count <= 4
         return isOnlyNumeric && isFourOrFewer
     }
@@ -101,18 +101,18 @@ class RosettaPINTextField: UIView, VaultWrapper, UITextFieldDelegate {
     }
 
     @objc func textFieldDidChange(_ textField: UITextField) {
-        self._isEmpty = !textField.hasText
-        self._isValid = textField.text?.count == 4 && (textField.text?.allSatisfy { $0.isNumber } ?? false)
-        self._isComplete = self._isValid
-        self.delegate?.textFieldDidChange(self)
+        _isEmpty = !textField.hasText
+        _isValid = textField.text?.count == 4 && (textField.text?.allSatisfy(\.isNumber) ?? false)
+        _isComplete = _isValid
+        delegate?.textFieldDidChange(self)
     }
 
     @objc func editingBegan(_ textField: UITextField) {
-        self.delegate?.firstResponderDidChange(self)
+        delegate?.firstResponderDidChange(self)
     }
 
     @objc func editingEnded(_ textField: UITextField) {
-        self.delegate?.firstResponderDidChange(self)
+        delegate?.firstResponderDidChange(self)
     }
 
     func clearText() {

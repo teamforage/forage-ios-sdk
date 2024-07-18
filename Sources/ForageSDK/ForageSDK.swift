@@ -18,7 +18,7 @@ public class ForageSDK {
 
     public var environment: Environment = .sandbox
     // Don't update! Only updated when releasing.
-    public static let version = "4.4.7"
+    public static let version = "4.4.8"
     public static let shared = ForageSDK()
 
     // MARK: Init
@@ -69,7 +69,7 @@ public class ForageSDK {
     public class func setup(_ config: Config) {
         ForageSDK.config = config
         let environment = Environment(sessionToken: config.sessionToken)
-        
+
         updateMerchantID(config.merchantID)
         updateSessionToken(config.sessionToken)
 

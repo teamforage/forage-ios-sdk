@@ -33,8 +33,8 @@ class MockLogger: NoopLogger {
         lastCriticalMessage = message
         lastAttributes = attributes
     }
-    
-    override func warn(_ message: String, error: (any Error)?, attributes: [String : any Encodable]?) {
+
+    override func warn(_ message: String, error: (any Error)?, attributes: [String: any Encodable]?) {
         lastWarnMsg = message
         lastAttributes = attributes
     }
