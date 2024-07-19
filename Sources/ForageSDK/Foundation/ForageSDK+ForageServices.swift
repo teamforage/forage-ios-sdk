@@ -270,9 +270,9 @@ extension ForageSDK: ForageSDKService {
         )
         return false
     }
-    
+
     /// Determine if we should log an error or a warning
-    internal func logErrorResponse(_ message: String, error: Error, attributes: [String: Encodable]?, responseMonitor: ResponseMonitor?) {
+    func logErrorResponse(_ message: String, error: Error, attributes: [String: Encodable]?, responseMonitor: ResponseMonitor?) {
         responseMonitor?.setForageErrorCode(error)
         if let statusCode = (error as? ForageError)?.httpStatusCode, let forageLogger = ForageSDK.logger {
             responseMonitor?.setHttpStatusCode(statusCode)
@@ -282,7 +282,7 @@ extension ForageSDK: ForageSDKService {
         } else {
             ForageSDK.logger?.error(message, error: error, attributes: nil)
         }
-        
+
         responseMonitor?.end()
         responseMonitor?.logResult()
     }

@@ -111,12 +111,12 @@ final class ForagePINTextFieldTests: XCTestCase {
         // Test BasisTheoryTextFieldWrapper background color = nil
         btTextFieldWrapper.backgroundColor = nil
         XCTAssertEqual(btTextFieldWrapper.backgroundColor, nil)
-        
+
         // Test RosettaPINTextField background color
         let rosettaPINTextField = RosettaPINTextField()
         rosettaPINTextField.backgroundColor = .lightGray
         XCTAssertEqual(rosettaPINTextField.backgroundColor, .lightGray)
-        
+
         // Test RosettaPINTextField background color = nil
         rosettaPINTextField.backgroundColor = nil
         XCTAssertEqual(rosettaPINTextField.backgroundColor, nil)
@@ -136,7 +136,7 @@ final class ForagePINTextFieldTests: XCTestCase {
         let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
         btTextFieldWrapper.cornerRadius = 10
         XCTAssertEqual(btTextFieldWrapper.cornerRadius, 10)
-        
+
         // Test RosettaPINTextField corner radius
         let rosettaPINTextField = RosettaPINTextField()
         rosettaPINTextField.cornerRadius = 10
@@ -156,7 +156,7 @@ final class ForagePINTextFieldTests: XCTestCase {
         let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
         btTextFieldWrapper.masksToBounds = newVal
         XCTAssertEqual(btTextFieldWrapper.masksToBounds, newVal)
-        
+
         let rosettaPINTextField = RosettaPINTextField()
         rosettaPINTextField.masksToBounds = newVal
         XCTAssertEqual(rosettaPINTextField.masksToBounds, newVal)
@@ -177,12 +177,12 @@ final class ForagePINTextFieldTests: XCTestCase {
         // Test BasisTheoryTextFieldWrapper border color = .none
         btTextFieldWrapper.borderColor = .none
         XCTAssertEqual(btTextFieldWrapper.borderColor, nil)
-        
+
         // Test RosettaPINTextField border color
         let rosettaPINTextField = RosettaPINTextField()
         rosettaPINTextField.borderColor = .blue
         XCTAssertEqual(rosettaPINTextField.borderColor, .blue)
-        
+
         // Test RosettaPINTextField border color = .none
         rosettaPINTextField.borderColor = .none
         XCTAssertEqual(rosettaPINTextField.borderColor, nil)
@@ -204,7 +204,7 @@ final class ForagePINTextFieldTests: XCTestCase {
         let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
         btTextFieldWrapper.borderWidth = 10
         XCTAssertEqual(btTextFieldWrapper.borderWidth, 10)
-        
+
         // Test RosettaPINTextField border width
         let rosettaPINTextField = RosettaPINTextField()
         rosettaPINTextField.borderWidth = 10
@@ -235,7 +235,7 @@ final class ForagePINTextFieldTests: XCTestCase {
         let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
         btTextFieldWrapper.textAlignment = .center
         XCTAssertEqual(btTextFieldWrapper.textAlignment, .center)
-        
+
         // Test RosettaPINTextField text alignment
         let rosettaPINTextField = RosettaPINTextField()
         rosettaPINTextField.textAlignment = .center
@@ -247,7 +247,7 @@ final class ForagePINTextFieldTests: XCTestCase {
         let vgsTextFieldWrapper = VGSTextFieldWrapper()
         vgsTextFieldWrapper.padding = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
         XCTAssertEqual(vgsTextFieldWrapper.padding, UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10))
-        
+
         // Test RosettaPINTextField padding
         let rosettaPINTextField = RosettaPINTextField()
         rosettaPINTextField.padding = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
@@ -266,7 +266,7 @@ final class ForagePINTextFieldTests: XCTestCase {
         let btFont = UIFont.systemFont(ofSize: 20, weight: .bold)
         btTextFieldWrapper.font = btFont
         XCTAssertEqual(btTextFieldWrapper.font, btFont)
-        
+
         // Test RosettaPINTextField font
         let rosettaPINTextField = RosettaPINTextField()
         let forageFont = UIFont.systemFont(ofSize: 20, weight: .bold)
@@ -285,7 +285,7 @@ final class ForagePINTextFieldTests: XCTestCase {
         let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
         btTextFieldWrapper.textColor = .blue
         XCTAssertEqual(btTextFieldWrapper.textColor, .blue)
-        
+
         // Test RosettaPINTextField text color
         let rosettaPINTextField = RosettaPINTextField()
         rosettaPINTextField.textColor = .blue
@@ -320,7 +320,7 @@ final class ForagePINTextFieldTests: XCTestCase {
         XCTAssertEqual(btTextFieldWrapper.isComplete, false)
         XCTAssertEqual(btTextFieldWrapper.isEmpty, true)
         XCTAssertEqual(btTextFieldWrapper.isValid, false)
-        
+
         // Forage
         let rosettaPINTextField = RosettaPINTextField()
         rosettaPINTextField.clearText()
@@ -346,7 +346,7 @@ final class ForagePINTextFieldTests: XCTestCase {
 
             btTextFieldWrapper.clearText()
             btTextFieldWrapper.clearText()
-            
+
             rosettaPINTextField.clearText()
             rosettaPINTextField.clearText()
 
@@ -361,109 +361,108 @@ final class ForagePINTextFieldTests: XCTestCase {
 
         wait(for: [expectation], timeout: 3.0)
     }
-    
+
     func test_RosettaPINTextField_isComplete() {
         let rosettaPINTextField = RosettaPINTextField()
         let textField = UITextField()
-        
+
         textField.text = "1234"
         rosettaPINTextField.textFieldDidChange(textField)
         XCTAssertTrue(rosettaPINTextField.isComplete)
-        
+
         textField.text = "123"
         rosettaPINTextField.textFieldDidChange(textField)
         XCTAssertFalse(rosettaPINTextField.isComplete)
     }
-    
+
     func test_RosettaPINTextField_isValid() {
         let rosettaPINTextField = RosettaPINTextField()
         let textField = UITextField()
-        
+
         textField.text = "1234"
         rosettaPINTextField.textFieldDidChange(textField)
         XCTAssertTrue(rosettaPINTextField.isValid)
-        
+
         textField.text = "123"
         rosettaPINTextField.textFieldDidChange(textField)
         XCTAssertFalse(rosettaPINTextField.isValid)
-        
+
         textField.text = "12ab"
         rosettaPINTextField.textFieldDidChange(textField)
         XCTAssertFalse(rosettaPINTextField.isValid)
     }
-    
+
     func test_RosettaPINTextField_rejectsNonNumbers() {
         let rosettaPINTextField = RosettaPINTextField()
         let result = rosettaPINTextField.textField(UITextField(), shouldChangeCharactersIn: NSRange(), replacementString: "a")
         XCTAssertEqual(result, false)
     }
-    
+
     func test_RosettaPINTextField_allowsNumbers() {
         let rosettaPINTextField = RosettaPINTextField()
         let result = rosettaPINTextField.textField(UITextField(), shouldChangeCharactersIn: NSRange(), replacementString: "1")
         XCTAssertEqual(result, true)
     }
-    
+
     func test_RosettaPINTextField_rejectsOverFourDigits() {
         let rosettaPINTextField = RosettaPINTextField()
         let result = rosettaPINTextField.textField(UITextField(), shouldChangeCharactersIn: NSRange(), replacementString: "12345")
         XCTAssertEqual(result, false)
     }
-    
+
     func test_RosettaPINTextField_allowsFourDigits() {
         let rosettaPINTextField = RosettaPINTextField()
         let result = rosettaPINTextField.textField(UITextField(), shouldChangeCharactersIn: NSRange(), replacementString: "1234")
         XCTAssertEqual(result, true)
     }
-    
+
     func test_RosettaPINTextField_delegateMethodCalls() {
         class MockDelegate: VaultWrapperDelegate {
             var textFieldDidChangeCalledTimes = 0
             var firstResponderDidChangeCalledTimes = 0
-            
+
             func textFieldDidChange(_ textField: any VaultWrapper) {
                 textFieldDidChangeCalledTimes += 1
             }
-            
+
             func firstResponderDidChange(_ textField: any VaultWrapper) {
                 firstResponderDidChangeCalledTimes += 1
             }
-
         }
-        
+
         let rosettaPINTextField = RosettaPINTextField()
         let mockDelegate = MockDelegate()
         let textField = UITextField()
         let window = UIWindow()
-        
+
         rosettaPINTextField.delegate = mockDelegate
         window.addSubview(rosettaPINTextField)
-        
+
         // textFieldDidChange
         rosettaPINTextField.textFieldDidChange(textField)
         XCTAssertEqual(mockDelegate.textFieldDidChangeCalledTimes, 1)
-        
+
         // firstResponderDidChange
         XCTAssertFalse(rosettaPINTextField.isFirstResponder)
 
         // simulating the system firing the .editingDidBegin event
         rosettaPINTextField.becomeFirstResponder()
         rosettaPINTextField.editingBegan(textField)
-        
+
         // wait for the responder chain to update
         RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.1))
-        
+
         // Assert that we called the right delegate methods and the isFirstResponder status was updated
         XCTAssertEqual(mockDelegate.firstResponderDidChangeCalledTimes, 1)
         XCTAssertTrue(rosettaPINTextField.isFirstResponder)
-        
+
         // simulating the system firing the .editingDidEnd event
         rosettaPINTextField.resignFirstResponder()
         rosettaPINTextField.editingEnded(textField)
-        
+
         // wait for the responder chain to update
         RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.1))
-        
+
         // Assert that we called the right delegate methods and the isFirstResponder status was updated
         XCTAssertEqual(mockDelegate.firstResponderDidChangeCalledTimes, 2)
         XCTAssertFalse(rosettaPINTextField.isFirstResponder)

@@ -362,7 +362,7 @@ class RosettaPINSubmitter: VaultCollector {
         session: URLSessionProtocol = URLSession.shared
     ) {
         self.textElement = textElement
-        self.customHeaders = [:]
+        customHeaders = [:]
         self.forageVaultConfig = forageVaultConfig
         self.logger = logger
         self.session = session
@@ -489,7 +489,7 @@ class RosettaPINSubmitter: VaultCollector {
         }
 
         let isFourCharacters = pin.count == 4
-        let isOnlyNumeric = pin.allSatisfy { $0.isNumber }
+        let isOnlyNumeric = pin.allSatisfy(\.isNumber)
         let isValidPIN = isFourCharacters && isOnlyNumeric
 
         if isValidPIN {
