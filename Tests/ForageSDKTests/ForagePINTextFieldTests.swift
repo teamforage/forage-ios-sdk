@@ -98,11 +98,6 @@ final class ForagePINTextFieldTests: XCTestCase {
         foragePinTextField.backgroundColor = .lightGray
         XCTAssertEqual(foragePinTextField.backgroundColor, .lightGray)
 
-        // Test VGSTextFieldWrapper background color
-        let vgsTextFieldWrapper = VGSTextFieldWrapper()
-        vgsTextFieldWrapper.backgroundColor = .lightGray
-        XCTAssertEqual(vgsTextFieldWrapper.backgroundColor, .lightGray)
-
         // Test BasisTheoryTextFieldWrapper background color
         let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
         btTextFieldWrapper.backgroundColor = .lightGray
@@ -127,11 +122,6 @@ final class ForagePINTextFieldTests: XCTestCase {
         foragePinTextField.cornerRadius = 10
         XCTAssertEqual(foragePinTextField.cornerRadius, 10)
 
-        // Test VGSTextFieldWrapper border radius
-        let vgsTextFieldWrapper = VGSTextFieldWrapper()
-        vgsTextFieldWrapper.cornerRadius = 10
-        XCTAssertEqual(vgsTextFieldWrapper.cornerRadius, 10)
-
         // Test BasisTheoryTextFieldWrapper corner radius
         let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
         btTextFieldWrapper.cornerRadius = 10
@@ -148,10 +138,6 @@ final class ForagePINTextFieldTests: XCTestCase {
         let newVal = false
         foragePinTextField.masksToBounds = newVal
         XCTAssertEqual(foragePinTextField.masksToBounds, newVal)
-
-        let vgsTextFieldWrapper = VGSTextFieldWrapper()
-        vgsTextFieldWrapper.masksToBounds = newVal
-        XCTAssertEqual(vgsTextFieldWrapper.masksToBounds, newVal)
 
         let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
         btTextFieldWrapper.masksToBounds = newVal
@@ -195,11 +181,6 @@ final class ForagePINTextFieldTests: XCTestCase {
         let width = foragePinTextField.borderWidth
         XCTAssertEqual(width, borderWidth)
 
-        // Test VGSTextFieldWrapper border width
-        let vgsTextFieldWrapper = VGSTextFieldWrapper()
-        vgsTextFieldWrapper.borderWidth = 10
-        XCTAssertEqual(vgsTextFieldWrapper.borderWidth, 10)
-
         // Test BasisTheoryTextFieldWrapper border width
         let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
         btTextFieldWrapper.borderWidth = 10
@@ -226,11 +207,6 @@ final class ForagePINTextFieldTests: XCTestCase {
         let textAlignment = foragePinTextField.textAlignment
         XCTAssertEqual(alignment, textAlignment)
 
-        // Test VGSTextFieldWrapper text alignment
-        let vgsTextFieldWrapper = VGSTextFieldWrapper()
-        vgsTextFieldWrapper.textAlignment = .center
-        XCTAssertEqual(vgsTextFieldWrapper.textAlignment, .center)
-
         // Test BasisTheoryTextFieldWrapper text alignment
         let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
         btTextFieldWrapper.textAlignment = .center
@@ -243,11 +219,6 @@ final class ForagePINTextFieldTests: XCTestCase {
     }
 
     func test_padding() {
-        // Test VGSTextFieldWrapper padding
-        let vgsTextFieldWrapper = VGSTextFieldWrapper()
-        vgsTextFieldWrapper.padding = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
-        XCTAssertEqual(vgsTextFieldWrapper.padding, UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10))
-
         // Test RosettaPINTextField padding
         let rosettaPINTextField = RosettaPINTextField()
         rosettaPINTextField.padding = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
@@ -301,16 +272,6 @@ final class ForagePINTextFieldTests: XCTestCase {
     }
 
     func test_clearText() {
-        // VGS
-        let vgsTextFieldWrapper = VGSTextFieldWrapper()
-        vgsTextFieldWrapper.clearText()
-        vgsTextFieldWrapper.clearText()
-
-        // assert that it does not cause crash and resets status fields!
-        XCTAssertEqual(vgsTextFieldWrapper.isComplete, false)
-        XCTAssertEqual(vgsTextFieldWrapper.isEmpty, true)
-        XCTAssertEqual(vgsTextFieldWrapper.isValid, false)
-
         // Basis Theory
         let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
         btTextFieldWrapper.clearText()
@@ -334,16 +295,12 @@ final class ForagePINTextFieldTests: XCTestCase {
 
     // because we force clearText to run on the main thread!
     func test_clientCallsClearText_onBackgroundThread_doesNotCrash() {
-        let vgsTextFieldWrapper = VGSTextFieldWrapper()
         let btTextFieldWrapper = BasisTheoryTextFieldWrapper()
         let rosettaPINTextField = RosettaPINTextField()
 
         let expectation = XCTestExpectation(description: "should clear text without crashing")
 
         DispatchQueue.global(qos: .userInitiated).async {
-            vgsTextFieldWrapper.clearText()
-            vgsTextFieldWrapper.clearText()
-
             btTextFieldWrapper.clearText()
             btTextFieldWrapper.clearText()
 
@@ -351,7 +308,6 @@ final class ForagePINTextFieldTests: XCTestCase {
             rosettaPINTextField.clearText()
 
             DispatchQueue.main.async {
-                XCTAssertFalse(vgsTextFieldWrapper.isComplete)
                 XCTAssertFalse(btTextFieldWrapper.isComplete)
                 XCTAssertFalse(rosettaPINTextField.isComplete)
 
