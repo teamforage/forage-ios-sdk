@@ -38,7 +38,6 @@ private enum LDMobileKey: String {
  Vault Types
  */
 enum VaultType: String {
-    case vgs
     case basisTheory = "basis_theory"
     case forage
 }
