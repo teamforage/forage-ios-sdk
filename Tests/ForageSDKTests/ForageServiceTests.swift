@@ -8,7 +8,6 @@
 
 @testable import ForageSDK
 @testable import LaunchDarkly
-import VGSCollectSDK
 import XCTest
 
 class MockLDManager: LDManagerProtocol {
@@ -16,7 +15,7 @@ class MockLDManager: LDManagerProtocol {
         ldClient: LDClientProtocol?,
         genRandomDouble: () -> Double
     ) -> VaultType {
-        VaultType.vgs
+        VaultType.forage
     }
 }
 

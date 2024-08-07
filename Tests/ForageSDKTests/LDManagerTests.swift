@@ -18,7 +18,7 @@ class MockLDClient: LDClientProtocol {
     }
 
     init(vaultType: VaultType) {
-        vaultPercentage = vaultType == VaultType.vgs ? 0 : 100
+        vaultPercentage = vaultType == VaultType.forage ? 0 : 100
     }
 
     func doubleVariationWrapper(forKey key: String, defaultValue: Double) -> Double {
@@ -29,7 +29,7 @@ class MockLDClient: LDClientProtocol {
 final class LDManagerTests: XCTestCase {
     // MARK: Test LDManager.getVaultType
 
-    func testGetVaultType_WhenLDClientIsNil_ShouldReturnVGSVaultType() {
+    func testGetVaultType_WhenLDClientIsNil_ShouldReturnForageVaultType() {
         let result = LDManager.shared.getVaultType(
             ldClient: nil,
             genRandomDouble: LDManager.generateRandomDouble

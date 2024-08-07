@@ -4,7 +4,6 @@
 //
 
 import Foundation
-import VGSCollectSDK
 
 public class ForageSDK {
     // MARK: Properties
@@ -29,8 +28,6 @@ public class ForageSDK {
             return
         }
         traceId = ForageSDK.logger?.getTraceID() ?? ""
-
-        VGSCollectLogger.shared.disableAllLoggers()
 
         let provider = Provider(logger: ForageSDK.logger)
         service = LiveForageService(
