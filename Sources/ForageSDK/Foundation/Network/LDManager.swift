@@ -104,7 +104,7 @@ class LDManager: LDManagerProtocol {
     }
 
     /// Determines the type of vault to be used based on the "vault-primary-traffic-percentage" feature flag.
-    /// Defaults to VGS if something goes wrong (ex: LDClient not initialized, LaunchDarkly is down).
+    /// Defaults to Forage if something goes wrong (ex: LDClient not initialized, LaunchDarkly is down).
     ///
     /// - Parameters:
     ///   - ldClient: An optional `LDClientProtocol` object used to fetch feature flags. Defaults to `getDefaultLDClient()`.

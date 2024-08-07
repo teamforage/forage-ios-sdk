@@ -4,7 +4,6 @@
 //
 
 import UIKit
-import VGSCollectSDK
 
 public class ForagePINTextField: UIView, Identifiable, ForageElement {
     // MARK: - Properties
@@ -90,7 +89,6 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
     }
 
     /// Change UIFont
-    /// `VGSTextField` text font
     @IBInspectable public var font: UIFont? {
         get { textField.font }
         set { textField.font = newValue }

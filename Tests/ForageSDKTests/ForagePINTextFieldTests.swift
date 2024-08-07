@@ -7,7 +7,6 @@
 //
 
 @testable import ForageSDK
-import VGSCollectSDK
 import XCTest
 
 final class ForagePINTextFieldTests: XCTestCase {

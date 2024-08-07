@@ -191,7 +191,7 @@ class LiveForageService: ForageService {
                 authorization: sessionToken,
                 cardNumberToken: token,
                 merchantID: merchantID,
-                xKey: ["vgsXKey": xKeyModel.alias, "btXKey": xKeyModel.bt_alias]
+                xKey: ["btXKey": xKeyModel.bt_alias]
             )
         } catch {
             logger?.error(
@@ -205,7 +205,7 @@ class LiveForageService: ForageService {
 
     /// Common Payment-related prologue across capturePayment and collectPin.
     /// Both `deferPaymentCapture` and `capturePayment` involve the same
-    /// preliminerary data retrieval and a trip to the Vault (VGS or Basis Theory) Proxy
+    /// preliminerary data retrieval and a trip to the Vault (Forage or Basis Theory) Proxy
     private func collectPinForPayment<T: Decodable>(
         pinCollector: VaultCollector,
         paymentReference: String,
@@ -229,7 +229,7 @@ class LiveForageService: ForageService {
         }
     }
 
-    /// Submit PIN to the Vault Proxy (Basis Theory or VGS)
+    /// Submit PIN to the Vault Proxy (Basis Theory or Forage)
     /// - Parameters:
     ///   - pinCollector: The PIN collection client
     ///   - vaultAction: The action performed against the vault.

@@ -9,7 +9,6 @@
 @testable import ForageSDK
 import BasisTheoryElements
 import Foundation
-import VGSCollectSDK
 import XCTest
 
 class VaultCollectorTests: XCTestCase {

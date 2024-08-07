@@ -19,11 +19,6 @@ let package = Package(
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
         .package(
-            name: "VGSCollectSDK",
-            url: "https://github.com/verygoodsecurity/vgs-collect-ios.git",
-            .exact("1.15.3")
-        ),
-        .package(
             name: "LaunchDarkly",
             url: "https://github.com/launchdarkly/ios-client-sdk.git",
             .exact("9.6.1")
