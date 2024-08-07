@@ -9,7 +9,7 @@
 import Foundation
 
 enum EventName: String {
-    /// vaultResponse refers to a response from the Forage or BT submit actions.
+    /// vaultResponse refers to a response from the Vault Proxy submit actions.
     case vaultResponse = "vault_response"
     /**
      customer_perceived_response refers to the response from a balance or capture action. There are
@@ -21,7 +21,7 @@ enum EventName: String {
 }
 
 /*
- `VaultProxyResponseMonitor` is a specialized `ResponseMonitor` for handling Vault-related network metrics. VaultProxyResponseMonitor is used to track the errors and response times from the Forage and BT submit functions. The timer begins when a balance or capture request is submitted to Forage/BT and ends when a response is received by the SDK.
+ `VaultProxyResponseMonitor` is a specialized `ResponseMonitor` for handling Vault-related network metrics. VaultProxyResponseMonitor is used to track the errors and response times from the Vault Proxy submit functions. The timer begins when a balance or capture request is submitted to the Vault Proxy and ends when a response is received by the SDK.
  */
 final class VaultProxyResponseMonitor: ResponseMonitor {
     private let vaultAction: VaultAction

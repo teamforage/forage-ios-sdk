@@ -107,7 +107,7 @@ protocol ForageService: AnyObject {
     ///   - `ForageError`: If there's an issue at any stage of the payment capture process.
     ///
     /// - Returns:
-    ///   - A `VaultResponse` object containing the response from the Vault (Forage or Basis Theory) proxy.
+    ///   - A `VaultResponse` object containing the response from the Vault proxy.
     func collectPinForDeferredCapture(
         pinCollector: VaultCollector,
         paymentReference: String

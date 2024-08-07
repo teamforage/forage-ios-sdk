@@ -13,7 +13,7 @@ import UIKit
 let tokenDelimiter = ","
 let tokenKey = "card_number_token"
 
-/// Defines actions performed against the Vault (Forage or Basis Theory) Proxy.
+/// Defines actions performed against the Vault Proxy.
 enum VaultAction: String {
     case balanceCheck = "balance"
     case capturePayment = "capture"

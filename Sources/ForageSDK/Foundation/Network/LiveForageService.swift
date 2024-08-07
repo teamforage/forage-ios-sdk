@@ -205,7 +205,7 @@ class LiveForageService: ForageService {
 
     /// Common Payment-related prologue across capturePayment and collectPin.
     /// Both `deferPaymentCapture` and `capturePayment` involve the same
-    /// preliminerary data retrieval and a trip to the Vault (Forage or Basis Theory) Proxy
+    /// preliminerary data retrieval and a trip to the Vault Proxy
     private func collectPinForPayment<T: Decodable>(
         pinCollector: VaultCollector,
         paymentReference: String,
@@ -229,7 +229,7 @@ class LiveForageService: ForageService {
         }
     }
 
-    /// Submit PIN to the Vault Proxy (Basis Theory or Forage)
+    /// Submit PIN to the Vault Proxy
     /// - Parameters:
     ///   - pinCollector: The PIN collection client
     ///   - vaultAction: The action performed against the vault.

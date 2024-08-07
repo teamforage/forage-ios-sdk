@@ -35,7 +35,6 @@ let package = Package(
         .target(
             name: "ForageSDK",
             dependencies: [
-                "VGSCollectSDK",
                 "LaunchDarkly",
                 "BasisTheoryElements",
                 "DatadogPrivateFork"
