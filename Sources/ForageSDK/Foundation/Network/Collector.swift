@@ -46,11 +46,6 @@ protocol VaultCollector {
 
 // MARK: Vault Configs
 
-struct VGSCollectConfig {
-    let id: String
-    let environment: VGSCollectSDK.Environment
-}
-
 struct BasisTheoryConfig {
     let publicKey: String
     let proxyKey: String
@@ -66,127 +61,6 @@ struct ForageVaultConfig {
         case .cert: return "vault.cert.joinforage.app"
         case .prod: return "vault.joinforage.app"
         }
-    }
-}
-
-// MARK: VGS
-
-// Wrapper class for VGSCollect
-class VGSCollectWrapper: VaultCollector {
-    public let vgsCollect: VGSCollect
-    private let logger: ForageLogger?
-
-    init(config: VGSCollectConfig, logger: ForageLogger? = DatadogLogger(ForageLoggerConfig(prefix: "VGS"))) {
-        vgsCollect = VGSCollect(id: config.id, environment: config.environment)
-        self.logger = logger
-    }
-
-    func setCustomHeaders(headers: [String: String], xKey: [String: String]) {
-        var mutableHeaders = headers
-        mutableHeaders["X-KEY"] = xKey["vgsXKey"]
-        vgsCollect.customHeaders = mutableHeaders
-    }
-
-    func handleResponse<T: Decodable>(code: Int, data: Data?, error: Error?, measurement: NetworkMonitor, completion: (T?, ForageError?) -> Void) {
-        measurement.end()
-        measurement.setHttpStatusCode(code).logResult()
-
-        // If an error is explicitly returned from VGS, log the error and return
-        if let error = error {
-            logger?.critical(
-                "VGS proxy failed with an error",
-                error: error,
-                attributes: nil
-            )
-            return completion(nil, CommonErrors.UNKNOWN_SERVER_ERROR)
-        }
-
-        // If there was no error AND no data was returned, something went wrong and we should log and return
-        guard let data = data else {
-            logger?.critical(
-                "VGS failed to respond with a data object",
-                error: nil,
-                attributes: nil
-            )
-            return completion(nil, CommonErrors.UNKNOWN_SERVER_ERROR)
-        }
-
-        // If the response was a Forage error (ex. 429 throttled), catch it here and return
-        if let forageServiceError = try? JSONDecoder().decode(ForageServiceError.self, from: data) {
-            let forageCode = forageServiceError.errors[0].code
-            let message = forageServiceError.errors[0].message
-            return completion(nil, ForageError.create(
-                code: forageCode,
-                httpStatusCode: code,
-                message: message
-            ))
-        }
-
-        // If the code is a 204, we got a successful response from the deferred capture flow.
-        // In this scenario, we should just return
-        if code == 204 {
-            return completion(nil, nil)
-        }
-
-        // Try to decode the response and return the expected object
-        do {
-            let decoder = JSONDecoder()
-            let decodedResponse = try decoder.decode(T.self, from: data)
-            completion(decodedResponse, nil)
-        } catch {
-            // If we are unable to decode whatever was returned, log and return
-            logger?.critical(
-                "Failed to decode VGS response data.",
-                error: CommonErrors.UNKNOWN_SERVER_ERROR,
-                attributes: nil
-            )
-            return completion(nil, CommonErrors.UNKNOWN_SERVER_ERROR)
-        }
-    }
-
-    func sendData<T: Decodable>(path: String, vaultAction: VaultAction, extraData: [String: Any], completion: @escaping (T?, ForageError?) -> Void) {
-        var mutableExtraData = extraData
-        if let paymentMethodToken = extraData[tokenKey] as? String {
-            let token = getPaymentMethodToken(paymentMethodToken: paymentMethodToken)
-            if token.isEmpty {
-                logger?.critical(
-                    "Failed to send data. VGS token not found on card",
-                    error: nil,
-                    attributes: nil
-                )
-                return completion(nil, CommonErrors.UNKNOWN_SERVER_ERROR)
-            }
-            mutableExtraData[tokenKey] = token
-        }
-
-        let measurement = VaultProxyResponseMonitor.newMeasurement(vault: VaultType.vgs, action: vaultAction)
-            .setPath(path)
-            .setMethod(.post)
-
-        measurement.start()
-
-        // VGS performs UI actions in this method, which should run on the main thread
-        DispatchQueue.main.async { [self] in
-            vgsCollect.sendData(path: path, extraData: mutableExtraData) { [self] response in
-                switch response {
-                case let .success(code, data, _):
-                    handleResponse(code: code, data: data, error: nil, measurement: measurement, completion: completion)
-                case let .failure(code, data, _, error):
-                    handleResponse(code: code, data: data, error: error, measurement: measurement, completion: completion)
-                }
-            }
-        }
-    }
-
-    func getPaymentMethodToken(paymentMethodToken: String) -> String {
-        if paymentMethodToken.contains(tokenDelimiter) {
-            return paymentMethodToken.components(separatedBy: tokenDelimiter)[0]
-        }
-        return paymentMethodToken
-    }
-
-    func getVaultType() -> VaultType {
-        VaultType.vgs
     }
 }
 
@@ -546,38 +420,6 @@ class RosettaPINSubmitter: VaultCollector {
 
 enum CollectorFactory {
     /**
-     VGS VaultId
-     */
-    private enum VaultId: String {
-        case sandbox = "tntagcot4b1"
-        case cert = "tntpnht7psv"
-        case prod = "tntbcrncmgi"
-        case staging = "tnteykuh975"
-        case dev = "tntlqkidhc6"
-    }
-
-    public static func CreateVGS() -> VGSCollect {
-        VGSCollect(id: vaultID(ForageSDK.shared.environment).rawValue, environment: environmentVGS(ForageSDK.shared.environment))
-    }
-
-    private static func vaultID(_ environment: Environment) -> VaultId {
-        switch environment {
-        case .sandbox: return .sandbox
-        case .cert: return .cert
-        case .prod: return .prod
-        case .staging: return .staging
-        case .dev: return .dev
-        }
-    }
-
-    private static func environmentVGS(_ environment: Environment) -> VGSCollectSDK.Environment {
-        switch environment {
-        case .cert, .sandbox, .staging, .dev: return .sandbox
-        case .prod: return .live
-        }
-    }
-
-    /**
      BT public Keys
      */
     private enum PublicKey: String {
@@ -617,13 +459,6 @@ enum CollectorFactory {
         case prod = "UxbU4Jn2RmvCovABjwCwsa"
         case staging = "ScWvAUkp53xz7muae7fW5p"
         case dev = "N31FZgKpYZpo3oQ6XiM6M6"
-    }
-
-    static func createVGS(environment: Environment) -> VGSCollectWrapper {
-        let id = vaultID(environment).rawValue
-        let environmentVGS = environmentVGS(environment)
-        let config = VGSCollectConfig(id: id, environment: environmentVGS)
-        return VGSCollectWrapper(config: config)
     }
 
     static func createBasisTheory(environment: Environment, textElement: TextElementUITextField) -> BasisTheoryWrapper {
