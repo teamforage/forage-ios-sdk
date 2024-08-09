@@ -31,7 +31,7 @@ let package = Package(
         .package(
             name: "BasisTheoryElements",
             url: "https://github.com/Basis-Theory/basistheory-ios",
-            .exact("4.1.0")
+            .exact("4.1.2")
         )
     ],
     targets: [
