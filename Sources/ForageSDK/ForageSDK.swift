@@ -63,6 +63,11 @@ public class ForageSDK {
     public struct Config {
         var merchantID: String
         var sessionToken: String
+        
+        public init(merchantID: String, sessionToken: String) {
+            self.merchantID = merchantID
+            self.sessionToken = sessionToken
+        }
     }
 
     /// Configures the Forage SDK with the given configuration.
