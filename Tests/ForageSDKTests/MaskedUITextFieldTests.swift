@@ -13,8 +13,6 @@ final class MaskedUITextFieldTests: XCTestCase {
 
     override func setUp() {
         setUpForageSDK()
-        // .setup() currently doesn't allow us to update the environment
-        ForageSDK.shared.environment = .sandbox
         maskedTextField = MaskedUITextField()
     }
 
@@ -120,7 +118,7 @@ final class MaskedUITextFieldTests: XCTestCase {
     // MARK: - Validation with special cards
 
     func testValidation_specialButProd_shouldBeInvalidAndIncomplete() {
-        ForageSDK.shared.environment = .prod
+        ForageSDK.updateSessionToken("prod_unit-test")
         maskedTextField.text = "4444444444444454"
         maskedTextField.textFieldDidChange()
 

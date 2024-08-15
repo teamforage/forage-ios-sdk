@@ -14,7 +14,6 @@ final class FloatingTextFieldTests: XCTestCase {
 
     override func setUp() {
         setUpForageSDK()
-        ForageSDK.shared.environment = .sandbox
         floatingTextField = FloatingTextField()
     }
 
