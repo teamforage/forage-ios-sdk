@@ -6,28 +6,42 @@
 import Foundation
 
 public class ForageSDK {
-    // MARK: Properties
+    // MARK: - Static Properties
 
+    // These belong to ForageSDK itself and are shared by all of its instances
     private static var config: Config?
     static var logger: ForageLogger?
-    var service: ForageService?
-    var merchantID: String = config?.merchantID ?? ""
-    var sessionToken: String = config?.sessionToken ?? ""
-    var traceId: String = ""
-
-    public var environment: Environment = .sandbox
-    // Don't update! Only updated when releasing.
+    // Don't update version! Only updated when releasing.
     public static let version = "4.4.9"
     public static let shared = ForageSDK()
+    
+    // MARK: - Singleton Instance Properties
 
-    // MARK: Init
+    // Instance properties, only belong to the `shared` singleton instance.
+    var service: ForageService?
+    
+    // Computed instance properties derived from static values
+    public var environment: Environment {
+        Environment(sessionToken: ForageSDK.config?.sessionToken)
+    }
+    var merchantID: String {
+        ForageSDK.config?.merchantID ?? ""
+    }
+    var sessionToken: String {
+        ForageSDK.config?.sessionToken ?? ""
+    }
+    var traceId: String {
+        ForageSDK.logger?.getTraceID() ?? ""
+    }
 
+    // MARK: - Singleton Init
+
+    // This is only called when first accessing `shared`. This class can't be initialized manually, only by referencing `ForageSDK.shared`, which creates the singleton instance and calls this private `init` method. It would only get called again if the singleton instance was removed from memory (force-closing an app, for instance).
     private init() {
         guard ForageSDK.config != nil else {
             assertionFailure("ForageSDK is not initialized - call ForageSDK.setup() before accessing ForageSDK.shared")
             return
         }
-        traceId = ForageSDK.logger?.getTraceID() ?? ""
 
         let provider = Provider(logger: ForageSDK.logger)
         service = LiveForageService(
@@ -36,6 +50,8 @@ public class ForageSDK {
             ldManager: LDManager.shared
         )
     }
+    
+    // MARK: - Public API
 
     /**
      ``Config`` struct to set the merchant ID and session token on the ``ForageSDK`` singleton
@@ -95,7 +111,6 @@ public class ForageSDK {
 
         // config is guaranteed to be non-nil because of the guard above.
         ForageSDK.config!.merchantID = newMerchantID
-        ForageSDK.shared.merchantID = newMerchantID
     }
 
     /// Updates the session token to use for subsequent API calls.
@@ -116,10 +131,10 @@ public class ForageSDK {
 
         // config is guaranteed to be non-nil because of the guard above.
         ForageSDK.config!.sessionToken = newSessionToken
-        ForageSDK.shared.sessionToken = newSessionToken
-        ForageSDK.shared.environment = Environment(sessionToken: newSessionToken)
     }
 
+    // MARK: - Internal methods
+    
     class func initializeLogger(_ environment: Environment) {
         ForageSDK.logger = DatadogLogger(
             ForageLoggerConfig(
