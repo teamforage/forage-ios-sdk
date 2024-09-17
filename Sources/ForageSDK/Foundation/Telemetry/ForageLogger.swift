@@ -205,7 +205,11 @@ class DatadogLogger: ForageLogger {
             instanceName: instanceName
         )
 
-        Logs.enable(in: datadogInstance)
+        // Send logs to PCI compliant Datadog endpoint
+        let config = Logs.Configuration(
+            customEndpoint: URL(string: "https://pci.browser-intake-datadoghq.com"))
+
+        Logs.enable(with: config, in: datadogInstance)
         return datadogInstance
     }
 
