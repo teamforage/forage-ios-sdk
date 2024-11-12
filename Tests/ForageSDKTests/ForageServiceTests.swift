@@ -7,18 +7,7 @@
 //
 
 @testable import ForageSDK
-@testable import LaunchDarkly
-import VGSCollectSDK
 import XCTest
-
-class MockLDManager: LDManagerProtocol {
-    func getVaultType(
-        ldClient: LDClientProtocol?,
-        genRandomDouble: () -> Double
-    ) -> VaultType {
-        VaultType.vgs
-    }
-}
 
 final class ForageServiceTests: XCTestCase {
     var forageMocks: ForageMocks!
@@ -29,10 +18,7 @@ final class ForageServiceTests: XCTestCase {
     }
 
     func createTestService(_ mockSession: URLSessionMock) -> ForageService {
-        LiveForageService(
-            provider: Provider(mockSession),
-            ldManager: MockLDManager()
-        )
+        LiveForageService(provider: Provider(mockSession))
     }
 
     func test_tokenizeEBTCard_onSuccess_checkExpectedPayload() {
@@ -84,45 +70,6 @@ final class ForageServiceTests: XCTestCase {
 
         let expectation = XCTestExpectation(description: "Tokenize EBT Card - result should be failure")
         service.tokenizeEBTCard(request: foragePANRequestModel) { result in
-            switch result {
-            case .success:
-                XCTFail("Expected failure")
-            case let .failure(error):
-                XCTAssertNotNil(error)
-                expectation.fulfill()
-            }
-        }
-        wait(for: [expectation], timeout: 1.0)
-    }
-
-    func test_getXKey_onSuccess_checkExpectedPayload() {
-        let mockSession = URLSessionMock()
-        mockSession.data = forageMocks.xKeySuccess
-        mockSession.response = forageMocks.mockSuccessResponse
-        let service = createTestService(mockSession)
-
-        let expectation = XCTestExpectation(description: "Get the X-Key header - should succeed")
-        service.getXKey(sessionToken: "auth1234", merchantID: "1234567") { result in
-            switch result {
-            case let .success(model):
-                XCTAssertEqual(model.alias, "tok_sandbox_agCcwWZs8TMkkq89f8KHSx")
-                XCTAssertEqual(model.bt_alias, "443b4f60-67f3-46d7-af4f-0476b7db4894")
-                expectation.fulfill()
-            case .failure:
-                XCTFail("Expected success")
-            }
-        }
-        wait(for: [expectation], timeout: 1.0)
-    }
-
-    func test_getXKey_onFailure_shouldReturnFailure() {
-        let mockSession = URLSessionMock()
-        mockSession.error = forageMocks.generalError
-        mockSession.response = forageMocks.mockFailureResponse
-        let service = createTestService(mockSession)
-
-        let expectation = XCTestExpectation(description: "Get the X-Key header - result should be failure")
-        service.getXKey(sessionToken: "auth1234", merchantID: "1234567") { result in
             switch result {
             case .success:
                 XCTFail("Expected failure")

@@ -13,7 +13,6 @@ struct ForageLogContext {
     var merchantRef: String?
     var paymentRef: String?
     var paymentMethodRef: String?
-    var vaultType: VaultType?
     var sdkVersion: String = ForageSDK.version
 }
 
@@ -158,7 +157,7 @@ class DatadogLogger: ForageLogger {
             ("merchant_ref", newContext.merchantRef),
             ("payment_method_ref", newContext.paymentMethodRef),
             ("payment_ref", newContext.paymentRef),
-            ("vault_type", newContext.vaultType?.rawValue),
+            ("vault_type", "forage"),
             ("sdk_version", newContext.sdkVersion),
         ]
 

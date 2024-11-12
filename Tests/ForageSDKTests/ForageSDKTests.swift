@@ -41,12 +41,6 @@ final class ForageSDKTests: XCTestCase {
         XCTAssertTrue(MockForageSDK.initializedLogger)
     }
 
-    func testInit_shouldInitializeLaunchDarkly() {
-        setupMockSDK()
-
-        XCTAssertTrue(MockForageSDK.initializedLaunchDarkly)
-    }
-
     func testInit_shouldInitForageService() {
         setupMockSDK()
 
