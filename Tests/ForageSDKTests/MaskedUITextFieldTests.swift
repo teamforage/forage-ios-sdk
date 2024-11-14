@@ -287,6 +287,37 @@ final class MaskedUITextFieldTests: XCTestCase {
         XCTAssertEqual(maskedTextField.actualPAN, "9999123412341234123")
     }
 
+    func testMasking_shouldMaskForMultiplePanLengths() {
+        // Maine cards can be 16 or 19 digits long
+
+        func assertMaskedTextField(input: String, expectedOutput: String) {
+            maskedTextField.text = input
+            maskedTextField.textFieldDidChange()
+            XCTAssertEqual(maskedTextField.text, expectedOutput)
+        }
+
+        assertMaskedTextField(
+            input: "507703111111123",
+            expectedOutput: "5077 0311 1111 123"
+        ) // 15 digits
+        assertMaskedTextField(
+            input: "5077031111111234",
+            expectedOutput: "5077 0311 1111 1234"
+        ) // 16 digits
+        assertMaskedTextField(
+            input: "50770311111112345",
+            expectedOutput: "507703 1111 1112 345"
+        ) // 17 digits
+        assertMaskedTextField(
+            input: "507703111111123456",
+            expectedOutput: "507703 1111 1112 345 6"
+        ) // 18 digits
+        assertMaskedTextField(
+            input: "5077031111111234567",
+            expectedOutput: "507703 1111 1112 345 67"
+        ) // 19 digits
+    }
+
     // MARK: Masking with backspace
 
     func testMasking_backspaceAtEnd_shouldRemoveLastChar() {
