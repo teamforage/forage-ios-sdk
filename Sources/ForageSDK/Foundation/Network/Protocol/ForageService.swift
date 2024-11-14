@@ -16,7 +16,7 @@ protocol ForageService: AnyObject {
     /// Provider provides the interface for performing HTTP requests.
     var provider: Provider { get }
 
-    /// Retrieves the EncryptionKey from the Forage API, to be utilized as the X-Key header.
+    /// Retrieves the Key from the Forage API, to be utilized as the X-Key header.
     ///
     /// - Parameters:
     ///  - sessionToken: Short-lived session token that authorizes requests to the Forage API.
