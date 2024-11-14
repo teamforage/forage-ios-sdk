@@ -78,6 +78,31 @@ final class ForagePANTextFieldTests: XCTestCase {
         XCTAssertEqual(validTextField.derivedCardInfo.usState, .southDakota)
     }
 
+    func test_maine_shouldBeValidCardFor16or19Digits() {
+        let validTextField = ForagePANTextField()
+
+        // 16 digits
+        validTextField.enhancedTextField.text = "5077031234123412"
+        validTextField.enhancedTextField.textFieldDidChange()
+        XCTAssertEqual(validTextField.enhancedTextField.actualPAN, "5077031234123412")
+
+        XCTAssertEqual(validTextField.enhancedTextField.text, "5077 0312 3412 3412")
+        XCTAssertTrue(validTextField.isValid)
+        XCTAssertTrue(validTextField.isComplete)
+        XCTAssertFalse(validTextField.isEmpty)
+        XCTAssertEqual(validTextField.derivedCardInfo.usState, .maine)
+
+        validTextField.enhancedTextField.text = "5077031234123412345"
+        validTextField.enhancedTextField.textFieldDidChange()
+        XCTAssertEqual(validTextField.enhancedTextField.actualPAN, "5077031234123412345")
+
+        XCTAssertEqual(validTextField.enhancedTextField.text, "507703 1234 1234 123 45")
+        XCTAssertTrue(validTextField.isValid)
+        XCTAssertTrue(validTextField.isComplete)
+        XCTAssertFalse(validTextField.isEmpty)
+        XCTAssertEqual(validTextField.derivedCardInfo.usState, .maine)
+    }
+
     func test_textField_enterNumericString_shouldReturnTrue() {
         let changesAllowed = foragePANTextField.textField(UITextField(), shouldChangeCharactersIn: NSRange(), replacementString: "1234")
 

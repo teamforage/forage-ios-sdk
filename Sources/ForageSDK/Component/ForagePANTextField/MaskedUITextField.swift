@@ -89,7 +89,10 @@ class MaskedUITextField: FloatingTextField, ObservableState {
     // MARK: - Text Handling
 
     private func trimTrailingDigits(_ newUnmaskedText: String, stateIIN: StateIIN?) -> String {
-        let maxPanLength = min(newUnmaskedText.count, stateIIN?.panLength ?? 19)
+        let maxPanLength = min(
+            newUnmaskedText.count,
+            stateIIN?.panLengths.max() ?? 19
+        )
 
         return String(newUnmaskedText.prefix(maxPanLength))
     }
@@ -118,7 +121,7 @@ class MaskedUITextField: FloatingTextField, ObservableState {
 
         if let stateIIN = stateIIN {
             isValid = true
-            isComplete = newUnmaskedText.count == stateIIN.panLength
+            isComplete = stateIIN.panLengths.contains(newUnmaskedText.count)
             derivedCardInfo.usState = stateIIN.state
             return
         }
@@ -134,12 +137,13 @@ class MaskedUITextField: FloatingTextField, ObservableState {
             return MaskPattern.unset
         }
         if let stateIIN = stateIIN {
-            switch stateIIN.panLength {
-            case 16:
+            if stateIIN.panLengths.contains(16) && stateIIN.panLengths.contains(19) {
+                return newUnmaskedText.count <= 16 ? MaskPattern.sixteenDigits : MaskPattern.nineteenDigits
+            } else if stateIIN.panLengths.contains(16) {
                 return MaskPattern.sixteenDigits
-            case 18:
+            } else if stateIIN.panLengths.contains(18) {
                 return MaskPattern.eighteenDigits
-            default:
+            } else if stateIIN.panLengths.contains(19) {
                 return MaskPattern.nineteenDigits
             }
         }
