@@ -207,7 +207,7 @@ final class ForagePINTextFieldTests: XCTestCase {
 
         let textColor = foragePinTextField.textColor
         XCTAssertEqual(color, textColor)
-        
+
         // Test RosettaPINTextField text color
         let rosettaPINTextField = RosettaPINTextField()
         rosettaPINTextField.textColor = .blue
