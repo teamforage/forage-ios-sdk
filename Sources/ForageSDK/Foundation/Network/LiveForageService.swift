@@ -185,7 +185,7 @@ class LiveForageService: ForageService {
             )
         } catch {
             logger?.error(
-                "Failure for PaymentMethod/Payment ref \(tokenRef). GET for Payment, Payment Method, or Encryption Key failed.",
+                "Failure for PaymentMethod/Payment ref \(tokenRef). GET for Payment or Payment Method failed.",
                 error: nil,
                 attributes: nil
             )

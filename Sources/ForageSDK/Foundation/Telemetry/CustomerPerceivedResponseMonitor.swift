@@ -16,7 +16,7 @@ let UnknownErrorCode = "unknown"
 
  The timer begins when the first HTTP request is sent from the SDK and ends when the the SDK returns information back to the user. Ex of a balance action:
 
- Timer Begins -> [GET] EncryptionKey -> [GET] PaymentMethod -> [POST] to Rosetta ->
+ Timer Begins -> [GET] PaymentMethod -> [POST] to Rosetta ->
  Timer Ends -> Return Balance
  */
 final class CustomerPerceivedResponseMonitor: ResponseMonitor {

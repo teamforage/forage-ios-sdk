@@ -15,7 +15,7 @@ enum EventName: String {
      customer_perceived_response refers to the response from a balance or capture action. There are
      multiple chained requests that come from the client when executing a balance or capture action.
      Example of a balance action:
-     [GET] EncryptionKey -> [GET] PaymentMethod -> [POST] to Rosetta  -> Return Balance
+     [GET] PaymentMethod -> [POST] to Rosetta  -> Return Balance
      */
     case customerPerceivedResponse = "customer_perceived_response"
 }
