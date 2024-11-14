@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import VGSCollectSDK
 
 /**
  Interface for internal Forage SDK requests
@@ -15,18 +14,6 @@ import VGSCollectSDK
 protocol ForageService: AnyObject {
     /// Provider provides the interface for performing HTTP requests.
     var provider: Provider { get }
-
-    /// Retrieves the EncryptionKey from the Forage API, to be utilized as the X-Key header.
-    ///
-    /// - Parameters:
-    ///  - sessionToken: Short-lived session token that authorizes requests to the Forage API.
-    ///  - merchantID: The unique ID of the Merchant.
-    ///  - completion: The closure returns a `Result` containing either a `ForageXKeyModel` or an `Error`.
-    func getXKey(
-        sessionToken: String,
-        merchantID: String,
-        completion: @escaping (Result<ForageXKeyModel, Error>) -> Void
-    )
 
     /// Perform a GET request for the PaymentMethod
     ///
@@ -108,7 +95,7 @@ protocol ForageService: AnyObject {
     ///   - `ForageError`: If there's an issue at any stage of the payment capture process.
     ///
     /// - Returns:
-    ///   - A `VaultResponse` object containing the response from the Vault (VGS or Basis Theory) proxy.
+    ///   - A `VaultResponse` object containing the response from the Vault (Rosetta) proxy.
     func collectPinForDeferredCapture(
         pinCollector: VaultCollector,
         paymentReference: String

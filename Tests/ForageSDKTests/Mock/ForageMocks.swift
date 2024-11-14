@@ -117,16 +117,6 @@ class ForageMocks {
         return NSError(domain: response, code: 400, userInfo: nil)
     }
 
-    var xKeySuccess: Data {
-        let response = """
-                {
-                   "alias":"tok_sandbox_agCcwWZs8TMkkq89f8KHSx",
-                   "bt_alias":"443b4f60-67f3-46d7-af4f-0476b7db4894"
-                }
-        """
-        return Data(response.utf8)
-    }
-
     var getBalanceSuccess: Data {
         let response = """
                 {

@@ -120,7 +120,6 @@ extension ForageSDK: ForageSDKService {
         // This block is used for tracking important Metrics!
         // -----------------------------------------------------
         let responseMonitor = CustomerPerceivedResponseMonitor.newMeasurement(
-            vaultType: pinCollector.getVaultType(),
             vaultAction: .balanceCheck,
             metricsLogger: ForageSDK.logger
         )
@@ -175,7 +174,6 @@ extension ForageSDK: ForageSDKService {
         // This block is used for tracking important Metrics!
         // -----------------------------------------------------
         let responseMonitor = CustomerPerceivedResponseMonitor.newMeasurement(
-            vaultType: pinCollector.getVaultType(),
             vaultAction: VaultAction.capturePayment,
             metricsLogger: ForageSDK.logger
         )

@@ -4,7 +4,6 @@
 //
 
 import Foundation
-import VGSCollectSDK
 
 public class ForageSDK {
     // MARK: Properties
@@ -30,13 +29,10 @@ public class ForageSDK {
         }
         traceId = ForageSDK.logger?.getTraceID() ?? ""
 
-        VGSCollectLogger.shared.disableAllLoggers()
-
         let provider = Provider(logger: ForageSDK.logger)
         service = LiveForageService(
             provider: provider,
-            logger: ForageSDK.logger,
-            ldManager: LDManager.shared
+            logger: ForageSDK.logger
         )
     }
 
@@ -74,7 +70,6 @@ public class ForageSDK {
         updateSessionToken(config.sessionToken)
 
         initializeLogger(environment)
-        initializeLaunchDarkly(environment)
 
         ForageSDK.logger?
             .setPrefix("ForageSDK")
@@ -130,9 +125,5 @@ public class ForageSDK {
                 prefix: ""
             )
         )
-    }
-
-    class func initializeLaunchDarkly(_ environment: Environment) {
-        LDManager.shared.initialize(environment, logger: ForageSDK.logger)
     }
 }

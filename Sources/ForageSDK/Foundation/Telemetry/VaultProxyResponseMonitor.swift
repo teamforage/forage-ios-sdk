@@ -9,33 +9,31 @@
 import Foundation
 
 enum EventName: String {
-    /// vaultResponse refers to a response from the VGS or BT submit actions.
+    /// vaultResponse refers to a response from the Vault Proxy submit actions.
     case vaultResponse = "vault_response"
     /**
      customer_perceived_response refers to the response from a balance or capture action. There are
      multiple chained requests that come from the client when executing a balance or capture action.
      Example of a balance action:
-     [GET] EncryptionKey -> [GET] PaymentMethod -> [POST] to VGS/BT -> Return Balance
+     [GET] PaymentMethod -> [POST] to Rosetta  -> Return Balance
      */
     case customerPerceivedResponse = "customer_perceived_response"
 }
 
 /*
- `VaultProxyResponseMonitor` is a specialized `ResponseMonitor` for handling Vault-related network metrics. VaultProxyResponseMonitor is used to track the errors and response times from the VGS and BT submit functions. The timer begins when a balance or capture request is submitted to VGS/BT and ends when a response is received by the SDK.
+ `VaultProxyResponseMonitor` is a specialized `ResponseMonitor` for handling Vault-related network metrics. VaultProxyResponseMonitor is used to track the errors and response times from the Rosetta submit functions. The timer begins when a balance or capture request is submitted to Rosetta and ends when a response is received by the SDK.
  */
 final class VaultProxyResponseMonitor: ResponseMonitor {
     private let vaultAction: VaultAction
-    private let vaultType: VaultType
     private var eventName: EventName = .vaultResponse
 
-    private init(vaultType: VaultType, vaultAction: VaultAction) {
-        self.vaultType = vaultType
+    private init(vaultAction: VaultAction) {
         self.vaultAction = vaultAction
     }
 
     /// Factory method for creating new VaultProxyResponseMonitor instances
-    static func newMeasurement(vault: VaultType, action: VaultAction) -> VaultProxyResponseMonitor {
-        VaultProxyResponseMonitor(vaultType: vault, vaultAction: action)
+    static func newMeasurement(action: VaultAction) -> VaultProxyResponseMonitor {
+        VaultProxyResponseMonitor(vaultAction: action)
     }
 
     override func logWithResponseAttributes(metricsLogger: ForageLogger?, responseAttributes: ResponseAttributes) {
@@ -47,10 +45,8 @@ final class VaultProxyResponseMonitor: ResponseMonitor {
             return
         }
 
-        let vaultType = vaultType.rawValue
-
         metricsLogger?.info(
-            "Received response from \(vaultType) proxy",
+            "Received response from Rosetta proxy",
             attributes: mapEnumKeysToStrings(from: [
                 .action: vaultAction.rawValue,
                 .eventName: eventName.rawValue,
@@ -59,7 +55,7 @@ final class VaultProxyResponseMonitor: ResponseMonitor {
                 .method: httpMethod,
                 .path: path,
                 .responseTimeMs: responseTimeMs,
-                .vaultType: self.vaultType.rawValue,
+                .vaultType: "forage",
             ])
         )
     }

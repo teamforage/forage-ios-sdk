@@ -4,7 +4,6 @@
 //
 
 import UIKit
-import VGSCollectSDK
 
 public class ForagePINTextField: UIView, Identifiable, ForageElement {
     // MARK: - Properties
@@ -90,7 +89,7 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
     }
 
     /// Change UIFont
-    /// `VGSTextField` text font
+    /// `ForagePINTextField` text font
     @IBInspectable public var font: UIFont? {
         get { textField.font }
         set { textField.font = newValue }
@@ -136,30 +135,16 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
     }()
 
     private lazy var textField: VaultWrapper = {
-        let vaultType = LDManager.shared.getVaultType(
-            ldClient: LDManager.getDefaultLDClient(),
-            genRandomDouble: LDManager.generateRandomDouble
-        )
+        let tf = RosettaPINTextField()
+        tf.textColor = UIColor.black
+        tf.font = UIFont.systemFont(ofSize: 14, weight: .regular)
+        tf.borderWidth = 0
+        tf.cornerRadius = 16
+        tf.masksToBounds = true
+        tf.borderColor = .clear
+        tf.backgroundColor = .systemGray6
 
-        var tf: VaultWrapper?
-
-        if vaultType == VaultType.vgs {
-            tf = VGSTextFieldWrapper()
-        } else if vaultType == VaultType.basisTheory {
-            tf = BasisTheoryTextFieldWrapper()
-        } else {
-            tf = RosettaPINTextField()
-        }
-
-        tf?.textColor = UIColor.black
-        tf?.font = UIFont.systemFont(ofSize: 14, weight: .regular)
-        tf?.borderWidth = 0
-        tf?.cornerRadius = 16
-        tf?.masksToBounds = true
-        tf?.borderColor = .clear
-        tf?.backgroundColor = .systemGray6
-
-        return tf ?? RosettaPINTextField()
+        return tf
     }()
 
     private lazy var imageView: UIImageView = {

@@ -14,16 +14,13 @@ class LiveForageService: ForageService {
     var provider: Provider
 
     private var logger: ForageLogger?
-    private var ldManager: LDManagerProtocol
 
     init(
         provider: Provider = Provider(),
-        logger: ForageLogger? = nil,
-        ldManager: LDManagerProtocol
+        logger: ForageLogger? = nil
     ) {
         self.provider = provider
         self.logger = logger?.setPrefix("")
-        self.ldManager = ldManager
     }
 
     // MARK: Tokenize EBT card
@@ -166,7 +163,6 @@ class LiveForageService: ForageService {
         let authorization: String
         let cardNumberToken: String
         let merchantID: String
-        let xKey: [String: String]
     }
 
     // MARK: Private helper methods
@@ -180,22 +176,16 @@ class LiveForageService: ForageService {
         let merchantID = ForageSDK.shared.merchantID
 
         do {
-            // TODO: Parallelize getting xKeyModel and token
-            let xKeyModel = try await awaitResult { completion in
-                self.getXKey(sessionToken: sessionToken, merchantID: merchantID, completion: completion)
-            }
-
             let token = try await collectTokenFunc(sessionToken, merchantID, tokenRef)
 
             return ForageRequestModel(
                 authorization: sessionToken,
                 cardNumberToken: token,
-                merchantID: merchantID,
-                xKey: ["vgsXKey": xKeyModel.alias, "btXKey": xKeyModel.bt_alias]
+                merchantID: merchantID
             )
         } catch {
             logger?.error(
-                "Failure for PaymentMethod/Payment ref \(tokenRef). GET for Payment, Payment Method, or Encryption Key failed.",
+                "Failure for PaymentMethod/Payment ref \(tokenRef). GET for Payment or Payment Method failed.",
                 error: nil,
                 attributes: nil
             )
@@ -205,7 +195,7 @@ class LiveForageService: ForageService {
 
     /// Common Payment-related prologue across capturePayment and collectPin.
     /// Both `deferPaymentCapture` and `capturePayment` involve the same
-    /// preliminerary data retrieval and a trip to the Vault (VGS or Basis Theory) Proxy
+    /// preliminerary data retrieval and a trip to the Vault Proxy
     private func collectPinForPayment<T: Decodable>(
         pinCollector: VaultCollector,
         paymentReference: String,
@@ -229,7 +219,7 @@ class LiveForageService: ForageService {
         }
     }
 
-    /// Submit PIN to the Vault Proxy (Basis Theory or VGS)
+    /// Submit PIN to the Vault Proxy
     /// - Parameters:
     ///   - pinCollector: The PIN collection client
     ///   - vaultAction: The action performed against the vault.
@@ -249,7 +239,7 @@ class LiveForageService: ForageService {
             "x-datadog-trace-id": ForageSDK.shared.traceId,
             "API-VERSION": "2024-01-08",
             "Session-Token": "Bearer \(request.authorization)",
-        ], xKey: request.xKey)
+        ])
 
         let extraData = [
             "card_number_token": request.cardNumberToken
@@ -323,9 +313,5 @@ class LiveForageService: ForageService {
         completion: @escaping (Result<PaymentMethodModel, Error>) -> Void
     ) {
         do { try provider.execute(model: PaymentMethodModel.self, endpoint: ForageAPI.getPaymentMethod(sessionToken: sessionToken, merchantID: merchantID, paymentMethodRef: paymentMethodRef), completion: completion) } catch { completion(.failure(error)) }
-    }
-
-    func getXKey(sessionToken: String, merchantID: String, completion: @escaping (Result<ForageXKeyModel, Error>) -> Void) {
-        do { try provider.execute(model: ForageXKeyModel.self, endpoint: ForageAPI.xKey(sessionToken: sessionToken, merchantID: merchantID), completion: completion) } catch { completion(.failure(error)) }
     }
 }

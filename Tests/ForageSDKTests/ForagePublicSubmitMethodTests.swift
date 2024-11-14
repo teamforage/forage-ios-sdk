@@ -106,10 +106,7 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
     }
 
     func createMockService() -> MockForageService {
-        MockForageService(
-            provider: Provider(URLSessionMock()),
-            ldManager: MockLDManager()
-        )
+        MockForageService(provider: Provider(URLSessionMock()))
     }
 
     func setupMockSDK() {

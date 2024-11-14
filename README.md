@@ -22,6 +22,4 @@ To get the application running:
 - Xcode 14.1 or above
 - iOS 13 or above
 - Swift 5.5
-- 3rd party libraries:
-  - [LaunchDarkly](https://github.com/launchdarkly/ios-client-sdk.git)
-  - [BasisTheory](https://github.com/Basis-Theory/basistheory-ios)
+

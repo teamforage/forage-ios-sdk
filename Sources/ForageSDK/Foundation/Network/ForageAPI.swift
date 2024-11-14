@@ -13,7 +13,6 @@ import Foundation
  */
 enum ForageAPI {
     case tokenizeNumber(request: ForagePANRequestModel)
-    case xKey(sessionToken: String, merchantID: String)
     case getPaymentMethod(sessionToken: String, merchantID: String, paymentMethodRef: String)
     case getPayment(sessionToken: String, merchantID: String, paymentRef: String)
 }
@@ -26,7 +25,6 @@ extension ForageAPI: ServiceProtocol {
     var path: String {
         switch self {
         case .tokenizeNumber: return "/api/payment_methods/"
-        case .xKey: return "/iso_server/encryption_alias/"
         case let .getPaymentMethod(request: request): return "/api/payment_methods/\(request.paymentMethodRef)/"
         case let .getPayment(request: request): return "/api/payments/\(request.paymentRef)/"
         }
@@ -35,7 +33,7 @@ extension ForageAPI: ServiceProtocol {
     var method: HttpMethod {
         switch self {
         case .tokenizeNumber: return .post
-        case .xKey, .getPaymentMethod, .getPayment: return .get
+        case .getPaymentMethod, .getPayment: return .get
         }
     }
 
@@ -68,19 +66,6 @@ extension ForageAPI: ServiceProtocol {
 
             return .requestParametersAndHeaders(
                 bodyParameters: bodyParameters,
-                urlParameters: nil,
-                additionalHeaders: headers
-            )
-
-        case let .xKey(sessionToken: sessionToken, merchantID: merchantID):
-            headers.addHeaders([
-                "authorization": "Bearer \(sessionToken)",
-                "accept": "application/json",
-                "Merchant-Account": merchantID,
-            ])
-
-            return .requestParametersAndHeaders(
-                bodyParameters: nil,
                 urlParameters: nil,
                 additionalHeaders: headers
             )

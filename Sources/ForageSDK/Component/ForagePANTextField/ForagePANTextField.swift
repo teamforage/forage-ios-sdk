@@ -4,7 +4,6 @@
 //
 
 import UIKit
-import VGSCollectSDK
 
 public enum CardType: String {
     case EBT = "ebt"

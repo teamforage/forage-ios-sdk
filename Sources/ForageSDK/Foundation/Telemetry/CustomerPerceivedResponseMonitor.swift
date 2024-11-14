@@ -16,29 +16,25 @@ let UnknownErrorCode = "unknown"
 
  The timer begins when the first HTTP request is sent from the SDK and ends when the the SDK returns information back to the user. Ex of a balance action:
 
- Timer Begins -> [GET] EncryptionKey -> [GET] PaymentMethod -> [POST] to VGS/BT ->
+ Timer Begins -> [GET] PaymentMethod -> [POST] to Rosetta ->
  Timer Ends -> Return Balance
  */
 final class CustomerPerceivedResponseMonitor: ResponseMonitor {
-    private var vaultType: VaultType
     private var vaultAction: VaultAction
     private var eventOutcome: EventOutcome?
     private var eventName: EventName = .customerPerceivedResponse
 
-    init(vaultType: VaultType, vaultAction: VaultAction, metricsLogger: ForageLogger?) {
-        self.vaultType = vaultType
+    init(vaultAction: VaultAction, metricsLogger: ForageLogger?) {
         self.vaultAction = vaultAction
         super.init(metricsLogger: metricsLogger)
     }
 
     /// Factory method for creating new CustomerPerceivedResponseMonitor instances
     static func newMeasurement(
-        vaultType: VaultType,
         vaultAction: VaultAction,
         metricsLogger: ForageLogger? = nil
     ) -> CustomerPerceivedResponseMonitor {
         CustomerPerceivedResponseMonitor(
-            vaultType: vaultType,
             vaultAction: vaultAction,
             metricsLogger: metricsLogger
         )
@@ -85,7 +81,7 @@ final class CustomerPerceivedResponseMonitor: ResponseMonitor {
                 .httpStatus: httpStatus,
                 .logType: ForageLogKind.metric.rawValue,
                 .responseTimeMs: responseTimeMs,
-                .vaultType: vaultType.rawValue,
+                .vaultType: "forage",
             ])
         )
     }
