@@ -49,8 +49,10 @@ class Provider {
         do {
             let request = try endpoint.urlRequest()
             task = urlSession.dataTask(with: request) { data, response, error in
-                guard let httpResponse = response as? HTTPURLResponse else {
-                    if let data = data {
+                DispatchQueue.main.async {
+                    if (response as? HTTPURLResponse) != nil {
+                        return completion(.success(data))
+                    } else if let data = data {
                         self.processVaultData(
                             model: ForageServiceError.self,
                             code: nil,
@@ -71,7 +73,6 @@ class Provider {
                         return completion(.failure(ServiceError.emptyError))
                     }
                 }
-                return completion(.success(data))
             }
             task?.resume()
         } catch {
