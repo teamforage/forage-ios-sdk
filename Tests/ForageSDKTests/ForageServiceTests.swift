@@ -37,6 +37,7 @@ final class ForageServiceTests: XCTestCase {
         )
 
         let expectation = XCTestExpectation(description: "Tokenize EBT Card - should succeed")
+        expectation.assertForOverFulfill = true
         service.tokenizeEBTCard(request: foragePANRequestModel) { result in
             switch result {
             case let .success(response):
@@ -69,6 +70,7 @@ final class ForageServiceTests: XCTestCase {
         )
 
         let expectation = XCTestExpectation(description: "Tokenize EBT Card - result should be failure")
+        expectation.assertForOverFulfill = true
         service.tokenizeEBTCard(request: foragePANRequestModel) { result in
             switch result {
             case .success:
@@ -88,6 +90,7 @@ final class ForageServiceTests: XCTestCase {
         let service = createTestService(mockSession)
 
         let expectation = XCTestExpectation(description: "Get the Payment Method - should succeed")
+        expectation.assertForOverFulfill = true
         service.getPaymentMethod(sessionToken: "auth1234", merchantID: "1234567", paymentMethodRef: "ca29d3443f") { result in
             switch result {
             case let .success(paymentMethod):
@@ -112,12 +115,82 @@ final class ForageServiceTests: XCTestCase {
         let service = createTestService(mockSession)
 
         let expectation = XCTestExpectation(description: "Get the Payment Method - result should be failure")
+        expectation.assertForOverFulfill = true
         service.getPaymentMethod(sessionToken: "auth1234", merchantID: "1234567", paymentMethodRef: "ca29d3443f") { result in
             switch result {
             case .success:
                 XCTFail("Expected failure")
             case let .failure(error):
                 XCTAssertNotNil(error)
+                expectation.fulfill()
+            }
+        }
+        wait(for: [expectation], timeout: 1.0)
+    }
+
+    func test_getPaymentMethod_onNetworkErrorFailure_shouldReturnFailure() {
+        let mockSession = URLSessionMock()
+        mockSession.error = forageMocks.networkError
+        let service = createTestService(mockSession)
+
+        let expectation = XCTestExpectation(description: "Get the Payment Method - result should be failure")
+        expectation.assertForOverFulfill = true
+        service.getPaymentMethod(sessionToken: "auth1234", merchantID: "1234567", paymentMethodRef: "ca29d3443f") { result in
+            switch result {
+            case .success:
+                XCTFail("Expected failure")
+            case let .failure(error):
+                XCTAssertNotNil(error)
+                expectation.fulfill()
+            }
+        }
+        wait(for: [expectation], timeout: 1.0)
+    }
+
+    func test_getPaymentMethod_onNilResponse_shouldReturnUnknownServerError() {
+        let mockSession = URLSessionMock()
+        mockSession.response = nil  // This will trigger the guard statement
+        let service = createTestService(mockSession)
+
+        let expectation = XCTestExpectation(description: "Get the Payment Method - result should be unknown server error")
+        expectation.assertForOverFulfill = true
+        
+        service.getPaymentMethod(sessionToken: "auth1234", merchantID: "1234567", paymentMethodRef: "ca29d3443f") { result in
+            switch result {
+            case .success:
+                XCTFail("Expected unknown server error")
+            case let .failure(error):
+                let forageError = error as! ForageError
+                XCTAssertEqual(forageError.code, "unknown_server_error")
+                XCTAssertEqual(forageError.httpStatusCode, 500)
+                XCTAssertEqual(forageError.message, "Unknown error. This is a problem on Forage’s end.")
+                expectation.fulfill()
+            }
+        }
+        wait(for: [expectation], timeout: 1.0)
+    }
+
+    func test_getPaymentMethod_onNonHTTPResponse_shouldReturnUnknownServerError() {
+        let mockSession = URLSessionMock()
+        // Create a non-HTTP URLResponse
+        mockSession.response = URLResponse(url: URL(string: "https://forage.com/tests")!, 
+                                        mimeType: nil, 
+                                        expectedContentLength: 0, 
+                                        textEncodingName: nil)
+        let service = createTestService(mockSession)
+
+        let expectation = XCTestExpectation(description: "Get the Payment Method - result should be unknown server error")
+        expectation.assertForOverFulfill = true
+        
+        service.getPaymentMethod(sessionToken: "auth1234", merchantID: "1234567", paymentMethodRef: "ca29d3443f") { result in
+            switch result {
+            case .success:
+                XCTFail("Expected unknown server error")
+            case let .failure(error):
+                let forageError = error as! ForageError
+                XCTAssertEqual(forageError.code, "unknown_server_error")
+                XCTAssertEqual(forageError.httpStatusCode, 500)
+                XCTAssertEqual(forageError.message, "Unknown error. This is a problem on Forage’s end.")
                 expectation.fulfill()
             }
         }
@@ -131,6 +204,7 @@ final class ForageServiceTests: XCTestCase {
         let service = createTestService(mockSession)
 
         let expectation = XCTestExpectation(description: "Get the Payment - should succeed")
+        expectation.assertForOverFulfill = true
         service.getPayment(sessionToken: "auth1234", merchantID: "1234567", paymentRef: "11767381fd") { (result: Result<PaymentModel, Error>) in
             switch result {
             case let .success(payment):
@@ -154,6 +228,7 @@ final class ForageServiceTests: XCTestCase {
         let service = createTestService(mockSession)
 
         let expectation = XCTestExpectation(description: "Get the Payment - should succeed")
+        expectation.assertForOverFulfill = true
         service.getPayment(sessionToken: "auth1234", merchantID: "1234567", paymentRef: "11767381fd") { (result: Result<ThinPaymentModel, Error>) in
             switch result {
             case let .success(payment):
@@ -173,6 +248,7 @@ final class ForageServiceTests: XCTestCase {
         let service = createTestService(mockSession)
 
         let expectation = XCTestExpectation(description: "Get the Payment - result should be failure")
+        expectation.assertForOverFulfill = true
         service.getPayment(sessionToken: "auth1234", merchantID: "1234567", paymentRef: "11767381fd") { (result: Result<PaymentModel, Error>) in
             switch result {
             case .success:
@@ -199,5 +275,93 @@ final class ForageServiceTests: XCTestCase {
 
     func test_capturePayment_onFailure_shouldReturnFailure() {
         _ = XCTSkip("Need to clean up and decouple capturePayment before we can test it properly")
+    }
+
+    func test_getPaymentMethod_onNilData_shouldReturnInvalidInputDataError() {
+        let mockSession = URLSessionMock()
+        mockSession.data = nil
+        mockSession.response = forageMocks.mockSuccessResponse
+        let service = createTestService(mockSession)
+
+        let expectation = XCTestExpectation(description: "Get the Payment Method - result should be invalid input data error")
+        expectation.assertForOverFulfill = true
+        
+        service.getPaymentMethod(sessionToken: "auth1234", merchantID: "1234567", paymentMethodRef: "ca29d3443f") { result in
+            switch result {
+            case .success:
+                XCTFail("Expected invalid input data error")
+            case let .failure(error):
+                let forageError = error as! ForageError
+                XCTAssertEqual(forageError.code, "invalid_input_data")
+                XCTAssertEqual(forageError.httpStatusCode, 200) // Using mockSuccessResponse's status code
+                XCTAssertEqual(forageError.message, "Double check the reference documentation to validate the request body, and scan your implementation for any other errors.")
+                expectation.fulfill()
+            }
+        }
+        wait(for: [expectation], timeout: 1.0)
+    }
+
+    func test_getPaymentMethod_onInvalidJSONData_shouldReturnUnknownServerError() {
+        let mockSession = URLSessionMock()
+        // Create invalid JSON data that can't be decoded
+        mockSession.data = "Invalid JSON Data".data(using: .utf8)
+        mockSession.response = forageMocks.mockSuccessResponse
+        let service = createTestService(mockSession)
+
+        let expectation = XCTestExpectation(description: "Get the Payment Method - result should be unknown server error")
+        expectation.assertForOverFulfill = true
+        
+        service.getPaymentMethod(sessionToken: "auth1234", merchantID: "1234567", paymentMethodRef: "ca29d3443f") { result in
+            switch result {
+            case .success:
+                XCTFail("Expected unknown server error")
+            case let .failure(error):
+                let forageError = error as! ForageError
+                XCTAssertEqual(forageError.code, "unknown_server_error")
+                XCTAssertEqual(forageError.httpStatusCode, 200) // Using mockSuccessResponse's status code
+                XCTAssertEqual(forageError.message, "Could not decode payload - Invalid JSON Data")
+                expectation.fulfill()
+            }
+        }
+        wait(for: [expectation], timeout: 1.0)
+    }
+
+    func test_getPaymentMethod_onForageServiceError_shouldReturnForageError() {
+        let mockSession = URLSessionMock()
+        let errorJSON = """
+        {
+            "path": "/api/payment_methods/test123/",
+            "errors": [
+                {
+                    "code": "custom_error_code",
+                    "message": "Custom error message",
+                    "source": {
+                        "resource": "Payment_Methods",
+                        "ref": "test123"
+                    }
+                }
+            ]
+        }
+        """
+        mockSession.data = errorJSON.data(using: .utf8)
+        mockSession.response = forageMocks.mockSuccessResponse
+        let service = createTestService(mockSession)
+
+        let expectation = XCTestExpectation(description: "Get the Payment Method - result should be forage service error")
+        expectation.assertForOverFulfill = true
+        
+        service.getPaymentMethod(sessionToken: "auth1234", merchantID: "1234567", paymentMethodRef: "test123") { result in
+            switch result {
+            case .success:
+                XCTFail("Expected forage service error")
+            case let .failure(error):
+                let forageError = error as! ForageError
+                XCTAssertEqual(forageError.code, "custom_error_code")
+                XCTAssertEqual(forageError.httpStatusCode, 200) // Using mockSuccessResponse's status code
+                XCTAssertEqual(forageError.message, "Custom error message")
+                expectation.fulfill()
+            }
+        }
+        wait(for: [expectation], timeout: 1.0)
     }
 }

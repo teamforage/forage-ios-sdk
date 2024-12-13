@@ -37,6 +37,11 @@ class ForageMocks {
         return NSError(domain: response, code: 400, userInfo: nil)
     }
 
+    var networkError: Error {
+        // Mock SSL error
+        return NSError(domain: "NSURLErrorDomain", code: -1200, userInfo: nil)
+    }
+
     var tokenizeSuccess: Data {
         let response = """
                 {

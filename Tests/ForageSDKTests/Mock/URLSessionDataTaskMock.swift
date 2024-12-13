@@ -20,7 +20,7 @@ class URLSessionMock: URLSessionProtocol {
     // data and error can be set to provide data or an error
     var data: Data?
     var error: Error?
-    var response: HTTPURLResponse? = nil
+    var response: URLResponse? = nil
     var lastRequest: URLRequest?
 
     func dataTask(with request: URLRequest, completionHandler: @escaping CompletionHandler) -> URLSessionDataTask {
