@@ -37,6 +37,7 @@ final class ForageServiceTests: XCTestCase {
         )
 
         let expectation = XCTestExpectation(description: "Tokenize EBT Card - should succeed")
+        expectation.assertForOverFulfill = true
         service.tokenizeEBTCard(request: foragePANRequestModel) { result in
             switch result {
             case let .success(response):
@@ -69,6 +70,7 @@ final class ForageServiceTests: XCTestCase {
         )
 
         let expectation = XCTestExpectation(description: "Tokenize EBT Card - result should be failure")
+        expectation.assertForOverFulfill = true
         service.tokenizeEBTCard(request: foragePANRequestModel) { result in
             switch result {
             case .success:
@@ -88,6 +90,7 @@ final class ForageServiceTests: XCTestCase {
         let service = createTestService(mockSession)
 
         let expectation = XCTestExpectation(description: "Get the Payment Method - should succeed")
+        expectation.assertForOverFulfill = true
         service.getPaymentMethod(sessionToken: "auth1234", merchantID: "1234567", paymentMethodRef: "ca29d3443f") { result in
             switch result {
             case let .success(paymentMethod):
@@ -112,6 +115,26 @@ final class ForageServiceTests: XCTestCase {
         let service = createTestService(mockSession)
 
         let expectation = XCTestExpectation(description: "Get the Payment Method - result should be failure")
+        expectation.assertForOverFulfill = true
+        service.getPaymentMethod(sessionToken: "auth1234", merchantID: "1234567", paymentMethodRef: "ca29d3443f") { result in
+            switch result {
+            case .success:
+                XCTFail("Expected failure")
+            case let .failure(error):
+                XCTAssertNotNil(error)
+                expectation.fulfill()
+            }
+        }
+        wait(for: [expectation], timeout: 1.0)
+    }
+
+    func test_getPaymentMethod_onNetworkErrorFailure_shouldReturnFailure() {
+        let mockSession = URLSessionMock()
+        mockSession.error = forageMocks.networkError
+        let service = createTestService(mockSession)
+
+        let expectation = XCTestExpectation(description: "Get the Payment Method - result should be failure")
+        expectation.assertForOverFulfill = true
         service.getPaymentMethod(sessionToken: "auth1234", merchantID: "1234567", paymentMethodRef: "ca29d3443f") { result in
             switch result {
             case .success:
@@ -131,6 +154,7 @@ final class ForageServiceTests: XCTestCase {
         let service = createTestService(mockSession)
 
         let expectation = XCTestExpectation(description: "Get the Payment - should succeed")
+        expectation.assertForOverFulfill = true
         service.getPayment(sessionToken: "auth1234", merchantID: "1234567", paymentRef: "11767381fd") { (result: Result<PaymentModel, Error>) in
             switch result {
             case let .success(payment):
@@ -154,6 +178,7 @@ final class ForageServiceTests: XCTestCase {
         let service = createTestService(mockSession)
 
         let expectation = XCTestExpectation(description: "Get the Payment - should succeed")
+        expectation.assertForOverFulfill = true
         service.getPayment(sessionToken: "auth1234", merchantID: "1234567", paymentRef: "11767381fd") { (result: Result<ThinPaymentModel, Error>) in
             switch result {
             case let .success(payment):
@@ -173,6 +198,7 @@ final class ForageServiceTests: XCTestCase {
         let service = createTestService(mockSession)
 
         let expectation = XCTestExpectation(description: "Get the Payment - result should be failure")
+        expectation.assertForOverFulfill = true
         service.getPayment(sessionToken: "auth1234", merchantID: "1234567", paymentRef: "11767381fd") { (result: Result<PaymentModel, Error>) in
             switch result {
             case .success:

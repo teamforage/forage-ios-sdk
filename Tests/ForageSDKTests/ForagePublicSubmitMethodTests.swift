@@ -136,6 +136,7 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
         mockService.doesCheckBalanceThrow = doesThrow
         let mockPinTextField = createMockPinTextField(isComplete: pinComplete)
         let expectation = XCTestExpectation(description: description)
+        expectation.assertForOverFulfill = true
 
         MockForageSDK.shared.checkBalance(
             foragePinTextField: mockPinTextField,
@@ -158,6 +159,7 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
         mockService.doesCapturePaymentThrow = doesThrow
         let mockPinTextField = createMockPinTextField(isComplete: pinComplete)
         let expectation = XCTestExpectation(description: description)
+        expectation.assertForOverFulfill = true
 
         MockForageSDK.shared.capturePayment(
             foragePinTextField: mockPinTextField,
@@ -179,6 +181,7 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
         mockService.doesCollectPinThrow = doesThrow
         let mockPinTextField = createMockPinTextField(isComplete: pinComplete)
         let expectation = XCTestExpectation(description: description)
+        expectation.assertForOverFulfill = true
 
         MockForageSDK.shared.deferPaymentCapture(
             foragePinTextField: mockPinTextField,
@@ -195,6 +198,7 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
 
     func testTokenizeEBTCard_Success() {
         let expectation = XCTestExpectation(description: "Returns PaymentMethod response")
+        expectation.assertForOverFulfill = true
         let mockPanTextField = ForagePANTextField(frame: .zero)
 
         MockForageSDK.shared.tokenizeEBTCard(
@@ -221,6 +225,7 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
 
     func testTokenizeEBTCard_Throws_DoesRejectWithError() {
         let expectation = XCTestExpectation(description: "tokenizeEBTCard rejects with ForageError")
+        expectation.assertForOverFulfill = true
         let mockPanTextField = ForagePANTextField(frame: .zero)
 
         (MockForageSDK.shared.service as! MockForageService).doesTokenizeEBTCardThrow = true
