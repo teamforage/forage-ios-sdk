@@ -31,8 +31,9 @@ jobs:
           xcodebuild test \
             -project Sample/SampleForageSDK.xcodeproj \
             -scheme ForageSDK \
-            -destination 'platform=iOS Simulator,name=iPhone 14 Pro,OS=latest' \
+            -destination 'platform=iOS Simulator,name=iPhone 15 Pro,OS=latest' \
             -enableCodeCoverage YES
+
 
       - name: Generate XML coverage report (Cobertura)
         run: slather coverage -x
