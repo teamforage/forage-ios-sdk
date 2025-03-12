@@ -50,6 +50,16 @@ class ViewController: UIViewController {
             animated: true
         )
     }
+    
+    @IBAction func didTapOnStartHSAFSAFlow(_ sender: Any) {
+        initializeSdk()
+        
+        let HSAViewController = HSAViewController()
+        navigationController?.pushViewController(
+            HSAViewController,
+            animated: true
+        )
+    }
 
     @IBAction func didTapOnStartPaymentSheetFlow(_ sender: Any) {
         initializeSdk()

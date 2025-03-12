@@ -40,6 +40,8 @@
 		5D7925D52B2270CC009BC07C /* PaymentSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D7925D42B2270CC009BC07C /* PaymentSheetView.swift */; };
 		5D7925D72B2270D6009BC07C /* PaymentSheetViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D7925D62B2270D6009BC07C /* PaymentSheetViewController.swift */; };
 		C0A2B6B729E608F900472040 /* ForageSDK in Frameworks */ = {isa = PBXBuildFile; productRef = C0A2B6B629E608F900472040 /* ForageSDK */; };
+		E895CFC72D6E33F000DD043E /* HSAViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E895CFC62D6E33F000DD043E /* HSAViewController.swift */; };
+		E895CFC82D6E33F000DD043E /* HSAView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E895CFC52D6E33F000DD043E /* HSAView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -77,6 +79,8 @@
 		5D5FC1D02B2A520E00761361 /* BaseSampleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseSampleView.swift; sourceTree = "<group>"; };
 		5D7925D42B2270CC009BC07C /* PaymentSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentSheetView.swift; sourceTree = "<group>"; };
 		5D7925D62B2270D6009BC07C /* PaymentSheetViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentSheetViewController.swift; sourceTree = "<group>"; };
+		E895CFC52D6E33F000DD043E /* HSAView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HSAView.swift; sourceTree = "<group>"; };
+		E895CFC62D6E33F000DD043E /* HSAViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HSAViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -208,6 +212,7 @@
 		4976E75929074D44004FD1CD /* Sections */ = {
 			isa = PBXGroup;
 			children = (
+				E895CFC42D6E322300DD043E /* HSA */,
 				5D7925D32B2270B4009BC07C /* PaymentSheet */,
 				491CFFDB28FED8830066B9F8 /* CardNumber */,
 				4976E75A29074D4C004FD1CD /* RequestBalance */,
@@ -258,6 +263,15 @@
 				5D7925D62B2270D6009BC07C /* PaymentSheetViewController.swift */,
 			);
 			path = PaymentSheet;
+			sourceTree = "<group>";
+		};
+		E895CFC42D6E322300DD043E /* HSA */ = {
+			isa = PBXGroup;
+			children = (
+				E895CFC52D6E33F000DD043E /* HSAView.swift */,
+				E895CFC62D6E33F000DD043E /* HSAViewController.swift */,
+			);
+			path = HSA;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -341,6 +355,8 @@
 				4985C748290A0AE1000568BF /* CapturePaymentViewController.swift in Sources */,
 				5D5FC1D12B2A520E00761361 /* BaseSampleView.swift in Sources */,
 				4928DEAA2908DB230085B156 /* ServiceError.swift in Sources */,
+				E895CFC72D6E33F000DD043E /* HSAViewController.swift in Sources */,
+				E895CFC82D6E33F000DD043E /* HSAView.swift in Sources */,
 				4928DEA52908D61B0085B156 /* CreatePaymentViewController.swift in Sources */,
 				49475BF328FCD93B00190846 /* ViewController.swift in Sources */,
 				4928DEAE2908DB350085B156 /* ParameterEncoder.swift in Sources */,
