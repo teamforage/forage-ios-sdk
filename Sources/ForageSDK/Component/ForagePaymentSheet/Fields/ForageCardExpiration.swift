@@ -8,8 +8,18 @@
 
 import UIKit
 
-public class ForageCardExpiration: UIView, Identifiable, ForageElement, ForageElementDelegate {
+public class ForageCardExpiration: UIView, Identifiable, ForagePaymentSheetField, ForageElementDelegate {
     // MARK: - Properties
+    public var name: String = "cardExpirationTextField"
+    
+    public private(set) var isDirty: Bool = false
+    
+    public private(set) var isTouched: Bool = false
+    
+    public var invalidError: (any Error)? {
+        get { enhancedTextField.invalidError }
+    }
+    
     @IBInspectable public var isEmpty: Bool {
         enhancedTextField.isEmpty
     }
@@ -238,7 +248,8 @@ extension ForageCardExpiration {
 
     /// Remove  focus from `ForageCardExpiration`.
     @discardableResult override public func resignFirstResponder() -> Bool {
-        enhancedTextField.resignFirstResponder()
+        isTouched = true
+        return enhancedTextField.resignFirstResponder()
     }
 
     /// Check if `ForageCardExpiration` is focused.
@@ -253,6 +264,7 @@ extension ForageCardExpiration: UITextFieldDelegate {
     }
 
     public func textFieldDidChange(_ state: ObservableState) {
+        isDirty = true
         delegate?.textFieldDidChange(self)
     }
 

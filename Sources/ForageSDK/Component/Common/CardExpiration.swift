@@ -8,13 +8,17 @@
 
 import UIKit
 
-class CardExpiration: FloatingTextField, ObservableState {
+class CardExpiration: FloatingTextField, ObservableState, Maskable, Validatable {
     // MARK: - Properties
     
+    /// Maskable properties
     var actualText: String = ""
-    private var maskPattern: String = "##/##"
-
-    private var wasBackspacePressed = false
+    private(set) var maskPattern: String = "##/##"
+    private(set) var wasBackspacePressed = false
+    
+    /// Validatable properties
+    var invalidError: (any Error)?
+    var validators: [(String) throws -> (Bool)] = []
 
     /// A delegate that informs the client about the state of the entered expiration (validation, focus)
     public weak var forageDelegate: ForageElementDelegate? {
@@ -24,7 +28,7 @@ class CardExpiration: FloatingTextField, ObservableState {
     }
 
     @IBInspectable public private(set) var isEmpty = true
-    @IBInspectable public private(set) var isValid = true
+    @IBInspectable public internal(set) var isValid = true
     @IBInspectable public private(set) var isComplete = false
 
     // MARK: - Initialization
@@ -44,62 +48,18 @@ class CardExpiration: FloatingTextField, ObservableState {
     private func setup() {
         autocorrectionType = .no
         addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+        validators = [textLengthValidator, isNotExpiredValidator]
     }
     
-    private func removeMask(from maskedText: String) -> String {
-        return maskedText.replacingOccurrences(of: "/", with: "")
+    private func textLengthValidator(_ text: String) throws -> Bool {
+        if text.count < 5 {
+            throw PaymentSheetErrors.inComplete
+        }
+        
+        return text.count >= 5
     }
     
-    private func getMaskedText(for unmaskedText: String) -> String {
-        var maskedText = ""
-        var insertionIndex = unmaskedText.startIndex
-
-        for char in maskPattern {
-            if insertionIndex >= unmaskedText.endIndex {
-                break
-            }
-            if char == "#" {
-                maskedText.append(unmaskedText[insertionIndex])
-                insertionIndex = unmaskedText.index(after: insertionIndex)
-            } else {
-                maskedText.append(char)
-            }
-        }
-        return maskedText
-    }
-    
-    private func applyMask(to unmaskedText: String) {
-        // Find the current cursor position
-        var cursorOffset = offset(from: beginningOfDocument, to: selectedTextRange!.start)
-        let maskedText = getMaskedText(for: unmaskedText)
-        let isCursorAtEndOfText = cursorOffset - maskedText.count >= 0
-
-        if wasBackspacePressed && isCursorAtEndOfText {
-            text = maskedText
-            return
-        }
-
-        // Apply the masked text to the text field with a new character, we use " " string as "any" character
-        let maskedTextWithNewChar = getMaskedText(for: unmaskedText + " ")
-        text = maskedText
-
-        // Calculate the new cursor position
-        if !isCursorAtEndOfText
-            && !wasBackspacePressed
-            && isNextCharacterSlash(offset: cursorOffset) {
-            // move cursor an additional step forward
-            cursorOffset += 1
-        }
-        // Check if a whitespace (or other non-placeholder character) was added during the masking
-        if isCursorAtEndOfText && maskedTextWithNewChar.count > maskedText.count + 1 {
-            // move cursor an additional step forward
-            cursorOffset += 1
-        }
-
-        setNewCursorPosition(cursorOffset)
-    }
-    
-    private func isExpired(_ dateString: String) -> Bool {
+    private func isNotExpiredValidator(_ dateString: String) throws -> Bool {
         let dateFormatter = DateFormatter()
         dateFormatter.locale = Locale(identifier: "en_US")
         dateFormatter.setLocalizedDateFormatFromTemplate("MM/yy")
@@ -113,33 +73,14 @@ class CardExpiration: FloatingTextField, ObservableState {
         let currDate = dateFormatter.date(from: String(currentMonth) + "/" + String(currentYear))
         
         if let expirationDate = expDate, let currentDate = currDate {
-            return expirationDate < currentDate
+            if currentDate > expirationDate {
+                throw PaymentSheetErrors.invalidDate
+            }
+            
+            return currentDate <= expirationDate
         }
         
-        return true
-    }
-    
-    /// checks validation of text
-    private func validateText(_ text: String) {
-        defer {
-            isEmpty = text.isEmpty
-            forageDelegate?.textFieldDidChange(self)
-        }
-        
-        if text.count < 5 {
-            isValid = false
-            isComplete = false
-            return
-        }
-        
-        if !isExpired(text) {
-            isValid = true
-            isComplete = true
-            return
-        }
-        
-        isValid = false
-        isComplete = false
+        throw PaymentSheetErrors.invalidDate
     }
 
     // MARK: - Text Field Actions
@@ -150,17 +91,18 @@ class CardExpiration: FloatingTextField, ObservableState {
     }
 
     @objc func textFieldDidChange() {
-        defer { wasBackspacePressed = false }
+        defer {
+            wasBackspacePressed = false
+            isEmpty = text?.isEmpty ?? true
+            forageDelegate?.textFieldDidChange(self)
+        }
 
         guard let text = text else { return }
         
-        var newUnmaskedText = removeMask(from: text)
-        newUnmaskedText = String(newUnmaskedText.prefix(4))
-        
-        actualText = newUnmaskedText
+        let newUnmaskedText = removeMask(from: text)
         
         let maskedText = getMaskedText(for: newUnmaskedText)
-        validateText(maskedText)
+        isComplete = validateText(maskedText)
         
         applyMask(to: newUnmaskedText)
 
@@ -169,16 +111,6 @@ class CardExpiration: FloatingTextField, ObservableState {
         } else {
             addClearButton(isVisible: false)
             becomeFirstResponder()
-        }
-    }
-
-    private func isNextCharacterSlash(offset cursorOffset: NSInteger) -> Bool {
-        cursorOffset > 0 && maskPattern[safe: cursorOffset - 1] == "/"
-    }
-
-    private func setNewCursorPosition(_ newPositionOffset: NSInteger) {
-        if let newPosition = position(from: beginningOfDocument, offset: newPositionOffset) {
-            selectedTextRange = textRange(from: newPosition, to: newPosition)
         }
     }
 }

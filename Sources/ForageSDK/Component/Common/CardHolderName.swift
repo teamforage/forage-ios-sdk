@@ -8,7 +8,16 @@
 
 import UIKit
 
-class CardHolderName: FloatingTextField, ObservableState {
+class CardHolderName: FloatingTextField, ObservableState, Validatable {
+    var invalidError: (any Error)?
+    
+    var validators: [(String) throws -> (Bool)] = [{
+        if $0.isEmpty {
+            throw PaymentSheetErrors.inComplete
+        }
+        return true
+    }]
+    
     // MARK: - Properties
 
     private var wasBackspacePressed = false
@@ -21,7 +30,7 @@ class CardHolderName: FloatingTextField, ObservableState {
     }
 
     @IBInspectable public private(set) var isEmpty = true
-    @IBInspectable public private(set) var isValid = true
+    @IBInspectable public internal(set) var isValid = true
     @IBInspectable public private(set) var isComplete = false
 
     // MARK: - Initialization
@@ -49,13 +58,15 @@ class CardHolderName: FloatingTextField, ObservableState {
     }
 
     @objc func textFieldDidChange() {
-        defer { wasBackspacePressed = false }
-        defer { forageDelegate?.textFieldDidChange(self) }
+        defer {
+            wasBackspacePressed = false
+            forageDelegate?.textFieldDidChange(self)
+        }
 
         guard let text = text else { return }
         
-        self.isComplete = !text.isEmpty
-        self.isEmpty = text.isEmpty
+        isComplete = validateText(text)
+        isEmpty = text.isEmpty
 
         if !text.isEmpty {
             addClearButton(isVisible: true)

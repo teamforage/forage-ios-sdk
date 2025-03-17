@@ -8,8 +8,17 @@
 
 import UIKit
 
-class CardZipCode: FloatingTextField, ObservableState {
+class CardZipCode: FloatingTextField, ObservableState, Validatable {
     // MARK: - Properties
+    
+    var invalidError: (any Error)?
+    
+    var validators: [(String) throws -> (Bool)] = [{
+        if $0.count < 5 {
+            throw PaymentSheetErrors.inComplete
+        }
+        return true
+    }]
 
     private var wasBackspacePressed = false
 
@@ -21,7 +30,7 @@ class CardZipCode: FloatingTextField, ObservableState {
     }
 
     @IBInspectable public private(set) var isEmpty = true
-    @IBInspectable public private(set) var isValid = true
+    @IBInspectable public internal(set) var isValid = true
     @IBInspectable public private(set) var isComplete = false
 
     // MARK: - Initialization
@@ -42,17 +51,6 @@ class CardZipCode: FloatingTextField, ObservableState {
     }
     
     // MARK: Methods
-    
-    /// checks validation of text
-    private func validateText(_ text: String) {
-        defer {
-            isEmpty = text.isEmpty
-            forageDelegate?.textFieldDidChange(self)
-        }
-        
-        isValid = text.count >= 5
-        isComplete = text.count >= 5
-    }
 
     // MARK: - Text Field Actions
 
@@ -62,13 +60,17 @@ class CardZipCode: FloatingTextField, ObservableState {
     }
 
     @objc func textFieldDidChange() {
-        defer { wasBackspacePressed = false }
+        defer {
+            wasBackspacePressed = false
+            isEmpty = text?.isEmpty ?? true
+            forageDelegate?.textFieldDidChange(self)
+        }
 
         guard var newText = text else { return }
         
         newText = String(newText.prefix(5))
         
-        validateText(newText)
+        isComplete = validateText(newText)
         
         text = newText
 

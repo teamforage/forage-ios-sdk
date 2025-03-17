@@ -8,7 +8,16 @@
 
 import UIKit
 
-class CardCVV: FloatingTextField, ObservableState {
+class CardCVV: FloatingTextField, ObservableState, Validatable {
+    var invalidError: (any Error)?
+    
+    var validators: [(String) throws -> (Bool)] = [{
+        if $0.count < 3 {
+            throw PaymentSheetErrors.inComplete
+        }
+        return true
+    }]
+    
     // MARK: - Properties
 
     private var wasBackspacePressed = false
@@ -21,7 +30,7 @@ class CardCVV: FloatingTextField, ObservableState {
     }
 
     @IBInspectable public private(set) var isEmpty = true
-    @IBInspectable public private(set) var isValid = true
+    @IBInspectable public internal(set) var isValid = true
     @IBInspectable public private(set) var isComplete = false
 
     // MARK: - Initialization
@@ -41,17 +50,6 @@ class CardCVV: FloatingTextField, ObservableState {
         autocorrectionType = .no
         addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
     }
-    
-    /// checks validation of text and updates properties
-    private func validateText(_ text: String) {
-        defer {
-            isEmpty = text.isEmpty
-            forageDelegate?.textFieldDidChange(self)
-        }
-        
-        isValid = text.count >= 3
-        isComplete = text.count >= 3
-    }
 
     // MARK: - Text Field Action methods
 
@@ -61,13 +59,17 @@ class CardCVV: FloatingTextField, ObservableState {
     }
 
     @objc func textFieldDidChange() {
-        defer { wasBackspacePressed = false }
+        defer {
+            wasBackspacePressed = false
+            isEmpty = text?.isEmpty ?? true
+            forageDelegate?.textFieldDidChange(self)
+        }
 
         guard var newText = text else { return }
         
         newText = String(newText.prefix(4))
         
-        validateText(newText)
+        isComplete = validateText(newText)
         
         text = newText
 

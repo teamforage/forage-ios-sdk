@@ -8,15 +8,19 @@
 
 import UIKit
 
-class CardNumber: FloatingTextField, ObservableState {
+class CardNumber: FloatingTextField, ObservableState, Maskable, Validatable {
     // MARK: - Properties
     
+    /// Maskable Properties
     var actualText: String = ""
-    private var maskPattern: String = "#### #### #### ####"
+    private(set) var maskPattern: String = "#### #### #### ####"
+    private(set) var wasBackspacePressed = false
+    
+    /// Validatable properties
+    public internal(set) var invalidError: (any Error)?
+    public private(set) var validators: [(String) throws -> (Bool)] = []
 
-    private var wasBackspacePressed = false
-
-    /// A delegate that informs the client about the state of the entered card number (validation, focus)
+    /// A delegate that informs the client about the state (validation, focus)
     public weak var forageDelegate: ForageElementDelegate? {
         didSet {
             delegate = forageDelegate as? UITextFieldDelegate
@@ -24,7 +28,7 @@ class CardNumber: FloatingTextField, ObservableState {
     }
 
     @IBInspectable public private(set) var isEmpty = true
-    @IBInspectable public private(set) var isValid = true
+    @IBInspectable public internal(set) var isValid = true
     @IBInspectable public private(set) var isComplete = false
 
     // MARK: - Initialization
@@ -44,62 +48,18 @@ class CardNumber: FloatingTextField, ObservableState {
     private func setup() {
         autocorrectionType = .no
         addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+        validators.append(textLengthValidator)
+        validators.append(luhnsCheckValidator)
     }
     
-    private func removeMask(from maskedText: String) -> String {
-        return maskedText.replacingOccurrences(of: " ", with: "")
+    private func textLengthValidator(_ text: String) throws -> Bool {
+        if text.count < 16 {
+            throw PaymentSheetErrors.inComplete
+        }
+        return true
     }
     
-    private func getMaskedText(for unmaskedText: String) -> String {
-        var maskedText = ""
-        var insertionIndex = unmaskedText.startIndex
-
-        for char in maskPattern {
-            if insertionIndex >= unmaskedText.endIndex {
-                break
-            }
-            if char == "#" {
-                maskedText.append(unmaskedText[insertionIndex])
-                insertionIndex = unmaskedText.index(after: insertionIndex)
-            } else {
-                maskedText.append(char)
-            }
-        }
-        return maskedText
-    }
-    
-    private func applyMask(to unmaskedText: String) {
-        // Find the current cursor position
-        var cursorOffset = offset(from: beginningOfDocument, to: selectedTextRange!.start)
-        let maskedText = getMaskedText(for: unmaskedText)
-        let isCursorAtEndOfText = cursorOffset - maskedText.count >= 0
-
-        if wasBackspacePressed && isCursorAtEndOfText {
-            text = maskedText
-            return
-        }
-
-        // Apply the masked text to the text field with a new character, we use " " string as "any" character
-        let maskedTextWithNewChar = getMaskedText(for: unmaskedText + " ")
-        text = maskedText
-
-        // Calculate the new cursor position
-        if !isCursorAtEndOfText
-            && !wasBackspacePressed
-            && isNextCharacterGap(offset: cursorOffset) {
-            // move cursor an additional step forward
-            cursorOffset += 1
-        }
-        // Check if a whitespace (or other non-placeholder character) was added during the masking
-        if isCursorAtEndOfText && maskedTextWithNewChar.count > maskedText.count + 1 {
-            // move cursor an additional step forward
-            cursorOffset += 1
-        }
-
-        setNewCursorPosition(cursorOffset)
-    }
-    
-    private func luhnsCheck(_ cardNumber: String) -> Bool {
+    private func luhnsCheckValidator(_ cardNumber: String) throws -> Bool {
         let reverseCard = cardNumber.reversed().compactMap { Int(String($0)) }
             
             var sumEven = 0
@@ -117,32 +77,10 @@ class CardNumber: FloatingTextField, ObservableState {
                 }
             }
 
-            return (sumEven + sumOdd) % 10 == 0
-    }
-    
-    /// checks validation of text
-    private func validateText(_ text: String) {
-        defer {
-            isEmpty = text.isEmpty
-            forageDelegate?.textFieldDidChange(self)
+        if !((sumEven + sumOdd) % 10 == 0) {
+            throw PaymentSheetErrors.invalidCardNumber
         }
-        
-        // TODO: handle test cards
-        if text.count < 16 {
-            isValid = false
-            isComplete = false
-            return
-        }
-        
-        if luhnsCheck(text) {
-            isValid = true
-            isComplete = true
-            return
-        }
-        
-        isValid = false
-        isComplete = false
-        
+        return true
     }
 
     // MARK: - Text Field Actions
@@ -153,34 +91,25 @@ class CardNumber: FloatingTextField, ObservableState {
     }
 
     @objc func textFieldDidChange() {
-        defer { wasBackspacePressed = false }
+        defer {
+            wasBackspacePressed = false
+            isEmpty = text?.isEmpty ?? true
+            forageDelegate?.textFieldDidChange(self)
+        }
 
         guard let text = text else { return }
         
-        var newUnmaskedText = removeMask(from: text)
-        newUnmaskedText = String(newUnmaskedText.prefix(16))
+        let newUnmaskedText = removeMask(from: text)
         
-        validateText(newUnmaskedText)
+        isComplete = validateText(newUnmaskedText)
         
         applyMask(to: newUnmaskedText)
-        
-        actualText = newUnmaskedText
 
         if !text.isEmpty {
             addClearButton(isVisible: true)
         } else {
             addClearButton(isVisible: false)
             becomeFirstResponder()
-        }
-    }
-
-    private func isNextCharacterGap(offset cursorOffset: NSInteger) -> Bool {
-        cursorOffset > 0 && maskPattern[safe: cursorOffset - 1] == " "
-    }
-
-    private func setNewCursorPosition(_ newPositionOffset: NSInteger) {
-        if let newPosition = position(from: beginningOfDocument, offset: newPositionOffset) {
-            selectedTextRange = textRange(from: newPosition, to: newPosition)
         }
     }
 }

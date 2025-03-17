@@ -39,10 +39,12 @@ class HSAView: BaseSampleView {
         ps.elementHeight = 52
         
         ps.cardHolderNameTextField.placeholder = "Card holder name"
-        ps.cardHolderNameTextField.accessibilityIdentifier = "tf_paymentsheet_cardholdername"
+        ps.cardHolderNameTextField.accessibilityIdentifier = "tf_paymentsheet_cardholderName"
         ps.cardHolderNameTextField.isAccessibilityElement = true
         
         ps.cardNumberTextField.placeholder = "Card number"
+        ps.cardNumberTextField.accessibilityIdentifier = "tf_paymentsheet_cardNumber"
+        ps.cardNumberTextField.isAccessibilityElement = true
         ps.cardExpirationTextField.placeholder = "Expiration (MM/YY)"
         ps.cardCVVTextField.placeholder = "Security code"
         ps.cardZipCodeTextField.placeholder = "Zip code"
@@ -52,6 +54,8 @@ class HSAView: BaseSampleView {
 
     // ObservableState labels
     private var completeLabel: UILabel = .create(id: "lbl_complete", text: "isComplete: false")
+    private var currentFirstResponderLabel: UILabel = .create(id: "lbl_first_responder", text: "currentFirstResponder: ")
+    private var completionErrorsLabel: UILabel = .create(id: "lbl_completion_errors", text: "completionErrors: []")
 
     // Result labels
     private var refLabel: UILabel = .create(id: "lbl_ref")
@@ -140,7 +144,9 @@ class HSAView: BaseSampleView {
 
         contentView.addSubview(titleLabel)
         contentView.addSubview(forageHSAPaymentSheet)
+        contentView.addSubview(currentFirstResponderLabel)
         contentView.addSubview(completeLabel)
+        contentView.addSubview(completionErrorsLabel)
         contentView.addSubview(refLabel)
         contentView.addSubview(typeLabel)
         contentView.addSubview(tokenLabel)
@@ -153,7 +159,9 @@ class HSAView: BaseSampleView {
 
     private func setupConstraints() {
         setupContentViewConstraints()
+        currentFirstResponderLabel.text = "currentFirstResponder: \(forageHSAPaymentSheet.currentFirstResponder?.name ?? "")"
         completeLabel.text = "isComplete: \(forageHSAPaymentSheet.isComplete)"
+        completeLabel.text = "completionErrors: \(forageHSAPaymentSheet.completionErrors)"
     }
 
     private func setupContentViewConstraints() {
@@ -168,7 +176,9 @@ class HSAView: BaseSampleView {
         anchorContentViewSubviews(contentView: contentView, subviews: [
             titleLabel,
             forageHSAPaymentSheet,
+            currentFirstResponderLabel,
             completeLabel,
+            completionErrorsLabel,
             refLabel,
             typeLabel,
             tokenLabel,
@@ -196,7 +206,20 @@ class HSAView: BaseSampleView {
     }
 
     private func updateState(state: PaymentSheetObservableState) {
+        // TODO: determine best way to expose the state on all of the fields
+        // TODO: is it better to expose the fields and by proxy expose the state on each or better to have a sheet level object
+        // TODO: tbh I think it's probably better to expose the list fields and then allow them to edit their state easily with access to the
+        for var field in forageHSAPaymentSheet.fields {
+            if !field.isValid && !field.isFirstResponder && field.isDirty {
+                field.borderColor = UIColor(red: 0.60, green: 0.26, blue: 0.19, alpha: 1.0)
+            } else {
+                field.borderColor = UIColor(red: 0.01, green: 0.26, blue: 0.19, alpha: 1.0)
+            }
+        }
+        
+        currentFirstResponderLabel.text = "currentFirstResponder: \(state.currentFirstResponder?.name ?? "")"
         completeLabel.text = "isComplete: \(state.isComplete)"
+        completionErrorsLabel.text = "completionErrors: \(state.completionErrors)"
     }
 }
 

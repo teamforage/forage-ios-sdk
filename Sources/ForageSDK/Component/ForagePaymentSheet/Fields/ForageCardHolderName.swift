@@ -8,15 +8,24 @@
 
 import UIKit
 
-public class ForageCardHolderName: UIView, Identifiable, ForageElement, ForageElementDelegate {
+public class ForageCardHolderName: UIView, Identifiable, ForagePaymentSheetField, ForageElementDelegate {
     // MARK: - Properties
+    public var name: String = "ForageCardHolderName"
+    
+    public private(set) var isDirty: Bool = false
+    
+    public private(set) var isTouched: Bool = false
+    
+    public var invalidError: (any Error)? {
+        get { enhancedTextField.invalidError }
+    }
+    
     @IBInspectable public var isEmpty: Bool {
         enhancedTextField.isEmpty
     }
     
     @IBInspectable public var isValid: Bool {
         return enhancedTextField.isValid
-        
     }
 
     @IBInspectable public var isComplete: Bool {
@@ -238,7 +247,8 @@ extension ForageCardHolderName {
 
     /// Remove  focus from `ForageCardHolderName`.
     @discardableResult override public func resignFirstResponder() -> Bool {
-        enhancedTextField.resignFirstResponder()
+        isTouched = true
+        return enhancedTextField.resignFirstResponder()
     }
 
     /// Check if `ForageCardHolderName` is focused.
@@ -253,6 +263,7 @@ extension ForageCardHolderName: UITextFieldDelegate {
     }
 
     public func textFieldDidChange(_ state: ObservableState) {
+        isDirty = true
         delegate?.textFieldDidChange(self)
     }
 

@@ -8,9 +8,17 @@
 
 import UIKit
 
-public class ForageCardCVV: UIView, Identifiable, ForageElement, ForageElementDelegate {
+public class ForageCardCVV: UIView, Identifiable, ForagePaymentSheetField, ForageElementDelegate {
     // MARK: - Properties
-    var hasDetectedInput: Bool = false
+    public var name: String = "cardCVVTextField"
+    
+    public private(set) var isDirty: Bool = false
+    
+    public private(set) var isTouched: Bool = false
+    
+    public var invalidError: (any Error)? {
+        get { enhancedTextField.invalidError }
+    }
 
     @IBInspectable public var isEmpty: Bool {
         enhancedTextField.isEmpty
@@ -239,7 +247,8 @@ extension ForageCardCVV {
 
     /// Remove  focus from `ForageCardCVV`.
     @discardableResult override public func resignFirstResponder() -> Bool {
-        enhancedTextField.resignFirstResponder()
+        isTouched = true
+        return enhancedTextField.resignFirstResponder()
     }
 
     /// Check if `ForageCardCVV` is focused.
@@ -254,8 +263,8 @@ extension ForageCardCVV: UITextFieldDelegate {
     }
 
     public func textFieldDidChange(_ state: ObservableState) {
+        isDirty = true
         delegate?.textFieldDidChange(self)
-        hasDetectedInput = true
     }
 
     public func textFieldDidBeginEditing(_ textField: UITextField) {

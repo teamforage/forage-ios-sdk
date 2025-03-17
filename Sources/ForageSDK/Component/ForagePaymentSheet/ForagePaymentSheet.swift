@@ -8,8 +8,19 @@
 
 import UIKit
 
+public enum PaymentSheetErrors: Error {
+    case invalidCardNumber
+    case invalidDate
+    case inComplete
+}
+
 public class ForagePaymentSheet: UIView, Identifiable, ForagePaymentSheetElement {
     // MARK: - Properties
+    
+    public private(set) var completionErrors: [String: any Error] = [:]
+    public var currentFirstResponder: (any ForagePaymentSheetField)? {
+        get { fields.first { $0.isFirstResponder } }
+    }
     
     /// height for textfields
     @IBInspectable public var elementHeight: Int = 83 {
@@ -202,7 +213,7 @@ public class ForagePaymentSheet: UIView, Identifiable, ForagePaymentSheetElement
     private lazy var imageView: UIView = PoweredByForageImage()
     
     /// collection of all fields to easily iterate and style fields as needed
-    lazy var fields: [any ForageElement] = [
+    public private(set) lazy var fields: [any ForagePaymentSheetField] = [
         cardHolderNameTextField,
         cardNumberTextField,
         cardExpirationTextField,
@@ -339,13 +350,29 @@ public class ForagePaymentSheet: UIView, Identifiable, ForagePaymentSheetElement
     public func clearSheet() {
         cardHolderNameTextField.clearText()
     }
+    
+    private func updateSheetState() {
+        var errors: [String: any Error] = [:]
+        
+        for field in fields {
+            if field.invalidError != nil {
+                errors[field.name] = field.invalidError
+            }
+        }
+        
+        completionErrors = errors
+    }
 }
 
 // MARK: - UIResponder methods
 extension ForagePaymentSheet: ForageElementDelegate {
     public func textFieldDidChange(_ state: any ObservableState) {
+        updateSheetState()
         delegate?.sheetDidChange(self)
     }
     
-    public func focusDidChange(_ state: any ObservableState) {}
+    public func focusDidChange(_ state: any ObservableState) {
+        updateSheetState()
+        delegate?.sheetDidChange(self)
+    }
 }
