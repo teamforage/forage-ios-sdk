@@ -44,8 +44,11 @@ public class ForagePaymentSheet: UIView, Identifiable, ForagePaymentSheetElement
     /// BorderColor for the text fields
     @IBInspectable public var borderColor: UIColor? = .black {
         didSet {
+            if borderColor == nil {
+                borderColor = .black
+            }
             for var field in fields {
-                field.borderColor = borderColor ?? .black
+                field.borderColor = borderColor
             }
         }
     }
@@ -77,8 +80,11 @@ public class ForagePaymentSheet: UIView, Identifiable, ForagePaymentSheetElement
 
     /// Text color for the text fields
     /// `textColor` default value is `black`
-    @IBInspectable public var textColor: UIColor? {
+    @IBInspectable public var textColor: UIColor? = .black {
         didSet {
+            if textColor == nil {
+                textColor = .black
+            }
             for var field in fields {
                 field.textColor = textColor
             }
@@ -348,7 +354,9 @@ public class ForagePaymentSheet: UIView, Identifiable, ForagePaymentSheetElement
     }
 
     public func clearSheet() {
-        cardHolderNameTextField.clearText()
+        for field in fields {
+            field.clearText()
+        }
     }
     
     private func updateSheetState() {
