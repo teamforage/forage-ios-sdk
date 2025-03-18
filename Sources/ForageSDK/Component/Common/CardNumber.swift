@@ -52,14 +52,14 @@ class CardNumber: FloatingTextField, ObservableState, Maskable, Validatable {
         validators.append(luhnsCheckValidator)
     }
     
-    private func textLengthValidator(_ text: String) throws(PaymentSheetError) -> Bool {
+    private func textLengthValidator(_ text: String) throws -> Bool {
         if text.count < 16 {
-            throw .inComplete
+            throw PaymentSheetError.inComplete
         }
         return true
     }
     
-    private func luhnsCheckValidator(_ cardNumber: String) throws(PaymentSheetError) -> Bool {
+    private func luhnsCheckValidator(_ cardNumber: String) throws -> Bool {
         let reverseCard = cardNumber.reversed().compactMap { Int(String($0)) }
             
             var sumEven = 0
@@ -78,7 +78,7 @@ class CardNumber: FloatingTextField, ObservableState, Maskable, Validatable {
             }
 
         if !((sumEven + sumOdd) % 10 == 0) {
-            throw .invalidCardNumber
+            throw PaymentSheetError.invalidCardNumber
         }
         return true
     }

@@ -51,15 +51,15 @@ class CardExpiration: FloatingTextField, ObservableState, Maskable, Validatable 
         validators = [textLengthValidator, isNotExpiredValidator]
     }
     
-    private func textLengthValidator(_ text: String) throws(PaymentSheetError) -> Bool {
+    private func textLengthValidator(_ text: String) throws -> Bool {
         if text.count < 5 {
-            throw .inComplete
+            throw PaymentSheetError.inComplete
         }
         
         return text.count >= 5
     }
     
-    private func isNotExpiredValidator(_ dateString: String) throws(PaymentSheetError) -> Bool {
+    private func isNotExpiredValidator(_ dateString: String) throws -> Bool {
         let dateFormatter = DateFormatter()
         dateFormatter.locale = Locale(identifier: "en_US")
         dateFormatter.setLocalizedDateFormatFromTemplate("MM/yy")
@@ -74,13 +74,13 @@ class CardExpiration: FloatingTextField, ObservableState, Maskable, Validatable 
         
         if let expirationDate = expDate, let currentDate = currDate {
             if currentDate > expirationDate {
-                throw .invalidDate
+                throw PaymentSheetError.invalidDate
             }
             
             return currentDate <= expirationDate
         }
         
-        throw .invalidDate
+        throw PaymentSheetError.invalidDate
     }
 
     // MARK: - Text Field Actions
