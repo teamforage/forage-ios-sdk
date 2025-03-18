@@ -15,7 +15,7 @@ class CardZipCode: FloatingTextField, ObservableState, Validatable {
     
     var validators: [(String) throws -> (Bool)] = [{
         if $0.count < 5 {
-            throw PaymentSheetErrors.inComplete
+            throw PaymentSheetError.inComplete
         }
         return true
     }]

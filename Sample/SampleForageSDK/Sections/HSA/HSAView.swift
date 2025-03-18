@@ -206,9 +206,6 @@ class HSAView: BaseSampleView {
     }
 
     private func updateState(state: PaymentSheetObservableState) {
-        // TODO: determine best way to expose the state on all of the fields
-        // TODO: is it better to expose the fields and by proxy expose the state on each or better to have a sheet level object
-        // TODO: tbh I think it's probably better to expose the list fields and then allow them to edit their state easily with access to the
         for var field in forageHSAPaymentSheet.fields {
             if !field.isValid && !field.isFirstResponder && field.isDirty {
                 field.borderColor = UIColor(red: 0.60, green: 0.26, blue: 0.19, alpha: 1.0)
@@ -226,7 +223,11 @@ class HSAView: BaseSampleView {
 // MARK: - ForagePaymentSheetDelegate
 
 extension HSAView: ForagePaymentSheetElementDelegate {
-    func sheetDidChange(_ state: PaymentSheetObservableState) {
+    func sheetFocusDidChange(_ state: any PaymentSheetObservableState) {
+        updateState(state: state)
+    }
+    
+    func sheetTextFieldDidChange(_ state: any PaymentSheetObservableState) {
         updateState(state: state)
     }
 }

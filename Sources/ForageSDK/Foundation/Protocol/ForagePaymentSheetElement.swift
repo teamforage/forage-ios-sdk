@@ -16,7 +16,8 @@ public protocol PaymentSheetObservableState {
 }
 
 public protocol ForagePaymentSheetElementDelegate {
-    func sheetDidChange(_ state: PaymentSheetObservableState)
+    func sheetTextFieldDidChange(_ state: PaymentSheetObservableState)
+    func sheetFocusDidChange(_ state: PaymentSheetObservableState)
 }
 
 public protocol ForagePaymentSheetElement: UIView, Identifiable, Appearance, Style, PaymentSheetObservableState {

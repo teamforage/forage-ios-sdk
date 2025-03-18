@@ -8,7 +8,7 @@
 
 import UIKit
 
-public enum PaymentSheetErrors: Error {
+public enum PaymentSheetError: Error {
     case invalidCardNumber
     case invalidDate
     case inComplete
@@ -368,11 +368,11 @@ public class ForagePaymentSheet: UIView, Identifiable, ForagePaymentSheetElement
 extension ForagePaymentSheet: ForageElementDelegate {
     public func textFieldDidChange(_ state: any ObservableState) {
         updateSheetState()
-        delegate?.sheetDidChange(self)
+        delegate?.sheetTextFieldDidChange(self)
     }
     
     public func focusDidChange(_ state: any ObservableState) {
         updateSheetState()
-        delegate?.sheetDidChange(self)
+        delegate?.sheetFocusDidChange(self)
     }
 }

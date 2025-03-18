@@ -13,7 +13,7 @@ class CardHolderName: FloatingTextField, ObservableState, Validatable {
     
     var validators: [(String) throws -> (Bool)] = [{
         if $0.isEmpty {
-            throw PaymentSheetErrors.inComplete
+            throw PaymentSheetError.inComplete
         }
         return true
     }]
