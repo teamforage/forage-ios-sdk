@@ -161,7 +161,7 @@ class HSAView: BaseSampleView {
         setupContentViewConstraints()
         currentFirstResponderLabel.text = "currentFirstResponder: \(forageHSAPaymentSheet.currentFirstResponder?.name ?? "")"
         completeLabel.text = "isComplete: \(forageHSAPaymentSheet.isComplete)"
-        completeLabel.text = "completionErrors: \(forageHSAPaymentSheet.completionErrors)"
+        completionErrorsLabel.text = "completionErrors: \(forageHSAPaymentSheet.completionErrors)"
     }
 
     private func setupContentViewConstraints() {
