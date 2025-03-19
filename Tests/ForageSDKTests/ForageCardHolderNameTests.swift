@@ -52,7 +52,7 @@ final class ForageCardHolderNameTests: XCTestCase {
         XCTAssertFalse(invalidTextField.isValid)
         
         XCTAssertNil(validTextField.invalidError)
-        XCTAssertEqual(invalidTextField.invalidError as! PaymentSheetError, PaymentSheetError.inComplete)
+        XCTAssertEqual(invalidTextField.invalidError as! PaymentSheetError, PaymentSheetError.incomplete)
 
         XCTAssertTrue(validTextField.isComplete)
         XCTAssertFalse(invalidTextField.isComplete)

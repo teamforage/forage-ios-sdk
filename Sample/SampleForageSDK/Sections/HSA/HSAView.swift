@@ -29,15 +29,20 @@ class HSAView: BaseSampleView {
         return label
     }()
     
-    // set defaults on payment sheet
     public let forageHSAPaymentSheet: ForagePaymentSheet = {
         let ps = ForagePaymentSheet()
         
+        // set defaults on payment sheet that will cascade to all fields
         ps.borderWidth = 2.0
         ps.borderColor = UIColor(red: 0.01, green: 0.26, blue: 0.19, alpha: 1.0)
         ps.cornerRadius = 4.0
         ps.elementHeight = 52
         
+        // set field specific styles
+        ps.cardExpirationTextField.cornerRadius = 6.0
+        ps.cardCVVTextField.cornerRadius = 6.0
+        
+        // Set field accessibility settings
         ps.cardHolderNameTextField.placeholder = "Card holder name"
         ps.cardHolderNameTextField.accessibilityIdentifier = "tf_paymentsheet_cardholderName"
         ps.cardHolderNameTextField.isAccessibilityElement = true
@@ -45,9 +50,25 @@ class HSAView: BaseSampleView {
         ps.cardNumberTextField.placeholder = "Card number"
         ps.cardNumberTextField.accessibilityIdentifier = "tf_paymentsheet_cardNumber"
         ps.cardNumberTextField.isAccessibilityElement = true
+        
         ps.cardExpirationTextField.placeholder = "Expiration (MM/YY)"
+        ps.cardExpirationTextField.accessibilityIdentifier = "tf_paymentsheet_expiration"
+        ps.cardExpirationTextField.isAccessibilityElement = true
+        
         ps.cardCVVTextField.placeholder = "Security code"
+        ps.cardCVVTextField.accessibilityIdentifier = "tf_paymentsheet_seccurity_code"
+        ps.cardCVVTextField.isAccessibilityElement = true
+        
         ps.cardZipCodeTextField.placeholder = "Zip code"
+        ps.cardZipCodeTextField.accessibilityIdentifier = "tf_paymentsheet_zip_code"
+        ps.cardZipCodeTextField.isAccessibilityElement = true
+        
+        // set custom field names to identify the field as currentFirstResponder or completionErrors map
+        ps.cardHolderNameTextField.name = "cardName"
+        ps.cardNumberTextField.name = "cardNumber"
+        ps.cardExpirationTextField.name = "cardExp"
+        ps.cardCVVTextField.name = "cardCVV"
+        ps.cardZipCodeTextField.name = "cardZip"
         
         return ps
     }()
@@ -72,7 +93,7 @@ class HSAView: BaseSampleView {
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         button.tintColor = .white
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.addTarget(self, action: #selector(sendInfo(_:)), for: .touchUpInside)
+        // TODO: add selector for functionality
         button.backgroundColor = .primaryColor
         button.isEnabled = true
         button.isUserInteractionEnabled = true
@@ -81,20 +102,6 @@ class HSAView: BaseSampleView {
         button.isAccessibilityElement = true
         return button
     }()
-
-    // MARK: Fileprivate Methods
-
-    @objc fileprivate func sendInfo(_ gesture: UIGestureRecognizer) {
-//        tokenizeCardButton.showLoading()
-//        ForageSDK.shared.tokenizeEBTCard(
-//            foragePanTextField: foragePanTextField,
-//            customerID: ClientSharedData.shared.customerID,
-//            reusable: ClientSharedData.shared.isReusablePaymentMethod
-//        ) { [self] result in
-//            tokenizeCardButton.hideLoading()
-//            printResult(result: result)
-//        }
-    }
 
     // MARK: Public Methods
 
@@ -106,38 +113,6 @@ class HSAView: BaseSampleView {
     }
 
     // MARK: Private Methods
-
-    private func printResult(result: Result<PaymentMethodModel, Error>) {
-        DispatchQueue.main.async {
-            switch result {
-            case let .success(response):
-                self.refLabel.text = "ref=\(response.paymentMethodIdentifier)"
-                self.typeLabel.text = "type=\(response.type)"
-                self.tokenLabel.text = "token=\(response.card.token)"
-                self.last4Label.text = "last4=\(response.card.last4)"
-                self.customerIDLabel.text = "customerID=\(response.customerID ?? "NO CUST ID")"
-                if let reusable = response.reusable {
-                    self.reusableLabel.text = "reusable=\(String(describing: reusable))"
-                } else {
-                    self.reusableLabel.text = "reusable not in response"
-                }
-                self.errorLabel.text = ""
-                ClientSharedData.shared.paymentMethodReference = response.paymentMethodIdentifier
-            case let .failure(error):
-                self.logForageError(error)
-                self.errorLabel.text = "error: \n\(error)"
-                self.refLabel.text = ""
-                self.typeLabel.text = ""
-                self.tokenLabel.text = ""
-                self.last4Label.text = ""
-                self.customerIDLabel.text = ""
-                self.reusableLabel.text = ""
-            }
-
-            self.layoutIfNeeded()
-            self.layoutSubviews()
-        }
-    }
 
     private func setupView() {
         addSubview(contentView)
@@ -199,13 +174,8 @@ class HSAView: BaseSampleView {
         )
     }
 
-    private func updateButtonState(isEnabled: Bool, button: UIButton) {
-        button.isEnabled = isEnabled
-        button.isUserInteractionEnabled = isEnabled
-        button.alpha = isEnabled ? 1.0 : 0.5
-    }
-
     private func updateState(state: PaymentSheetObservableState) {
+        // loop through fields and highlight fields with errors that are not in Focus
         for var field in forageHSAPaymentSheet.fields {
             if !field.isValid && !field.isFirstResponder && field.isDirty {
                 field.borderColor = UIColor(red: 0.60, green: 0.26, blue: 0.19, alpha: 1.0)

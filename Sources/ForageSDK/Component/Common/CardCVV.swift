@@ -13,7 +13,7 @@ class CardCVV: FloatingTextField, ObservableState, Validatable {
     
     var validators: [(String) throws -> (Bool)] = [{
         if $0.count < 3 {
-            throw PaymentSheetError.inComplete
+            throw PaymentSheetError.incomplete
         }
         return true
     }]

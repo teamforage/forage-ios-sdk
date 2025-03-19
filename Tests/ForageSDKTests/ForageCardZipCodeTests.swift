@@ -52,7 +52,7 @@ final class ForageCardZipCodeTests: XCTestCase {
         XCTAssertFalse(invalidTextField.isValid)
         
         XCTAssertNil(validTextField.invalidError)
-        XCTAssertEqual(invalidTextField.invalidError as! PaymentSheetError, PaymentSheetError.inComplete)
+        XCTAssertEqual(invalidTextField.invalidError as! PaymentSheetError, PaymentSheetError.incomplete)
 
         XCTAssertTrue(validTextField.isComplete)
         XCTAssertFalse(invalidTextField.isComplete)
@@ -74,7 +74,7 @@ final class ForageCardZipCodeTests: XCTestCase {
 
         XCTAssertFalse(validTextField.isValid)
         
-        XCTAssertEqual(validTextField.invalidError as! PaymentSheetError, PaymentSheetError.inComplete)
+        XCTAssertEqual(validTextField.invalidError as! PaymentSheetError, PaymentSheetError.incomplete)
 
         XCTAssertFalse(validTextField.isComplete)
 

@@ -54,7 +54,7 @@ class CardNumber: FloatingTextField, ObservableState, Maskable, Validatable {
     
     private func textLengthValidator(_ text: String) throws -> Bool {
         if text.count < 16 {
-            throw PaymentSheetError.inComplete
+            throw PaymentSheetError.incomplete
         }
         return true
     }

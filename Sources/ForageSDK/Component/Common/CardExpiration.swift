@@ -53,7 +53,7 @@ class CardExpiration: FloatingTextField, ObservableState, Maskable, Validatable 
     
     private func textLengthValidator(_ text: String) throws -> Bool {
         if text.count < 5 {
-            throw PaymentSheetError.inComplete
+            throw PaymentSheetError.incomplete
         }
         
         return text.count >= 5

@@ -11,7 +11,7 @@ import UIKit
 public enum PaymentSheetError: Error {
     case invalidCardNumber
     case invalidDate
-    case inComplete
+    case incomplete
 }
 
 public class ForagePaymentSheet: UIView, Identifiable, ForagePaymentSheetElement {
