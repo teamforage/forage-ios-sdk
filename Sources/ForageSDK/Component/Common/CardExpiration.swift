@@ -65,12 +65,10 @@ class CardExpiration: FloatingTextField, ObservableState, Maskable, Validatable 
         dateFormatter.setLocalizedDateFormatFromTemplate("MM/yy")
         
         let date = Date()
-        let calendar = Calendar.current
-        let currentYear = calendar.component(.year, from: date)
-        let currentMonth = calendar.component(.month, from: date)
-
+        
         let expDate = dateFormatter.date(from: dateString)
-        let currDate = dateFormatter.date(from: String(currentMonth) + "/" + String(currentYear))
+        let currentDateString = dateFormatter.string(from: date)
+        let currDate = dateFormatter.date(from: currentDateString)
         
         if let expirationDate = expDate, let currentDate = currDate {
             if currentDate > expirationDate {
