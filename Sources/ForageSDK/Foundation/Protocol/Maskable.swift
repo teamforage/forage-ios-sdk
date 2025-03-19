@@ -44,10 +44,8 @@ extension Maskable {
                     }
                     insertionIndex = maskedText.index(after: insertionIndex)
                 } while insertionIndex < maskedText.endIndex
-            } else {
-                if char == maskedText[insertionIndex] {
-                    insertionIndex = maskedText.index(after: insertionIndex)
-                }
+            } else if char == maskedText[insertionIndex] {
+                insertionIndex = maskedText.index(after: insertionIndex)
             }
         }
         return unMaskedText
