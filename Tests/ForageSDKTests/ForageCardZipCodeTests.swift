@@ -79,6 +79,42 @@ final class ForageCardZipCodeTests: XCTestCase {
         XCTAssertFalse(validTextField.isComplete)
 
         XCTAssertFalse(validTextField.isEmpty)
+        
+        validTextField.enhancedTextField.text = "12345"
+
+        validTextField.enhancedTextField.textFieldDidChange()
+        
+        XCTAssertEqual(validTextField.enhancedTextField.text, "12345")
+
+        XCTAssertTrue(validTextField.isValid)
+        
+        XCTAssertNil(validTextField.invalidError)
+
+        XCTAssertTrue(validTextField.isComplete)
+        
+        validTextField.enhancedTextField.text = "1234567"
+
+        validTextField.enhancedTextField.textFieldDidChange()
+        
+        XCTAssertEqual(validTextField.enhancedTextField.text, "12345-67")
+
+        XCTAssertFalse(validTextField.isValid)
+        
+        XCTAssertEqual(validTextField.invalidError as! PaymentSheetError, PaymentSheetError.incomplete)
+
+        XCTAssertFalse(validTextField.isComplete)
+        
+        validTextField.enhancedTextField.text = "123456789"
+
+        validTextField.enhancedTextField.textFieldDidChange()
+        
+        XCTAssertEqual(validTextField.enhancedTextField.text, "12345-6789")
+        
+        XCTAssertTrue(validTextField.isValid)
+        
+        XCTAssertNil(validTextField.invalidError)
+
+        XCTAssertTrue(validTextField.isComplete)
     }
     
     func test_textField_enterNumericString_shouldReturnTrue() {

@@ -8,19 +8,18 @@
 
 import UIKit
 
-class CardZipCode: FloatingTextField, ObservableState, Validatable {
+class CardZipCode: FloatingTextField, ObservableState, Validatable, Maskable {
+    var actualText: String = ""
+    
+    var maskPattern: String = "#####-####"
+    
     // MARK: - Properties
     
     var invalidError: (any Error)?
     
-    var validators: [(String) throws -> (Bool)] = [{
-        if $0.count < 5 {
-            throw PaymentSheetError.incomplete
-        }
-        return true
-    }]
+    var validators: [(String) throws -> (Bool)] = []
 
-    private var wasBackspacePressed = false
+    internal var wasBackspacePressed = false
 
     /// A delegate that informs the client about the state of the entered zip code (validation, focus)
     public weak var forageDelegate: ForageElementDelegate? {
@@ -44,13 +43,24 @@ class CardZipCode: FloatingTextField, ObservableState, Validatable {
         super.init(coder: coder)
         setup()
     }
+    
+    // MARK: Methods
 
     private func setup() {
         autocorrectionType = .no
         addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+        validators = [textLengthValidator]
     }
     
-    // MARK: Methods
+    private func textLengthValidator(_ text: String) throws -> Bool {
+        if text.count < 5 {
+            throw PaymentSheetError.incomplete
+        } else if text.count > 5 && text.count < 9 {
+            throw PaymentSheetError.incomplete
+        }
+        
+        return true
+    }
 
     // MARK: - Text Field Actions
 
@@ -66,15 +76,15 @@ class CardZipCode: FloatingTextField, ObservableState, Validatable {
             forageDelegate?.textFieldDidChange(self)
         }
 
-        guard var newText = text else { return }
+        guard let text = text else { return }
         
-        newText = String(newText.prefix(5))
+        let newUnmaskedText = removeMask(from: text)
         
-        isComplete = validateText(newText)
+        isComplete = validateText(newUnmaskedText)
         
-        text = newText
+        applyMask(to: newUnmaskedText)
 
-        if !newText.isEmpty {
+        if !text.isEmpty {
             addClearButton(isVisible: true)
         } else {
             addClearButton(isVisible: false)

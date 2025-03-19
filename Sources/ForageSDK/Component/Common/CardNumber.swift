@@ -48,8 +48,7 @@ class CardNumber: FloatingTextField, ObservableState, Maskable, Validatable {
     private func setup() {
         autocorrectionType = .no
         addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
-        validators.append(textLengthValidator)
-        validators.append(luhnsCheckValidator)
+        validators = [textLengthValidator, luhnsCheckValidator]
     }
     
     private func textLengthValidator(_ text: String) throws -> Bool {
