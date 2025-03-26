@@ -57,6 +57,20 @@ class CardNumberView: BaseSampleView {
 
         return tf
     }()
+    
+    private let cameraButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Scan your card", for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .medium)
+        button.backgroundColor = .primaryColor
+        button.tintColor = .white
+        button.layer.cornerRadius = 4.0
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(cameraButtonTapped), for: .touchUpInside)
+        button.accessibilityIdentifier = "bt_camera"
+        button.isAccessibilityElement = true
+        return button
+    }()
 
     // ObservableState labels
     private var firstResponderLabel: UILabel = .create(id: "lbl_first_responder")
@@ -108,6 +122,11 @@ class CardNumberView: BaseSampleView {
     @objc fileprivate func goToBalance(_ gesture: UIGestureRecognizer) {
         delegate?.goToBalance(self)
     }
+    
+    @objc fileprivate func cameraButtonTapped() {
+        // Handle camera button tap
+        print("Camera button tapped")
+    }
 
     // MARK: Public Methods
 
@@ -158,6 +177,7 @@ class CardNumberView: BaseSampleView {
 
         contentView.addSubview(titleLabel)
         contentView.addSubview(foragePanTextField)
+        contentView.addSubview(cameraButton)
         contentView.addSubview(firstResponderLabel)
         contentView.addSubview(completeLabel)
         contentView.addSubview(emptyLabel)
@@ -193,6 +213,7 @@ class CardNumberView: BaseSampleView {
         anchorContentViewSubviews(contentView: contentView, subviews: [
             titleLabel,
             foragePanTextField,
+            cameraButton,
             firstResponderLabel,
             completeLabel,
             emptyLabel,
@@ -205,6 +226,16 @@ class CardNumberView: BaseSampleView {
             reusableLabel,
             errorLabel,
         ])
+
+        cameraButton.anchor(
+            top: foragePanTextField.bottomAnchor,
+            leading: contentView.leadingAnchor,
+            bottom: nil,
+            trailing: nil,
+            centerXAnchor: nil,
+            padding: .init(top: 10, left: 20, bottom: 0, right: 0),
+            size: .init(width: 60, height: 40)
+        )
 
         tokenizeCardButton.anchor(
             top: nil,
