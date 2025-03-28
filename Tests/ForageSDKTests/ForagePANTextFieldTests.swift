@@ -206,4 +206,97 @@ final class ForagePANTextFieldTests: XCTestCase {
         foragePANTextField.masksToBounds = masksToBounds
         XCTAssertEqual(masksToBounds, foragePANTextField.masksToBounds)
     }
+
+    func test_recognizeCardText_shouldRecognizeValidCardNumber() {
+        // Create an expectation for the async call
+        let expectation = XCTestExpectation(description: "Card text recognition")
+        
+        // Create a test image with card number text
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: 300, height: 100))
+        let testImage = renderer.image { ctx in
+            let rect = CGRect(x: 0, y: 0, width: 300, height: 100)
+            ctx.cgContext.setFillColor(UIColor.white.cgColor)
+            ctx.cgContext.fill(rect)
+            
+            let text = "5077 0312 3412 3412"
+            let attributes: [NSAttributedString.Key: Any] = [
+                .font: UIFont.systemFont(ofSize: 16),
+                .foregroundColor: UIColor.black
+            ]
+            
+            text.draw(at: CGPoint(x: 10, y: 40), withAttributes: attributes)
+        }
+        
+        // Save the image to the Documents directory for inspection
+        saveImageForInspection(testImage, named: "card_number_test_image")
+        
+        // Call the function under test
+        recognizeCardText(from: testImage) { result in
+            switch result {
+            case .success(let cardNumber):
+                // The actual test assertions
+                XCTAssertNotNil(cardNumber, "Card number should be recognized")
+                if let number = cardNumber {
+                    XCTAssertEqual(number, "5077031234123412", "Recognized card number should match expected value")
+                }
+            case .failure(let error):
+                XCTFail("Card recognition failed with error: \(error)")
+            }
+            expectation.fulfill()
+        }
+        
+        // Wait for the expectation to be fulfilled
+        wait(for: [expectation], timeout: 5.0)
+    }
+
+    func test_recognizeCardText_withInvalidImage_shouldReturnNil() {
+        // Create an expectation for the async call
+        let expectation = XCTestExpectation(description: "Card text recognition with invalid image")
+        
+        // Create a blank image without any text
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: 300, height: 100))
+        let blankImage = renderer.image { ctx in
+            let rect = CGRect(x: 0, y: 0, width: 300, height: 100)
+            ctx.cgContext.setFillColor(UIColor.white.cgColor)
+            ctx.cgContext.fill(rect)
+        }
+        
+        // Save the image to the Documents directory for inspection
+        saveImageForInspection(blankImage, named: "blank_test_image")
+        
+        // Call the function under test
+        recognizeCardText(from: blankImage) { result in
+            switch result {
+            case .success(let cardNumber):
+                XCTAssertNil(cardNumber, "No card number should be recognized from a blank image")
+            case .failure(let error):
+                // While we expect nil result rather than an error, we shouldn't fail the test
+                // if Vision framework encounters an error with our test image
+                print("Card recognition returned error: \(error)")
+            }
+            expectation.fulfill()
+        }
+        
+        // Wait for the expectation to be fulfilled
+        wait(for: [expectation], timeout: 5.0)
+    }
+
+    // Helper function to save images for inspection
+    private func saveImageForInspection(_ image: UIImage, named filename: String) {
+        guard let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            print("Could not access documents directory")
+            return
+        }
+        
+        let fileURL = documentsDirectory.appendingPathComponent("\(filename).png")
+        
+        if let data = image.pngData() {
+            do {
+                try data.write(to: fileURL)
+                print("Test image saved to: \(fileURL.path)")
+            } catch {
+                print("Could not save test image: \(error)")
+            }
+        }
+    }
 }
