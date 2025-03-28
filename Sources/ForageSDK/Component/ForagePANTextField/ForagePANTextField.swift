@@ -149,7 +149,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
     }()
 
     /// UITextField with masking and floating placeholder label functionality.
-    lazy var enhancedTextField: MaskedUITextField = {
+    public lazy var enhancedTextField: MaskedUITextField = {
         let tf = MaskedUITextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
         tf.textColor = UIColor.black

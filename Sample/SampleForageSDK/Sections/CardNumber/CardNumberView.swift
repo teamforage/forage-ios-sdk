@@ -13,6 +13,9 @@ import Vision
 
 protocol CardNumberViewDelegate: AnyObject {
     func goToBalance(_ view: CardNumberView)
+    func openImagePicker()
+    func getCardNumber() -> String
+    func setCardNumber(_ num: String)
 }
 
 class CardNumberView: BaseSampleView {
@@ -126,7 +129,7 @@ class CardNumberView: BaseSampleView {
     
     @objc fileprivate func cameraButtonTapped() {
         // Handle camera button tap
-        print("Camera button tapped")
+        self.delegate?.openImagePicker()
     }
 
     // MARK: Public Methods
@@ -270,6 +273,8 @@ class CardNumberView: BaseSampleView {
         completeLabel.text = "isComplete: \(state.isComplete)"
         emptyLabel.text = "isEmpty: \(state.isEmpty)"
         validLabel.text = "isValid: \(state.isValid)"
+        var num = self.delegate?.getCardNumber()
+        foragePanTextField.enhancedTextField.text = num
     }
 }
 

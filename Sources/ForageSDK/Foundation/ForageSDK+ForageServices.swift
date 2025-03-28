@@ -7,7 +7,7 @@
 //
 
 import Foundation
-
+import UIKit
 /**
  Interface for Forage SDK Services
  */
