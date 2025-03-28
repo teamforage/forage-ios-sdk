@@ -8,7 +8,7 @@
 
 import UIKit
 
-class FloatingTextField: UITextField {
+public class FloatingTextField: UITextField {
     enum FloatingDisplayStatus {
         case always
         case never
@@ -277,7 +277,7 @@ class FloatingTextField: UITextField {
 
     // MARK: - UIView override layout
 
-    override var intrinsicContentSize: CGSize {
+    public override var intrinsicContentSize: CGSize {
         self.layoutIfNeeded()
 
         let textFieldIntrinsicContentSize = super.intrinsicContentSize

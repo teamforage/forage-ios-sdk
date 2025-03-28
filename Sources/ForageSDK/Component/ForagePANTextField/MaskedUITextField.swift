@@ -17,7 +17,7 @@ enum MaskPattern: String {
     case noIINmatch = "#### #### #### #### ###"
 }
 
-class MaskedUITextField: FloatingTextField, ObservableState {
+public class MaskedUITextField: FloatingTextField, ObservableState {
     // MARK: - Properties
 
     var actualPAN: String = ""
@@ -55,7 +55,7 @@ class MaskedUITextField: FloatingTextField, ObservableState {
 
     // MARK: - Text Field Actions
 
-    override func deleteBackward() {
+    public override func deleteBackward() {
         wasBackspacePressed = true
         super.deleteBackward()
     }

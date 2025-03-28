@@ -9,9 +9,13 @@
 import ForageSDK
 import Foundation
 import UIKit
+import Vision
 
 protocol CardNumberViewDelegate: AnyObject {
     func goToBalance(_ view: CardNumberView)
+    func openImagePicker()
+    func getCardNumber() -> String
+    func setCardNumber(_ num: String)
 }
 
 class CardNumberView: BaseSampleView {
@@ -56,6 +60,20 @@ class CardNumberView: BaseSampleView {
         tf.isAccessibilityElement = true
 
         return tf
+    }()
+    
+    private let cameraButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Scan your card", for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .medium)
+        button.backgroundColor = .primaryColor
+        button.tintColor = .white
+        button.layer.cornerRadius = 4.0
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(cameraButtonTapped), for: .touchUpInside)
+        button.accessibilityIdentifier = "bt_camera"
+        button.isAccessibilityElement = true
+        return button
     }()
 
     // ObservableState labels
@@ -108,6 +126,11 @@ class CardNumberView: BaseSampleView {
     @objc fileprivate func goToBalance(_ gesture: UIGestureRecognizer) {
         delegate?.goToBalance(self)
     }
+    
+    @objc fileprivate func cameraButtonTapped() {
+        // Handle camera button tap
+        self.delegate?.openImagePicker()
+    }
 
     // MARK: Public Methods
 
@@ -158,6 +181,7 @@ class CardNumberView: BaseSampleView {
 
         contentView.addSubview(titleLabel)
         contentView.addSubview(foragePanTextField)
+        contentView.addSubview(cameraButton)
         contentView.addSubview(firstResponderLabel)
         contentView.addSubview(completeLabel)
         contentView.addSubview(emptyLabel)
@@ -193,6 +217,7 @@ class CardNumberView: BaseSampleView {
         anchorContentViewSubviews(contentView: contentView, subviews: [
             titleLabel,
             foragePanTextField,
+            cameraButton,
             firstResponderLabel,
             completeLabel,
             emptyLabel,
@@ -205,6 +230,16 @@ class CardNumberView: BaseSampleView {
             reusableLabel,
             errorLabel,
         ])
+
+        cameraButton.anchor(
+            top: foragePanTextField.bottomAnchor,
+            leading: contentView.leadingAnchor,
+            bottom: nil,
+            trailing: nil,
+            centerXAnchor: nil,
+            padding: .init(top: 10, left: 20, bottom: 0, right: 0),
+            size: .init(width: 60, height: 40)
+        )
 
         tokenizeCardButton.anchor(
             top: nil,
@@ -238,6 +273,8 @@ class CardNumberView: BaseSampleView {
         completeLabel.text = "isComplete: \(state.isComplete)"
         emptyLabel.text = "isEmpty: \(state.isEmpty)"
         validLabel.text = "isValid: \(state.isValid)"
+        var num = self.delegate?.getCardNumber()
+        foragePanTextField.enhancedTextField.text = num
     }
 }
 
@@ -250,5 +287,70 @@ extension CardNumberView: ForageElementDelegate {
 
     func textFieldDidChange(_ state: ObservableState) {
         updateState(state: state)
+    }
+}
+
+func recognizeCardText(from uiImage: UIImage, completion: @escaping (Result<String?, Error>) -> Void) {
+        
+    // 1. Convert UIImage to CGImage
+    guard let cgImage = uiImage.cgImage else {
+        let error = NSError(domain: "VisionErrorDomain",
+                            code: -1,
+                            userInfo: [NSLocalizedDescriptionKey: "Unable to create CGImage from UIImage."])
+        completion(.failure(error))
+        return
+    }
+    
+    // 2. Create a text recognition request
+    let request = VNRecognizeTextRequest { request, error in
+        
+        if let error = error {
+            completion(.failure(error))
+            return
+        }
+        
+        // 3. Process the recognized text
+        guard let observations = request.results as? [VNRecognizedTextObservation] else {
+            let error = NSError(domain: "VisionErrorDomain",
+                                code: -2,
+                                userInfo: [NSLocalizedDescriptionKey: "No text observations found."])
+            completion(.failure(error))
+            return
+        }
+        
+        // 4. Extract text from each observation
+        let recognizedStrings: [String] = observations.compactMap { observation in
+            return observation.topCandidates(1).first?.string
+        }
+        
+        // 5. Look for card number pattern in recognized text
+        let cardNumberRegex = #"\b(?:\d[ -]*?){16,19}\b"#
+        
+        for line in recognizedStrings {
+            if let range = line.range(of: cardNumberRegex, options: .regularExpression) {
+                // Extract just the digits from the matched card number
+                let cardNumber = line[range].components(separatedBy: CharacterSet.decimalDigits.inverted).joined()
+                completion(.success(cardNumber))
+                return
+            }
+        }
+        
+        // No card number found
+        completion(.success(nil))
+    }
+
+    // Configure request properties
+    request.recognitionLevel = .accurate
+    request.usesCPUOnly = false
+    
+    // 6. Create a request handler and perform request
+    let requestHandler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+    
+    DispatchQueue.global(qos: .userInitiated).async {
+        do {
+            try requestHandler.perform([request])
+        } catch {
+            completion(.failure(error))
+        }
     }
 }
