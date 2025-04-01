@@ -56,7 +56,7 @@ class HSAView: BaseSampleView {
         ps.cardExpirationTextField.isAccessibilityElement = true
         
         ps.cardCVVTextField.placeholder = "Security code"
-        ps.cardCVVTextField.accessibilityIdentifier = "tf_paymentsheet_seccurity_code"
+        ps.cardCVVTextField.accessibilityIdentifier = "tf_paymentsheet_security_code"
         ps.cardCVVTextField.isAccessibilityElement = true
         
         ps.cardZipCodeTextField.placeholder = "Zip code"
