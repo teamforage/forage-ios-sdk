@@ -30,6 +30,101 @@ final class ForageCardExpirationTests: XCTestCase {
         XCTAssertFalse(cardExpirationTextField.isComplete)
     }
     
+    func test_multipleInstancesHaveSeparateState() {
+        let validTextField = ForageCardExpiration()
+        let invalidTextField = ForageCardExpiration()
+
+        validTextField.enhancedTextField.text = "08/49"
+        invalidTextField.enhancedTextField.text = "08/24"
+        
+        validTextField.name = "validTextField"
+        invalidTextField.name = "invalidTextField"
+
+        validTextField.enhancedTextField.textFieldDidChange()
+        invalidTextField.enhancedTextField.textFieldDidChange()
+
+        XCTAssertEqual(validTextField.enhancedTextField.text, "08/49")
+        XCTAssertEqual(invalidTextField.enhancedTextField.text, "08/24")
+        
+        XCTAssertNotEqual(validTextField.name, invalidTextField.name)
+
+        XCTAssertTrue(validTextField.isValid)
+        XCTAssertFalse(invalidTextField.isValid)
+        
+        XCTAssertNil(validTextField.invalidError)
+        XCTAssertEqual(invalidTextField.invalidError as! PaymentSheetError, PaymentSheetError.invalidDate)
+
+        XCTAssertTrue(validTextField.isComplete)
+        XCTAssertFalse(invalidTextField.isComplete)
+
+        XCTAssertFalse(validTextField.isEmpty)
+        XCTAssertFalse(invalidTextField.isEmpty)
+    }
+    
+    func test_validators() {
+        XCTAssertNil(cardExpirationTextField.invalidError)
+
+        cardExpirationTextField.enhancedTextField.text = "12"
+
+        cardExpirationTextField.enhancedTextField.textFieldDidChange()
+
+        XCTAssertEqual(cardExpirationTextField.enhancedTextField.text, "12")
+
+        XCTAssertFalse(cardExpirationTextField.isValid)
+        
+        XCTAssertEqual(cardExpirationTextField.invalidError as! PaymentSheetError, PaymentSheetError.incomplete)
+
+        XCTAssertFalse(cardExpirationTextField.isComplete)
+
+        XCTAssertFalse(cardExpirationTextField.isEmpty)
+        
+        cardExpirationTextField.enhancedTextField.text = "1224"
+
+        cardExpirationTextField.enhancedTextField.textFieldDidChange()
+
+        XCTAssertEqual(cardExpirationTextField.enhancedTextField.text, "12/24")
+
+        XCTAssertFalse(cardExpirationTextField.isValid)
+        
+        XCTAssertEqual(cardExpirationTextField.invalidError as! PaymentSheetError, PaymentSheetError.invalidDate)
+
+        XCTAssertFalse(cardExpirationTextField.isComplete)
+
+        XCTAssertFalse(cardExpirationTextField.isEmpty)
+        
+        cardExpirationTextField.enhancedTextField.text = "1249"
+
+        cardExpirationTextField.enhancedTextField.textFieldDidChange()
+
+        XCTAssertEqual(cardExpirationTextField.enhancedTextField.text, "12/49")
+
+        XCTAssertTrue(cardExpirationTextField.isValid)
+        
+        XCTAssertNil(cardExpirationTextField.invalidError)
+
+        XCTAssertTrue(cardExpirationTextField.isComplete)
+
+        XCTAssertFalse(cardExpirationTextField.isEmpty)
+    }
+    
+    func test_textLengthMax() {
+        XCTAssertNil(cardExpirationTextField.invalidError)
+
+        cardExpirationTextField.enhancedTextField.text = "12495"
+
+        cardExpirationTextField.enhancedTextField.textFieldDidChange()
+
+        XCTAssertEqual(cardExpirationTextField.enhancedTextField.text, "12/49")
+
+        XCTAssertTrue(cardExpirationTextField.isValid)
+        
+        XCTAssertNil(cardExpirationTextField.invalidError)
+
+        XCTAssertTrue(cardExpirationTextField.isComplete)
+
+        XCTAssertFalse(cardExpirationTextField.isEmpty)
+    }
+    
     func test_textField_enterNumericString_shouldReturnTrue() {
         let changesAllowed = cardExpirationTextField.textField(UITextField(), shouldChangeCharactersIn: NSRange(), replacementString: "1234")
 
@@ -134,10 +229,10 @@ final class ForageCardExpirationTests: XCTestCase {
     }
     
     func test_clearText() {
-        cardExpirationTextField.enhancedTextField.text = "08/25"
+        cardExpirationTextField.enhancedTextField.text = "08/49"
         cardExpirationTextField.enhancedTextField.textFieldDidChange()
         
-        XCTAssertEqual(cardExpirationTextField.enhancedTextField.text, "08/25")
+        XCTAssertEqual(cardExpirationTextField.enhancedTextField.text, "08/49")
         
         cardExpirationTextField.clearText()
         

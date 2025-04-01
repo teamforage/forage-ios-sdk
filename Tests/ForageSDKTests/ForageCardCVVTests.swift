@@ -62,23 +62,39 @@ final class ForageCardCVVTests: XCTestCase {
     }
     
     func test_validators() {
-        let validTextField = ForageCardCVV()
+        XCTAssertNil(cardCVVTextField.invalidError)
 
-        XCTAssertNil(validTextField.invalidError)
+        cardCVVTextField.enhancedTextField.text = "12"
 
-        validTextField.enhancedTextField.text = "12"
+        cardCVVTextField.enhancedTextField.textFieldDidChange()
 
-        validTextField.enhancedTextField.textFieldDidChange()
+        XCTAssertEqual(cardCVVTextField.enhancedTextField.text, "12")
 
-        XCTAssertEqual(validTextField.enhancedTextField.text, "12")
-
-        XCTAssertFalse(validTextField.isValid)
+        XCTAssertFalse(cardCVVTextField.isValid)
         
-        XCTAssertEqual(validTextField.invalidError as! PaymentSheetError, PaymentSheetError.incomplete)
+        XCTAssertEqual(cardCVVTextField.invalidError as! PaymentSheetError, PaymentSheetError.incomplete)
 
-        XCTAssertFalse(validTextField.isComplete)
+        XCTAssertFalse(cardCVVTextField.isComplete)
 
-        XCTAssertFalse(validTextField.isEmpty)
+        XCTAssertFalse(cardCVVTextField.isEmpty)
+    }
+    
+    func test_textLengthMax() {
+        XCTAssertNil(cardCVVTextField.invalidError)
+
+        cardCVVTextField.enhancedTextField.text = "12345"
+
+        cardCVVTextField.enhancedTextField.textFieldDidChange()
+
+        XCTAssertEqual(cardCVVTextField.enhancedTextField.text, "1234")
+
+        XCTAssertTrue(cardCVVTextField.isValid)
+        
+        XCTAssertNil(cardCVVTextField.invalidError)
+
+        XCTAssertTrue(cardCVVTextField.isComplete)
+
+        XCTAssertFalse(cardCVVTextField.isEmpty)
     }
     
     func test_textField_enterNumericString_shouldReturnTrue() {

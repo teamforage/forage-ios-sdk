@@ -62,41 +62,57 @@ final class ForageCardNumberTests: XCTestCase {
     }
     
     func test_validators() {
-        let validTextField = ForageCardNumber()
+        XCTAssertNil(cardNumberTextField.invalidError)
 
-        XCTAssertNil(validTextField.invalidError)
+        cardNumberTextField.enhancedTextField.text = "42424242"
 
-        validTextField.enhancedTextField.text = "42424242"
+        cardNumberTextField.enhancedTextField.textFieldDidChange()
 
-        validTextField.enhancedTextField.textFieldDidChange()
+        XCTAssertEqual(cardNumberTextField.enhancedTextField.actualText, "42424242")
 
-        XCTAssertEqual(validTextField.enhancedTextField.actualText, "42424242")
+        XCTAssertEqual(cardNumberTextField.enhancedTextField.text, "4242 4242")
 
-        XCTAssertEqual(validTextField.enhancedTextField.text, "4242 4242")
-
-        XCTAssertFalse(validTextField.isValid)
+        XCTAssertFalse(cardNumberTextField.isValid)
         
-        XCTAssertEqual(validTextField.invalidError as! PaymentSheetError, PaymentSheetError.incomplete)
+        XCTAssertEqual(cardNumberTextField.invalidError as! PaymentSheetError, PaymentSheetError.incomplete)
 
-        XCTAssertFalse(validTextField.isComplete)
+        XCTAssertFalse(cardNumberTextField.isComplete)
 
-        XCTAssertFalse(validTextField.isEmpty)
+        XCTAssertFalse(cardNumberTextField.isEmpty)
         
-        validTextField.enhancedTextField.text = "4242424242424241"
+        cardNumberTextField.enhancedTextField.text = "4242424242424241"
 
-        validTextField.enhancedTextField.textFieldDidChange()
+        cardNumberTextField.enhancedTextField.textFieldDidChange()
 
-        XCTAssertEqual(validTextField.enhancedTextField.actualText, "4242424242424241")
+        XCTAssertEqual(cardNumberTextField.enhancedTextField.actualText, "4242424242424241")
 
-        XCTAssertEqual(validTextField.enhancedTextField.text, "4242 4242 4242 4241")
+        XCTAssertEqual(cardNumberTextField.enhancedTextField.text, "4242 4242 4242 4241")
 
-        XCTAssertFalse(validTextField.isValid)
+        XCTAssertFalse(cardNumberTextField.isValid)
         
-        XCTAssertEqual(validTextField.invalidError as! PaymentSheetError, PaymentSheetError.invalidCardNumber)
+        XCTAssertEqual(cardNumberTextField.invalidError as! PaymentSheetError, PaymentSheetError.invalidCardNumber)
 
-        XCTAssertFalse(validTextField.isComplete)
+        XCTAssertFalse(cardNumberTextField.isComplete)
 
-        XCTAssertFalse(validTextField.isEmpty)
+        XCTAssertFalse(cardNumberTextField.isEmpty)
+    }
+    
+    func test_textLengthMax() {
+        XCTAssertNil(cardNumberTextField.invalidError)
+
+        cardNumberTextField.enhancedTextField.text = "424242424242424235"
+
+        cardNumberTextField.enhancedTextField.textFieldDidChange()
+
+        XCTAssertEqual(cardNumberTextField.enhancedTextField.text, "4242 4242 4242 4242")
+
+        XCTAssertTrue(cardNumberTextField.isValid)
+        
+        XCTAssertNil(cardNumberTextField.invalidError)
+
+        XCTAssertTrue(cardNumberTextField.isComplete)
+
+        XCTAssertFalse(cardNumberTextField.isEmpty)
     }
     
     func test_textField_enterNumericString_shouldReturnTrue() {

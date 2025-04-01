@@ -62,59 +62,75 @@ final class ForageCardZipCodeTests: XCTestCase {
     }
     
     func test_validators() {
-        let validTextField = ForageCardZipCode()
+        XCTAssertNil(cardAZipCodeTextField.invalidError)
 
-        XCTAssertNil(validTextField.invalidError)
+        cardAZipCodeTextField.enhancedTextField.text = "12"
 
-        validTextField.enhancedTextField.text = "12"
+        cardAZipCodeTextField.enhancedTextField.textFieldDidChange()
 
-        validTextField.enhancedTextField.textFieldDidChange()
+        XCTAssertEqual(cardAZipCodeTextField.enhancedTextField.text, "12")
 
-        XCTAssertEqual(validTextField.enhancedTextField.text, "12")
-
-        XCTAssertFalse(validTextField.isValid)
+        XCTAssertFalse(cardAZipCodeTextField.isValid)
         
-        XCTAssertEqual(validTextField.invalidError as! PaymentSheetError, PaymentSheetError.incomplete)
+        XCTAssertEqual(cardAZipCodeTextField.invalidError as! PaymentSheetError, PaymentSheetError.incomplete)
 
-        XCTAssertFalse(validTextField.isComplete)
+        XCTAssertFalse(cardAZipCodeTextField.isComplete)
 
-        XCTAssertFalse(validTextField.isEmpty)
+        XCTAssertFalse(cardAZipCodeTextField.isEmpty)
         
-        validTextField.enhancedTextField.text = "12345"
+        cardAZipCodeTextField.enhancedTextField.text = "12345"
 
-        validTextField.enhancedTextField.textFieldDidChange()
+        cardAZipCodeTextField.enhancedTextField.textFieldDidChange()
         
-        XCTAssertEqual(validTextField.enhancedTextField.text, "12345")
+        XCTAssertEqual(cardAZipCodeTextField.enhancedTextField.text, "12345")
 
-        XCTAssertTrue(validTextField.isValid)
+        XCTAssertTrue(cardAZipCodeTextField.isValid)
         
-        XCTAssertNil(validTextField.invalidError)
+        XCTAssertNil(cardAZipCodeTextField.invalidError)
 
-        XCTAssertTrue(validTextField.isComplete)
+        XCTAssertTrue(cardAZipCodeTextField.isComplete)
         
-        validTextField.enhancedTextField.text = "1234567"
+        cardAZipCodeTextField.enhancedTextField.text = "1234567"
 
-        validTextField.enhancedTextField.textFieldDidChange()
+        cardAZipCodeTextField.enhancedTextField.textFieldDidChange()
         
-        XCTAssertEqual(validTextField.enhancedTextField.text, "12345-67")
+        XCTAssertEqual(cardAZipCodeTextField.enhancedTextField.text, "12345-67")
 
-        XCTAssertFalse(validTextField.isValid)
+        XCTAssertFalse(cardAZipCodeTextField.isValid)
         
-        XCTAssertEqual(validTextField.invalidError as! PaymentSheetError, PaymentSheetError.incomplete)
+        XCTAssertEqual(cardAZipCodeTextField.invalidError as! PaymentSheetError, PaymentSheetError.incomplete)
 
-        XCTAssertFalse(validTextField.isComplete)
+        XCTAssertFalse(cardAZipCodeTextField.isComplete)
         
-        validTextField.enhancedTextField.text = "123456789"
+        cardAZipCodeTextField.enhancedTextField.text = "123456789"
 
-        validTextField.enhancedTextField.textFieldDidChange()
+        cardAZipCodeTextField.enhancedTextField.textFieldDidChange()
         
-        XCTAssertEqual(validTextField.enhancedTextField.text, "12345-6789")
+        XCTAssertEqual(cardAZipCodeTextField.enhancedTextField.text, "12345-6789")
         
-        XCTAssertTrue(validTextField.isValid)
+        XCTAssertTrue(cardAZipCodeTextField.isValid)
         
-        XCTAssertNil(validTextField.invalidError)
+        XCTAssertNil(cardAZipCodeTextField.invalidError)
 
-        XCTAssertTrue(validTextField.isComplete)
+        XCTAssertTrue(cardAZipCodeTextField.isComplete)
+    }
+    
+    func test_textLengthMax() {
+        XCTAssertNil(cardAZipCodeTextField.invalidError)
+
+        cardAZipCodeTextField.enhancedTextField.text = "12345-67891"
+
+        cardAZipCodeTextField.enhancedTextField.textFieldDidChange()
+
+        XCTAssertEqual(cardAZipCodeTextField.enhancedTextField.text, "12345-6789")
+
+        XCTAssertTrue(cardAZipCodeTextField.isValid)
+        
+        XCTAssertNil(cardAZipCodeTextField.invalidError)
+
+        XCTAssertTrue(cardAZipCodeTextField.isComplete)
+
+        XCTAssertFalse(cardAZipCodeTextField.isEmpty)
     }
     
     func test_textField_enterNumericString_shouldReturnTrue() {
