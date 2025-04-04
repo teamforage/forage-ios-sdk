@@ -119,7 +119,7 @@ class CardNumberView: BaseSampleView {
 
     // MARK: Private Methods
 
-    private func printResult(result: Result<PaymentMethodModel, Error>) {
+    private func printResult(result: Result<PaymentMethodModel<ForageEBTCard>, Error>) {
         DispatchQueue.main.async {
             switch result {
             case let .success(response):

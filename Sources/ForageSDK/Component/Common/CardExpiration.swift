@@ -13,6 +13,8 @@ class CardExpiration: FloatingTextField, ObservableState, Maskable, Validatable 
     
     /// Maskable properties
     var actualText: String = ""
+    var expMonth: Int = 0
+    var expYear: Int = 0
     private(set) var maskPattern: String = "##/##"
     private(set) var wasBackspacePressed = false
     
@@ -71,6 +73,11 @@ class CardExpiration: FloatingTextField, ObservableState, Maskable, Validatable 
         let currDate = dateFormatter.date(from: currentDateString)
         
         if let expirationDate = expDate, let currentDate = currDate {
+            dateFormatter.setLocalizedDateFormatFromTemplate("MM")
+            expMonth = Int(dateFormatter.string(from: expirationDate))!
+            dateFormatter.setLocalizedDateFormatFromTemplate("yy")
+            expYear = Int(dateFormatter.string(from: expirationDate))!
+            
             if currentDate > expirationDate {
                 throw PaymentSheetError.invalidDate
             }
@@ -100,6 +107,8 @@ class CardExpiration: FloatingTextField, ObservableState, Maskable, Validatable 
         let newUnmaskedText = removeMask(from: text)
         
         let maskedText = getMaskedText(for: newUnmaskedText)
+        expMonth = 0
+        expYear = 0
         isComplete = validateText(maskedText)
         
         applyMask(to: newUnmaskedText)
