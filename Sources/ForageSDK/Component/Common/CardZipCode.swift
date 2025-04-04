@@ -53,13 +53,11 @@ class CardZipCode: FloatingTextField, ObservableState, Validatable, Maskable {
     }
     
     private func textLengthValidator(_ text: String) throws -> Bool {
-        if text.count < 5 {
-            throw PaymentSheetError.incomplete
-        } else if text.count > 5 && text.count < 9 {
-            throw PaymentSheetError.incomplete
+        if text.count == 5 || text.count == 9 {
+            return true
         }
         
-        return true
+        throw PaymentSheetError.incomplete
     }
 
     // MARK: - Text Field Actions
