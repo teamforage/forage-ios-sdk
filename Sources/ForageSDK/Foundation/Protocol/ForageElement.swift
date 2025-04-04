@@ -32,6 +32,8 @@ public protocol Appearance {
     var borderColor: UIColor? { get set }
     var cornerRadius: CGFloat { get set }
     var masksToBounds: Bool { get set }
+    var size: Double { get set }
+    var font: UIFont? { get set }
 }
 
 /// The visual characteristics that require input-specific customization.

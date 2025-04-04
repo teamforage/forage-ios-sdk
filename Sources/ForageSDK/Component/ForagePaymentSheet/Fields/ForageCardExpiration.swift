@@ -1,31 +1,35 @@
 //
-//  ForagePANTextField.swift
+//  ForageCardExpiration.swift
 //  ForageSDK
+//
+//  Created by Jerimiah on 3/6/25.
+//  Copyright © 2025-Present Forage Technology Corporation. All rights reserved.
 //
 
 import UIKit
 
-public enum CardType: String {
-    case EBT = "ebt"
-}
-
-public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElementDelegate {
+public class ForageCardExpiration: UIView, Identifiable, ForagePaymentSheetField, ForageElementDelegate {
     // MARK: - Properties
-
+    public var name: String = "cardExpirationTextField"
+    
+    public private(set) var isDirty: Bool = false
+    
+    public private(set) var isTouched: Bool = false
+    
+    public var invalidError: (any Error)? {
+        get { enhancedTextField.invalidError }
+    }
+    
     @IBInspectable public var isEmpty: Bool {
         enhancedTextField.isEmpty
     }
-
+    
     @IBInspectable public var isValid: Bool {
         enhancedTextField.isValid
     }
 
     @IBInspectable public var isComplete: Bool {
-        enhancedTextField.isComplete
-    }
-
-    public var derivedCardInfo: DerivedCardInfo {
-        enhancedTextField.derivedCardInfo
+        get { enhancedTextField.isComplete }
     }
 
     /// BorderWidth for the text field
@@ -41,9 +45,8 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
     }
 
     /// CornerRadius for the text field
-    @IBInspectable public var cornerRadius: CGFloat {
-        get { enhancedTextField.layer.cornerRadius }
-        set { enhancedTextField.layer.cornerRadius = newValue }
+    @IBInspectable public var cornerRadius: CGFloat = 4 {
+        didSet { enhancedTextField.layer.cornerRadius = cornerRadius }
     }
 
     /// MasksToBounds for the text field
@@ -62,7 +65,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
     /// Placeholder for the text field
     @IBInspectable public var placeholder: String? {
         get { enhancedTextField.placeholder }
-        set { enhancedTextField.placeholder = newValue }
+        set { enhancedTextField.placeholder = "\(newValue ?? "")*"}
     }
 
     /// Text color for the text field
@@ -106,7 +109,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
 
     // MARK: - Public Delegate
 
-    /// A delegate that informs the client about the state of the entered card number (validation, focus).
+    /// A delegate that informs the client about the state (validation, focus).
     public weak var delegate: ForageElementDelegate?
 
     // MARK: - Private components
@@ -118,12 +121,6 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
     }()
 
     private lazy var textFieldContainer: UIView = {
-        let view = UIView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
-
-    private lazy var imageViewContainer: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -149,34 +146,22 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
     }()
 
     /// UITextField with masking and floating placeholder label functionality.
-    lazy var enhancedTextField: MaskedUITextField = {
-        let tf = MaskedUITextField()
+    lazy var enhancedTextField: CardExpiration = {
+        let tf = CardExpiration()
+        
         tf.translatesAutoresizingMaskIntoConstraints = false
         tf.textColor = UIColor.black
         tf.font = UIFont.systemFont(ofSize: 14, weight: .regular)
         tf.heightAnchor.constraint(greaterThanOrEqualToConstant: 37).isActive = true
         tf.borderStyle = .roundedRect
         tf.autocorrectionType = .no
-        tf.keyboardType = UIKeyboardType.numberPad
-        tf.accessibilityIdentifier = "tf_forage_ebt_text_field"
+        tf.keyboardType = .numberPad
+        tf.accessibilityIdentifier = "tf_forage_card_expiration_text_field"
         tf.isAccessibilityElement = true
         tf.borderWidth = 0.1
         tf.borderColor = .black
         tf.layer.cornerRadius = 4
         return tf
-    }()
-
-    private lazy var imageView: UIImageView = {
-        let imgView = UIImageView()
-        let image = UIImage(named: "forageLogo", in: AssetsBundle.main.iconBundle, compatibleWith: nil)
-        imgView.adjustsImageSizeForAccessibilityContentSizeCategory = true
-        imgView.image = image
-        imgView.contentMode = .scaleAspectFit
-        imgView.translatesAutoresizingMaskIntoConstraints = false
-        imgView.heightAnchor.constraint(equalToConstant: 16).isActive = true
-        imgView.accessibilityIdentifier = "img_forage_logo"
-        imgView.isAccessibilityElement = true
-        return imgView
     }()
 
     // MARK: - Lifecycle methods
@@ -199,9 +184,7 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
         root.addSubview(container)
 
         textFieldContainer.addSubview(enhancedTextField)
-        imageViewContainer.addSubview(imageView)
         container.addArrangedSubview(textFieldContainer)
-        container.addArrangedSubview(imageViewContainer)
 
         enhancedTextField.forageDelegate = self
 
@@ -232,29 +215,16 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
             padding: UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         )
 
-        imageView.anchor(
-            top: imageViewContainer.topAnchor,
-            leading: imageViewContainer.leadingAnchor,
-            bottom: imageViewContainer.bottomAnchor,
-            trailing: imageViewContainer.trailingAnchor,
-            centerXAnchor: nil,
-            padding: UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-        )
-
         let tapGesture = UITapGestureRecognizer(
             target: self,
             action: #selector(requestFocus(_:))
         )
         addGestureRecognizer(tapGesture)
-        logger.notice("ForagePANTextField was initialized successfully", attributes: nil)
+        logger.notice("ForageCardHolderName was initialized successfully", attributes: nil)
     }
 
     @objc fileprivate func requestFocus(_ gesture: UIGestureRecognizer) {
         becomeFirstResponder()
-    }
-
-    func getActualPAN() -> String {
-        enhancedTextField.actualPAN
     }
 
     // MARK: - Public API
@@ -265,25 +235,65 @@ public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElem
 
     public func clearText() {
         enhancedTextField.text = ""
-        enhancedTextField.actualPAN = ""
     }
 }
 
 // MARK: - UIResponder methods
 
-extension ForagePANTextField {
-    /// Make `ForagePANTextField` focused.
+extension ForageCardExpiration {
+    /// Make `ForageCardExpiration` focused.
     @discardableResult override public func becomeFirstResponder() -> Bool {
         enhancedTextField.becomeFirstResponder()
     }
 
-    /// Remove  focus from `ForagePANTextField`.
+    /// Remove  focus from `ForageCardExpiration`.
     @discardableResult override public func resignFirstResponder() -> Bool {
-        enhancedTextField.resignFirstResponder()
+        isTouched = true
+        return enhancedTextField.resignFirstResponder()
     }
 
-    /// Check if `ForagePANTextField` is focused.
+    /// Check if `ForageCardExpiration` is focused.
     override public var isFirstResponder: Bool {
         enhancedTextField.isFirstResponder
+    }
+}
+
+extension ForageCardExpiration: UITextFieldDelegate {
+    public func focusDidChange(_ state: ObservableState) {
+        delegate?.focusDidChange(self)
+    }
+
+    public func textFieldDidChange(_ state: ObservableState) {
+        isDirty = true
+        delegate?.textFieldDidChange(self)
+    }
+
+    public func textFieldDidBeginEditing(_ textField: UITextField) {
+        delegate?.focusDidChange(self)
+    }
+
+    public func textFieldDidEndEditing(_ textField: UITextField) {
+        delegate?.focusDidChange(self)
+    }
+    
+    /// Determines whether the text field should allow a change of characters within the specified range.
+    /// This method is called when the user attempts to change the content of the text field.
+    /// - Parameters:
+    ///   - textField: The text field containing the text.
+    ///   - range: The range of characters to be replaced.
+    ///   - replacementString: The replacement string.
+    /// - Returns: `true` if the changes should be allowed; otherwise, `false`.
+    public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString: String) -> Bool {
+        let isBackspace = replacementString.isEmpty
+        if isBackspace {
+            return true
+        }
+
+        // Only allow the user to enter numeric strings
+        if !replacementString.allSatisfy(\.isNumber) {
+            return false
+        }
+
+        return true
     }
 }

@@ -147,18 +147,7 @@ public class ForagePINTextField: UIView, Identifiable, ForageElement {
         return tf
     }()
 
-    private lazy var imageView: UIImageView = {
-        let imgView = UIImageView()
-        let image = UIImage(named: "forageLogo", in: AssetsBundle.main.iconBundle, compatibleWith: nil)
-        imgView.adjustsImageSizeForAccessibilityContentSizeCategory = true
-        imgView.image = image
-        imgView.contentMode = .scaleAspectFit
-        imgView.translatesAutoresizingMaskIntoConstraints = false
-        imgView.heightAnchor.constraint(equalToConstant: 16).isActive = true
-        imgView.accessibilityIdentifier = "img_forage_logo"
-        imgView.isAccessibilityElement = true
-        return imgView
-    }()
+    private lazy var imageView: UIView = PoweredByForageImage()
 
     func getPinCollector() -> VaultCollector {
         textField.collector
