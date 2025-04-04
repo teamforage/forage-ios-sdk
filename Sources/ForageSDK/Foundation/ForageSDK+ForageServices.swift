@@ -23,7 +23,7 @@ protocol ForageSDKService: AnyObject {
         foragePanTextField: ForagePANTextField,
         customerID: String,
         reusable: Bool?,
-        completion: @escaping (Result<PaymentMethodModel, Error>) -> Void
+        completion: @escaping (Result<PaymentMethodModel<ForageEBTCard>, Error>) -> Void
     )
 
     /// Check the balance of an EBT Card.
@@ -70,7 +70,7 @@ extension ForageSDK: ForageSDKService {
         foragePanTextField: ForagePANTextField,
         customerID: String,
         reusable: Bool? = true,
-        completion: @escaping (Result<PaymentMethodModel, Error>) -> Void
+        completion: @escaping (Result<PaymentMethodModel<ForageEBTCard>, Error>) -> Void
     ) {
         _ = ForageSDK.logger?
             .setPrefix("tokenizeEBTCard")

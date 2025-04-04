@@ -26,7 +26,8 @@ public struct BalanceModel: Codable {
     }
 }
 
-public struct ForageCard: Codable {
+/// `ForageEBTCard` used to represent a tokenized EBT card
+public struct ForageEBTCard: Codable {
     public let last4: String
     public let created: String
     public let state: String?
@@ -40,12 +41,12 @@ public struct ForageCard: Codable {
     }
 }
 
-/// `PaymentMethodModel` used to represent a tokenized EBT Card
-public struct PaymentMethodModel: Codable {
+/// `PaymentMethodModel` used to represent a tokenized payment method
+public struct PaymentMethodModel<TCard: Codable>: Codable {
     public let paymentMethodIdentifier: String
     public let type: String
     public let balance: BalanceModel?
-    public let card: ForageCard
+    public let card: TCard
     public let customerID: String?
     public let reusable: Bool?
 

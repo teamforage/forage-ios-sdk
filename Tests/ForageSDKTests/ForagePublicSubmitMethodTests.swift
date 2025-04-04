@@ -27,7 +27,7 @@ class MockForageService: LiveForageService {
         return BalanceModel(snap: "100.0", cash: "1.0", updated: "2023-4-20T12:36:57.482668-08:00")
     }
 
-    override func tokenizeEBTCard(request: ForagePANRequestModel, completion: @escaping (Result<PaymentMethodModel, Error>) -> Void) {
+    override func tokenizeEBTCard(request: ForagePANRequestModel, completion: @escaping (Result<PaymentMethodModel<ForageEBTCard>, Error>) -> Void) {
         if doesTokenizeEBTCardThrow {
             let error = ForageError.create(
                 code: "card_not_reusable",
@@ -40,7 +40,7 @@ class MockForageService: LiveForageService {
         }
 
         let paymentMethodModel = try! JSONDecoder().decode(
-            PaymentMethodModel.self,
+            PaymentMethodModel<ForageEBTCard>.self,
             from: ForageMocks().tokenizeSuccess
         )
 
