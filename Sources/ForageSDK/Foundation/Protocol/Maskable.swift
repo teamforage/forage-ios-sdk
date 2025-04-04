@@ -9,7 +9,7 @@
 import UIKit
 
 // protocol to facilitate masking the text in a UITextField
-public protocol Maskable: UITextField {
+protocol Maskable: UITextField {
     /// property to store the unmasked text separate from the masked text
     var actualText: String { get set }
     

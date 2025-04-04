@@ -9,7 +9,7 @@
 import UIKit
 
 // protocol to facilitate validating the text in a UITextField
-public protocol Validatable: UITextField {
+protocol Validatable: UITextField {
     /// property to store the valid state
     var isValid: Bool { get set }
     
