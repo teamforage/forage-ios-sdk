@@ -22,12 +22,19 @@ class LiveForageService: ForageService {
         self.provider = provider
         self.logger = logger?.setPrefix("")
     }
+    
+    // MARK: Tokenize Credit / Debit Card
+    func tokenizeCreditDebitCard(request: ForageCreditDebitRequestModel, completion: @escaping (Result<PaymentMethodModel<ForageCreditDebitCard>, Error>) -> Void) {
+        do {
+            try provider.execute(model: PaymentMethodModel<ForageCreditDebitCard>.self, endpoint: ForageAPI.tokenizeCreditDebitNumber(request: request), completion: completion)
+        } catch { completion(.failure(error)) }
+    }
 
     // MARK: Tokenize EBT card
 
     func tokenizeEBTCard(request: ForagePANRequestModel, completion: @escaping (Result<PaymentMethodModel<ForageEBTCard>, Error>) -> Void) {
         do {
-            try provider.execute(model: PaymentMethodModel<ForageEBTCard>.self, endpoint: ForageAPI.tokenizeNumber(request: request), completion: completion)
+            try provider.execute(model: PaymentMethodModel<ForageEBTCard>.self, endpoint: ForageAPI.tokenizeEBTNumber(request: request), completion: completion)
         } catch { completion(.failure(error)) }
     }
 

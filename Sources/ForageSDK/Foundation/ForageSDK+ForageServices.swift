@@ -19,6 +19,19 @@ protocol ForageSDKService: AnyObject {
     ///  - customerID: A unique ID for the end customer making the payment. We recommend that you hash this value.
     ///  - reusable: Optional value indicating if the `PaymentMethod` is reusable.
     ///  - completion: The closure returns a `Result` containing either a `PaymentMethodModel` or an `Error`. [Read more](https://docs.joinforage.app/reference/create-payment-method)
+    func tokenizeCreditDebitCard(
+        foragePaymentSheet: ForagePaymentSheet,
+        customerID: String,
+        reusable: Bool?,
+        completion: @escaping (Result<PaymentMethodModel<ForageCreditDebitCard>, Error>) -> Void
+    )
+    /// Create a Forage [PaymentMethod](https://docs.joinforage.app/reference/payment-methods#paymentmethod-object) object that represents the EBT Card number.
+    ///
+    /// - Parameters:
+    ///  - foragePanTextField: Text field for collecting the PAN (Primary Account Number) of the EBT card.
+    ///  - customerID: A unique ID for the end customer making the payment. We recommend that you hash this value.
+    ///  - reusable: Optional value indicating if the `PaymentMethod` is reusable.
+    ///  - completion: The closure returns a `Result` containing either a `PaymentMethodModel` or an `Error`. [Read more](https://docs.joinforage.app/reference/create-payment-method)
     func tokenizeEBTCard(
         foragePanTextField: ForagePANTextField,
         customerID: String,
@@ -66,6 +79,56 @@ protocol ForageSDKService: AnyObject {
 }
 
 extension ForageSDK: ForageSDKService {
+    public func tokenizeCreditDebitCard(
+        foragePaymentSheet: ForagePaymentSheet,
+        customerID: String,
+        reusable: Bool?,
+        completion: @escaping (Result<PaymentMethodModel<ForageCreditDebitCard>, Error>) -> Void
+    ){
+        _ = ForageSDK.logger?
+            .setPrefix("tokenizeCreditDebitCard")
+            .addContext(ForageLogContext(
+                customerID: customerID,
+                merchantRef: merchantID
+            ))
+            .notice("Called tokenizeCreditDebitCard for Customer \(customerID)", attributes: nil)
+        
+        if foragePaymentSheet.paymentType == .unset {
+            completion(.failure(ForageError.create(
+                code: "payment_sheet_type_unset",
+                httpStatusCode: 400,
+                message: "Payment sheet type is unset. Set payment sheet type, (hsa/fsa)"
+            )))
+            return
+        }
+        
+        if !foragePaymentSheet.isComplete {
+            completion(.failure(ForageError.create(
+                code: "payment_sheet_incomplete",
+                httpStatusCode: 400,
+                message: "Payment sheet is incomplete, double check inputs and try again."
+            )))
+            return
+        }
+        let cardData = foragePaymentSheet.getPaymentData()
+
+        let request = ForageCreditDebitRequestModel(
+            authorization: ForageSDK.shared.sessionToken,
+            merchantID: ForageSDK.shared.merchantID,
+            name: cardData["name"] as! String,
+            number: cardData["number"] as! String,
+            expMonth: cardData["expMonth"] as! Int,
+            expYear: cardData["expYear"] as! Int,
+            securityCode: cardData["number"] as! String,
+            zipCode: cardData["number"] as! String,
+            type: CardType.CREDIT.rawValue,
+            customerID: customerID,
+            isHSAFSA: foragePaymentSheet.paymentType == .HSAFSA,
+            reusable: reusable ?? true
+        )
+        service?.tokenizeCreditDebitCard(request: request, completion: completion)
+    }
+    
     public func tokenizeEBTCard(
         foragePanTextField: ForagePANTextField,
         customerID: String,

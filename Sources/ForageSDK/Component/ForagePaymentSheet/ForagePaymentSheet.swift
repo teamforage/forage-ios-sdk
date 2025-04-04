@@ -14,8 +14,14 @@ public enum PaymentSheetError: Error {
     case incomplete
 }
 
+public enum PaymentSheetType: String {
+    case HSAFSA = "hsa_fsa"
+    case unset = "unset"
+}
+
 public class ForagePaymentSheet: UIView, Identifiable, ForagePaymentSheetElement {
     // MARK: - Properties
+    public var paymentType: PaymentSheetType = PaymentSheetType.unset
     
     public private(set) var completionErrors: [String: any Error] = [:]
     public var currentFirstResponder: (any ForagePaymentSheetField)? {
@@ -357,6 +363,19 @@ public class ForagePaymentSheet: UIView, Identifiable, ForagePaymentSheetElement
         for field in fields {
             field.clearText()
         }
+    }
+    
+    func getPaymentData() -> [String: Any] {
+        var data: [String: Any] = [:]
+        
+            data["name"] = cardHolderNameTextField.enhancedTextField.text
+            data["number"] = cardNumberTextField.enhancedTextField.actualText
+            data["expMonth"] = cardExpirationTextField.enhancedTextField.expMonth
+            data["expYear"] = cardExpirationTextField.enhancedTextField.expYear
+            data["securityCode"] = cardCVVTextField.enhancedTextField.text
+            data["zipCode"] = cardZipCodeTextField.enhancedTextField.text
+        
+        return data
     }
     
     private func updateSheetState() {

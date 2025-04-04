@@ -8,6 +8,29 @@
 
 import Foundation
 
+/// `ForageCreditDebitCard` used to represent a tokenized credit/debit card
+public struct ForageCreditDebitCard: Codable {
+    public let brand: String
+    public let expMonth: Int
+    public let expYear: Int
+    public let last4: String
+    public let created: String
+    public let isHSAFSA: Bool
+    public let pspCustomerId: String
+    public let paymentMethodId: String
+    
+    private enum CodingKeys: String, CodingKey {
+        case brand
+        case expMonth = "exp_month"
+        case expYear = "exp_year"
+        case last4 = "last_4"
+        case created
+        case isHSAFSA = "is_hsa_fsa"
+        case pspCustomerId = "psp_customer_id"
+        case paymentMethodId = "payment_method_id"
+    }
+}
+
 struct RawBalanceResponseModel: Codable {
     let ref: String?
     let balance: BalanceModel?

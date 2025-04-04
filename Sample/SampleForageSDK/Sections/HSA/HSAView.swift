@@ -32,6 +32,9 @@ class HSAView: BaseSampleView {
     public let forageHSAPaymentSheet: ForagePaymentSheet = {
         let ps = ForagePaymentSheet()
         
+        // set paymentType on the sheet
+        ps.paymentType = .HSAFSA
+        
         // set defaults on payment sheet that will cascade to all fields
         ps.borderWidth = 2.0
         ps.borderColor = UIColor(red: 0.01, green: 0.26, blue: 0.19, alpha: 1.0)
@@ -81,7 +84,6 @@ class HSAView: BaseSampleView {
     // Result labels
     private var refLabel: UILabel = .create(id: "lbl_ref")
     private var typeLabel: UILabel = .create(id: "lbl_type")
-    private var tokenLabel: UILabel = .create(id: "lbl_token")
     private var last4Label: UILabel = .create(id: "lbl_last4")
     private var customerIDLabel: UILabel = .create(id: "lbl_customerID")
     private var reusableLabel: UILabel = .create(id: "lbl_reusable")
@@ -93,7 +95,7 @@ class HSAView: BaseSampleView {
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         button.tintColor = .white
         button.translatesAutoresizingMaskIntoConstraints = false
-        // TODO: add selector for functionality
+        button.addTarget(self, action: #selector(sendInfo(_:)), for: .touchUpInside)
         button.backgroundColor = .primaryColor
         button.isEnabled = true
         button.isUserInteractionEnabled = true
@@ -102,6 +104,18 @@ class HSAView: BaseSampleView {
         button.isAccessibilityElement = true
         return button
     }()
+    
+    @objc fileprivate func sendInfo(_ gesture: UIGestureRecognizer) {
+        tokenizeCardButton.showLoading()
+        ForageSDK.shared.tokenizeCreditDebitCard(
+            foragePaymentSheet: forageHSAPaymentSheet,
+            customerID: ClientSharedData.shared.customerID,
+            reusable: ClientSharedData.shared.isReusablePaymentMethod
+        ) { [self] result in
+            tokenizeCardButton.hideLoading()
+            printResult(result: result)
+        }
+    }
 
     // MARK: Public Methods
 
@@ -113,6 +127,36 @@ class HSAView: BaseSampleView {
     }
 
     // MARK: Private Methods
+    
+    private func printResult(result: Result<PaymentMethodModel<ForageCreditDebitCard>, Error>) {
+        DispatchQueue.main.async {
+            switch result {
+            case let .success(response):
+                self.refLabel.text = "ref=\(response.paymentMethodIdentifier)"
+                self.typeLabel.text = "type=\(response.type)"
+                self.last4Label.text = "last4=\(response.card.last4)"
+                self.customerIDLabel.text = "customerID=\(response.customerID ?? "NO CUST ID")"
+                if let reusable = response.reusable {
+                    self.reusableLabel.text = "reusable=\(String(describing: reusable))"
+                } else {
+                    self.reusableLabel.text = "reusable not in response"
+                }
+                self.errorLabel.text = ""
+                ClientSharedData.shared.paymentMethodReference = response.paymentMethodIdentifier
+            case let .failure(error):
+                self.logForageError(error)
+                self.errorLabel.text = "error: \n\(error)"
+                self.refLabel.text = ""
+                self.typeLabel.text = ""
+                self.last4Label.text = ""
+                self.customerIDLabel.text = ""
+                self.reusableLabel.text = ""
+            }
+
+            self.layoutIfNeeded()
+            self.layoutSubviews()
+        }
+    }
 
     private func setupView() {
         addSubview(contentView)
@@ -124,7 +168,6 @@ class HSAView: BaseSampleView {
         contentView.addSubview(completionErrorsLabel)
         contentView.addSubview(refLabel)
         contentView.addSubview(typeLabel)
-        contentView.addSubview(tokenLabel)
         contentView.addSubview(last4Label)
         contentView.addSubview(customerIDLabel)
         contentView.addSubview(reusableLabel)
@@ -156,7 +199,6 @@ class HSAView: BaseSampleView {
             completionErrorsLabel,
             refLabel,
             typeLabel,
-            tokenLabel,
             last4Label,
             customerIDLabel,
             reusableLabel,
