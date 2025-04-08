@@ -330,13 +330,13 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
                 // continue to test the legacy path until .errors (list) is deprecated!
                 let firstForageError = (error as! ForageError).errors.first!
                 XCTAssertEqual(firstForageError.code, "payment_sheet_type_unset")
-                XCTAssertEqual(firstForageError.message, "Payment sheet type is unset. Set payment sheet type, (hsa/fsa)")
+                XCTAssertEqual(firstForageError.message, "Payment sheet type is unset. Set the ForagePaymentSheet.paymentType.")
                 XCTAssertEqual(firstForageError.httpStatusCode, 400)
 
                 let forageError = (error as! ForageError)
 
                 XCTAssertEqual(forageError.code, "payment_sheet_type_unset")
-                XCTAssertEqual(forageError.message, "Payment sheet type is unset. Set payment sheet type, (hsa/fsa)")
+                XCTAssertEqual(forageError.message, "Payment sheet type is unset. Set the ForagePaymentSheet.paymentType.")
                 XCTAssertEqual(forageError.httpStatusCode, 400)
                 expectation.fulfill()
             }
