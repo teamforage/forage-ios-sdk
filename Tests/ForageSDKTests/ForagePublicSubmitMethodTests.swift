@@ -10,10 +10,31 @@ import XCTest
 @testable import ForageSDK
 
 class MockForageService: LiveForageService {
+    var doesTokenizeCreditDebitCardThrow: Bool = false
     var doesCheckBalanceThrow: Bool = false
     var doesCapturePaymentThrow: Bool = false
     var doesTokenizeEBTCardThrow: Bool = false
     var doesCollectPinThrow: Bool = false
+    
+    override func tokenizeCreditDebitCard(request: ForageCreditDebitRequestModel, completion: @escaping (Result<PaymentMethodModel<ForageCreditDebitCard>, any Error>) -> Void) {
+        if doesTokenizeCreditDebitCardThrow {
+            let error = ForageError.create(
+                code: "not_an_hsa_fsa_card",
+                httpStatusCode: 400,
+                message: "Not an HSA/FSA card"
+            )
+
+            completion(.failure(error))
+            return
+        }
+
+        let paymentMethodModel = try! JSONDecoder().decode(
+            PaymentMethodModel<ForageCreditDebitCard>.self,
+            from: ForageMocks().tokenizeCreditDebitSuccess
+        )
+
+        completion(.success(paymentMethodModel))
+    }
 
     override func checkBalance(pinCollector: VaultCollector, paymentMethodReference: String) async throws -> BalanceModel {
         if doesCheckBalanceThrow {
@@ -41,7 +62,7 @@ class MockForageService: LiveForageService {
 
         let paymentMethodModel = try! JSONDecoder().decode(
             PaymentMethodModel<ForageEBTCard>.self,
-            from: ForageMocks().tokenizeSuccess
+            from: ForageMocks().tokenizeEBTSuccess
         )
 
         completion(.success(paymentMethodModel))
@@ -189,6 +210,172 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
         ) { result in
             validation(result)
             expectation.fulfill()
+        }
+
+        wait(for: [expectation], timeout: 1.0)
+    }
+    
+    // MARK: tokenizeCreditDebitCard tests
+    
+    func testTokenizeCreditDebitCard_Success() {
+        let expectation = XCTestExpectation(description: "Returns PaymentMethod response")
+        expectation.assertForOverFulfill = true
+        
+        let mockPaymentSheet = ForagePaymentSheet(frame: .zero)
+        mockPaymentSheet.paymentType = .HSAFSA
+        mockPaymentSheet.cardHolderNameTextField.enhancedTextField.text = "Nathan Shelley"
+        mockPaymentSheet.cardHolderNameTextField.enhancedTextField.textFieldDidChange()
+        mockPaymentSheet.cardNumberTextField.enhancedTextField.text = "4242424242424242"
+        mockPaymentSheet.cardNumberTextField.enhancedTextField.textFieldDidChange()
+        mockPaymentSheet.cardExpirationTextField.enhancedTextField.text = "08/45"
+        mockPaymentSheet.cardExpirationTextField.enhancedTextField.textFieldDidChange()
+        mockPaymentSheet.cardCVVTextField.enhancedTextField.text = "123"
+        mockPaymentSheet.cardCVVTextField.enhancedTextField.textFieldDidChange()
+        mockPaymentSheet.cardZipCodeTextField.enhancedTextField.text = "12345"
+        mockPaymentSheet.cardZipCodeTextField.enhancedTextField.textFieldDidChange()
+
+        MockForageSDK.shared.tokenizeCreditDebitCard(
+            foragePaymentSheet: mockPaymentSheet,
+            customerID: "test-ios-customer-id"
+        ) { result in
+            switch result {
+            case let .success(paymentMethod):
+                XCTAssertEqual(paymentMethod.paymentMethodIdentifier, "d0c47b0ed5")
+                XCTAssertEqual(paymentMethod.type, "credit")
+                XCTAssertNil(paymentMethod.balance)
+                XCTAssertEqual(paymentMethod.card.last4, "8210")
+                XCTAssertEqual(paymentMethod.customerID, "test-ios-customer-id")
+                XCTAssertEqual(paymentMethod.reusable, true)
+
+                expectation.fulfill()
+            case .failure:
+                XCTFail("Expected success but got \(String(describing: result))")
+            }
+        }
+
+        wait(for: [expectation], timeout: 1.0)
+    }
+    
+    func testTokenizeCreditDebitCard_Throws_DoesRejectWithError() {
+        let expectation = XCTestExpectation(description: "tokenizeCreditDebitCard rejects with ForageError")
+        expectation.assertForOverFulfill = true
+        
+        let mockPaymentSheet = ForagePaymentSheet(frame: .zero)
+        mockPaymentSheet.paymentType = .HSAFSA
+        mockPaymentSheet.cardHolderNameTextField.enhancedTextField.text = "Nathan Shelley"
+        mockPaymentSheet.cardHolderNameTextField.enhancedTextField.textFieldDidChange()
+        mockPaymentSheet.cardNumberTextField.enhancedTextField.text = "4242424242424242"
+        mockPaymentSheet.cardNumberTextField.enhancedTextField.textFieldDidChange()
+        mockPaymentSheet.cardExpirationTextField.enhancedTextField.text = "08/45"
+        mockPaymentSheet.cardExpirationTextField.enhancedTextField.textFieldDidChange()
+        mockPaymentSheet.cardCVVTextField.enhancedTextField.text = "123"
+        mockPaymentSheet.cardCVVTextField.enhancedTextField.textFieldDidChange()
+        mockPaymentSheet.cardZipCodeTextField.enhancedTextField.text = "12345"
+        mockPaymentSheet.cardZipCodeTextField.enhancedTextField.textFieldDidChange()
+
+        (MockForageSDK.shared.service as! MockForageService).doesTokenizeCreditDebitCardThrow = true
+
+        MockForageSDK.shared.tokenizeCreditDebitCard(
+            foragePaymentSheet: mockPaymentSheet,
+            customerID: "test-ios-customer-id"
+        ) { result in
+            switch result {
+            case .success:
+                XCTFail("Expected ForageError but got \(String(describing: result))")
+            case let .failure(error):
+                // continue to test the legacy path until .errors (list) is deprecated!
+                let firstForageError = (error as! ForageError).errors.first!
+                XCTAssertEqual(firstForageError.code, "not_an_hsa_fsa_card")
+                XCTAssertEqual(firstForageError.message, "Not an HSA/FSA card")
+                XCTAssertEqual(firstForageError.httpStatusCode, 400)
+
+                let forageError = (error as! ForageError)
+
+                XCTAssertEqual(forageError.code, "not_an_hsa_fsa_card")
+                XCTAssertEqual(forageError.message, "Not an HSA/FSA card")
+                XCTAssertEqual(forageError.httpStatusCode, 400)
+                expectation.fulfill()
+            }
+        }
+
+        wait(for: [expectation], timeout: 1.0)
+    }
+    
+    func testTokenizeCreditDebitCard_paymentType_unset_Throws_DoesRejectWithError() {
+        let expectation = XCTestExpectation(description: "tokenizeCreditDebitCard rejects with ForageError")
+        expectation.assertForOverFulfill = true
+        
+        let mockPaymentSheet = ForagePaymentSheet(frame: .zero)
+        mockPaymentSheet.cardHolderNameTextField.enhancedTextField.text = "Nathan Shelley"
+        mockPaymentSheet.cardHolderNameTextField.enhancedTextField.textFieldDidChange()
+        mockPaymentSheet.cardNumberTextField.enhancedTextField.text = "4242424242424242"
+        mockPaymentSheet.cardNumberTextField.enhancedTextField.textFieldDidChange()
+        mockPaymentSheet.cardExpirationTextField.enhancedTextField.text = "08/45"
+        mockPaymentSheet.cardExpirationTextField.enhancedTextField.textFieldDidChange()
+        mockPaymentSheet.cardCVVTextField.enhancedTextField.text = "123"
+        mockPaymentSheet.cardCVVTextField.enhancedTextField.textFieldDidChange()
+        mockPaymentSheet.cardZipCodeTextField.enhancedTextField.text = "12345"
+        mockPaymentSheet.cardZipCodeTextField.enhancedTextField.textFieldDidChange()
+
+        (MockForageSDK.shared.service as! MockForageService).doesTokenizeCreditDebitCardThrow = true
+
+        MockForageSDK.shared.tokenizeCreditDebitCard(
+            foragePaymentSheet: mockPaymentSheet,
+            customerID: "test-ios-customer-id"
+        ) { result in
+            switch result {
+            case .success:
+                XCTFail("Expected ForageError but got \(String(describing: result))")
+            case let .failure(error):
+                // continue to test the legacy path until .errors (list) is deprecated!
+                let firstForageError = (error as! ForageError).errors.first!
+                XCTAssertEqual(firstForageError.code, "payment_sheet_type_unset")
+                XCTAssertEqual(firstForageError.message, "Payment sheet type is unset. Set payment sheet type, (hsa/fsa)")
+                XCTAssertEqual(firstForageError.httpStatusCode, 400)
+
+                let forageError = (error as! ForageError)
+
+                XCTAssertEqual(forageError.code, "payment_sheet_type_unset")
+                XCTAssertEqual(forageError.message, "Payment sheet type is unset. Set payment sheet type, (hsa/fsa)")
+                XCTAssertEqual(forageError.httpStatusCode, 400)
+                expectation.fulfill()
+            }
+        }
+
+        wait(for: [expectation], timeout: 1.0)
+    }
+    
+    func testTokenizeCreditDebitCard_paymentSheet_incomplete_Throws_DoesRejectWithError() {
+        let expectation = XCTestExpectation(description: "tokenizeCreditDebitCard rejects with ForageError")
+        expectation.assertForOverFulfill = true
+        
+        let mockPaymentSheet = ForagePaymentSheet(frame: .zero)
+        mockPaymentSheet.paymentType = .HSAFSA
+        // missing field inputs should mark the sheet incomplete
+
+        (MockForageSDK.shared.service as! MockForageService).doesTokenizeCreditDebitCardThrow = true
+
+        MockForageSDK.shared.tokenizeCreditDebitCard(
+            foragePaymentSheet: mockPaymentSheet,
+            customerID: "test-ios-customer-id"
+        ) { result in
+            switch result {
+            case .success:
+                XCTFail("Expected ForageError but got \(String(describing: result))")
+            case let .failure(error):
+                // continue to test the legacy path until .errors (list) is deprecated!
+                let firstForageError = (error as! ForageError).errors.first!
+                XCTAssertEqual(firstForageError.code, "payment_sheet_incomplete")
+                XCTAssertEqual(firstForageError.message, "Payment sheet is incomplete, double check inputs and try again.")
+                XCTAssertEqual(firstForageError.httpStatusCode, 400)
+
+                let forageError = (error as! ForageError)
+
+                XCTAssertEqual(forageError.code, "payment_sheet_incomplete")
+                XCTAssertEqual(forageError.message, "Payment sheet is incomplete, double check inputs and try again.")
+                XCTAssertEqual(forageError.httpStatusCode, 400)
+                expectation.fulfill()
+            }
         }
 
         wait(for: [expectation], timeout: 1.0)

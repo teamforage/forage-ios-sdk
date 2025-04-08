@@ -42,7 +42,51 @@ class ForageMocks {
         return NSError(domain: "NSURLErrorDomain", code: -1200, userInfo: nil)
     }
 
-    var tokenizeSuccess: Data {
+    var tokenizeCreditDebitSuccess: Data {
+        let response = """
+                {
+                   "ref":"d0c47b0ed5",
+                   "type":"credit",
+                   "balance":null,
+                   "card":{
+                      "brand":"unknown",
+                      "exp_month":1,
+                      "exp_year":29,
+                      "is_hsa_fsa":true,
+                      "last_4":"8210",
+                      "created":"2022-11-29T03:31:52.349193-08:00",
+                      "psp_customer_id":"cus_test",
+                      "payment_method_id":"pm_test"
+                   },
+                   "reusable":true,
+                   "customer_id":"test-ios-customer-id"
+                }
+        """
+        return Data(response.utf8)
+    }
+
+    var tokenizeCreditDebitFailure: Error {
+        let response = """
+                {
+                   "path":"/api/payment_methods/",
+                   "errors":[
+                      {
+                         "code":"cannot_parse_request_body",
+                         "message":"Parsing \"ebt_card\" field failed with message: {'number': [ErrorDetail(string='Card number must be between 15 and 19 digits in length', code='invalid')]}",
+                         "source":[
+                            {
+                               "resource":"Payment_Methods",
+                               "ref":""
+                            }
+                         ]
+                      }
+                   ]
+                }
+        """
+        return NSError(domain: response, code: 400, userInfo: nil)
+    }
+    
+    var tokenizeEBTSuccess: Data {
         let response = """
                 {
                    "ref":"d0c47b0ed5",
@@ -60,7 +104,7 @@ class ForageMocks {
         return Data(response.utf8)
     }
 
-    var tokenizeFailure: Error {
+    var tokenizeEBTFailure: Error {
         let response = """
                 {
                    "path":"/api/payment_methods/",

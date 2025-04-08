@@ -82,7 +82,7 @@ extension ForageSDK: ForageSDKService {
     public func tokenizeCreditDebitCard(
         foragePaymentSheet: ForagePaymentSheet,
         customerID: String,
-        reusable: Bool?,
+        reusable: Bool? = true,
         completion: @escaping (Result<PaymentMethodModel<ForageCreditDebitCard>, Error>) -> Void
     ){
         _ = ForageSDK.logger?
