@@ -1,9 +1,9 @@
 //
-//  ForagePANRequestModel.swift
+//  ForageCreditDebitRequestModel.swift
 //  ForageSDK
 //
-//  Created by Tiago Oliveira on 20/10/22.
-//  Copyright © 2022-Present Forage Technology Corporation. All rights reserved.
+//  Created by Jerimiah Gazlay
+//  Copyright © 2025-Present Forage Technology Corporation. All rights reserved.
 //
 
 import Foundation
