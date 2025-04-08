@@ -8,6 +8,11 @@
 
 import Foundation
 
+public enum CardType: String {
+    case EBT = "ebt"
+    case CREDIT = "credit"
+}
+
 /**
  Interface for Forage SDK Services
  */

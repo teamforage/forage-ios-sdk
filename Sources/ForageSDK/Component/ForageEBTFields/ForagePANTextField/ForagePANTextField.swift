@@ -5,11 +5,6 @@
 
 import UIKit
 
-public enum CardType: String {
-    case EBT = "ebt"
-    case CREDIT = "credit"
-}
-
 public class ForagePANTextField: UIView, Identifiable, ForageElement, ForageElementDelegate {
     // MARK: - Properties
 
