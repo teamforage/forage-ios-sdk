@@ -46,7 +46,7 @@ protocol ForageService: AnyObject {
     /// Tokenize a credit/debit card using the given *ForageCreditDebitRequestModel* object
     ///
     /// - Parameters:
-    ///  - request: An instance of `ForageCreditDebitRequestModel` containing the EBT card details.
+    ///  - request: An instance of `ForageCreditDebitRequestModel` containing the Credit/Debit card details.
     ///  - completion: The closure returns a `Result` containing either a `PaymentMethodModel` or an `Error`. [Read more](https://docs.joinforage.app/reference/create-payment-method)
     func tokenizeCreditDebitCard(
         request: ForageCreditDebitRequestModel,
