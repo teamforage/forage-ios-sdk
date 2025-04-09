@@ -20,7 +20,7 @@ protocol ForageSDKService: AnyObject {
     /// Create a Forage [PaymentMethod<ForageCreditDebitCard>](https://docs.joinforage.app/reference/payment-methods#paymentmethod-object) object that represents the Credit/Debit Card number.
     ///
     /// - Parameters:
-    ///  - foratePaymentSheet: PaymentSheet used to collect the payment details for the Credit/Debit card.
+    ///  - foragePaymentSheet: PaymentSheet used to collect the payment details for the Credit/Debit card.
     ///  - customerID: A unique ID for the end customer making the payment. We recommend that you hash this value.
     ///  - reusable: Optional value indicating if the `PaymentMethod` is reusable.
     ///  - completion: The closure returns a `Result` containing either a `PaymentMethodModel<ForageCreditDebitCard>` or an `Error`. [Read more](https://docs.joinforage.app/reference/create-payment-method)
