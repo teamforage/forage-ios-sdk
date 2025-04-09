@@ -90,7 +90,7 @@ extension ForageAPI: ServiceProtocol {
             headers.addHeaders([
                 "Merchant-Account": model.merchantID,
                 "authorization": "Bearer \(model.authorization)",
-                "API-VERSION": "2023-05-15",
+                "API-VERSION": "2025-01-14",
             ])
 
             return .requestParametersAndHeaders(
