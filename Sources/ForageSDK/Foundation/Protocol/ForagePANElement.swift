@@ -3,7 +3,7 @@
 //
 //
 //  Created by Danny Leiser on 11/23/23.
-//  © 2023-Present Forage Technology Corporation. All rights reserved.
+//  © 2023-2025 Forage Technology Corporation. All rights reserved.
 //
 
 /// Represents card information derived from the user's current Primary Account Number (PAN) input value.
