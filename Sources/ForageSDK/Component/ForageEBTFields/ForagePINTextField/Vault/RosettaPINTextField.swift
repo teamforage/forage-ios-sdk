@@ -3,7 +3,7 @@
 //
 //
 //  Created by Evan Freeze on 6/6/24.
-//  Copyright © 2024-Present Forage Technology Corporation. All rights reserved.
+//  © 2024-Present Forage Technology Corporation. All rights reserved.
 //
 
 import Combine

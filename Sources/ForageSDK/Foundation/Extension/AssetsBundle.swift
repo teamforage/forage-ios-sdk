@@ -3,7 +3,7 @@
 //  ForageSDK
 //
 //  Created by Tiago Oliveira on 28/11/22.
-//  Copyright © 2022-Present Forage Technology Corporation. All rights reserved.
+//  © 2022-Present Forage Technology Corporation. All rights reserved.
 //
 
 import Foundation

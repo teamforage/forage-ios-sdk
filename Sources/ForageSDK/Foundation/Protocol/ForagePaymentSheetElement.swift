@@ -3,7 +3,7 @@
 //  ForageSDK
 //
 //  Created by Jerimiah on 3/4/25.
-//  Copyright © 2025-Present Forage Technology Corporation. All rights reserved.
+//  © 2025 Forage Technology Corporation. All rights reserved.
 //
 
 import UIKit

@@ -3,7 +3,7 @@
 //
 //
 //  Created by Danny Leiser on 1/26/23.
-//  Copyright © 2023-Present Forage Technology Corporation. All rights reserved.
+//  © 2023-Present Forage Technology Corporation. All rights reserved.
 //
 
 import Foundation
