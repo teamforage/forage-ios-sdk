@@ -15,13 +15,6 @@ class ViewController: UIViewController {
     @IBOutlet private var sessionTokenTextField: UITextField!
     @IBOutlet private var merchantIdTextField: UITextField!
 
-    @IBOutlet private var startPaymentSheetFlowButton: UIButton!
-
-    override func viewDidLoad() {
-        startPaymentSheetFlowButton.layer.borderWidth = 2
-        startPaymentSheetFlowButton.layer.borderColor = UIColor.black.cgColor
-    }
-
     private func initializeSdk() {
         guard
             let merchantID = merchantIdTextField.text,
@@ -57,16 +50,6 @@ class ViewController: UIViewController {
         let HSAViewController = HSAViewController()
         navigationController?.pushViewController(
             HSAViewController,
-            animated: true
-        )
-    }
-
-    @IBAction func didTapOnStartPaymentSheetFlow(_ sender: Any) {
-        initializeSdk()
-
-        let paymentSheetViewController = PaymentSheetViewController()
-        navigationController?.pushViewController(
-            paymentSheetViewController,
             animated: true
         )
     }

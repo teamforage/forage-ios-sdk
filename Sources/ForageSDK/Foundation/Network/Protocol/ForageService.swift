@@ -26,7 +26,7 @@ protocol ForageService: AnyObject {
         sessionToken: String,
         merchantID: String,
         paymentMethodRef: String,
-        completion: @escaping (Result<PaymentMethodModel, Error>) -> Void
+        completion: @escaping (Result<PaymentMethodModel<ForageEBTCard>, Error>) -> Void
     )
 
     /// Performs a GET request to retrieve the specified Payment.
@@ -42,6 +42,16 @@ protocol ForageService: AnyObject {
         paymentRef: String,
         completion: @escaping (Result<T, Error>) -> Void
     )
+    
+    /// Tokenize a credit/debit card using the given *ForageCreditDebitRequestModel* object
+    ///
+    /// - Parameters:
+    ///  - request: An instance of `ForageCreditDebitRequestModel` containing the Credit/Debit card details.
+    ///  - completion: The closure returns a `Result` containing either a `PaymentMethodModel` or an `Error`. [Read more](https://docs.joinforage.app/reference/create-payment-method)
+    func tokenizeCreditDebitCard(
+        request: ForageCreditDebitRequestModel,
+        completion: @escaping (Result<PaymentMethodModel<ForageCreditDebitCard>, Error>) -> Void
+    )
 
     /// Tokenize an EBT card using the given *ForagePANRequestModel* object
     ///
@@ -50,7 +60,7 @@ protocol ForageService: AnyObject {
     ///  - completion: The closure returns a `Result` containing either a `PaymentMethodModel` or an `Error`. [Read more](https://docs.joinforage.app/reference/create-payment-method)
     func tokenizeEBTCard(
         request: ForagePANRequestModel,
-        completion: @escaping (Result<PaymentMethodModel, Error>) -> Void
+        completion: @escaping (Result<PaymentMethodModel<ForageEBTCard>, Error>) -> Void
     )
 
     /// Asynchronously checks the balance of a PaymentMethod using the given `pinCollector` and `paymentMethodReference`

@@ -12,7 +12,8 @@ import Foundation
  Map the endpoints used on ForageSDK
  */
 enum ForageAPI {
-    case tokenizeNumber(request: ForagePANRequestModel)
+    case tokenizeEBTNumber(request: ForagePANRequestModel)
+    case tokenizeCreditDebitNumber(request: ForageCreditDebitRequestModel)
     case getPaymentMethod(sessionToken: String, merchantID: String, paymentMethodRef: String)
     case getPayment(sessionToken: String, merchantID: String, paymentRef: String)
 }
@@ -24,7 +25,7 @@ extension ForageAPI: ServiceProtocol {
 
     var path: String {
         switch self {
-        case .tokenizeNumber: return "/api/payment_methods/"
+        case .tokenizeEBTNumber, .tokenizeCreditDebitNumber: return "/api/payment_methods/"
         case let .getPaymentMethod(request: request): return "/api/payment_methods/\(request.paymentMethodRef)/"
         case let .getPayment(request: request): return "/api/payments/\(request.paymentRef)/"
         }
@@ -32,7 +33,7 @@ extension ForageAPI: ServiceProtocol {
 
     var method: HttpMethod {
         switch self {
-        case .tokenizeNumber: return .post
+        case .tokenizeEBTNumber, .tokenizeCreditDebitNumber: return .post
         case .getPaymentMethod, .getPayment: return .get
         }
     }
@@ -45,7 +46,7 @@ extension ForageAPI: ServiceProtocol {
             "API-VERSION": "default",
         ])
         switch self {
-        case let .tokenizeNumber(
+        case let .tokenizeEBTNumber(
             request: model
         ):
             var card = [String: String]()
@@ -69,7 +70,34 @@ extension ForageAPI: ServiceProtocol {
                 urlParameters: nil,
                 additionalHeaders: headers
             )
+        case let .tokenizeCreditDebitNumber(request: model):
+            var card = [String: Any]()
+            card["exp_month"] = model.expMonth
+            card["exp_year"] = model.expYear
+            card["zip_code"] = model.zipCode
+            card["name"] = model.name
+            card["number"] = model.number
+            card["security_code"] = model.securityCode
+            card["is_hsa_fsa"] = model.isHSAFSA
 
+            let bodyParameters: Parameters = [
+                "type": model.type,
+                "reusable": model.reusable ?? true,
+                "card": card,
+                "customer_id": model.customerID,
+            ]
+
+            headers.addHeaders([
+                "Merchant-Account": model.merchantID,
+                "authorization": "Bearer \(model.authorization)",
+                "API-VERSION": "2025-01-14",
+            ])
+
+            return .requestParametersAndHeaders(
+                bodyParameters: bodyParameters,
+                urlParameters: nil,
+                additionalHeaders: headers
+            )
         case let .getPaymentMethod(request: request):
             headers.addHeaders([
                 "Merchant-Account": request.merchantID,

@@ -20,10 +20,83 @@ final class ForageServiceTests: XCTestCase {
     func createTestService(_ mockSession: URLSessionMock) -> ForageService {
         LiveForageService(provider: Provider(mockSession))
     }
+    
+    func test_tokenizeCreditDebitCard_onSuccess_checkExpectedPayload() {
+        let mockSession = URLSessionMock()
+        mockSession.data = forageMocks.tokenizeCreditDebitSuccess
+        mockSession.response = forageMocks.mockSuccessResponse
+        let service = createTestService(mockSession)
+
+        let forageCreditDebitRequestModel = ForageCreditDebitRequestModel(
+            authorization: "authToken123",
+            merchantID: "merchantID123",
+            name: "Sleve McDichael",
+            number: "5200828282828210",
+            expMonth: 1,
+            expYear: 45,
+            securityCode: "123",
+            zipCode: "12345",
+            type: "credit",
+            customerID: "test-ios-customer-id",
+            isHSAFSA: true,
+            reusable: true
+        )
+
+        let expectation = XCTestExpectation(description: "Tokenize Credit Debit Card - should succeed")
+        expectation.assertForOverFulfill = true
+        service.tokenizeCreditDebitCard(request: forageCreditDebitRequestModel) { result in
+            switch result {
+            case let .success(response):
+                XCTAssertEqual(response.type, "credit")
+                XCTAssertEqual(response.paymentMethodIdentifier, "d0c47b0ed5")
+                XCTAssertEqual(response.card.last4, "8210")
+                XCTAssertEqual(response.customerID, "test-ios-customer-id")
+                expectation.fulfill()
+            case .failure:
+                XCTFail("Expected success")
+            }
+        }
+        wait(for: [expectation], timeout: 1.0)
+    }
+    
+    func test_tokenizeCreditDebitCard_onFailure_shouldReturnFailure() {
+        let mockSession = URLSessionMock()
+        mockSession.error = forageMocks.tokenizeCreditDebitFailure
+        mockSession.response = forageMocks.mockFailureResponse
+        let service = createTestService(mockSession)
+
+        let forageCreditDebitRequestModel = ForageCreditDebitRequestModel(
+            authorization: "authToken123",
+            merchantID: "merchantID123",
+            name: "Sleve McDichael",
+            number: "5200828282828210",
+            expMonth: 1,
+            expYear: 45,
+            securityCode: "123",
+            zipCode: "12345",
+            type: "credit",
+            customerID: "test-ios-customer-id",
+            isHSAFSA: true,
+            reusable: true
+        )
+
+        let expectation = XCTestExpectation(description: "Tokenize Credit Debit Card - result should be failure")
+        expectation.assertForOverFulfill = true
+        service.tokenizeCreditDebitCard(request: forageCreditDebitRequestModel) { result in
+            switch result {
+            case .success:
+                XCTFail("Expected failure")
+            case let .failure(error):
+                XCTAssertNotNil(error)
+                expectation.fulfill()
+            }
+        }
+        wait(for: [expectation], timeout: 1.0)
+    }
 
     func test_tokenizeEBTCard_onSuccess_checkExpectedPayload() {
         let mockSession = URLSessionMock()
-        mockSession.data = forageMocks.tokenizeSuccess
+        mockSession.data = forageMocks.tokenizeEBTSuccess
         mockSession.response = forageMocks.mockSuccessResponse
         let service = createTestService(mockSession)
 
@@ -56,7 +129,7 @@ final class ForageServiceTests: XCTestCase {
 
     func test_tokenizeEBTCard_onFailure_shouldReturnFailure() {
         let mockSession = URLSessionMock()
-        mockSession.error = forageMocks.tokenizeFailure
+        mockSession.error = forageMocks.tokenizeEBTFailure
         mockSession.response = forageMocks.mockFailureResponse
         let service = createTestService(mockSession)
 
