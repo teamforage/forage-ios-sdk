@@ -61,3 +61,6 @@ cobertura.xml
 
 # macOS
 .DS_Store
+
+# jazzy-generated reference documentation
+reference-docs/
