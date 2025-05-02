@@ -21,11 +21,18 @@ enum ForageAPI {
 extension ForageAPI: ServiceProtocol {
     var scheme: String { "https" }
 
-    var host: String { ForageSDK.shared.environment.hostname }
+    var host: String {
+        switch self {
+        case .tokenizeCreditDebitNumber:
+            return ForageVaultConfig(environment: ForageSDK.shared.environment).vaultBaseURL
+        default: return ForageSDK.shared.environment.hostname
+        }
+    }
 
     var path: String {
         switch self {
-        case .tokenizeEBTNumber, .tokenizeCreditDebitNumber: return "/api/payment_methods/"
+        case .tokenizeCreditDebitNumber: return "/proxy/api/payment_methods/"
+        case .tokenizeEBTNumber: return "/api/payment_methods/"
         case let .getPaymentMethod(request: request): return "/api/payment_methods/\(request.paymentMethodRef)/"
         case let .getPayment(request: request): return "/api/payments/\(request.paymentRef)/"
         }
