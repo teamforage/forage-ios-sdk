@@ -52,6 +52,7 @@ struct ForageVaultConfig {
         case .sandbox: return "vault.sandbox.joinforage.app"
         case .cert: return "vault.cert.joinforage.app"
         case .prod: return "vault.joinforage.app"
+        case .local: return "vault.joinforage.localhost"
         }
     }
 }
@@ -232,7 +233,10 @@ class RosettaPINSubmitter: VaultCollector {
     }
 
     func buildRequest(for path: String) -> URLRequest {
-        let url = URL(string: "https://\(forageVaultConfig.vaultBaseURL)/proxy\(path)")!
+        let hostname = forageVaultConfig.vaultBaseURL
+        let scheme = getForageScheme(hostname: hostname)
+        let url = URL(string: "\(scheme)://\(hostname)/proxy\(path)")!
+        
         var request = URLRequest(url: url)
 
         request.httpMethod = "POST"

@@ -32,6 +32,9 @@ class VaultCollectorTests: XCTestCase {
         XCTAssertEqual(config.vaultBaseURL, "vault.cert.joinforage.app")
         config = ForageVaultConfig(environment: .prod)
         XCTAssertEqual(config.vaultBaseURL, "vault.joinforage.app")
+        
+        config = ForageVaultConfig(environment: .local)
+        XCTAssertEqual(config.vaultBaseURL, "vault.joinforage.localhost")
     }
 
     func testRosettaSubmitter_GetValidatedPIN() {
