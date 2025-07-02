@@ -21,8 +21,10 @@
 				<true/>
 			</dict>
 		</dict>
+        <!-- DO NOT ALLOW NSAllowsArbitraryLoads IN PRODUCTION RELEASES. This is only allowed for the sample app -->
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
+        <!-- DO NOT ALLOW NSAllowsLocalNetworking IN PRODUCTION RELEASES. This is only allowed for the sample app -->
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
