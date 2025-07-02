@@ -58,11 +58,16 @@ private func sessionTokenToEnv(_ sessionToken: String?) -> Environment {
     return Environment(rawValue: prefix) ?? Environment.sandbox
 }
 
-/// Return http if ``hostname`` ends in .localhost
+/// Return http if ``hostname`` ends in .localhost and running in simulator
 public func getForageScheme(hostname: String) -> String {
-     let hostSegments = hostname.split(separator: ".")
-     if hostSegments.last == "localhost" {
-         return "http"
-     }
-     return "https"
- }
+    let hostSegments = hostname.split(separator: ".")
+    
+    #if targetEnvironment(simulator)
+    if hostSegments.last == "localhost" {
+        return "http"
+    }
+    #endif
+    return "https"
+}
+
+
