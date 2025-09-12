@@ -69,6 +69,7 @@ class CardNumberView: BaseSampleView {
     private var typeLabel: UILabel = .create(id: "lbl_type")
     private var tokenLabel: UILabel = .create(id: "lbl_token")
     private var last4Label: UILabel = .create(id: "lbl_last4")
+    private var fingerprintV2Label: UILabel = .create(id: "lbl_fingerprint_v2")
     private var customerIDLabel: UILabel = .create(id: "lbl_customerID")
     private var reusableLabel: UILabel = .create(id: "lbl_reusable")
     private var errorLabel: UILabel = .create(id: "lbl_error")
@@ -127,6 +128,7 @@ class CardNumberView: BaseSampleView {
                 self.typeLabel.text = "type=\(response.type)"
                 self.tokenLabel.text = "token=\(response.card.token)"
                 self.last4Label.text = "last4=\(response.card.last4)"
+                self.fingerprintV2Label.text = "fingerprint=\(response.card.fingerprintV2)"
                 self.customerIDLabel.text = "customerID=\(response.customerID ?? "NO CUST ID")"
                 if let reusable = response.reusable {
                     self.reusableLabel.text = "reusable=\(String(describing: reusable))"
@@ -143,6 +145,7 @@ class CardNumberView: BaseSampleView {
                 self.typeLabel.text = ""
                 self.tokenLabel.text = ""
                 self.last4Label.text = ""
+                self.fingerprintV2Label.text = ""
                 self.customerIDLabel.text = ""
                 self.reusableLabel.text = ""
                 self.updateButtonState(isEnabled: false, button: self.nextButton)
@@ -166,6 +169,7 @@ class CardNumberView: BaseSampleView {
         contentView.addSubview(typeLabel)
         contentView.addSubview(tokenLabel)
         contentView.addSubview(last4Label)
+        contentView.addSubview(fingerprintV2Label)
         contentView.addSubview(customerIDLabel)
         contentView.addSubview(reusableLabel)
         contentView.addSubview(errorLabel)
@@ -201,6 +205,7 @@ class CardNumberView: BaseSampleView {
             typeLabel,
             tokenLabel,
             last4Label,
+            fingerprintV2Label,
             customerIDLabel,
             reusableLabel,
             errorLabel,

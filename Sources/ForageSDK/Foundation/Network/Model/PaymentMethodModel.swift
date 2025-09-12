@@ -55,12 +55,14 @@ public struct ForageEBTCard: Codable {
     public let created: String
     public let state: String?
     public let token: String
+    public let fingerprintV2: String
 
     private enum CodingKeys: String, CodingKey {
         case last4 = "last_4"
         case token
         case state
         case created
+        case fingerprintV2 = "fingerprint_v2"
     }
 }
 
