@@ -14,7 +14,7 @@ enum SampleAPI {
 }
 
 extension SampleAPI: ServiceProtocol {
-    var scheme: String { "https" }
+    var scheme: String { getForageScheme(hostname: host) }
 
     var host: String { ForageSDK.shared.environment.hostname }
 

@@ -74,4 +74,9 @@ final class EnvironmentTests: XCTestCase {
         let actual = Environment(sessionToken: "invalid")
         XCTAssertEqual(actual.rawValue, "sandbox")
     }
+    
+    func testSessionTokenToEnv_givenLocalPrefix_shouldReturnLocal() {
+        let actual = Environment(sessionToken: "local_superLocalDude")
+        XCTAssertEqual(actual.rawValue, "local")
+    }
 }

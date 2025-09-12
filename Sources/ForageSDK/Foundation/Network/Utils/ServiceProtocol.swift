@@ -55,7 +55,7 @@ class HTTPHeaders {
 extension ServiceProtocol {
     func urlRequest() throws -> URLRequest {
         var components = URLComponents()
-        components.scheme = scheme
+        components.scheme = getForageScheme(hostname: host)
         components.host = host
         components.path = path
 
