@@ -95,7 +95,8 @@ class ForageMocks {
                    "card":{
                       "last_4":"3412",
                       "created":"2022-11-29T03:31:52.349193-08:00",
-                      "token":"tok_sandbox_72VEC9LasHbMYiiVWP9zms"
+                      "token":"tok_sandbox_72VEC9LasHbMYiiVWP9zms",
+                      "fingerprint_v2": "a2f1b4e6c7d9380b59fa7c2e98ad0e316be9fcde1e2a4c3d56b17c6e0198a2fb"
                    },
                    "reusable":true,
                    "customer_id":"test-ios-customer-id"
@@ -139,7 +140,8 @@ class ForageMocks {
                         "last_4": "1234",
                         "created": "2023-02-23T14:25:37.531327-08:00",
                         "token": "tok_sandbox_vJp2BwDc6R6Z16mgzCxuXk",
-                        "state": "PA"
+                        "state": "PA",
+                        "fingerprint_v2": "a2f1b4e6c7d9380b59fa7c2e98ad0e316be9fcde1e2a4c3d56b17c6e0198a2fb" 
                     },
                     "reusable":true
                 }

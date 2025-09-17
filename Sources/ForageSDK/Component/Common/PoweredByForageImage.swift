@@ -12,7 +12,7 @@ class PoweredByForageImage: UIView {
     // MARK: - Properties
     
     /// Size of the image
-    private let size: Double = 16.0
+    private let size: Double = 21.0
     
     // MARK: - Lifecycle methods
     override init(frame: CGRect) {
