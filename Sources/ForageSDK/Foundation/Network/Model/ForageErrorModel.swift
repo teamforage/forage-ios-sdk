@@ -82,10 +82,14 @@ public enum ForageErrorDetails: Codable, Equatable {
     /// Received a malformed details object from the Forage API
     case invalid
 
+    public init(ebtError51 details: EbtError51Details) {
+        self = .ebtError51(snapBalance: details.snapBalance, cashBalance: details.cashBalance)
+    }
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         if let details = try? container.decode(EbtError51Details.self) {
-            self = .ebtError51(snapBalance: details.snapBalance, cashBalance: details.cashBalance)
+            self.init(ebtError51: details)
             return
         }
 
