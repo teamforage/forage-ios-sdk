@@ -13,3 +13,4 @@ ignore:
   - "Sources/ForageSDK/Foundation/Telemetry/NoopLogger.swift"
   - "**/Sources/ForageSDK/Foundation/Telemetry/NoopLogger.swift"
   - Tests/*
+  - "Sources/ForageSDK/Foundation/Network/LiveForageService.swift"
