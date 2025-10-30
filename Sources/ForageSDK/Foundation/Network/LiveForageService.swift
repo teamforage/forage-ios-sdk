@@ -129,7 +129,8 @@ class LiveForageService: ForageService {
             let forageError = ForageError.create(
                 code: vaultError.forageCode,
                 httpStatusCode: vaultError.statusCode,
-                message: vaultError.message
+                message: vaultError.message,
+                details: vaultError.details.map(ForageErrorDetails.init)
             )
             throw forageError
         }
