@@ -1,0 +1,51 @@
+# The name of your project
+module: ForageSDK
+
+# whether to clean the build folder before generating docs, ensuring that you're starting fresh.
+clean: true
+
+swift_build_tool: xcodebuild
+
+# xcodebuild command arguments
+build_tool_arguments:
+  - "-scheme"
+  - "ForageSDK"
+  - "-sdk"
+  - "iphoneos"
+  - "-destination"
+  - "name=iPhone 8"
+
+# The path to the directory containing your source code
+# source_directory: Sources/
+
+# The path to the directory where Jazzy should output the documentation
+output: reference-docs/
+
+exclude:
+  - /*Vendor
+  - Sources/ForageSDK/Vendor/*
+
+# The list of files to include in the documentation
+# source:
+#   - MyProject/SourceFile1.swift
+#   - MyProject/SourceFile2.swift
+
+# The theme to use for the documentation
+theme: fullwidth
+
+# The author of the project
+author: Forage
+
+# The version of the project
+module_version: 4.0.0
+
+# Default text for undocumented symbols.
+undocumented_text: ""
+
+# The description of the project
+abstract: Forage SDK is an iOS library for processing EBT payments. You can use the library to add all of the essential EBT checkout operations to you iOS app.
+
+# The list of GitHub repositories to link to in the documentation
+github_file_prefix: https://github.com/teamforage/forage-ios-sdk/blob/master/
+
+hide_documentation_coverage: true
