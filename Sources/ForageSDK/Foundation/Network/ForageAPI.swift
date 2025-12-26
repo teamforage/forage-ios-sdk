@@ -51,6 +51,7 @@ extension ForageAPI: ServiceProtocol {
             "accept": "application/json",
             "x-datadog-trace-id": ForageSDK.shared.traceId,
             "API-VERSION": "default",
+            "X-Forage-iOS-Sdk-Version": ForageSDK.version,
         ])
         switch self {
         case let .tokenizeEBTNumber(
