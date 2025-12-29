@@ -241,7 +241,7 @@ class RosettaPINSubmitter: VaultCollector {
 
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue(ForageSDK.version, forHTTPHeaderField: "X-Forage-iOS-Sdk-Version")
+        request.setValue(ForageSDK.version, forHTTPHeaderField: "X-Forage-Ios-Sdk-Version")
 
         for header in customHeaders {
             if header.key == "Session-Token" {
