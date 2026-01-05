@@ -89,6 +89,7 @@ class VaultCollectorTests: XCTestCase {
         XCTAssertEqual(request.allHTTPHeaderFields, [
             "Content-Type": "application/json",
             "Authorization": "some-session-token",
+            "X-Forage-Ios-Sdk-Version": ForageSDK.version,
             "Something": "Else"
         ])
         XCTAssertFalse(request.allHTTPHeaderFields?.contains(where: { (key: String, _: String) in
@@ -205,6 +206,7 @@ class VaultCollectorTests: XCTestCase {
         XCTAssertEqual(session.lastRequest?.allHTTPHeaderFields, [
             "Content-Type": "application/json",
             "Authorization": "test session token",
+            "X-Forage-Ios-Sdk-Version": ForageSDK.version,
             "Merchant-Account": "mid/test-merchant-id"
         ])
         XCTAssertFalse(session.lastRequest?.allHTTPHeaderFields?.contains(where: { (key: String, _: String) in
