@@ -61,3 +61,11 @@ cobertura.xml
 
 # macOS
 .DS_Store
+
+# vscode
+.vscode/*
+
+# jazzy generated docs
+reference-docs/*
+.jazzy.yaml
+.ruby-version
