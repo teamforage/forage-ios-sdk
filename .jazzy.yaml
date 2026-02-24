@@ -43,6 +43,6 @@ undocumented_text: ""
 abstract: Forage SDK is an iOS library for processing EBT payments. You can use the library to add all of the essential EBT checkout operations to you iOS app.
 
 # The list of GitHub repositories to link to in the documentation
-github_file_prefix: https://github.com/teamforage/forage-ios-sdk/blob/master/
+github_file_prefix: https://github.com/teamforage/forage-ios-sdk/blob/main/
 
 hide_documentation_coverage: true
