@@ -24,14 +24,17 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: Setup Xcode 14.3.1
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '14.3.1'
+
       - name: Set up env
         run: |
           cd Sample/
-          brew uninstall xcodes || true # ignore if xcodes isn't installed
-          brew install xcodesorg/made/xcodes
-          sudo xcode-select -s /Applications/Xcode_14.3.1.app
-          sudo xcodebuild -runFirstLaunch
           bundle install
+
       - name: Install the Apple certificate and provisioning profile and build app
         env:
           MATCH_KEY_ID: ${{ secrets.MATCH_KEY_ID }}
@@ -42,10 +45,10 @@ jobs:
           BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
           BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
           BROWSERSTACK_CUSTOM_ID: ${{ env.BROWSERSTACK_CUSTOM_ID }}
-
         run: |
           cd Sample/
           bundle exec fastlane build_ci_app
+
       - name: Checkout Integration Test Repo
         uses: actions/checkout@v3
         with:
@@ -53,10 +56,12 @@ jobs:
           ref: main
           ssh-key: ${{ secrets.MOBILE_QA_DEPLOY_KEY }}
           path: 'mobile-qa-tests/'
+
       - name: Set up Python 3.12
         uses: actions/setup-python@v4
         with:
           python-version: '3.12'
+
       - name: Run Integration Tests
         env:
           BROWSERSTACK_CUSTOM_ID: ${{ env.BROWSERSTACK_CUSTOM_ID }}
