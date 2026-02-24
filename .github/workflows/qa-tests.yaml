@@ -11,7 +11,7 @@ on:
     - cron: '0 12 * * *' # Run every day at 7/8 AM Eastern
 
 env:
-  DEVELOPER_DIR: '/Applications/Xcode_14.3.1.app/Contents/Developer'
+  DEVELOPER_DIR: '/Applications/Xcode_26.3.0.app/Contents/Developer'
 
 jobs:
   CI:
@@ -25,10 +25,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup Xcode 14.3.1
+      - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: '14.3.1'
+          xcode-version: '26.3.0'
 
       - name: Set up env
         run: |
