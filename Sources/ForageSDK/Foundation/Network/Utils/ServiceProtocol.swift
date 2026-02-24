@@ -3,7 +3,7 @@
 //  ForageSDK
 //
 //  Created by Tiago Oliveira on 23/10/22.
-//  Copyright © 2022-Present Forage Technology Corporation. All rights reserved.
+//  © 2022-2025 Forage Technology Corporation. All rights reserved.
 //
 
 import Foundation
@@ -55,7 +55,7 @@ class HTTPHeaders {
 extension ServiceProtocol {
     func urlRequest() throws -> URLRequest {
         var components = URLComponents()
-        components.scheme = scheme
+        components.scheme = getForageScheme(hostname: host)
         components.host = host
         components.path = path
 

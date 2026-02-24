@@ -3,33 +3,54 @@
 //  ForageSDK
 //
 //  Created by Tiago Oliveira on 22/11/22.
-//  Copyright © 2022-Present Forage Technology Corporation. All rights reserved.
+//  © 2022-2025 Forage Technology Corporation. All rights reserved.
 //
 
 import Foundation
+
+public enum CardType: String {
+    case EBT = "ebt"
+    case CREDIT = "credit"
+}
 
 /**
  Interface for Forage SDK Services
  */
 protocol ForageSDKService: AnyObject {
-    /// Tokenize a given EBT Card
+    /// Create a Forage [PaymentMethod<ForageCreditDebitCard>](https://docs.joinforage.app/reference/payment-methods#paymentmethod-object) object that represents the Credit/Debit Card number.
     ///
     /// - Parameters:
-    ///  - foragePanTextField: A text field capturing the PAN (Primary Account Number) of the EBT card.
+    ///  - foragePaymentSheet: PaymentSheet used to collect the payment details for the Credit/Debit card.
     ///  - customerID: A unique ID for the end customer making the payment. We recommend that you hash this value.
-    ///  - completion: The closure returns a `Result` containing either a `PaymentMethodModel` or an `Error`. [Read more](https://docs.joinforage.app/reference/create-payment-method)
+    ///  - reusable: Optional value indicating if the `PaymentMethod` is reusable.
+    ///  - completion: The closure returns a `Result` containing either a `PaymentMethodModel<ForageCreditDebitCard>` or an `Error`. [Read more](https://docs.joinforage.app/reference/create-payment-method)
+    func tokenizeCreditDebitCard(
+        foragePaymentSheet: ForagePaymentSheet,
+        customerID: String,
+        reusable: Bool?,
+        completion: @escaping (Result<PaymentMethodModel<ForageCreditDebitCard>, Error>) -> Void
+    )
+    /// Create a Forage [PaymentMethod<ForageEBTCard>](https://docs.joinforage.app/reference/payment-methods#paymentmethod-object) object that represents the EBT Card number.
+    ///
+    /// - Parameters:
+    ///  - foragePanTextField: Text field for collecting the PAN (Primary Account Number) of the EBT card.
+    ///  - customerID: A unique ID for the end customer making the payment. We recommend that you hash this value.
+    ///  - reusable: Optional value indicating if the `PaymentMethod` is reusable.
+    ///  - completion: The closure returns a `Result` containing either a `PaymentMethodModel<ForageEBTCard>` or an `Error`. [Read more](https://docs.joinforage.app/reference/create-payment-method)
     func tokenizeEBTCard(
         foragePanTextField: ForagePANTextField,
         customerID: String,
         reusable: Bool?,
-        completion: @escaping (Result<PaymentMethodModel, Error>) -> Void
+        completion: @escaping (Result<PaymentMethodModel<ForageEBTCard>, Error>) -> Void
     )
 
-    /// Check balance for a given EBT Card
+    /// Check the balance of an EBT Card.
+    ///
+    /// Returns the `snap`and `cash` (EBT Cash) balance available on the EBT Card, in addition to a timestamp for when the balance was last updated.
     ///
     /// - Parameters:
-    ///  - foragePinTextField: A specialized text field for securely capturing the PIN to check the balance of the EBT card.
-    ///  - paymentMethodReference: PaymentMethod's unique reference hash
+    ///  - foragePinTextField: A text field for secure PIN collection.
+    ///  - paymentMethodReference: A string identifier that refers to an instance in Forage's database of a [PaymentMethod](https://docs.joinforage.app/reference/create-payment-method)
     ///  - completion: The closure returns a `Result` containing either a `BalanceModel` or an `Error`.
     func checkBalance(
         foragePinTextField: ForagePINTextField,
@@ -37,25 +58,87 @@ protocol ForageSDKService: AnyObject {
         completion: @escaping (Result<BalanceModel, Error>) -> Void
     )
 
-    /// Capture a payment for a given payment reference
+    /// Immediately capture a payment using the customer's EBT card PIN.
     ///
     /// - Parameters:
-    ///  - foragePinTextField: A specialized text field  for securely capturing the PIN to capture the EBT payment.
-    ///  - paymentReference: The reference hash of the Payment
-    ///  - completion: The closure returns a `Result` containing either a `PaymentModel` or an `Error`. [Read more](https://docs.joinforage.app/reference/capture-payment)
+    ///  - foragePinTextField: A text field for secure PIN collection.
+    ///  - paymentReference: The reference hash of the `Payment` that you're capturing. Refers to an instance in Forage's database of a [Payment](https://docs.joinforage.app/reference/create-a-payment)
+    ///  - completion: The closure returns a `Result` containing either a `PaymentModel` or an `Error`.
     func capturePayment(
         foragePinTextField: ForagePINTextField,
         paymentReference: String,
         completion: @escaping (Result<PaymentModel, Error>) -> Void
     )
+
+    /// Collect the customer's PIN for an EBT payment and defer the capture of the payment to the server.
+    ///
+    /// - Parameters:
+    ///  - foragePinTextField: A text field for secure PIN collection.
+    ///  - paymentReference: Reference hash for the `Payment` that you plan on capturing on the server. Refers to an instance in Forage's database of a [Payment](https://docs.joinforage.app/reference/create-a-payment)
+    ///  - completion: Completion handler returning a `Result` with either success (`Void`) or `Error`.
+    func deferPaymentCapture(
+        foragePinTextField: ForagePINTextField,
+        paymentReference: String,
+        completion: @escaping (Result<Void, Error>) -> Void
+    )
 }
 
 extension ForageSDK: ForageSDKService {
+    public func tokenizeCreditDebitCard(
+        foragePaymentSheet: ForagePaymentSheet,
+        customerID: String,
+        reusable: Bool? = true,
+        completion: @escaping (Result<PaymentMethodModel<ForageCreditDebitCard>, Error>) -> Void
+    ){
+        _ = ForageSDK.logger?
+            .setPrefix("tokenizeCreditDebitCard")
+            .addContext(ForageLogContext(
+                customerID: customerID,
+                merchantRef: merchantID
+            ))
+            .notice("Called tokenizeCreditDebitCard for Customer \(customerID)", attributes: nil)
+        
+        if foragePaymentSheet.paymentType == .UNSET {
+            completion(.failure(ForageError.create(
+                code: "payment_sheet_type_unset",
+                httpStatusCode: 400,
+                message: "Payment sheet type is unset. Set the ForagePaymentSheet.paymentType."
+            )))
+            return
+        }
+        
+        if !foragePaymentSheet.isComplete {
+            completion(.failure(ForageError.create(
+                code: "payment_sheet_incomplete",
+                httpStatusCode: 400,
+                message: "Payment sheet is incomplete, double check inputs and try again."
+            )))
+            return
+        }
+        let cardData = foragePaymentSheet.getPaymentData()
+
+        let request = ForageCreditDebitRequestModel(
+            authorization: ForageSDK.shared.sessionToken,
+            merchantID: ForageSDK.shared.merchantID,
+            name: cardData["name"] as! String,
+            number: cardData["number"] as! String,
+            expMonth: cardData["expMonth"] as! Int,
+            expYear: cardData["expYear"] as! Int,
+            securityCode: cardData["securityCode"] as! String,
+            zipCode: cardData["zipCode"] as! String,
+            type: CardType.CREDIT.rawValue,
+            customerID: customerID,
+            isHSAFSA: foragePaymentSheet.paymentType == .HSAFSA,
+            reusable: reusable ?? true
+        )
+        service?.tokenizeCreditDebitCard(request: request, completion: completion)
+    }
+    
     public func tokenizeEBTCard(
         foragePanTextField: ForagePANTextField,
         customerID: String,
         reusable: Bool? = true,
-        completion: @escaping (Result<PaymentMethodModel, Error>) -> Void
+        completion: @escaping (Result<PaymentMethodModel<ForageEBTCard>, Error>) -> Void
     ) {
         _ = ForageSDK.logger?
             .setPrefix("tokenizeEBTCard")
@@ -63,7 +146,7 @@ extension ForageSDK: ForageSDKService {
                 customerID: customerID,
                 merchantRef: merchantID
             ))
-            .notice("Called ForageSDK.shared.tokenizeEBTCard", attributes: nil)
+            .notice("Called tokenizeEBTCard for Customer \(customerID)", attributes: nil)
 
         let request = ForagePANRequestModel(
             authorization: ForageSDK.shared.sessionToken,
@@ -91,6 +174,7 @@ extension ForageSDK: ForageSDKService {
 
         guard let forageService = service else {
             reportIllegalState(for: "checkBalance", dueTo: "ForageService was not initialized")
+            completion(.failure(CommonErrors.UNKNOWN_SERVER_ERROR))
             return
         }
 
@@ -104,8 +188,8 @@ extension ForageSDK: ForageSDKService {
         // This block is used for tracking important Metrics!
         // -----------------------------------------------------
         let responseMonitor = CustomerPerceivedResponseMonitor.newMeasurement(
-            vaultType: pinCollector.getVaultType(),
-            vaultAction: VaultAction.balanceCheck
+            vaultAction: .balanceCheck,
+            metricsLogger: ForageSDK.logger
         )
         responseMonitor.start()
         // ------------------------------------------------------
@@ -118,16 +202,12 @@ extension ForageSDK: ForageSDKService {
                 )
                 ForageSDK.logger?.notice("Balance check succeeded for PaymentMethod \(paymentMethodReference)", attributes: nil)
 
-                responseMonitor.setEventOutcome(.success).end()
+                responseMonitor.setEventOutcome(.success).setHttpStatusCode(200).end()
                 responseMonitor.logResult()
 
                 completion(.success(balanceResult))
             } catch {
-                ForageSDK.logger?.error("Balance check failed for PaymentMethod \(paymentMethodReference)", error: error, attributes: nil)
-
-                responseMonitor.setForageErrorCode(error).end()
-                responseMonitor.logResult()
-
+                logErrorResponse("Balance check failed for PaymentMethod \(paymentMethodReference)", error: error, attributes: nil, responseMonitor: responseMonitor)
                 completion(.failure(error))
             }
         }
@@ -144,10 +224,11 @@ extension ForageSDK: ForageSDKService {
                 merchantRef: merchantID,
                 paymentRef: paymentReference
             ))
-            .notice("Called ForageSDK.shared.capturePayment for Payment \(paymentReference)", attributes: nil)
+            .notice("Called capturePayment for Payment \(paymentReference)", attributes: nil)
 
         guard let forageService = service else {
             reportIllegalState(for: "capturePayment", dueTo: "ForageService was not initialized")
+            completion(.failure(CommonErrors.UNKNOWN_SERVER_ERROR))
             return
         }
 
@@ -161,8 +242,8 @@ extension ForageSDK: ForageSDKService {
         // This block is used for tracking important Metrics!
         // -----------------------------------------------------
         let responseMonitor = CustomerPerceivedResponseMonitor.newMeasurement(
-            vaultType: pinCollector.getVaultType(),
-            vaultAction: VaultAction.capturePayment
+            vaultAction: VaultAction.capturePayment,
+            metricsLogger: ForageSDK.logger
         )
         responseMonitor.start()
         // ------------------------------------------------------
@@ -175,22 +256,60 @@ extension ForageSDK: ForageSDKService {
                 )
                 ForageSDK.logger?.notice("Capture succeeded for Payment \(paymentReference)", attributes: nil)
 
-                responseMonitor.setEventOutcome(.success).end()
+                responseMonitor.setEventOutcome(.success).setHttpStatusCode(200).end()
                 responseMonitor.logResult()
 
                 completion(.success(paymentResult))
             } catch {
-                ForageSDK.logger?.error("Capture failed for Payment \(paymentReference)", error: error, attributes: nil)
-
-                responseMonitor.setForageErrorCode(error).end()
-                responseMonitor.logResult()
-
+                logErrorResponse("Capture failed for Payment \(paymentReference)", error: error, attributes: nil, responseMonitor: responseMonitor)
                 completion(.failure(error))
             }
         }
     }
 
-    /// Reports an illegal state by logging a critical error and triggering an assertion failure.
+    public func deferPaymentCapture(
+        foragePinTextField: ForagePINTextField,
+        paymentReference: String,
+        completion: @escaping (Result<Void, Error>) -> Void
+    ) {
+        _ = ForageSDK.logger?
+            .setPrefix("deferPaymentCapture")
+            .addContext(ForageLogContext(
+                merchantRef: merchantID,
+                paymentRef: paymentReference
+            ))
+            .notice("Called deferPaymentCapture for Payment \(paymentReference)", attributes: nil)
+
+        guard let forageService = service else {
+            reportIllegalState(for: "deferPaymentCapture", dueTo: "ForageService was not initialized")
+            completion(.failure(CommonErrors.UNKNOWN_SERVER_ERROR))
+            return
+        }
+
+        guard validatePin(foragePinTextField: foragePinTextField) else {
+            completion(.failure(CommonErrors.INCOMPLETE_PIN_ERROR))
+            return
+        }
+
+        let pinCollector = foragePinTextField.getPinCollector()
+
+        Task.init {
+            do {
+                _ = try await forageService.collectPinForDeferredCapture(
+                    pinCollector: pinCollector,
+                    paymentReference: paymentReference
+                )
+                ForageSDK.logger?.notice("deferPaymentCapture succeeded for Payment \(paymentReference)", attributes: nil)
+
+                completion(.success(()))
+            } catch {
+                logErrorResponse("deferPaymentCapture failed for Payment \(paymentReference)", error: error, attributes: nil, responseMonitor: nil)
+                completion(.failure(error))
+            }
+        }
+    }
+
+    /// Reports an illegal state by logging a critical error .
     ///
     /// This method is utilized to indicate that a precondition has not been met or an object is in an
     /// illegal state when invoking a particular method, aiding in identifying and rectifying improper
@@ -202,7 +321,6 @@ extension ForageSDK: ForageSDKService {
     private func reportIllegalState(for methodName: String, dueTo reason: String) {
         let assertionMessage = "Attempted to call \(methodName), but \(reason)"
         ForageSDK.logger?.critical(assertionMessage, error: nil, attributes: nil)
-        assertionFailure(assertionMessage)
     }
 
     /// Validates the completeness of the PIN entered in the specified text field.
@@ -217,5 +335,21 @@ extension ForageSDK: ForageSDKService {
             attributes: nil
         )
         return false
+    }
+
+    /// Determine if we should log an error or a warning
+    func logErrorResponse(_ message: String, error: Error, attributes: [String: Encodable]?, responseMonitor: ResponseMonitor?) {
+        responseMonitor?.setForageErrorCode(error)
+        if let statusCode = (error as? ForageError)?.httpStatusCode, let forageLogger = ForageSDK.logger {
+            responseMonitor?.setHttpStatusCode(statusCode)
+            let isWarningLevelStatusCode = [400, 429]
+            let logLevel = isWarningLevelStatusCode.contains(statusCode) ? forageLogger.warn : forageLogger.error
+            logLevel(message, error, nil)
+        } else {
+            ForageSDK.logger?.error(message, error: error, attributes: nil)
+        }
+
+        responseMonitor?.end()
+        responseMonitor?.logResult()
     }
 }

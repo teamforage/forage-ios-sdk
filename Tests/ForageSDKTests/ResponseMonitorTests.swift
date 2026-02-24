@@ -80,7 +80,7 @@ final class ResponseMonitorTests: XCTestCase {
 
     func testLogWithResponseAttributes_whenMissingAttributes_shouldLogError() {
         let mockMetricsLogger = MockMetricsLogger()
-        let monitor = VaultProxyResponseMonitor.newMeasurement(vault: .btVaultType, action: .balanceCheck)
+        let monitor = VaultProxyResponseMonitor.newMeasurement(action: .balanceCheck)
 
         let attributes = ResponseAttributes(
             responseTimeMs: nil,
@@ -100,7 +100,7 @@ final class ResponseMonitorTests: XCTestCase {
 
     func testLogWithResponseAttributes_shouldLogWithAttributes() {
         let mockMetricsLogger = MockMetricsLogger()
-        let monitor = VaultProxyResponseMonitor.newMeasurement(vault: .btVaultType, action: .balanceCheck)
+        let monitor = VaultProxyResponseMonitor.newMeasurement(action: .balanceCheck)
 
         let attributes = ResponseAttributes(
             responseTimeMs: 123.45,
@@ -116,8 +116,8 @@ final class ResponseMonitorTests: XCTestCase {
 
         let loggedInfo = mockMetricsLogger.loggedInfos.first!
         let loggedAttributes = loggedInfo.attributes!
-        XCTAssertEqual(loggedInfo.message, "Received response from basis_theory proxy")
-        XCTAssertEqual(loggedAttributes["vault_type"] as? String, "basis_theory")
+        XCTAssertEqual(loggedInfo.message, "Received response from Rosetta proxy")
+        XCTAssertEqual(loggedAttributes["vault_type"] as? String, "forage")
         XCTAssertEqual(loggedAttributes["action"] as? String, "balance")
         XCTAssertEqual(loggedAttributes["path"] as? String, "/vault/test")
         XCTAssertEqual(loggedAttributes["method"] as? String, "POST")
@@ -128,7 +128,6 @@ final class ResponseMonitorTests: XCTestCase {
     func testCustomerPerceivedMonitor_missingEventOutcome_logsAssertionError() {
         let mockMetricsLogger = MockMetricsLogger()
         let monitor = CustomerPerceivedResponseMonitor.newMeasurement(
-            vaultType: .btVaultType,
             vaultAction: .balanceCheck
         )
         let attributes = ResponseAttributes(
@@ -146,13 +145,12 @@ final class ResponseMonitorTests: XCTestCase {
     func testCustomerPerceivedMonitor_missingForageErrorCode_logsAssertionError() {
         let mockMetricsLogger = MockMetricsLogger()
         let monitor = CustomerPerceivedResponseMonitor.newMeasurement(
-            vaultType: .btVaultType,
             vaultAction: .balanceCheck
         )
         monitor.setEventOutcome(.failure)
         // set to failure, but missing forage_error_code!
 
-        let attributes = ResponseAttributes(responseTimeMs: 123)
+        let attributes = ResponseAttributes(responseTimeMs: 123, code: 400)
 
         monitor.logWithResponseAttributes(
             metricsLogger: mockMetricsLogger,
@@ -166,12 +164,11 @@ final class ResponseMonitorTests: XCTestCase {
     func testCustomerPerceivedMonitor_successOutcome_reportsMetricEvent() {
         let mockMetricsLogger = MockMetricsLogger()
         let monitor = CustomerPerceivedResponseMonitor.newMeasurement(
-            vaultType: .btVaultType,
             vaultAction: .balanceCheck
         )
         monitor.setEventOutcome(.success)
 
-        let attributes = ResponseAttributes(responseTimeMs: 123.23)
+        let attributes = ResponseAttributes(responseTimeMs: 123.23, code: 200)
         monitor.logWithResponseAttributes(metricsLogger: mockMetricsLogger, responseAttributes: attributes)
 
         XCTAssertEqual(mockMetricsLogger.loggedInfos.count, 1)

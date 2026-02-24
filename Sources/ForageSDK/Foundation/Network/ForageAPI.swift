@@ -3,7 +3,7 @@
 //  ForageSDK
 //
 //  Created by Tiago Oliveira on 24/10/22.
-//  Copyright © 2022-Present Forage Technology Corporation. All rights reserved.
+//  © 2022-2025 Forage Technology Corporation. All rights reserved.
 //
 
 import Foundation
@@ -12,9 +12,8 @@ import Foundation
  Map the endpoints used on ForageSDK
  */
 enum ForageAPI {
-    case tokenizeNumber(request: ForagePANRequestModel)
-    case xKey(sessionToken: String, merchantID: String)
-    case message(contentId: String, sessionToken: String, merchantID: String)
+    case tokenizeEBTNumber(request: ForagePANRequestModel)
+    case tokenizeCreditDebitNumber(request: ForageCreditDebitRequestModel)
     case getPaymentMethod(sessionToken: String, merchantID: String, paymentMethodRef: String)
     case getPayment(sessionToken: String, merchantID: String, paymentRef: String)
 }
@@ -22,13 +21,18 @@ enum ForageAPI {
 extension ForageAPI: ServiceProtocol {
     var scheme: String { "https" }
 
-    var host: String { ForageSDK.shared.environment.hostname }
+    var host: String {
+        switch self {
+        case .tokenizeCreditDebitNumber:
+            return ForageVaultConfig(environment: ForageSDK.shared.environment).vaultBaseURL
+        default: return ForageSDK.shared.environment.hostname
+        }
+    }
 
     var path: String {
         switch self {
-        case .tokenizeNumber: return "/api/payment_methods/"
-        case .xKey: return "/iso_server/encryption_alias/"
-        case let .message(contentId: contentId, _, _): return "/api/message/\(contentId)/"
+        case .tokenizeCreditDebitNumber: return "/proxy/api/payment_methods/"
+        case .tokenizeEBTNumber: return "/api/payment_methods/"
         case let .getPaymentMethod(request: request): return "/api/payment_methods/\(request.paymentMethodRef)/"
         case let .getPayment(request: request): return "/api/payments/\(request.paymentRef)/"
         }
@@ -36,8 +40,8 @@ extension ForageAPI: ServiceProtocol {
 
     var method: HttpMethod {
         switch self {
-        case .tokenizeNumber: return .post
-        case .xKey, .message, .getPaymentMethod, .getPayment: return .get
+        case .tokenizeEBTNumber, .tokenizeCreditDebitNumber: return .post
+        case .getPaymentMethod, .getPayment: return .get
         }
     }
 
@@ -46,9 +50,11 @@ extension ForageAPI: ServiceProtocol {
             "content-type": "application/json",
             "accept": "application/json",
             "x-datadog-trace-id": ForageSDK.shared.traceId,
+            "API-VERSION": "default",
+            "X-Forage-Ios-Sdk-Version": ForageSDK.version,
         ])
         switch self {
-        case let .tokenizeNumber(
+        case let .tokenizeEBTNumber(
             request: model
         ):
             var card = [String: String]()
@@ -72,33 +78,34 @@ extension ForageAPI: ServiceProtocol {
                 urlParameters: nil,
                 additionalHeaders: headers
             )
+        case let .tokenizeCreditDebitNumber(request: model):
+            var card = [String: Any]()
+            card["exp_month"] = model.expMonth
+            card["exp_year"] = model.expYear
+            card["zip_code"] = model.zipCode
+            card["name"] = model.name
+            card["number"] = model.number
+            card["security_code"] = model.securityCode
+            card["is_hsa_fsa"] = model.isHSAFSA
 
-        case let .xKey(sessionToken: sessionToken, merchantID: merchantID):
+            let bodyParameters: Parameters = [
+                "type": model.type,
+                "reusable": model.reusable ?? true,
+                "card": card,
+                "customer_id": model.customerID,
+            ]
+
             headers.addHeaders([
-                "authorization": "Bearer \(sessionToken)",
-                "accept": "application/json",
-                "Merchant-Account": merchantID,
+                "Merchant-Account": model.merchantID,
+                "authorization": "Bearer \(model.authorization)",
+                "API-VERSION": "2025-01-14",
             ])
 
             return .requestParametersAndHeaders(
-                bodyParameters: nil,
+                bodyParameters: bodyParameters,
                 urlParameters: nil,
                 additionalHeaders: headers
             )
-
-        case let .message(_, sessionToken: sessionToken, merchantID: merchantID):
-            headers.addHeaders([
-                "Merchant-Account": merchantID,
-                "authorization": "Bearer \(sessionToken)",
-                "API-VERSION": "2023-02-01",
-            ])
-
-            return .requestParametersAndHeaders(
-                bodyParameters: nil,
-                urlParameters: nil,
-                additionalHeaders: headers
-            )
-
         case let .getPaymentMethod(request: request):
             headers.addHeaders([
                 "Merchant-Account": request.merchantID,

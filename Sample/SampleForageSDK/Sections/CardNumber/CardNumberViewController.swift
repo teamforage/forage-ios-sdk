@@ -3,7 +3,7 @@
 //  SampleForageSDK
 //
 //  Created by Tiago Oliveira on 18/10/22.
-//  Copyright © 2022-Present Forage Technology Corporation. All rights reserved.
+//  © 2022-2025 Forage Technology Corporation. All rights reserved.
 //
 
 import UIKit
@@ -20,7 +20,7 @@ class CardNumberViewController: BaseViewCodeViewController<CardNumberView> {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        customView.panNumberTextField.becomeFirstResponder()
+        customView.foragePanTextField.becomeFirstResponder()
     }
 }
 

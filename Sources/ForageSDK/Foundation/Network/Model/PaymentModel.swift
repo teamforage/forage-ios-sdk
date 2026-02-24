@@ -3,7 +3,7 @@
 //
 //
 //  Created by Danny Leiser on 4/27/23.
-//  Copyright © 2023-Present Forage Technology Corporation. All rights reserved.
+//  © 2023-2025 Forage Technology Corporation. All rights reserved.
 //
 
 import Foundation
@@ -59,7 +59,7 @@ public struct Receipt: Codable {
     }
 }
 
-/// `PaymentModel` used to represent a tokenized EBT Card
+/// `PaymentModel` used to represent a [Forage Payment object](https://docs.joinforage.app/reference/create-a-payment)
 public struct PaymentModel: Codable {
     public let paymentRef: String
     public let merchantID: String
@@ -80,6 +80,7 @@ public struct PaymentModel: Codable {
     public let merchantFixedSettlement: String?
     public let platformFixedSettlement: String?
     public let refunds: [String]
+    let error: VaultError?
 
     private enum CodingKeys: String, CodingKey {
         case paymentRef = "ref"
@@ -101,5 +102,20 @@ public struct PaymentModel: Codable {
         case merchantFixedSettlement = "merchant_fixed_settlement"
         case platformFixedSettlement = "platform_fixed_settlement"
         case refunds
+        case error
+    }
+}
+
+/// When using the deferred capture flow
+/// the Payment may not have some `null` properties
+/// (`amount`, `delivery_address`, `is_delivery`, ...)  until the
+/// payment is updated and captured on the server-side.
+/// In turn, we only grab what we need from `ThinPaymentModel` for
+/// intermediate internal SDK requests to `GET /payments/`
+struct ThinPaymentModel: Codable {
+    let paymentMethodRef: String
+
+    private enum CodingKeys: String, CodingKey {
+        case paymentMethodRef = "payment_method"
     }
 }

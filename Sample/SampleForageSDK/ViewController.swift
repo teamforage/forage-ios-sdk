@@ -3,7 +3,7 @@
 //  SampleForageSDK
 //
 //  Created by Tiago Oliveira on 16/10/22.
-//  Copyright © 2022-Present Forage Technology Corporation. All rights reserved.
+//  © 2022-2025 Forage Technology Corporation. All rights reserved.
 //
 
 import ForageSDK
@@ -15,9 +15,7 @@ class ViewController: UIViewController {
     @IBOutlet private var sessionTokenTextField: UITextField!
     @IBOutlet private var merchantIdTextField: UITextField!
 
-    // MARK: IBActions
-
-    @IBAction func didTapOnStartSDK(_ sender: Any) {
+    private func initializeSdk() {
         guard
             let merchantID = merchantIdTextField.text,
             let sessionToken = sessionTokenTextField.text
@@ -32,8 +30,27 @@ class ViewController: UIViewController {
                 sessionToken: sessionToken
             )
         )
+    }
+
+    // MARK: IBActions
+
+    @IBAction func didTapOnStartEbtFlow(_ sender: Any) {
+        initializeSdk()
 
         let cardNumberViewController = CardNumberViewController()
-        navigationController?.pushViewController(cardNumberViewController, animated: true)
+        navigationController?.pushViewController(
+            cardNumberViewController,
+            animated: true
+        )
+    }
+    
+    @IBAction func didTapOnStartHSAFSAFlow(_ sender: Any) {
+        initializeSdk()
+        
+        let HSAViewController = HSAViewController()
+        navigationController?.pushViewController(
+            HSAViewController,
+            animated: true
+        )
     }
 }

@@ -3,12 +3,11 @@
 //
 //
 //  Created by Danny Leiser on 11/23/23.
-//  Copyright © 2023-Present Forage Technology Corporation. All rights reserved.
+//  © 2023-2025 Forage Technology Corporation. All rights reserved.
 //
 
 /// Represents card information derived from the user's current Primary Account Number (PAN) input value.
 public protocol DerivedCardInfoProtocol {
-    
     /// The US state that issued the EBT card, derived from the Issuer Identification Number (IIN),
     /// also known as BIN (Bank Identification Number).
     /// The IIN is the first 6 digits of the PAN.
@@ -56,7 +55,6 @@ public enum USState: String {
     case newMexico = "NM"
     case newYork = "NY"
     case northCarolina = "NC"
-    case northDakota = "ND"
     case ohio = "OH"
     case oklahoma = "OK"
     case oregon = "OR"

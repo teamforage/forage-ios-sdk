@@ -21,3 +21,14 @@ func setUpForageSDK() {
         sessionToken: "dev_authToken123"
     ))
 }
+
+// Mock definitions for testing
+struct MockDecodableModel: Decodable, Equatable {
+    let id: String
+}
+
+let THROTTLE_ERROR = ForageError.create(
+    code: "too_many_requests",
+    httpStatusCode: 429,
+    message: "Request was throttled, please try again later."
+)

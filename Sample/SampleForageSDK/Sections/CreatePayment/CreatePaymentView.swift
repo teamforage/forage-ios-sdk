@@ -3,7 +3,7 @@
 //  SampleForageSDK
 //
 //  Created by Tiago Oliveira on 25/10/22.
-//  Copyright © 2022-Present Forage Technology Corporation. All rights reserved.
+//  © 2022-2025 Forage Technology Corporation. All rights reserved.
 //
 
 import ForageSDK
@@ -30,9 +30,21 @@ class CreatePaymentView: UIView {
         return view
     }()
 
+    private let snapButtonContainer: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+
+    private let ebtCashButtonContainer: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "Create Payment"
+        label.text = "Create Payments"
         label.font = UIFont.systemFont(ofSize: 28, weight: .bold)
         label.accessibilityIdentifier = "lbl_title"
         label.isAccessibilityElement = true
@@ -41,7 +53,7 @@ class CreatePaymentView: UIView {
 
     private let snapTextField: UITextField = {
         let tf = UITextField()
-        tf.placeholder = "Snap amount"
+        tf.placeholder = "SNAP amount or Payment ref"
         tf.translatesAutoresizingMaskIntoConstraints = false
         tf.borderStyle = .roundedRect
         tf.accessibilityIdentifier = "tf_snap_amount"
@@ -49,54 +61,69 @@ class CreatePaymentView: UIView {
         return tf
     }()
 
-    private let nonSnapTextField: UITextField = {
+    private let ebtCashTextField: UITextField = {
         let tf = UITextField()
-        tf.placeholder = "Non Snap amount"
+        tf.placeholder = "EBT Cash amount or Payment ref"
         tf.translatesAutoresizingMaskIntoConstraints = false
         tf.borderStyle = .roundedRect
-        tf.accessibilityIdentifier = "tf_non_snap_amount"
+        tf.accessibilityIdentifier = "tf_cash_amount"
         tf.isAccessibilityElement = true
         return tf
     }()
 
-    private let createSnapPaymentButton: UIButton = {
-        let button = UIButton()
-        button.setTitle("Create Snap Payment", for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
-        button.tintColor = .white
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.addTarget(self, action: #selector(performSnapPayment(_:)), for: .touchUpInside)
-        button.backgroundColor = .systemBlue
-        button.accessibilityIdentifier = "bt_create_snap_payment"
-        button.isAccessibilityElement = true
-        return button
-    }()
+    private lazy var createSnapPaymentButton: UIButton = .createPaymentButton(
+        title: "Set SNAP Amount",
+        accessibilityIdentifier: "bt_create_snap_payment",
+        fundingType: .ebtSnap,
+        action: { [self] completion in
+            createPayment(
+                fundingType: .ebtSnap,
+                amountTextField: snapTextField,
+                completion: completion
+            )
+        }
+    )
 
-    private let createNonSnapPaymentButton: UIButton = {
-        let button = UIButton()
-        button.setTitle("Create Non Snap Payment", for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
-        button.tintColor = .white
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.addTarget(self, action: #selector(performNonSnapPayment(_:)), for: .touchUpInside)
-        button.backgroundColor = .systemBlue
-        button.accessibilityIdentifier = "bt_create_non_snap_payment"
-        button.isAccessibilityElement = true
-        return button
-    }()
+    private lazy var addSnapPaymentRefButton: UIButton = .createPaymentButton(
+        title: "Set SNAP Ref",
+        accessibilityIdentifier: "bt_set_snap_payment_ref",
+        fundingType: .ebtSnap,
+        action: { [self] completion in
+            setPaymentRef(
+                fundingType: .ebtSnap,
+                amountTextField: snapTextField,
+                completion: completion
+            )
+        }
+    )
 
-    private let nextButton: UIButton = {
-        let button = UIButton()
-        button.setTitle("Go To Next", for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
-        button.tintColor = .white
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.addTarget(self, action: #selector(goToCapture(_:)), for: .touchUpInside)
-        button.backgroundColor = .systemBlue
-        button.accessibilityIdentifier = "bt_next"
-        button.isAccessibilityElement = true
-        return button
-    }()
+    private lazy var createEbtCashPaymentButton: UIButton = .createPaymentButton(
+        title: "Set EBT Cash Amount",
+        accessibilityIdentifier: "bt_create_cash_payment",
+        fundingType: .ebtCash,
+        action: { [self] completion in
+            createPayment(
+                fundingType: .ebtCash,
+                amountTextField: ebtCashTextField,
+                completion: completion
+            )
+        }
+    )
+
+    private lazy var addEbtCashPaymentRefButton: UIButton = .createPaymentButton(
+        title: "Set EBT Cash Ref",
+        accessibilityIdentifier: "bt_set_cash_payment_ref",
+        fundingType: .ebtCash,
+        action: { [self] completion in
+            setPaymentRef(
+                fundingType: .ebtCash,
+                amountTextField: ebtCashTextField,
+                completion: completion
+            )
+        }
+    )
+
+    private let nextButton: UIButton = .createNextButton(self, action: #selector(goToCapture(_:)))
 
     private let fundingTypeLabel: UILabel = {
         let label = UILabel()
@@ -166,14 +193,6 @@ class CreatePaymentView: UIView {
 
     // MARK: Fileprivate Methods
 
-    @objc fileprivate func performSnapPayment(_ gesture: UIGestureRecognizer) {
-        createPayment(isEbtSnap: true)
-    }
-
-    @objc fileprivate func performNonSnapPayment(_ gesture: UIGestureRecognizer) {
-        createPayment(isEbtSnap: false)
-    }
-
     @objc fileprivate func goToCapture(_ gesture: UIGestureRecognizer) {
         delegate?.goToCapture(self)
     }
@@ -187,26 +206,30 @@ class CreatePaymentView: UIView {
 
     // MARK: Private Methods
 
-    private func createPayment(isEbtSnap: Bool) {
+    private func setPaymentRef(fundingType: FundingType, amountTextField: UITextField, completion: @escaping () -> Void) {
+        let paymentReference = amountTextField.text ?? "Unknown value"
+        DispatchQueue.main.async {
+            self.paymentIdentifierLabel.text = "paymentIdentifier=\(paymentReference)"
+            ClientSharedData.shared.paymentReference[fundingType] = paymentReference
+
+            completion()
+            self.layoutIfNeeded()
+            self.layoutSubviews()
+        }
+    }
+
+    private func createPayment(fundingType: FundingType, amountTextField: UITextField, completion: @escaping () -> Void) {
         var paymentAmount = 0.0
 
-        if isEbtSnap {
-            guard
-                let stringAmount = snapTextField.text,
-                let amount = Double(stringAmount)
-            else { return }
-            paymentAmount = amount
-        } else {
-            guard
-                let stringAmount = nonSnapTextField.text,
-                let amount = Double(stringAmount)
-            else { return }
-            paymentAmount = amount
-        }
+        guard
+            let stringAmount = amountTextField.text,
+            let amount = Double(stringAmount)
+        else { return }
+        paymentAmount = amount
 
         let request = CreatePaymentRequest(
             amount: paymentAmount,
-            fundingType: isEbtSnap ? "ebt_snap" : "ebt_cash",
+            fundingType: fundingType.rawValue,
             paymentMethodIdentifier: ClientSharedData.shared.paymentMethodReference,
             merchantID: ClientSharedData.shared.merchantID,
             description: "desc",
@@ -224,11 +247,11 @@ class CreatePaymentView: UIView {
         )
 
         controller.createPayment(request: request) { result in
-            self.printResult(result: result)
+            self.printResult(result: result, completion: completion)
         }
     }
 
-    private func printResult(result: Result<CreatePaymentResponse, Error>) {
+    private func printResult(result: Result<CreatePaymentResponse, Error>, completion: @escaping () -> Void) {
         DispatchQueue.main.async {
             switch result {
             case let .success(response):
@@ -249,6 +272,7 @@ class CreatePaymentView: UIView {
                 self.amountLabel.text = ""
             }
 
+            completion()
             self.layoutIfNeeded()
             self.layoutSubviews()
         }
@@ -258,9 +282,13 @@ class CreatePaymentView: UIView {
         addSubview(contentView)
         contentView.addSubview(titleLabel)
         contentView.addSubview(snapTextField)
-        contentView.addSubview(createSnapPaymentButton)
-        contentView.addSubview(nonSnapTextField)
-        contentView.addSubview(createNonSnapPaymentButton)
+        contentView.addSubview(snapButtonContainer)
+        snapButtonContainer.addSubview(createSnapPaymentButton)
+        snapButtonContainer.addSubview(addSnapPaymentRefButton)
+        contentView.addSubview(ebtCashTextField)
+        contentView.addSubview(ebtCashButtonContainer)
+        ebtCashButtonContainer.addSubview(createEbtCashPaymentButton)
+        ebtCashButtonContainer.addSubview(addEbtCashPaymentRefButton)
         contentView.addSubview(fundingTypeLabel)
         contentView.addSubview(paymentMethodIdentifierLabel)
         contentView.addSubview(paymentIdentifierLabel)
@@ -275,6 +303,10 @@ class CreatePaymentView: UIView {
     }
 
     private func setupContentViewConstraints() {
+        let buttonSpacing: CGFloat = 10
+        let collectButtonWidthMultiplier: CGFloat = 0.50 // 50%
+        let captureButtonWidthMultiplier: CGFloat = 0.50 // 50%
+
         contentView.anchor(
             top: topAnchor,
             leading: leadingAnchor,
@@ -302,18 +334,34 @@ class CreatePaymentView: UIView {
             size: .init(width: 0, height: 42)
         )
 
-        createSnapPaymentButton.anchor(
-            top: snapTextField.safeAreaLayoutGuide.bottomAnchor,
-            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
+        snapButtonContainer.anchor(
+            top: snapTextField.bottomAnchor,
+            leading: contentView.leadingAnchor,
             bottom: nil,
-            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
+            trailing: contentView.trailingAnchor,
             centerXAnchor: contentView.centerXAnchor,
-            padding: .init(top: 12, left: 24, bottom: 0, right: 24),
-            size: .init(width: 0, height: 48)
+            padding: UIEdgeInsets(top: 12, left: 24, bottom: 0, right: 24)
         )
 
-        nonSnapTextField.anchor(
-            top: createSnapPaymentButton.safeAreaLayoutGuide.bottomAnchor,
+        NSLayoutConstraint.activate([
+            addSnapPaymentRefButton.topAnchor.constraint(equalTo: snapButtonContainer.topAnchor),
+            addSnapPaymentRefButton.leadingAnchor.constraint(equalTo: snapButtonContainer.leadingAnchor),
+            addSnapPaymentRefButton.bottomAnchor.constraint(equalTo: snapButtonContainer.bottomAnchor),
+            addSnapPaymentRefButton.heightAnchor.constraint(equalToConstant: 48),
+            addSnapPaymentRefButton.widthAnchor.constraint(equalTo: snapButtonContainer.widthAnchor, multiplier: collectButtonWidthMultiplier, constant: -(buttonSpacing / 2)),
+        ])
+
+        NSLayoutConstraint.activate([
+            createSnapPaymentButton.topAnchor.constraint(equalTo: snapButtonContainer.topAnchor),
+            createSnapPaymentButton.leadingAnchor.constraint(equalTo: addSnapPaymentRefButton.trailingAnchor, constant: buttonSpacing),
+            createSnapPaymentButton.trailingAnchor.constraint(equalTo: snapButtonContainer.trailingAnchor),
+            createSnapPaymentButton.bottomAnchor.constraint(equalTo: snapButtonContainer.bottomAnchor),
+            createSnapPaymentButton.heightAnchor.constraint(equalToConstant: 48),
+            createSnapPaymentButton.widthAnchor.constraint(equalTo: snapButtonContainer.widthAnchor, multiplier: captureButtonWidthMultiplier, constant: -(buttonSpacing / 2)),
+        ])
+
+        ebtCashTextField.anchor(
+            top: snapButtonContainer.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
             bottom: nil,
             trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
@@ -322,18 +370,34 @@ class CreatePaymentView: UIView {
             size: .init(width: 0, height: 42)
         )
 
-        createNonSnapPaymentButton.anchor(
-            top: nonSnapTextField.safeAreaLayoutGuide.bottomAnchor,
-            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
+        ebtCashButtonContainer.anchor(
+            top: ebtCashTextField.bottomAnchor,
+            leading: contentView.leadingAnchor,
             bottom: nil,
-            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
+            trailing: contentView.trailingAnchor,
             centerXAnchor: contentView.centerXAnchor,
-            padding: .init(top: 12, left: 24, bottom: 0, right: 24),
-            size: .init(width: 0, height: 48)
+            padding: UIEdgeInsets(top: 12, left: 24, bottom: 0, right: 24)
         )
 
+        NSLayoutConstraint.activate([
+            addEbtCashPaymentRefButton.topAnchor.constraint(equalTo: ebtCashButtonContainer.topAnchor),
+            addEbtCashPaymentRefButton.leadingAnchor.constraint(equalTo: ebtCashButtonContainer.leadingAnchor),
+            addEbtCashPaymentRefButton.bottomAnchor.constraint(equalTo: ebtCashButtonContainer.bottomAnchor),
+            addEbtCashPaymentRefButton.heightAnchor.constraint(equalToConstant: 48),
+            addEbtCashPaymentRefButton.widthAnchor.constraint(equalTo: ebtCashButtonContainer.widthAnchor, multiplier: collectButtonWidthMultiplier, constant: -(buttonSpacing / 2)),
+        ])
+
+        NSLayoutConstraint.activate([
+            createEbtCashPaymentButton.topAnchor.constraint(equalTo: ebtCashButtonContainer.topAnchor),
+            createEbtCashPaymentButton.leadingAnchor.constraint(equalTo: addEbtCashPaymentRefButton.trailingAnchor, constant: buttonSpacing),
+            createEbtCashPaymentButton.trailingAnchor.constraint(equalTo: ebtCashButtonContainer.trailingAnchor),
+            createEbtCashPaymentButton.bottomAnchor.constraint(equalTo: ebtCashButtonContainer.bottomAnchor),
+            createEbtCashPaymentButton.heightAnchor.constraint(equalToConstant: 48),
+            createEbtCashPaymentButton.widthAnchor.constraint(equalTo: ebtCashButtonContainer.widthAnchor, multiplier: captureButtonWidthMultiplier, constant: -(buttonSpacing / 2)),
+        ])
+
         fundingTypeLabel.anchor(
-            top: createNonSnapPaymentButton.safeAreaLayoutGuide.bottomAnchor,
+            top: ebtCashButtonContainer.safeAreaLayoutGuide.bottomAnchor,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
             bottom: nil,
             trailing: contentView.safeAreaLayoutGuide.trailingAnchor,

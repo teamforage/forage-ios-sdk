@@ -53,9 +53,54 @@ final class ForagePANTextFieldTests: XCTestCase {
 
         XCTAssertFalse(validTextField.isEmpty)
         XCTAssertFalse(invalidTextField.isEmpty)
-        
+
         XCTAssertEqual(validTextField.derivedCardInfo.usState, .maine)
         XCTAssertNil(invalidTextField.derivedCardInfo.usState)
+    }
+
+    func test_southDakota_shouldBeValidCard() {
+        let validTextField = ForagePANTextField()
+
+        validTextField.enhancedTextField.text = "5081321111111111"
+
+        validTextField.enhancedTextField.textFieldDidChange()
+
+        XCTAssertEqual(validTextField.enhancedTextField.actualPAN, "5081321111111111")
+
+        XCTAssertEqual(validTextField.enhancedTextField.text, "5081 3211 1111 1111")
+
+        XCTAssertTrue(validTextField.isValid)
+
+        XCTAssertTrue(validTextField.isComplete)
+
+        XCTAssertFalse(validTextField.isEmpty)
+
+        XCTAssertEqual(validTextField.derivedCardInfo.usState, .southDakota)
+    }
+
+    func test_maine_shouldBeValidCardFor16or19Digits() {
+        let validTextField = ForagePANTextField()
+
+        // 16 digits
+        validTextField.enhancedTextField.text = "5077031234123412"
+        validTextField.enhancedTextField.textFieldDidChange()
+        XCTAssertEqual(validTextField.enhancedTextField.actualPAN, "5077031234123412")
+
+        XCTAssertEqual(validTextField.enhancedTextField.text, "5077 0312 3412 3412")
+        XCTAssertTrue(validTextField.isValid)
+        XCTAssertTrue(validTextField.isComplete)
+        XCTAssertFalse(validTextField.isEmpty)
+        XCTAssertEqual(validTextField.derivedCardInfo.usState, .maine)
+
+        validTextField.enhancedTextField.text = "5077031234123412345"
+        validTextField.enhancedTextField.textFieldDidChange()
+        XCTAssertEqual(validTextField.enhancedTextField.actualPAN, "5077031234123412345")
+
+        XCTAssertEqual(validTextField.enhancedTextField.text, "507703 1234 1234 123 45")
+        XCTAssertTrue(validTextField.isValid)
+        XCTAssertTrue(validTextField.isComplete)
+        XCTAssertFalse(validTextField.isEmpty)
+        XCTAssertEqual(validTextField.derivedCardInfo.usState, .maine)
     }
 
     func test_textField_enterNumericString_shouldReturnTrue() {

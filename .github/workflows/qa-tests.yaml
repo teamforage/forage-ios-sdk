@@ -50,6 +50,10 @@ jobs:
           ref: main
           ssh-key: ${{ secrets.MOBILE_QA_DEPLOY_KEY }}
           path: 'mobile-qa-tests/'
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
       - name: Run Integration Tests
         env:
           BROWSERSTACK_CUSTOM_ID: ${{ env.BROWSERSTACK_CUSTOM_ID }}

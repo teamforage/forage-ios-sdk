@@ -3,7 +3,7 @@
 //
 //
 //  Created by Danilo Joksimovic on 2023-07-26.
-//  Copyright © 2023-Present Forage Technology Corporation. All rights reserved.
+//  © 2023-2025 Forage Technology Corporation. All rights reserved.
 //
 
 import Foundation
@@ -13,7 +13,6 @@ struct ForageLogContext {
     var merchantRef: String?
     var paymentRef: String?
     var paymentMethodRef: String?
-    var vaultType: VaultType?
     var sdkVersion: String = ForageSDK.version
 }
 
@@ -89,7 +88,6 @@ protocol ForageLogger {
 class DatadogLogger: ForageLogger {
     private static let DD_CLIENT_TOKEN: String = "pub1e4572ba0f5e53df108c333d5ec66c02"
     private static let DD_SERVICE_NAME: String = "ios-sdk"
-    private static let DD_SDK_INSTANCE_NAME: String = "forage"
 
     // DO NOT UPDATE! Generate 1 TraceID per living session of the app
     static let traceId: String = generateTraceID()
@@ -159,7 +157,7 @@ class DatadogLogger: ForageLogger {
             ("merchant_ref", newContext.merchantRef),
             ("payment_method_ref", newContext.paymentMethodRef),
             ("payment_ref", newContext.paymentRef),
-            ("vault_type", newContext.vaultType?.rawValue),
+            ("vault_type", "forage"),
             ("sdk_version", newContext.sdkVersion),
         ]
 
@@ -190,7 +188,7 @@ class DatadogLogger: ForageLogger {
     /// Initializes and returns a Datadog instance for the given environment. If an instance with the specified name already exists,
     /// it returns the existing instance.
     private func initDatadog(_ environment: Environment) -> DatadogCoreProtocol {
-        let instanceName = DatadogLogger.DD_SDK_INSTANCE_NAME
+        let instanceName = buildInstanceName(environment: environment)
 
         if Datadog.isInitialized(instanceName: instanceName) {
             return Datadog.sdkInstance(named: instanceName)
@@ -208,6 +206,11 @@ class DatadogLogger: ForageLogger {
 
         Logs.enable(in: datadogInstance)
         return datadogInstance
+    }
+
+    // ensure logger is re-initialized if the environment changes!
+    private func buildInstanceName(environment: Environment) -> String {
+        "forage-\(environment.rawValue)"
     }
 
     private func getMessageWithPrefix(_ message: String) -> String {

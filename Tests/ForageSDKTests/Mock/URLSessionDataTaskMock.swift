@@ -3,7 +3,7 @@
 //  ForageSDK
 //
 //  Created by Tiago Oliveira on 29/11/22.
-//  Copyright © 2023-Present Forage Technology Corporation. All rights reserved.
+//  © 2023-2025 Forage Technology Corporation. All rights reserved.
 //
 
 @testable import ForageSDK
@@ -20,9 +20,11 @@ class URLSessionMock: URLSessionProtocol {
     // data and error can be set to provide data or an error
     var data: Data?
     var error: Error?
-    var response: HTTPURLResponse? = nil
+    var response: URLResponse? = nil
+    var lastRequest: URLRequest?
 
     func dataTask(with request: URLRequest, completionHandler: @escaping CompletionHandler) -> URLSessionDataTask {
+        lastRequest = request
         defer { completionHandler(data, response, error) }
         return DataTaskMock()
     }

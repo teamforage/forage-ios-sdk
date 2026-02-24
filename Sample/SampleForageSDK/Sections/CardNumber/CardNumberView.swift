@@ -3,7 +3,7 @@
 //  SampleForageSDK
 //
 //  Created by Tiago Oliveira on 18/10/22.
-//  Copyright © 2022-Present Forage Technology Corporation. All rights reserved.
+//  © 2022-2025 Forage Technology Corporation. All rights reserved.
 //
 
 import ForageSDK
@@ -14,7 +14,7 @@ protocol CardNumberViewDelegate: AnyObject {
     func goToBalance(_ view: CardNumberView)
 }
 
-class CardNumberView: UIView {
+class CardNumberView: BaseSampleView {
     // MARK: Public Properties
 
     weak var delegate: CardNumberViewDelegate?
@@ -30,69 +30,58 @@ class CardNumberView: UIView {
 
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "PAN number"
+        label.text = "Tokenize EBT Card"
         label.font = UIFont.systemFont(ofSize: 28, weight: .bold)
         label.accessibilityIdentifier = "lbl_title"
         label.isAccessibilityElement = true
         return label
     }()
 
-    public let panNumberTextField: ForagePANTextField = {
+    public let foragePanTextField: ForagePANTextField = {
         let tf = ForagePANTextField()
-        tf.placeholder = "PAN Number"
+
+        tf.placeholder = "Primary Account Number (PAN)"
+        tf.borderColor = UIColor(red: 0.01, green: 0.26, blue: 0.19, alpha: 1.0)
+        tf.borderWidth = 2.0
+        tf.cornerRadius = 4.0
+        tf.clearButtonMode = .whileEditing
+
+        // Setting height of TextField to 52.
+        // Height of 'powered by Forage' is 16 and spacing is 8
+        let heightAnchor = tf.heightAnchor.constraint(equalToConstant: 76)
+        heightAnchor.priority = UILayoutPriority.required
+        heightAnchor.isActive = true
+
         tf.accessibilityIdentifier = "tf_ebt_number"
         tf.isAccessibilityElement = true
+
         return tf
     }()
 
-    private let firstResponderLabel: UILabel = {
-        let label = UILabel()
-        label.text = "isFirstResponder: false"
-        label.textColor = .gray
-        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        label.accessibilityIdentifier = "lbl_first_responder"
-        label.isAccessibilityElement = true
-        return label
-    }()
+    // ObservableState labels
+    private var firstResponderLabel: UILabel = .create(id: "lbl_first_responder")
+    private var completeLabel: UILabel = .create(id: "lbl_complete", text: "isComplete: false")
+    private var emptyLabel: UILabel = .create(id: "lbl_empty", text: "isEmpty: true")
+    private var validLabel: UILabel = .create(id: "lbl_valid", text: "isValid: true")
 
-    private let completeLabel: UILabel = {
-        let label = UILabel()
-        label.text = "isComplete: false"
-        label.textColor = .gray
-        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        label.accessibilityIdentifier = "lbl_complete"
-        label.isAccessibilityElement = true
-        return label
-    }()
+    // Result labels
+    private var refLabel: UILabel = .create(id: "lbl_ref")
+    private var typeLabel: UILabel = .create(id: "lbl_type")
+    private var tokenLabel: UILabel = .create(id: "lbl_token")
+    private var last4Label: UILabel = .create(id: "lbl_last4")
+    private var fingerprintV2Label: UILabel = .create(id: "lbl_fingerprint_v2")
+    private var customerIDLabel: UILabel = .create(id: "lbl_customerID")
+    private var reusableLabel: UILabel = .create(id: "lbl_reusable")
+    private var errorLabel: UILabel = .create(id: "lbl_error")
 
-    private let emptyLabel: UILabel = {
-        let label = UILabel()
-        label.text = "isEmpty: true"
-        label.textColor = .gray
-        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        label.accessibilityIdentifier = "lbl_empty"
-        label.isAccessibilityElement = true
-        return label
-    }()
-
-    private let validLabel: UILabel = {
-        let label = UILabel()
-        label.text = "isValid: true"
-        label.textColor = .gray
-        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        label.accessibilityIdentifier = "lbl_valid"
-        label.isAccessibilityElement = true
-        return label
-    }()
-
-    private let sendPanButton: UIButton = {
-        let button = UIButton()
-        button.setTitle("Send PAN number", for: .normal)
+    private let tokenizeCardButton: LoadingButton = {
+        let button = LoadingButton()
+        button.setTitle("Tokenize EBT Card", for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         button.tintColor = .white
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(sendInfo(_:)), for: .touchUpInside)
-        button.backgroundColor = .systemBlue
+        button.backgroundColor = .primaryColor
         button.isEnabled = true
         button.isUserInteractionEnabled = true
         button.alpha = 1
@@ -101,108 +90,19 @@ class CardNumberView: UIView {
         return button
     }()
 
-    private let nextButton: UIButton = {
-        let button = UIButton()
-        button.setTitle("Go To Next", for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
-        button.tintColor = .white
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.addTarget(self, action: #selector(goToBalance(_:)), for: .touchUpInside)
-        button.backgroundColor = .systemBlue
-        button.isEnabled = false
-        button.isUserInteractionEnabled = false
-        button.alpha = 0.5
-        button.accessibilityIdentifier = "bt_next"
-        button.isAccessibilityElement = true
-        return button
-    }()
-
-    private let refLabel: UILabel = {
-        let label = UILabel()
-        label.text = ""
-        label.textColor = .black
-        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        label.numberOfLines = 0
-        label.accessibilityIdentifier = "lbl_ref"
-        label.isAccessibilityElement = true
-        return label
-    }()
-
-    private let tokenLabel: UILabel = {
-        let label = UILabel()
-        label.text = ""
-        label.textColor = .black
-        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        label.numberOfLines = 0
-        label.accessibilityIdentifier = "lbl_token"
-        label.isAccessibilityElement = true
-        return label
-    }()
-
-    private let typeLabel: UILabel = {
-        let label = UILabel()
-        label.text = ""
-        label.textColor = .black
-        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        label.numberOfLines = 0
-        label.accessibilityIdentifier = "lbl_type"
-        label.isAccessibilityElement = true
-        return label
-    }()
-
-    private let last4Label: UILabel = {
-        let label = UILabel()
-        label.text = ""
-        label.textColor = .black
-        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        label.numberOfLines = 0
-        label.accessibilityIdentifier = "lbl_last4"
-        label.isAccessibilityElement = true
-        return label
-    }()
-
-    private let customerIDLabel: UILabel = {
-        let label = UILabel()
-        label.text = ""
-        label.textColor = .black
-        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        label.numberOfLines = 0
-        label.accessibilityIdentifier = "lbl_customerID"
-        label.isAccessibilityElement = true
-        return label
-    }()
-
-    private let reusableLabel: UILabel = {
-        let label = UILabel()
-        label.text = ""
-        label.textColor = .black
-        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        label.numberOfLines = 0
-        label.accessibilityIdentifier = "lbl_reusable"
-        label.isAccessibilityElement = true
-        return label
-    }()
-
-    private let errorLabel: UILabel = {
-        let label = UILabel()
-        label.text = ""
-        label.textColor = .black
-        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        label.numberOfLines = 0
-        label.accessibilityIdentifier = "lbl_error"
-        label.isAccessibilityElement = true
-        return label
-    }()
+    private let nextButton: UIButton = .createNextButton(self, action: #selector(goToBalance(_:)))
 
     // MARK: Fileprivate Methods
 
     @objc fileprivate func sendInfo(_ gesture: UIGestureRecognizer) {
+        tokenizeCardButton.showLoading()
         ForageSDK.shared.tokenizeEBTCard(
-            foragePanTextField: panNumberTextField,
+            foragePanTextField: foragePanTextField,
             customerID: ClientSharedData.shared.customerID,
             reusable: ClientSharedData.shared.isReusablePaymentMethod
-        ) { result in
-            self.printResult(result: result)
+        ) { [self] result in
+            tokenizeCardButton.hideLoading()
+            printResult(result: result)
         }
     }
 
@@ -213,14 +113,14 @@ class CardNumberView: UIView {
     // MARK: Public Methods
 
     public func render() {
-        panNumberTextField.delegate = self
+        foragePanTextField.delegate = self
         setupView()
         setupConstraints()
     }
 
     // MARK: Private Methods
 
-    private func printResult(result: Result<PaymentMethodModel, Error>) {
+    private func printResult(result: Result<PaymentMethodModel<ForageEBTCard>, Error>) {
         DispatchQueue.main.async {
             switch result {
             case let .success(response):
@@ -228,6 +128,7 @@ class CardNumberView: UIView {
                 self.typeLabel.text = "type=\(response.type)"
                 self.tokenLabel.text = "token=\(response.card.token)"
                 self.last4Label.text = "last4=\(response.card.last4)"
+                self.fingerprintV2Label.text = "fingerprint=\(response.card.fingerprintV2)"
                 self.customerIDLabel.text = "customerID=\(response.customerID ?? "NO CUST ID")"
                 if let reusable = response.reusable {
                     self.reusableLabel.text = "reusable=\(String(describing: reusable))"
@@ -238,11 +139,13 @@ class CardNumberView: UIView {
                 ClientSharedData.shared.paymentMethodReference = response.paymentMethodIdentifier
                 self.updateButtonState(isEnabled: true, button: self.nextButton)
             case let .failure(error):
+                self.logForageError(error)
                 self.errorLabel.text = "error: \n\(error)"
                 self.refLabel.text = ""
                 self.typeLabel.text = ""
                 self.tokenLabel.text = ""
                 self.last4Label.text = ""
+                self.fingerprintV2Label.text = ""
                 self.customerIDLabel.text = ""
                 self.reusableLabel.text = ""
                 self.updateButtonState(isEnabled: false, button: self.nextButton)
@@ -255,8 +158,9 @@ class CardNumberView: UIView {
 
     private func setupView() {
         addSubview(contentView)
+
         contentView.addSubview(titleLabel)
-        contentView.addSubview(panNumberTextField)
+        contentView.addSubview(foragePanTextField)
         contentView.addSubview(firstResponderLabel)
         contentView.addSubview(completeLabel)
         contentView.addSubview(emptyLabel)
@@ -265,19 +169,20 @@ class CardNumberView: UIView {
         contentView.addSubview(typeLabel)
         contentView.addSubview(tokenLabel)
         contentView.addSubview(last4Label)
+        contentView.addSubview(fingerprintV2Label)
         contentView.addSubview(customerIDLabel)
         contentView.addSubview(reusableLabel)
         contentView.addSubview(errorLabel)
-        contentView.addSubview(sendPanButton)
+        contentView.addSubview(tokenizeCardButton)
         contentView.addSubview(nextButton)
     }
 
     private func setupConstraints() {
         setupContentViewConstraints()
-        firstResponderLabel.text = "isFirstResponder: \(panNumberTextField.isFirstResponder)"
-        completeLabel.text = "isComplete: \(panNumberTextField.isComplete)"
-        emptyLabel.text = "isEmpty: \(panNumberTextField.isEmpty)"
-        validLabel.text = "isValid: \(panNumberTextField.isValid)"
+        firstResponderLabel.text = "isFirstResponder: \(foragePanTextField.isFirstResponder)"
+        completeLabel.text = "isComplete: \(foragePanTextField.isComplete)"
+        emptyLabel.text = "isEmpty: \(foragePanTextField.isEmpty)"
+        validLabel.text = "isValid: \(foragePanTextField.isValid)"
     }
 
     private func setupContentViewConstraints() {
@@ -289,124 +194,24 @@ class CardNumberView: UIView {
             centerXAnchor: centerXAnchor
         )
 
-        titleLabel.anchor(
-            top: contentView.safeAreaLayoutGuide.topAnchor,
-            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
-            bottom: nil,
-            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
-            centerXAnchor: contentView.centerXAnchor,
-            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
-        )
+        anchorContentViewSubviews(contentView: contentView, subviews: [
+            titleLabel,
+            foragePanTextField,
+            firstResponderLabel,
+            completeLabel,
+            emptyLabel,
+            validLabel,
+            refLabel,
+            typeLabel,
+            tokenLabel,
+            last4Label,
+            fingerprintV2Label,
+            customerIDLabel,
+            reusableLabel,
+            errorLabel,
+        ])
 
-        panNumberTextField.anchor(
-            top: titleLabel.safeAreaLayoutGuide.bottomAnchor,
-            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
-            bottom: nil,
-            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
-            centerXAnchor: contentView.centerXAnchor,
-            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
-        )
-
-        firstResponderLabel.anchor(
-            top: panNumberTextField.safeAreaLayoutGuide.bottomAnchor,
-            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
-            bottom: nil,
-            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
-            centerXAnchor: contentView.centerXAnchor,
-            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
-        )
-
-        completeLabel.anchor(
-            top: firstResponderLabel.safeAreaLayoutGuide.bottomAnchor,
-            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
-            bottom: nil,
-            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
-            centerXAnchor: contentView.centerXAnchor,
-            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
-        )
-
-        emptyLabel.anchor(
-            top: completeLabel.safeAreaLayoutGuide.bottomAnchor,
-            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
-            bottom: nil,
-            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
-            centerXAnchor: contentView.centerXAnchor,
-            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
-        )
-
-        validLabel.anchor(
-            top: emptyLabel.safeAreaLayoutGuide.bottomAnchor,
-            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
-            bottom: nil,
-            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
-            centerXAnchor: contentView.centerXAnchor,
-            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
-        )
-
-        refLabel.anchor(
-            top: validLabel.safeAreaLayoutGuide.bottomAnchor,
-            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
-            bottom: nil,
-            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
-            centerXAnchor: contentView.centerXAnchor,
-            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
-        )
-
-        typeLabel.anchor(
-            top: refLabel.safeAreaLayoutGuide.bottomAnchor,
-            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
-            bottom: nil,
-            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
-            centerXAnchor: contentView.centerXAnchor,
-            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
-        )
-
-        tokenLabel.anchor(
-            top: typeLabel.safeAreaLayoutGuide.bottomAnchor,
-            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
-            bottom: nil,
-            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
-            centerXAnchor: contentView.centerXAnchor,
-            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
-        )
-
-        last4Label.anchor(
-            top: tokenLabel.safeAreaLayoutGuide.bottomAnchor,
-            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
-            bottom: nil,
-            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
-            centerXAnchor: contentView.centerXAnchor,
-            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
-        )
-
-        customerIDLabel.anchor(
-            top: last4Label.safeAreaLayoutGuide.bottomAnchor,
-            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
-            bottom: nil,
-            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
-            centerXAnchor: contentView.centerXAnchor,
-            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
-        )
-
-        reusableLabel.anchor(
-            top: customerIDLabel.safeAreaLayoutGuide.bottomAnchor,
-            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
-            bottom: nil,
-            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
-            centerXAnchor: contentView.centerXAnchor,
-            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
-        )
-
-        errorLabel.anchor(
-            top: reusableLabel.safeAreaLayoutGuide.bottomAnchor,
-            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
-            bottom: nil,
-            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
-            centerXAnchor: contentView.centerXAnchor,
-            padding: UIEdgeInsets(top: 24, left: 24, bottom: 0, right: 24)
-        )
-
-        sendPanButton.anchor(
+        tokenizeCardButton.anchor(
             top: nil,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
             bottom: nextButton.safeAreaLayoutGuide.topAnchor,

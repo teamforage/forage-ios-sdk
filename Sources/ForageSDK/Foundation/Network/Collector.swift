@@ -3,307 +3,266 @@
 //
 //
 //  Created by Danny Leiser on 3/8/23.
-//  Copyright © 2023-Present Forage Technology Corporation. All rights reserved.
+//  © 2023-2025 Forage Technology Corporation. All rights reserved.
 //
 
-import BasisTheoryElements
 import Foundation
-import VGSCollectSDK
+import UIKit
 
 let tokenDelimiter = ","
 let tokenKey = "card_number_token"
 
+/// Defines actions performed against the Vault Proxy.
+enum VaultAction: String {
+    case balanceCheck = "balance"
+    case capturePayment = "capture"
+    case deferCapture = "defer_capture"
+
+    var endpointSuffix: String {
+        switch self {
+        case .balanceCheck:
+            return "/balance/"
+        case .capturePayment:
+            return "/capture/"
+        case .deferCapture:
+            return "/collect_pin/"
+        }
+    }
+}
+
 protocol VaultCollector {
-    func setCustomHeaders(headers: [String: String], xKey: [String: String])
-    func sendData(
+    func setCustomHeaders(headers: [String: String])
+    func sendData<T: Decodable>(
         path: String,
         vaultAction: VaultAction,
         extraData: [String: Any],
-        completion: @escaping (VaultResponse) -> Void
+        completion: @escaping (T?, ForageError?) -> Void
     )
     func getPaymentMethodToken(paymentMethodToken: String) throws -> String
-    func getVaultType() -> VaultType
 }
 
-struct VGSCollectConfig {
-    let id: String
-    let environment: VGSCollectSDK.Environment
+// MARK: Vault Config
+
+struct ForageVaultConfig {
+    let environment: Environment
+    var vaultBaseURL: String {
+        switch environment {
+        case .dev: return "vault.dev.joinforage.app"
+        case .staging: return "vault.staging.joinforage.app"
+        case .sandbox: return "vault.sandbox.joinforage.app"
+        case .cert: return "vault.cert.joinforage.app"
+        case .prod: return "vault.joinforage.app"
+        case .local: return "vault.joinforage.localhost"
+        }
+    }
 }
 
-struct BasisTheoryConfig {
-    let publicKey: String
-    let proxyKey: String
-}
+// MARK: Rosetta
 
-// Wrapper class for VGSCollect
-class VGSCollectWrapper: VaultCollector {
-    public let vgsCollect: VGSCollect
+// Wrapper class for Forage internal vault
+class RosettaPINSubmitter: VaultCollector {
+    var customHeaders: [String: String] = [:]
+    let textElement: UITextField
+
+    private let forageVaultConfig: ForageVaultConfig
     private let logger: ForageLogger?
+    private let session: URLSessionProtocol
 
-    init(config: VGSCollectConfig, logger: ForageLogger? = DatadogLogger(ForageLoggerConfig(prefix: "VGS"))) {
-        vgsCollect = VGSCollect(id: config.id, environment: config.environment)
+    init(
+        textElement: UITextField,
+        forageVaultConfig: ForageVaultConfig,
+        logger: ForageLogger? = DatadogLogger(ForageLoggerConfig(prefix: "Rosetta")),
+        // Taking session as an injected dependency to make this easier to test
+        session: URLSessionProtocol = URLSession.shared
+    ) {
+        self.textElement = textElement
+        customHeaders = [:]
+        self.forageVaultConfig = forageVaultConfig
         self.logger = logger
+        self.session = session
     }
 
-    func setCustomHeaders(headers: [String: String], xKey: [String: String]) {
-        var mutableHeaders = headers
-        mutableHeaders["X-KEY"] = xKey["vgsXKey"]
-        vgsCollect.customHeaders = mutableHeaders
+    func setCustomHeaders(headers: [String: String]) {
+        customHeaders = headers
     }
 
-    func sendData(path: String, vaultAction: VaultAction, extraData: [String: Any], completion: @escaping (VaultResponse) -> Void) {
-        var mutableExtraData = extraData
-        if let paymentMethodToken = extraData[tokenKey] as? String {
-            let token = getPaymentMethodToken(paymentMethodToken: paymentMethodToken)
-            if token.isEmpty {
-                logger?.error(
-                    "Failed to send data. VGS token not found on card",
-                    error: nil,
-                    attributes: nil
-                )
-            }
-            mutableExtraData[tokenKey] = token
+    func sendData<T: Decodable>(path: String, vaultAction: VaultAction, extraData: [String: Any], completion: @escaping (T?, ForageError?) -> Void) {
+        guard var requestBody = try? buildRequestBody(with: extraData) else {
+            return completion(nil, CommonErrors.UNKNOWN_SERVER_ERROR)
         }
 
-        let measurement = VaultProxyResponseMonitor.newMeasurement(vault: VaultType.vgsVaultType, action: vaultAction)
+        var request = buildRequest(for: path)
+
+        // measure the response time
+        let measurement = VaultProxyResponseMonitor.newMeasurement(action: vaultAction)
             .setPath(path)
             .setMethod(.post)
 
         measurement.start()
 
-        // VGS performs UI actions in this method, which should run on the main thread
-        DispatchQueue.main.async { [self] in
-            vgsCollect.sendData(path: path, extraData: mutableExtraData) { response in
-                switch response {
-                case let .success(code, data, urlResponse):
-                    measurement.end()
-                    measurement.setHttpStatusCode(code).logResult()
-                    completion(VaultResponse(statusCode: code, urlResponse: urlResponse, data: data, error: nil))
-                case let .failure(code, data, urlResponse, error):
-                    measurement.end()
-                    self.logger?.error("Failed to send data to VGS proxy", error: error, attributes: [
-                        "http_status": code
-                    ])
-                    measurement.setHttpStatusCode(code).logResult()
-                    completion(VaultResponse(statusCode: code, urlResponse: urlResponse, data: data, error: error))
-                }
+        // making sure this runs on the main queue since we're reading from a UI element
+        DispatchQueue.main.async {
+            guard let validatedPIN = self.getValidatedPIN() else {
+                return completion(nil, CommonErrors.INCOMPLETE_PIN_ERROR)
             }
+
+            requestBody["pin"] = validatedPIN
+            request.httpBody = try! JSONSerialization.data(withJSONObject: requestBody)
+
+            // make the request to the vault proxy
+            self.session.dataTask(with: request) { data, response, error in
+                self.handleResponse(response: response, data: data, error: error, measurement: measurement, completion: completion)
+            }.resume()
         }
     }
 
-    func getPaymentMethodToken(paymentMethodToken: String) -> String {
-        if paymentMethodToken.contains(tokenDelimiter) {
-            return paymentMethodToken.components(separatedBy: tokenDelimiter)[0]
+    func handleResponse<T: Decodable>(response: URLResponse?, data: Data?, error: Error?, measurement: NetworkMonitor, completion: (T?, ForageError?) -> Void) {
+        measurement.end()
+
+        let code = (response as? HTTPURLResponse)?.statusCode ?? 500
+
+        measurement.setHttpStatusCode(code).logResult()
+
+        // If an error is explicitly returned from Rosetta, log the error and return
+        if let error = error {
+            logger?.error(
+                "Rosetta proxy failed with an error",
+                error: error,
+                attributes: nil
+            )
+            return completion(nil, CommonErrors.UNKNOWN_SERVER_ERROR)
         }
-        return paymentMethodToken
-    }
 
-    func getVaultType() -> VaultType {
-        VaultType.vgsVaultType
-    }
-}
+        // If there was no error AND no data was returned, something went wrong and we should log and return
+        guard let data = data else {
+            logger?.critical(
+                "Rosetta failed to respond with a data object",
+                error: nil,
+                attributes: nil
+            )
+            return completion(nil, CommonErrors.UNKNOWN_SERVER_ERROR)
+        }
 
-func convertJsonToDictionary(_ json: JSON) -> [String: Any] {
-    var result: [String: Any] = [:]
+        // If the response was a Forage error (ex. 429 throttled), catch it here and return
+        if let forageServiceError = try? JSONDecoder().decode(ForageServiceError.self, from: data) {
+            let forageCode = forageServiceError.errors[0].code
+            let message = forageServiceError.errors[0].message
+            return completion(nil, ForageError.create(
+                code: forageCode,
+                httpStatusCode: code,
+                message: message
+            ))
+        }
 
-    if case let .dictionaryValue(dictionary) = json {
-        for (key, value) in dictionary {
-            if case let .rawValue(rawValue) = value {
-                result[key] = rawValue
-            } else {
-                result[key] = convertJsonToDictionary(value)
-            }
+        // If the code is a 204, we got a successful response from the deferred capture flow.
+        // In this scenario, we should just return
+        if code == 204 {
+            return completion(nil, nil)
+        }
+
+        // Try to decode the response and return the expected object
+        do {
+            let decoder = JSONDecoder()
+            let decodedResponse = try decoder.decode(T.self, from: data)
+            completion(decodedResponse, nil)
+        } catch {
+            // If we are unable to decode whatever was returned, log and return
+            logger?.critical(
+                "Failed to decode Rosetta response data.",
+                error: CommonErrors.UNKNOWN_SERVER_ERROR,
+                attributes: nil
+            )
+            return completion(nil, CommonErrors.UNKNOWN_SERVER_ERROR)
         }
     }
-    return result
-}
 
-// Wrapper class for BasisTheory
-class BasisTheoryWrapper: VaultCollector {
     func getPaymentMethodToken(paymentMethodToken: String) throws -> String {
         if paymentMethodToken.contains(tokenDelimiter) {
-            return paymentMethodToken.components(separatedBy: tokenDelimiter)[1]
+            let tokens = paymentMethodToken.components(separatedBy: tokenDelimiter)
+            if tokens.count > 2 {
+                let rosettaToken = tokens[2]
+                if rosettaToken.isEmpty {
+                    throw ServiceError.parseError
+                } else {
+                    return rosettaToken
+                }
+            } else {
+                throw ServiceError.parseError
+            }
         }
         throw ServiceError.parseError
     }
 
-    var customHeaders: [String: String] = [:]
-    let textElement: TextElementUITextField
+    func getValidatedPIN() -> String? {
+        guard let pin = textElement.text else {
+            return nil
+        }
 
-    private let basisTheoryConfig: BasisTheoryConfig
-    private let logger: ForageLogger?
+        let isFourCharacters = pin.count == 4
+        let isOnlyNumeric = pin.allSatisfy(\.isNumber)
+        let isValidPIN = isFourCharacters && isOnlyNumeric
 
-    func setCustomHeaders(headers: [String: String], xKey: [String: String]) {
-        customHeaders = headers
-        customHeaders["X-KEY"] = xKey["btXKey"]
+        if isValidPIN {
+            return pin
+        } else {
+            return nil
+        }
     }
 
-    init(textElement: TextElementUITextField, basisTheoryconfig: BasisTheoryConfig, logger: ForageLogger? = DatadogLogger(ForageLoggerConfig(prefix: "BasisTheory"))) {
-        self.textElement = textElement
-        customHeaders = [:]
-        basisTheoryConfig = basisTheoryconfig
-        self.logger = logger
-    }
+    func buildRequestBody(with extraData: [String: Any]) throws -> [String: String] {
+        var body = [String: String]()
 
-    func sendData(path: String, vaultAction: VaultAction, extraData: [String: Any], completion: @escaping (VaultResponse) -> Void) {
-        var body: [String: Any] = ["pin": textElement]
+        // grab the payment method token and add it to the request body, throw if there isn't a rosetta token
         for (key, value) in extraData {
             if key == tokenKey, let paymentMethodToken = value as? String {
                 do {
                     let token = try getPaymentMethodToken(paymentMethodToken: paymentMethodToken)
                     body[key] = token
                 } catch {
-                    logger?.error(
-                        "Failed to send data to Basis Theory proxy. BT token not found on card",
+                    logger?.critical(
+                        "Failed to send data to Rosetta proxy. Rosetta token not found on card",
                         error: error,
                         attributes: nil
                     )
-                    completion(VaultResponse(
-                        statusCode: nil,
-                        urlResponse: nil,
-                        data: nil,
-                        error: error
-                    ))
-                    return
+                    throw CommonErrors.UNKNOWN_SERVER_ERROR
                 }
-            } else {
-                body[key] = value
             }
         }
 
-        let measurement = VaultProxyResponseMonitor.newMeasurement(vault: VaultType.btVaultType, action: vaultAction)
-            .setPath(path)
-            .setMethod(.post)
-
-        let proxyHttpRequest = ProxyHttpRequest(method: .post, path: path, body: body, headers: customHeaders)
-
-        measurement.start()
-
-        // Basis Theory performs UI actions in this method, which should run on the main thread
-        DispatchQueue.main.async { [self] in
-            BasisTheoryElements.proxy(
-                apiKey: basisTheoryConfig.publicKey,
-                proxyKey: basisTheoryConfig.proxyKey,
-                proxyHttpRequest: proxyHttpRequest
-            ) { response, data, error in
-                measurement.end()
-
-                let httpStatusCode = (response as? HTTPURLResponse)?.statusCode
-                measurement.setHttpStatusCode(httpStatusCode).logResult()
-
-                if error != nil {
-                    self.logger?.error("Failed to send data to Basis Theory proxy", error: error, attributes: [
-                        "http_status": httpStatusCode
-                    ])
-                }
-
-                var rawData: Data?
-                if let data = data {
-                    let dataDictionary = convertJsonToDictionary(data)
-                    rawData = try? JSONSerialization.data(withJSONObject: dataDictionary, options: [])
-                }
-                let vaultResponse = VaultResponse(
-                    statusCode: httpStatusCode,
-                    urlResponse: response,
-                    data: rawData,
-                    error: error
-                )
-                completion(vaultResponse)
-            }
-        }
+        return body
     }
 
-    func getVaultType() -> VaultType {
-        VaultType.btVaultType
+    func buildRequest(for path: String) -> URLRequest {
+        let hostname = forageVaultConfig.vaultBaseURL
+        let scheme = getForageScheme(hostname: hostname)
+        let url = URL(string: "\(scheme)://\(hostname)/proxy\(path)")!
+        
+        var request = URLRequest(url: url)
+
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(ForageSDK.version, forHTTPHeaderField: "X-Forage-Ios-Sdk-Version")
+
+        for header in customHeaders {
+            if header.key == "Session-Token" {
+                // intentionally omitting `Session-Token` header since we only need `Authorization` for Rosetta
+                request.setValue(header.value, forHTTPHeaderField: "Authorization")
+            } else {
+                request.setValue(header.value, forHTTPHeaderField: header.key)
+            }
+        }
+
+        return request
     }
 }
 
+// MARK: CollectorFactory
+
 enum CollectorFactory {
-    /**
-     VGS VaultId
-     */
-    private enum VaultId: String {
-        case sandbox = "tntagcot4b1"
-        case cert = "tntpnht7psv"
-        case prod = "tntbcrncmgi"
-        case staging = "tnteykuh975"
-        case dev = "tntlqkidhc6"
-    }
-
-    public static func CreateVGS() -> VGSCollect {
-        VGSCollect(id: vaultID(ForageSDK.shared.environment).rawValue, environment: environmentVGS(ForageSDK.shared.environment))
-    }
-
-    private static func vaultID(_ environment: Environment) -> VaultId {
-        switch environment {
-        case .sandbox: return .sandbox
-        case .cert: return .cert
-        case .prod: return .prod
-        case .staging: return .staging
-        case .dev: return .dev
-        }
-    }
-
-    private static func environmentVGS(_ environment: Environment) -> VGSCollectSDK.Environment {
-        switch environment {
-        case .cert, .sandbox, .staging, .dev: return .sandbox
-        case .prod: return .live
-        }
-    }
-
-    /**
-     BT public Keys
-     */
-    private enum PublicKey: String {
-        case sandbox = "key_DQ5NfUAgiqzwX1pxqcrSzK"
-        case cert = "key_NdWtkKrZqztEfJRkZA8dmw"
-        case prod = "key_BypNREttGMPbZ1muARDUf4"
-        case staging = "key_6B4cvpcDCEeNDYNow9zH7c"
-        case dev = "key_AZfcBuKUsV38PEeYu6ZV8x"
-    }
-
-    private static func publicKey(_ environment: Environment) -> PublicKey {
-        switch environment {
-        case .sandbox: return .sandbox
-        case .cert: return .cert
-        case .prod: return .prod
-        case .staging: return .staging
-        case .dev: return .dev
-        }
-    }
-
-    private static func proxyKey(_ environment: Environment) -> ProxyKey {
-        switch environment {
-        case .sandbox: return .sandbox
-        case .cert: return .cert
-        case .prod: return .prod
-        case .staging: return .staging
-        case .dev: return .dev
-        }
-    }
-
-    /**
-     BT proxy Keys
-     */
-    private enum ProxyKey: String {
-        case sandbox = "R1CNiogSdhnHeNq6ZFWrG1"
-        case cert = "AFSMtyyTGLKgmdWwrLCENX"
-        case prod = "UxbU4Jn2RmvCovABjwCwsa"
-        case staging = "ScWvAUkp53xz7muae7fW5p"
-        case dev = "N31FZgKpYZpo3oQ6XiM6M6"
-    }
-
-    static func createVGS(environment: Environment) -> VGSCollectWrapper {
-        let id = vaultID(environment).rawValue
-        let environmentVGS = environmentVGS(environment)
-        let config = VGSCollectConfig(id: id, environment: environmentVGS)
-        return VGSCollectWrapper(config: config)
-    }
-
-    static func createBasisTheory(environment: Environment, textElement: TextElementUITextField) -> BasisTheoryWrapper {
-        let publicKey = publicKey(environment).rawValue
-        let proxyKey = proxyKey(environment).rawValue
-        let config = BasisTheoryConfig(publicKey: publicKey, proxyKey: proxyKey)
-        return BasisTheoryWrapper(textElement: textElement, basisTheoryconfig: config)
+    static func createRosettaPINSubmitter(environment: Environment, textElement: UITextField) -> RosettaPINSubmitter {
+        RosettaPINSubmitter(
+            textElement: textElement,
+            forageVaultConfig: ForageVaultConfig(environment: environment)
+        )
     }
 }

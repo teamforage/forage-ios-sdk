@@ -28,11 +28,6 @@ struct ResponseAttributes {
     var forageErrorCode: String?
 }
 
-enum VaultAction: String {
-    case balanceCheck = "balance"
-    case capturePayment = "capture"
-}
-
 enum EventOutcome: String {
     case success
     case failure
@@ -51,7 +46,7 @@ class ResponseMonitor: NetworkMonitor {
             ForageLoggerConfig(prefix: "Metrics")
         )
     ) {
-        self.metricsLogger = metricsLogger?.setLogKind(ForageLogKind.metric)
+        self.metricsLogger = metricsLogger?.setLogKind(ForageLogKind.metric).setPrefix("Metrics")
     }
 
     func start() {
@@ -82,7 +77,7 @@ class ResponseMonitor: NetworkMonitor {
 
     @discardableResult
     func setForageErrorCode(_ error: Error) -> ResponseMonitor {
-        responseAttributes.forageErrorCode = (error as? ForageError)?.errors.first?.code ?? UnknownErrorCode
+        responseAttributes.forageErrorCode = (error as? ForageError)?.code ?? UnknownErrorCode
         return self
     }
 

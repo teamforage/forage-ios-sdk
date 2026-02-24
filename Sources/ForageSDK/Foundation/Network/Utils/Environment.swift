@@ -3,7 +3,7 @@
 //
 //
 //  Created by Danilo Joksimovic on 2023-08-23.
-//  Copyright © 2023-Present Forage Technology Corporation. All rights reserved.
+//  © 2023-2025 Forage Technology Corporation. All rights reserved.
 //
 
 import Foundation
@@ -18,6 +18,7 @@ public enum Environment: String {
     case sandbox
     case cert
     case prod
+    case local
 
     /// Returns the corresponding hostname for the environment.
     public var hostname: String {
@@ -27,6 +28,7 @@ public enum Environment: String {
         case .sandbox: return "api.sandbox.joinforage.app"
         case .cert: return "api.cert.joinforage.app"
         case .prod: return "api.joinforage.app"
+        case .local: return "api.joinforage.localhost"
         }
     }
 
@@ -55,3 +57,17 @@ private func sessionTokenToEnv(_ sessionToken: String?) -> Environment {
     let prefix = String(parts[0])
     return Environment(rawValue: prefix) ?? Environment.sandbox
 }
+
+/// Return http if ``hostname`` ends in .localhost and running in simulator
+public func getForageScheme(hostname: String) -> String {
+    let hostSegments = hostname.split(separator: ".")
+    
+    #if targetEnvironment(simulator)
+    if hostSegments.last == "localhost" {
+        return "http"
+    }
+    #endif
+    return "https"
+}
+
+

@@ -3,7 +3,7 @@
 //  ForageSDK
 //
 //  Created by Tiago Oliveira on 29/11/22.
-//  Copyright © 2023-Present Forage Technology Corporation. All rights reserved.
+//  © 2023-2025 Forage Technology Corporation. All rights reserved.
 //
 
 import Foundation
@@ -37,16 +37,26 @@ class ForageMocks {
         return NSError(domain: response, code: 400, userInfo: nil)
     }
 
-    var tokenizeSuccess: Data {
+    var networkError: Error {
+        // Mock SSL error
+        return NSError(domain: "NSURLErrorDomain", code: -1200, userInfo: nil)
+    }
+
+    var tokenizeCreditDebitSuccess: Data {
         let response = """
                 {
                    "ref":"d0c47b0ed5",
-                   "type":"ebt",
+                   "type":"credit",
                    "balance":null,
                    "card":{
-                      "last_4":"3412",
+                      "brand":"unknown",
+                      "exp_month":1,
+                      "exp_year":29,
+                      "is_hsa_fsa":true,
+                      "last_4":"8210",
                       "created":"2022-11-29T03:31:52.349193-08:00",
-                      "token":"tok_sandbox_72VEC9LasHbMYiiVWP9zms"
+                      "psp_customer_id":"cus_test",
+                      "payment_method_id":"pm_test"
                    },
                    "reusable":true,
                    "customer_id":"test-ios-customer-id"
@@ -55,7 +65,47 @@ class ForageMocks {
         return Data(response.utf8)
     }
 
-    var tokenizeFailure: Error {
+    var tokenizeCreditDebitFailure: Error {
+        let response = """
+                {
+                   "path":"/api/payment_methods/",
+                   "errors":[
+                      {
+                         "code":"cannot_parse_request_body",
+                         "message":"Parsing \"ebt_card\" field failed with message: {'number': [ErrorDetail(string='Card number must be between 15 and 19 digits in length', code='invalid')]}",
+                         "source":[
+                            {
+                               "resource":"Payment_Methods",
+                               "ref":""
+                            }
+                         ]
+                      }
+                   ]
+                }
+        """
+        return NSError(domain: response, code: 400, userInfo: nil)
+    }
+    
+    var tokenizeEBTSuccess: Data {
+        let response = """
+                {
+                   "ref":"d0c47b0ed5",
+                   "type":"ebt",
+                   "balance":null,
+                   "card":{
+                      "last_4":"3412",
+                      "created":"2022-11-29T03:31:52.349193-08:00",
+                      "token":"tok_sandbox_72VEC9LasHbMYiiVWP9zms",
+                      "fingerprint_v2": "a2f1b4e6c7d9380b59fa7c2e98ad0e316be9fcde1e2a4c3d56b17c6e0198a2fb"
+                   },
+                   "reusable":true,
+                   "customer_id":"test-ios-customer-id"
+                }
+        """
+        return Data(response.utf8)
+    }
+
+    var tokenizeEBTFailure: Error {
         let response = """
                 {
                    "path":"/api/payment_methods/",
@@ -90,7 +140,8 @@ class ForageMocks {
                         "last_4": "1234",
                         "created": "2023-02-23T14:25:37.531327-08:00",
                         "token": "tok_sandbox_vJp2BwDc6R6Z16mgzCxuXk",
-                        "state": "PA"
+                        "state": "PA",
+                        "fingerprint_v2": "a2f1b4e6c7d9380b59fa7c2e98ad0e316be9fcde1e2a4c3d56b17c6e0198a2fb" 
                     },
                     "reusable":true
                 }
@@ -115,16 +166,6 @@ class ForageMocks {
                 }
         """
         return NSError(domain: response, code: 400, userInfo: nil)
-    }
-
-    var xKeySuccess: Data {
-        let response = """
-                {
-                   "alias":"tok_sandbox_agCcwWZs8TMkkq89f8KHSx",
-                   "bt_alias":"443b4f60-67f3-46d7-af4f-0476b7db4894"
-                }
-        """
-        return Data(response.utf8)
     }
 
     var getBalanceSuccess: Data {
@@ -205,107 +246,5 @@ class ForageMocks {
                 }
         """
         return NSError(domain: response, code: 400, userInfo: nil)
-    }
-
-    // MARK: GET /message/ success responses
-
-    var getMessageCompleted: Data {
-        let response = """
-        {
-          "content_id": "d789c086-9c4f-41c3-854a-1c436eee1d63",
-          "message_type": "0200",
-          "status": "completed",
-          "failed": false,
-          "errors": []
-        }
-        """
-        return Data(response.utf8)
-    }
-
-    // we continue to retry until we see status: "completed"
-    // so we permantly set the status to: "sent_to_proxy" to trigger retry attempts
-    var getMessageIncomplete: Data {
-        let response = """
-        {
-          "content_id": "i789c086-9c4f-41c3-854a-1c436eee1d63",
-          "message_type": "0200",
-          "status": "sent_to_proxy",
-          "failed": false,
-          "errors": []
-        }
-        """
-        return Data(response.utf8)
-    }
-
-    // MARK: GET /message/ error responses
-
-    var getMessageUnauthorized: Data {
-        let response = """
-        {
-            "path": "/api/message/1c53e9e0-92e9-4568-a128-deecf4c2194a/",
-            "errors": [
-              {
-                "code": "missing_merchant_account",
-                "message": "No merchant account FNS number was provided.",
-                "source": {
-                  "resource": "Merchant_Account_Header",
-                  "ref": ""
-                }
-              }
-            ]
-          }
-        """
-        return Data(response.utf8)
-    }
-
-    var getMessageExpiredCard: Data {
-        let response = """
-        {
-          "content_id": "36058ff7-0e9d-4025-94cd-80ef04a3bb1c",
-          "message_type": "0200",
-          "status": "received_on_django",
-          "failed": true,
-          "errors": [
-            {
-              "status_code": 400,
-              "forage_code": "ebt_error_54",
-              "message": "Expired card - Expired Card"
-            }
-          ]
-        }
-        """
-        return Data(response.utf8)
-    }
-
-    var getMessageFailed: Data {
-        let response = """
-        {
-          "content_id": "c2bf2b14-415f-4cb3-8687-7eea06f75369",
-          "message_type": "0200",
-          "status": "received_on_django",
-          "failed": true,
-          "errors": [
-            {
-              "status_code": 400,
-              "forage_code": "ebt_error_51",
-              "message": "Received failure response from EBT network"
-            }
-          ]
-        }
-        """
-        return Data(response.utf8)
-    }
-
-    // missing "errors" list
-    var getMessageMalformed: Data {
-        let response = """
-        {
-          "content_id": "d789c086-9c4f-41c3-854a-1c436eee1d63",
-          "message_type": "0200",
-          "status": "completed",
-          "failed": false
-        }
-        """
-        return Data(response.utf8)
     }
 }

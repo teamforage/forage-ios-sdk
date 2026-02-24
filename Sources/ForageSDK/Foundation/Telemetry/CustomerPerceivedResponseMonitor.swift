@@ -16,24 +16,28 @@ let UnknownErrorCode = "unknown"
 
  The timer begins when the first HTTP request is sent from the SDK and ends when the the SDK returns information back to the user. Ex of a balance action:
 
- Timer Begins -> [GET] EncryptionKey -> [GET] PaymentMethod -> [POST] to VGS/BT ->
- [GET] Poll for Response -> [GET] PaymentMethod -> Timer Ends -> Return Balance
+ Timer Begins -> [GET] PaymentMethod -> [POST] to Rosetta ->
+ Timer Ends -> Return Balance
  */
 final class CustomerPerceivedResponseMonitor: ResponseMonitor {
-    private var vaultType: VaultType
     private var vaultAction: VaultAction
     private var eventOutcome: EventOutcome?
     private var eventName: EventName = .customerPerceivedResponse
 
-    init(vaultType: VaultType, vaultAction: VaultAction) {
-        self.vaultType = vaultType
+    init(vaultAction: VaultAction, metricsLogger: ForageLogger?) {
         self.vaultAction = vaultAction
-        super.init()
+        super.init(metricsLogger: metricsLogger)
     }
 
     /// Factory method for creating new CustomerPerceivedResponseMonitor instances
-    static func newMeasurement(vaultType: VaultType, vaultAction: VaultAction) -> CustomerPerceivedResponseMonitor {
-        CustomerPerceivedResponseMonitor(vaultType: vaultType, vaultAction: vaultAction)
+    static func newMeasurement(
+        vaultAction: VaultAction,
+        metricsLogger: ForageLogger? = nil
+    ) -> CustomerPerceivedResponseMonitor {
+        CustomerPerceivedResponseMonitor(
+            vaultAction: vaultAction,
+            metricsLogger: metricsLogger
+        )
     }
 
     // override to set event_outcome to "failure" if we know the event has a forage_error_code
@@ -56,7 +60,8 @@ final class CustomerPerceivedResponseMonitor: ResponseMonitor {
     ) {
         guard
             let responseTimeMs = responseAttributes.responseTimeMs,
-            let eventOutcome = eventOutcome
+            let eventOutcome = eventOutcome,
+            let httpStatus = responseAttributes.code
         else {
             metricsLogger?.error("Incomplete or missing response attributes. Could not report metric event.", error: nil, attributes: nil)
             return
@@ -73,9 +78,10 @@ final class CustomerPerceivedResponseMonitor: ResponseMonitor {
                 .eventName: eventName.rawValue,
                 .eventOutcome: eventOutcome.rawValue,
                 .forageErrorCode: responseAttributes.forageErrorCode,
+                .httpStatus: httpStatus,
                 .logType: ForageLogKind.metric.rawValue,
                 .responseTimeMs: responseTimeMs,
-                .vaultType: vaultType.rawValue,
+                .vaultType: "forage",
             ])
         )
     }

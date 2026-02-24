@@ -3,7 +3,7 @@
 //  SampleForageSDK
 //
 //  Created by Tiago Oliveira on 26/10/22.
-//  Copyright © 2022-Present Forage Technology Corporation. All rights reserved.
+//  © 2022-2025 Forage Technology Corporation. All rights reserved.
 //
 
 import ForageSDK
@@ -14,7 +14,7 @@ enum SampleAPI {
 }
 
 extension SampleAPI: ServiceProtocol {
-    var scheme: String { "https" }
+    var scheme: String { getForageScheme(hostname: host) }
 
     var host: String { ForageSDK.shared.environment.hostname }
 

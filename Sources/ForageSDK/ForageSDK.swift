@@ -4,7 +4,6 @@
 //
 
 import Foundation
-import VGSCollectSDK
 
 public class ForageSDK {
     // MARK: Properties
@@ -12,41 +11,28 @@ public class ForageSDK {
     private static var config: Config?
     static var logger: ForageLogger?
     var service: ForageService?
-    var merchantID: String = ""
-    var sessionToken: String = ""
+    var merchantID: String = config?.merchantID ?? ""
+    var sessionToken: String = config?.sessionToken ?? ""
     var traceId: String = ""
 
     public var environment: Environment = .sandbox
     // Don't update! Only updated when releasing.
-    public static let version = "4.2.0"
+    public static let version = "4.5.1"
     public static let shared = ForageSDK()
 
     // MARK: Init
 
     private init() {
-        guard let config = ForageSDK.config else {
+        guard ForageSDK.config != nil else {
             assertionFailure("ForageSDK is not initialized - call ForageSDK.setup() before accessing ForageSDK.shared")
             return
         }
-        environment = Environment(sessionToken: config.sessionToken)
-        merchantID = config.merchantID
-        sessionToken = config.sessionToken
-
         traceId = ForageSDK.logger?.getTraceID() ?? ""
 
-        VGSCollectLogger.shared.disableAllLoggers()
-
         let provider = Provider(logger: ForageSDK.logger)
-        let pollingService = PollingService(
-            provider: provider,
-            logger: ForageSDK.logger,
-            ldManager: LDManager.shared
-        )
         service = LiveForageService(
             provider: provider,
-            logger: ForageSDK.logger,
-            ldManager: LDManager.shared,
-            pollingService: pollingService
+            logger: ForageSDK.logger
         )
     }
 
@@ -80,8 +66,10 @@ public class ForageSDK {
         ForageSDK.config = config
         let environment = Environment(sessionToken: config.sessionToken)
 
+        updateMerchantID(config.merchantID)
+        updateSessionToken(config.sessionToken)
+
         initializeLogger(environment)
-        initializeLaunchDarkly(environment)
 
         ForageSDK.logger?
             .setPrefix("ForageSDK")
@@ -137,9 +125,5 @@ public class ForageSDK {
                 prefix: ""
             )
         )
-    }
-
-    class func initializeLaunchDarkly(_ environment: Environment) {
-        LDManager.shared.initialize(environment, logger: ForageSDK.logger)
     }
 }
