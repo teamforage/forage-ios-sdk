@@ -13,7 +13,7 @@ build_tool_arguments:
   - "-sdk"
   - "iphoneos"
   - "-destination"
-  - "name=iPhone 8"
+  - "name=iPhone 17"
 
 # The path to the directory containing your source code
 # source_directory: Sources/
@@ -35,9 +35,6 @@ theme: fullwidth
 
 # The author of the project
 author: Forage
-
-# The version of the project
-module_version: 4.0.0
 
 # Default text for undocumented symbols.
 undocumented_text: ""
