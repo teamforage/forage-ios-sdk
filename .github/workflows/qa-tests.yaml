@@ -29,6 +29,8 @@ jobs:
           cd Sample/
           brew uninstall xcodes || true # ignore if xcodes isn't installed
           brew install xcodesorg/made/xcodes
+          sudo xcode-select -s /Applications/Xcode_14.3.1.app
+          sudo xcodebuild -runFirstLaunch
           bundle install
       - name: Install the Apple certificate and provisioning profile and build app
         env:
