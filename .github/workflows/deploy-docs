@@ -1,0 +1,39 @@
+name: Generate and Publish Jazzy Docs
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: 'The release version to publish docs for'
+        required: true
+        type: string
+  push:
+    branches:
+      - feat/autogenerate-docs
+
+jobs:
+  build:
+    runs-on: macOS-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '26.3.0'
+
+      - name: Install Jazzy
+        run: sudo gem install jazzy
+
+      - name: Generate Docs with Jazzy
+        run: jazzy --module_version={{ github.event.release.tag_name || inputs.release_version || '4.0.0' }}
+
+      - name: Upload documentation as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: jazzy-docs
+          path: reference-docs
+    
