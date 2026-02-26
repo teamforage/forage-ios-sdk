@@ -16,7 +16,7 @@ env:
 
 jobs:
   CI:
-    runs-on: macos-13
+    runs-on: macos-15
 
     env:
       # Avoid concurrency issues
