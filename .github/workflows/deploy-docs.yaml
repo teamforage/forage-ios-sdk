@@ -9,9 +9,6 @@ on:
         description: 'The release version to publish docs for'
         required: true
         type: string
-  push:
-    branches:
-      - feat/autogenerate-docs
 
 jobs:
   build:
