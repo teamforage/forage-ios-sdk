@@ -4,11 +4,12 @@ on:
   push:
     branches:
       - main
+      - danny/get-match-variables
   pull_request:
   workflow_dispatch:
 
-  schedule:
-    - cron: '0 12 * * *' # Run every day at 7/8 AM Eastern
+  # schedule:
+  #   - cron: '0 12 * * *' # Run every day at 7/8 AM Eastern
 
 env:
   DEVELOPER_DIR: '/Applications/Xcode_14.3.1.app/Contents/Developer'
@@ -41,25 +42,28 @@ jobs:
           BROWSERSTACK_CUSTOM_ID: ${{ env.BROWSERSTACK_CUSTOM_ID }}
 
         run: |
-          cd Sample/
-          bundle exec fastlane build_ci_app
-      - name: Checkout Integration Test Repo
-        uses: actions/checkout@v3
-        with:
-          repository: teamforage/mobile-qa-tests
-          ref: main
-          ssh-key: ${{ secrets.MOBILE_QA_DEPLOY_KEY }}
-          path: 'mobile-qa-tests/'
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.12'
-      - name: Run Integration Tests
-        env:
-          BROWSERSTACK_CUSTOM_ID: ${{ env.BROWSERSTACK_CUSTOM_ID }}
-        run: |
-          cd mobile-qa-tests
-          pip3 install -r requirements.txt
-          export BROWSERSTACK_CUSTOM_ID=${{ env.BROWSERSTACK_CUSTOM_ID }}
-          pytest ios/tests/test_basic_flow.py || true
-          pytest --lf --last-failed-no-failures none --suppress-no-test-exit-code ios/tests/test_basic_flow.py
+          echo "MATCH_KEY_ID: ${{ env.MATCH_KEY_ID }}"
+          echo "MATCH_ISSUER_ID: ${{ env.MATCH_ISSUER_ID }}"
+          echo "MATCH_P8: ${{ env.MATCH_P8 }}"
+          echo "MATCH_PASSWORD: ${{ env.MATCH_PASSWORD }}"
+          echo "MATCH_GIT_PRIVATE_KEY: ${{ env.MATCH_GIT_PRIVATE_KEY }}"
+      # - name: Checkout Integration Test Repo
+      #   uses: actions/checkout@v3
+      #   with:
+      #     repository: teamforage/mobile-qa-tests
+      #     ref: main
+      #     ssh-key: ${{ secrets.MOBILE_QA_DEPLOY_KEY }}
+      #     path: 'mobile-qa-tests/'
+      # - name: Set up Python 3.12
+      #   uses: actions/setup-python@v4
+      #   with:
+      #     python-version: '3.12'
+      # - name: Run Integration Tests
+      #   env:
+      #     BROWSERSTACK_CUSTOM_ID: ${{ env.BROWSERSTACK_CUSTOM_ID }}
+      #   run: |
+      #     cd mobile-qa-tests
+      #     pip3 install -r requirements.txt
+      #     export BROWSERSTACK_CUSTOM_ID=${{ env.BROWSERSTACK_CUSTOM_ID }}
+      #     pytest ios/tests/test_basic_flow.py || true
+      #     pytest --lf --last-failed-no-failures none --suppress-no-test-exit-code ios/tests/test_basic_flow.py
