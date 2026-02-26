@@ -25,11 +25,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Set up env
-        run: |
-          cd Sample/
-          brew install xcodesorg/made/xcodes
-          bundle install
+
       - name: Install the Apple certificate and provisioning profile and build app
         env:
           MATCH_KEY_ID: ${{ secrets.MATCH_KEY_ID }}
@@ -47,6 +43,13 @@ jobs:
           echo "MATCH_P8: ${{ env.MATCH_P8 }}"
           echo "MATCH_PASSWORD: ${{ env.MATCH_PASSWORD }}"
           echo "MATCH_GIT_PRIVATE_KEY: ${{ env.MATCH_GIT_PRIVATE_KEY }}"
+      
+      - name: Set up env
+        run: |
+          cd Sample/
+          brew install xcodesorg/made/xcodes
+          bundle install
+
       # - name: Checkout Integration Test Repo
       #   uses: actions/checkout@v3
       #   with:
