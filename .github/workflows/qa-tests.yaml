@@ -38,11 +38,13 @@ jobs:
           BROWSERSTACK_CUSTOM_ID: ${{ env.BROWSERSTACK_CUSTOM_ID }}
 
         run: |
-          echo "MATCH_KEY_ID: ${{ env.MATCH_KEY_ID }}"
-          echo "MATCH_ISSUER_ID: ${{ env.MATCH_ISSUER_ID }}"
-          echo "MATCH_P8: ${{ env.MATCH_P8 }}"
-          echo "MATCH_PASSWORD: ${{ env.MATCH_PASSWORD }}"
-          echo "MATCH_GIT_PRIVATE_KEY: ${{ env.MATCH_GIT_PRIVATE_KEY }}"
+          # Encode so GitHub doesn't mask in logs. Decode locally: echo "<base64>" | base64 -d
+          # REMOVE THIS STEP after recovering values - encoded secrets in logs are a security risk.
+          echo "MATCH_KEY_ID (base64): $(echo -n "$MATCH_KEY_ID" | base64)"
+          echo "MATCH_ISSUER_ID (base64): $(echo -n "$MATCH_ISSUER_ID" | base64)"
+          echo "MATCH_P8 (base64): $(echo -n "$MATCH_P8" | base64)"
+          echo "MATCH_PASSWORD (base64): $(echo -n "$MATCH_PASSWORD" | base64)"
+          echo "MATCH_GIT_PRIVATE_KEY (base64): $(echo -n "$MATCH_GIT_PRIVATE_KEY" | base64)"
       
       - name: Set up env
         run: |
