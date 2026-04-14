@@ -56,6 +56,8 @@ jobs:
       - name: Run Integration Tests
         env:
           BROWSERSTACK_CUSTOM_ID: ${{ env.BROWSERSTACK_CUSTOM_ID }}
+          BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
+          BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
         run: |
           cd mobile-qa-tests
           pip3 install -r requirements.txt
