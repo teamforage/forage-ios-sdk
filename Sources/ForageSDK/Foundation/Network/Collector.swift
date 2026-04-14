@@ -97,6 +97,7 @@ class RosettaPINSubmitter: VaultCollector {
         let measurement = VaultProxyResponseMonitor.newMeasurement(action: vaultAction)
             .setPath(path)
             .setMethod(.post)
+        
 
         measurement.start()
 
