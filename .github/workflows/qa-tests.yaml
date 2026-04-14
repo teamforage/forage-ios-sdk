@@ -27,7 +27,6 @@ jobs:
       - name: Set up env
         run: |
           cd Sample/
-          brew install xcodesorg/made/xcodes
           bundle install
       - name: Install the Apple certificate and provisioning profile and build app
         env:
