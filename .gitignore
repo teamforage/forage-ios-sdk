@@ -55,6 +55,11 @@ Dependencies/
 **/fastlane/Preview.html
 **/fastlane/screenshots/**/*.png
 **/fastlane/test_output
+**/fastlane/.env
+**/fastlane/.env.*
+.env
+.env.*
+!.env.example
 
 # Code Coverage
 cobertura.xml

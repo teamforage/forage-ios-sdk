@@ -15,6 +15,14 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 ## iOS
 
+### ios renew_certs
+
+```sh
+[bundle exec] fastlane ios renew_certs
+```
+
+Regenerate the development signing certificate via match
+
 ### ios build_ci_app
 
 ```sh

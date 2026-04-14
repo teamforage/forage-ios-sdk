@@ -16,6 +16,29 @@
 default_platform(:ios)
 
 platform :ios do
+  desc "Regenerate the development signing certificate via match"
+  # Destructive: only run when the dev cert has expired or needs rotation — revokes the existing cert for everyone.
+  lane :renew_certs do
+    api_key = app_store_connect_api_key(
+      key_id: ENV["MATCH_KEY_ID"],
+      issuer_id: ENV["MATCH_ISSUER_ID"],
+      key_content: ENV["MATCH_P8"],
+    )
+
+    match_nuke(
+      api_key: api_key,
+      type: "development",
+      team_id: "3D54TBBRF3",
+      skip_confirmation: true,
+    )
+
+    match(
+      api_key: api_key,
+      type: "development",
+      team_id: "3D54TBBRF3",
+    )
+  end
+
   desc "Description of what the lane does"
   lane :build_ci_app do
     setup_ci if ENV['CI']
