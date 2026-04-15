@@ -1,0 +1,44 @@
+name: Renew Certs
+
+on:
+  # UI-only input: surfaces the runbook link next to a checkbox on the "Run workflow" panel. Not read by any step.
+  workflow_dispatch:
+    inputs:
+      ack:
+        description: 'Read the runbook first: https://www.notion.so/joinforage/Renewing-the-iOS-Development-Signing-Certificate-3431cd5d67268057bbd2cae4247263d4'
+        type: boolean
+        default: false
+
+env:
+  DEVELOPER_DIR: '/Applications/Xcode_15.4.app/Contents/Developer'
+
+jobs:
+  renew:
+    runs-on: macos-14
+    steps:
+      # Renders a runbook link + destructive-action warning at the top of the workflow run page via $GITHUB_STEP_SUMMARY.
+      - name: Link runbook in run summary
+        run: |
+          cat <<'EOF' >> "$GITHUB_STEP_SUMMARY"
+          ## Renewing the iOS Development Signing Certificate
+
+          **Runbook:** [Notion — Renewing the iOS Development Signing Certificate](https://www.notion.so/joinforage/Renewing-the-iOS-Development-Signing-Certificate-3431cd5d67268057bbd2cae4247263d4)
+
+          This workflow revokes the existing development certificate for everyone on the team and issues a new one. Anyone signing locally will need to re-fetch afterward.
+          EOF
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Set up env
+        run: |
+          cd Sample/
+          bundle install
+      - name: Renew development signing certificate
+        env:
+          MATCH_KEY_ID: ${{ secrets.MATCH_KEY_ID }}
+          MATCH_ISSUER_ID: ${{ secrets.MATCH_ISSUER_ID }}
+          MATCH_P8: ${{ secrets.MATCH_P8 }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_PRIVATE_KEY: ${{ secrets.MATCH_GIT_PRIVATE_KEY }}
+        run: |
+          cd Sample/
+          bundle exec fastlane renew_certs
