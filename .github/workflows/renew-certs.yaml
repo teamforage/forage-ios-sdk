@@ -27,7 +27,8 @@ jobs:
           This workflow revokes the existing development certificate for everyone on the team and issues a new one. Anyone signing locally will need to re-fetch afterward.
           EOF
       - name: Checkout repository
-        uses: actions/checkout@v3
+        # v6.0.2 = de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Set up env
         run: |
           cd Sample/
