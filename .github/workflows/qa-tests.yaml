@@ -24,7 +24,7 @@ jobs:
     steps:
       - name: Checkout repository
         # v6.0.2 = de0fac2e4500dabe0009e67214ff5f5447ce83dd
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
       - name: Set up env
         run: |
           cd Sample/
@@ -45,14 +45,14 @@ jobs:
           bundle exec fastlane build_ci_app
       - name: Checkout Integration Test Repo
         # v6.0.2 = de0fac2e4500dabe0009e67214ff5f5447ce83dd
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
           repository: teamforage/mobile-qa-tests
           ref: main
           ssh-key: ${{ secrets.MOBILE_QA_DEPLOY_KEY }}
           path: 'mobile-qa-tests/'
       - name: Set up Python 3.12
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
         with:
           python-version: '3.12'
       - name: Run Integration Tests
