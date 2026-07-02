@@ -47,7 +47,7 @@ class LiveForageService: ForageService {
         let rawBalanceModel: RawBalanceResponseModel?
         do {
             // If any of the preamble requests fail, return back a generic response to the user
-            let balanceRequest = try await createRequestModel(using: getTokenFromPaymentMethod, tokenRef: paymentMethodReference)
+            let balanceRequest = try await createRequestModel(using: getTokenFromPaymentMethod, tokenRef: paymentMethodReference, merchantID: ForageSDK.shared.merchantID)
 
             // If the vault request fails for some unforeseen reason, return back a generic response to the user
             rawBalanceModel = try await submitPinToVault(
@@ -109,7 +109,8 @@ class LiveForageService: ForageService {
                 pinCollector: pinCollector,
                 paymentReference: paymentReference,
                 idempotencyKey: paymentReference,
-                action: .capturePayment
+                action: .capturePayment,
+                merchantID: ForageSDK.shared.merchantID
             )
         } catch {
             throw error
@@ -144,14 +145,16 @@ class LiveForageService: ForageService {
 
     func collectPinForDeferredCapture(
         pinCollector: VaultCollector,
-        paymentReference: String
+        paymentReference: String,
+        merchantID: String
     ) async throws {
         do {
             let _: Empty? = try await collectPinForPayment(
                 pinCollector: pinCollector,
                 paymentReference: paymentReference,
                 idempotencyKey: UUID().uuidString,
-                action: .deferCapture
+                action: .deferCapture,
+                merchantID: merchantID
             )
         } catch {
             throw error
@@ -178,10 +181,10 @@ class LiveForageService: ForageService {
     /// Common logic required for all requests to the proxy.
     private func createRequestModel(
         using collectTokenFunc: CollectTokenFunc,
-        tokenRef: String
+        tokenRef: String,
+        merchantID: String
     ) async throws -> ForageRequestModel {
         let sessionToken = ForageSDK.shared.sessionToken
-        let merchantID = ForageSDK.shared.merchantID
 
         do {
             let token = try await collectTokenFunc(sessionToken, merchantID, tokenRef)
@@ -208,10 +211,11 @@ class LiveForageService: ForageService {
         pinCollector: VaultCollector,
         paymentReference: String,
         idempotencyKey: String,
-        action: VaultAction
+        action: VaultAction,
+        merchantID: String
     ) async throws -> T? {
         do {
-            let collectPinRequest = try await createRequestModel(using: getTokenFromPayment, tokenRef: paymentReference)
+            let collectPinRequest = try await createRequestModel(using: getTokenFromPayment, tokenRef: paymentReference, merchantID: merchantID)
 
             let basePath = "/api/payments/\(paymentReference)"
 

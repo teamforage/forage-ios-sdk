@@ -12,6 +12,7 @@ import UIKit
 
 protocol RequestBalanceViewDelegate: AnyObject {
     func goToCreatePayment(_ view: RequestBalanceView)
+    func goToSinglePIN(_ view: RequestBalanceView)
 }
 
 class RequestBalanceView: BaseSampleView {
@@ -69,6 +70,19 @@ class RequestBalanceView: BaseSampleView {
     }()
 
     private let nextButton: UIButton = .createNextButton(self, action: #selector(goToCreatePayment(_:)))
+
+    private lazy var testSinglePINButton: UIButton = {
+        let button = UIButton()
+        button.setTitle("Test Single PIN", for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
+        button.tintColor = .white
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(goToSinglePIN(_:)), for: .touchUpInside)
+        button.backgroundColor = .primaryColor
+        button.accessibilityIdentifier = "bt_test_single_pin"
+        button.isAccessibilityElement = true
+        return button
+    }()
 
     private let isFirstResponderLabel: UILabel = {
         let label = UILabel()
@@ -164,6 +178,10 @@ class RequestBalanceView: BaseSampleView {
         delegate?.goToCreatePayment(self)
     }
 
+    @objc fileprivate func goToSinglePIN(_ gesture: UIGestureRecognizer) {
+        delegate?.goToSinglePIN(self)
+    }
+
     // MARK: Public Methods
 
     public func render() {
@@ -206,6 +224,7 @@ class RequestBalanceView: BaseSampleView {
         contentView.addSubview(errorLabel)
         contentView.addSubview(requestBalanceButton)
         contentView.addSubview(nextButton)
+        contentView.addSubview(testSinglePINButton)
     }
 
     private func setupConstraints() {
@@ -244,6 +263,16 @@ class RequestBalanceView: BaseSampleView {
         )
 
         nextButton.anchor(
+            top: nil,
+            leading: contentView.safeAreaLayoutGuide.leadingAnchor,
+            bottom: testSinglePINButton.safeAreaLayoutGuide.topAnchor,
+            trailing: contentView.safeAreaLayoutGuide.trailingAnchor,
+            centerXAnchor: contentView.centerXAnchor,
+            padding: .init(top: 0, left: 24, bottom: 8, right: 24),
+            size: .init(width: 0, height: 48)
+        )
+
+        testSinglePINButton.anchor(
             top: nil,
             leading: contentView.safeAreaLayoutGuide.leadingAnchor,
             bottom: contentView.safeAreaLayoutGuide.bottomAnchor,

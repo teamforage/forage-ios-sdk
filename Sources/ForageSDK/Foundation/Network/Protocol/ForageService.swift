@@ -95,11 +95,12 @@ protocol ForageService: AnyObject {
         paymentReference: String
     ) async throws -> PaymentModel
 
-    /// Collect the customer's PIN for a payment using the given `pinCollector` and `paymentReference`
+    /// Collect the customer's PIN for a payment using the given `pinCollector`, `paymentReference`, and `merchantID`
     ///
     /// - Parameters:
     ///   - pinCollector: The service responsible for securely collecting PINs.
     ///   - paymentReference: The reference hash of the Payment that the client intends on capturing from their server.
+    ///   - merchantID: The unique ID of the Merchant that owns the Payment.
     ///
     /// - Throws:
     ///   - `ForageError`: If there's an issue at any stage of the payment capture process.
@@ -108,6 +109,7 @@ protocol ForageService: AnyObject {
     ///   - A `VaultResponse` object containing the response from the Vault (Rosetta) proxy.
     func collectPinForDeferredCapture(
         pinCollector: VaultCollector,
-        paymentReference: String
+        paymentReference: String,
+        merchantID: String
     ) async throws
 }
