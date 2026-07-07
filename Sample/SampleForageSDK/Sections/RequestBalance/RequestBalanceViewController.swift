@@ -31,4 +31,9 @@ extension RequestBalanceViewController: RequestBalanceViewDelegate {
         let createPaymentViewController = CreatePaymentViewController()
         navigationController?.pushViewController(createPaymentViewController, animated: true)
     }
+
+    func goToSinglePIN(_ view: RequestBalanceView) {
+        let singlePINViewController = SinglePINViewController()
+        navigationController?.pushViewController(singlePINViewController, animated: true)
+    }
 }

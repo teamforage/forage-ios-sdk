@@ -35,6 +35,8 @@
 		4976E75E29074D76004FD1CD /* RequestBalanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4976E75D29074D76004FD1CD /* RequestBalanceView.swift */; };
 		4985C746290A0AD9000568BF /* CapturePaymentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4985C745290A0AD9000568BF /* CapturePaymentView.swift */; };
 		4985C748290A0AE1000568BF /* CapturePaymentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4985C747290A0AE1000568BF /* CapturePaymentViewController.swift */; };
+		5A11E91D0001000000000002 /* SinglePINView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11E91D0001000000000001 /* SinglePINView.swift */; };
+		5A11E91D0001000000000004 /* SinglePINViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11E91D0001000000000003 /* SinglePINViewController.swift */; };
 		49AA74FC2905615F00802CAC /* UIView+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49AA74FB2905615F00802CAC /* UIView+Extension.swift */; };
 		5D5FC1D12B2A520E00761361 /* BaseSampleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D5FC1D02B2A520E00761361 /* BaseSampleView.swift */; };
 		C0A2B6B729E608F900472040 /* ForageSDK in Frameworks */ = {isa = PBXBuildFile; productRef = C0A2B6B629E608F900472040 /* ForageSDK */; };
@@ -72,6 +74,8 @@
 		4976E75D29074D76004FD1CD /* RequestBalanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestBalanceView.swift; sourceTree = "<group>"; };
 		4985C745290A0AD9000568BF /* CapturePaymentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapturePaymentView.swift; sourceTree = "<group>"; };
 		4985C747290A0AE1000568BF /* CapturePaymentViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapturePaymentViewController.swift; sourceTree = "<group>"; };
+		5A11E91D0001000000000001 /* SinglePINView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SinglePINView.swift; sourceTree = "<group>"; };
+		5A11E91D0001000000000003 /* SinglePINViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SinglePINViewController.swift; sourceTree = "<group>"; };
 		49A15DBB29155A9E0023762E /* forage-ios-sdk */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "forage-ios-sdk"; path = ..; sourceTree = "<group>"; };
 		49AA74FB2905615F00802CAC /* UIView+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Extension.swift"; sourceTree = "<group>"; };
 		5D5FC1D02B2A520E00761361 /* BaseSampleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseSampleView.swift; sourceTree = "<group>"; };
@@ -213,6 +217,7 @@
 				4976E75A29074D4C004FD1CD /* RequestBalance */,
 				4928DEA12908D5CF0085B156 /* CreatePayment */,
 				4985C744290A0ABE000568BF /* CapturePayment */,
+				5A11E91D0001000000000005 /* SinglePIN */,
 			);
 			path = Sections;
 			sourceTree = "<group>";
@@ -233,6 +238,15 @@
 				4985C747290A0AE1000568BF /* CapturePaymentViewController.swift */,
 			);
 			path = CapturePayment;
+			sourceTree = "<group>";
+		};
+		5A11E91D0001000000000005 /* SinglePIN */ = {
+			isa = PBXGroup;
+			children = (
+				5A11E91D0001000000000001 /* SinglePINView.swift */,
+				5A11E91D0001000000000003 /* SinglePINViewController.swift */,
+			);
+			path = SinglePIN;
 			sourceTree = "<group>";
 		};
 		49A15DBA29155A9E0023762E /* Packages */ = {
@@ -339,6 +353,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				4985C748290A0AE1000568BF /* CapturePaymentViewController.swift in Sources */,
+				5A11E91D0001000000000002 /* SinglePINView.swift in Sources */,
+				5A11E91D0001000000000004 /* SinglePINViewController.swift in Sources */,
 				5D5FC1D12B2A520E00761361 /* BaseSampleView.swift in Sources */,
 				4928DEAA2908DB230085B156 /* ServiceError.swift in Sources */,
 				E895CFC72D6E33F000DD043E /* HSAViewController.swift in Sources */,

@@ -15,6 +15,8 @@ class MockForageService: LiveForageService {
     var doesCapturePaymentThrow: Bool = false
     var doesTokenizeEBTCardThrow: Bool = false
     var doesCollectPinThrow: Bool = false
+    var collectPinThrowOnPaymentReference: String?
+    var collectPinReceivedCalls: [(paymentReference: String, merchantID: String)] = []
     
     override func tokenizeCreditDebitCard(request: ForageCreditDebitRequestModel, completion: @escaping (Result<PaymentMethodModel<ForageCreditDebitCard>, any Error>) -> Void) {
         if doesTokenizeCreditDebitCardThrow {
@@ -86,9 +88,12 @@ class MockForageService: LiveForageService {
 
     override func collectPinForDeferredCapture(
         pinCollector: VaultCollector,
-        paymentReference: String
+        paymentReference: String,
+        merchantID: String
     ) async throws {
-        if doesCollectPinThrow {
+        collectPinReceivedCalls.append((paymentReference: paymentReference, merchantID: merchantID))
+
+        if doesCollectPinThrow || collectPinThrowOnPaymentReference == paymentReference {
             throw ForageError.create(
                 code: "too_many_requests",
                 httpStatusCode: 429,
@@ -207,6 +212,29 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
         MockForageSDK.shared.deferPaymentCapture(
             foragePinTextField: mockPinTextField,
             paymentReference: "deferPaymentCapturePaymentRef123"
+        ) { result in
+            validation(result)
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation], timeout: 1.0)
+    }
+
+    func executeDeferMultiPaymentCapture(
+        payments: [DeferredPayment],
+        doesThrow: Bool = false,
+        pinComplete: Bool = true,
+        description: String,
+        validation: @escaping (Result<Void, Error>) -> Void
+    ) {
+        mockService.doesCollectPinThrow = doesThrow
+        let mockPinTextField = createMockPinTextField(isComplete: pinComplete)
+        let expectation = XCTestExpectation(description: description)
+        expectation.assertForOverFulfill = true
+
+        MockForageSDK.shared.deferMultiPaymentCapture(
+            foragePinTextField: mockPinTextField,
+            payments: payments
         ) { result in
             validation(result)
             expectation.fulfill()
@@ -690,6 +718,111 @@ final class ForagePublicSubmitMethodTests: XCTestCase {
                 XCTFail("Expected general error but got success")
             case let .failure(error):
                 XCTAssertNotNil(error)
+            }
+        }
+    }
+
+    // MARK: deferMultiPaymentCapture tests
+
+    func testDeferMultiPaymentCapture_Success_DefersEachPaymentWithItsOwnMerchantID() {
+        let payments = [
+            DeferredPayment(merchantID: "merchantA", paymentReference: "paymentRef1"),
+            DeferredPayment(merchantID: "merchantB", paymentReference: "paymentRef2"),
+        ]
+
+        executeDeferMultiPaymentCapture(
+            payments: payments,
+            description: "PIN collection for multiple deferred captures succeeds"
+        ) { result in
+            switch result {
+            case .success:
+                let receivedCalls = self.mockService.collectPinReceivedCalls
+                XCTAssertEqual(receivedCalls.count, 2)
+                XCTAssertEqual(receivedCalls[0].paymentReference, "paymentRef1")
+                XCTAssertEqual(receivedCalls[0].merchantID, "merchantA")
+                XCTAssertEqual(receivedCalls[1].paymentReference, "paymentRef2")
+                XCTAssertEqual(receivedCalls[1].merchantID, "merchantB")
+            case .failure:
+                XCTFail("Expected success but got \(String(describing: result))")
+            }
+        }
+    }
+
+    func testDeferMultiPaymentCapture_EmptyPayments_Succeeds() {
+        executeDeferMultiPaymentCapture(
+            payments: [],
+            description: "deferMultiPaymentCapture succeeds immediately with no payments"
+        ) { result in
+            switch result {
+            case .success:
+                XCTAssertTrue(self.mockService.collectPinReceivedCalls.isEmpty)
+            case .failure:
+                XCTFail("Expected success but got \(String(describing: result))")
+            }
+        }
+    }
+
+    func testDeferMultiPaymentCapture_IncompletePIN() {
+        executeDeferMultiPaymentCapture(
+            payments: [DeferredPayment(merchantID: "merchantA", paymentReference: "paymentRef1")],
+            pinComplete: false,
+            description: "deferMultiPaymentCapture rejects with user_error due to incomplete PIN"
+        ) { result in
+            switch result {
+            case .success:
+                XCTFail("Expected failure due to incomplete PIN but got success")
+            case let .failure(error):
+                let forageError = (error as! ForageError)
+                XCTAssertEqual(forageError.code, "user_error")
+                XCTAssertEqual(forageError.message, EXPECTED_INCOMPLETE_PIN_MESSAGE)
+                XCTAssertEqual(forageError.httpStatusCode, 400)
+                XCTAssertTrue(self.mockService.collectPinReceivedCalls.isEmpty)
+            }
+        }
+    }
+
+    func testDeferMultiPaymentCapture_IllegalState() {
+        MockForageSDK.shared.service = nil
+
+        executeDeferMultiPaymentCapture(
+            payments: [DeferredPayment(merchantID: "merchantA", paymentReference: "paymentRef1")],
+            description: "deferMultiPaymentCapture rejects with unknown_server_error due to uninitialized service"
+        ) { result in
+            switch result {
+            case .success:
+                XCTFail("Expected unknown_server_error but got success")
+            case let .failure(error):
+                let forageError = (error as! ForageError)
+                XCTAssertEqual(forageError.code, "unknown_server_error")
+                XCTAssertEqual(forageError.message, EXPECTED_UNKNOWN_SERVER_ERROR)
+                XCTAssertEqual(forageError.httpStatusCode, 500)
+                XCTAssertEqual(self.mockLogger.lastCriticalMessage, "Attempted to call deferMultiPaymentCapture, but ForageService was not initialized")
+            }
+        }
+    }
+
+    func testDeferMultiPaymentCapture_FailFast_StopsAtFirstFailedPayment() {
+        mockService.collectPinThrowOnPaymentReference = "paymentRef2"
+        let payments = [
+            DeferredPayment(merchantID: "merchantA", paymentReference: "paymentRef1"),
+            DeferredPayment(merchantID: "merchantB", paymentReference: "paymentRef2"),
+            DeferredPayment(merchantID: "merchantC", paymentReference: "paymentRef3"),
+        ]
+
+        executeDeferMultiPaymentCapture(
+            payments: payments,
+            description: "deferMultiPaymentCapture rejects with the first error and skips remaining payments"
+        ) { result in
+            switch result {
+            case .success:
+                XCTFail("Expected failure on second payment but got success")
+            case let .failure(error):
+                let forageError = (error as! ForageError)
+                XCTAssertEqual(forageError.code, "too_many_requests")
+                XCTAssertEqual(forageError.httpStatusCode, 429)
+
+                let receivedReferences = self.mockService.collectPinReceivedCalls.map(\.paymentReference)
+                XCTAssertEqual(receivedReferences, ["paymentRef1", "paymentRef2"])
             }
         }
     }

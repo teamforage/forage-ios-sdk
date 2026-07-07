@@ -13,6 +13,19 @@ public enum CardType: String {
     case CREDIT = "credit"
 }
 
+/// A single Payment to defer-capture as part of a ``ForageSDK/deferMultiPaymentCapture(foragePinTextField:payments:completion:)`` call.
+public struct DeferredPayment {
+    /// The unique ID of the Merchant that owns the Payment. Overrides the merchant ID set when `ForageSDK` was initialized.
+    public let merchantID: String
+    /// The reference hash of the `Payment` that you plan on capturing on the server. Refers to an instance in Forage's database of a [Payment](https://docs.joinforage.app/reference/create-a-payment).
+    public let paymentReference: String
+
+    public init(merchantID: String, paymentReference: String) {
+        self.merchantID = merchantID
+        self.paymentReference = paymentReference
+    }
+}
+
 /**
  Interface for Forage SDK Services
  */
@@ -79,6 +92,25 @@ protocol ForageSDKService: AnyObject {
     func deferPaymentCapture(
         foragePinTextField: ForagePINTextField,
         paymentReference: String,
+        completion: @escaping (Result<Void, Error>) -> Void
+    )
+
+    /// Collect the customer's PIN once and defer the capture of multiple EBT payments to the server.
+    ///
+    /// Each `DeferredPayment` is deferred independently using the single collected PIN, in order.
+    /// Every element produces its own deferral, so the same `merchantID` may appear more than once.
+    /// Each payment's `merchantID` overrides the merchant ID set when `ForageSDK` was initialized,
+    /// which also enables deferring captures for payments that belong to different merchants.
+    ///
+    /// - Parameters:
+    ///  - foragePinTextField: A text field for secure PIN collection.
+    ///  - payments: The `Payment`s to defer, each pairing a `merchantID` with a `paymentReference`. One
+    ///    deferral is performed per element, in the order provided.
+    ///  - completion: Completion handler returning a `Result` with either success (`Void`) once every
+    ///    payment has been deferred, or the first `Error` encountered (fail-fast).
+    func deferMultiPaymentCapture(
+        foragePinTextField: ForagePINTextField,
+        payments: [DeferredPayment],
         completion: @escaping (Result<Void, Error>) -> Void
     )
 }
@@ -297,13 +329,61 @@ extension ForageSDK: ForageSDKService {
             do {
                 _ = try await forageService.collectPinForDeferredCapture(
                     pinCollector: pinCollector,
-                    paymentReference: paymentReference
+                    paymentReference: paymentReference,
+                    merchantID: merchantID
                 )
                 ForageSDK.logger?.notice("deferPaymentCapture succeeded for Payment \(paymentReference)", attributes: nil)
 
                 completion(.success(()))
             } catch {
                 logErrorResponse("deferPaymentCapture failed for Payment \(paymentReference)", error: error, attributes: nil, responseMonitor: nil)
+                completion(.failure(error))
+            }
+        }
+    }
+
+    public func deferMultiPaymentCapture(
+        foragePinTextField: ForagePINTextField,
+        payments: [DeferredPayment],
+        completion: @escaping (Result<Void, Error>) -> Void
+    ) {
+        _ = ForageSDK.logger?
+            .setPrefix("deferMultiPaymentCapture")
+            .addContext(ForageLogContext(
+                merchantRef: merchantID
+            ))
+            .notice("Called deferMultiPaymentCapture for \(payments.count) Payment(s)", attributes: nil)
+
+        guard let forageService = service else {
+            reportIllegalState(for: "deferMultiPaymentCapture", dueTo: "ForageService was not initialized")
+            completion(.failure(CommonErrors.UNKNOWN_SERVER_ERROR))
+            return
+        }
+
+        guard validatePin(foragePinTextField: foragePinTextField) else {
+            completion(.failure(CommonErrors.INCOMPLETE_PIN_ERROR))
+            return
+        }
+
+        let pinCollector = foragePinTextField.getPinCollector()
+
+        Task.init {
+            do {
+                // Defer each payment sequentially using the single collected PIN. One deferral is
+                // performed per element, so the same merchantID may repeat. Each payment's merchantID
+                // overrides the merchant ID set at SDK init.
+                for payment in payments {
+                    _ = try await forageService.collectPinForDeferredCapture(
+                        pinCollector: pinCollector,
+                        paymentReference: payment.paymentReference,
+                        merchantID: payment.merchantID
+                    )
+                    ForageSDK.logger?.notice("deferMultiPaymentCapture succeeded for Payment \(payment.paymentReference)", attributes: nil)
+                }
+
+                completion(.success(()))
+            } catch {
+                logErrorResponse("deferMultiPaymentCapture failed", error: error, attributes: nil, responseMonitor: nil)
                 completion(.failure(error))
             }
         }
