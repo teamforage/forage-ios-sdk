@@ -32,7 +32,7 @@ jobs:
           xcodebuild test \
             -project Sample/SampleForageSDK.xcodeproj \
             -scheme ForageSDK \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=latest' \
+            -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=latest' \
             -enableCodeCoverage YES
 
 
