@@ -64,11 +64,13 @@ final class MomentLifecycleTests: XCTestCase {
         ForageSDK.setup(ForageSDK.Config(merchantID: "mid/123", sessionToken: "dev_secretToken"))
         logger = RecordingLogger()
         ForageSDK.logger = logger
+        ForageSDK.shared.isMomentOpen = false
         clock = TestClock()
         results = []
     }
 
     override func tearDown() {
+        ForageSDK.shared.isMomentOpen = false
         ForageSDK.logger = nil
         super.tearDown()
     }
@@ -85,6 +87,19 @@ final class MomentLifecycleTests: XCTestCase {
         ) { [unowned self] result in
             results.append(result)
         }
+    }
+
+    /// Opens a moment through `ForageSDK` and returns its view controller, without presenting it.
+    @discardableResult
+    private func openMoment(
+        _ moment: Moment = .paymentCollectPin(paymentRef: "abc"),
+        completion: ((Result<MomentResult, Error>) -> Void)? = nil
+    ) -> MomentViewController? {
+        var presented: MomentViewController?
+        ForageSDK.shared.openMoment(moment, completion: completion ?? { [unowned self] in results.append($0) }) {
+            presented = $0
+        }
+        return presented
     }
 
     private func forageError(_ result: Result<MomentResult, Error>?) -> ForageError? {
@@ -158,6 +173,35 @@ final class MomentLifecycleTests: XCTestCase {
         XCTAssertTrue(results.isEmpty)
     }
 
+    // MARK: createMoment
+
+    func testOpenMoment_givenAMomentIsAlreadyOpen_shouldFailWithUserError() throws {
+        XCTAssertNotNil(openMoment())
+
+        var second: Result<MomentResult, Error>?
+        XCTAssertNil(openMoment(completion: { second = $0 }))
+
+        XCTAssertEqual(forageError(second)?.code, "user_error")
+        XCTAssertEqual(forageError(second)?.httpStatusCode, 400)
+        XCTAssertTrue(ForageSDK.shared.isMomentOpen)
+    }
+
+    func testOpenMoment_afterTheMomentSettles_shouldAllowAnother() throws {
+        let first = try XCTUnwrap(openMoment())
+        first.handle(.closed)
+
+        XCTAssertFalse(ForageSDK.shared.isMomentOpen)
+        XCTAssertNotNil(openMoment())
+    }
+
+    func testOpenMoment_givenAnEmptyParam_shouldFailWithUserError() {
+        XCTAssertNil(openMoment(.paymentCollectPin(paymentRef: "")))
+
+        XCTAssertEqual(forageError(results.first)?.code, "user_error")
+        XCTAssertEqual(forageError(results.first)?.httpStatusCode, 400)
+        XCTAssertFalse(ForageSDK.shared.isMomentOpen)
+    }
+
     // MARK: Telemetry
 
     func testTelemetry_givenTheMomentCompletes_shouldLogTimingAndOutcome() throws {
@@ -219,5 +263,27 @@ final class MomentLifecycleTests: XCTestCase {
 
         XCTAssertEqual(logger.entries.filter { $0.message.contains("is ready") }.count, 1)
         XCTAssertEqual(logger.entries.filter { $0.attributes?["event_name"] as? String == "moment_ready" }.count, 1)
+    }
+
+    func testTelemetry_givenAUsageError_shouldLogTheFailure() throws {
+        openMoment(.paymentCollectPin(paymentRef: ""))
+
+        XCTAssertEqual(logger.last(containing: "failed")?.level, "error")
+        let outcome = try XCTUnwrap(logger.metric("moment_outcome"))
+        XCTAssertEqual(outcome["forage_error_code"] as? String, "user_error")
+        XCTAssertEqual(outcome["http_status"] as? Int, 400)
+    }
+
+    func testTelemetry_shouldNeverLogTheSessionTokenOrParams() throws {
+        let viewController = try XCTUnwrap(openMoment(.paymentCollectPin(paymentRef: "secretPaymentRef")))
+        viewController.handle(.ready)
+        viewController.handle(.failure(CommonErrors.UNKNOWN_SERVER_ERROR))
+
+        XCTAssertFalse(logger.entries.isEmpty)
+        for entry in logger.entries {
+            let logged = entry.message + String(describing: entry.attributes ?? [:])
+            XCTAssertFalse(logged.contains("dev_secretToken"), entry.message)
+            XCTAssertFalse(logged.contains("secretPaymentRef"), entry.message)
+        }
     }
 }
