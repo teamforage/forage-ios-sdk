@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F1A0C0DE2E00000100000004 /* MomentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A0C0DE2E00000100000002 /* MomentsView.swift */; };
+		F1A0C0DE2E00000100000005 /* MomentsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A0C0DE2E00000100000003 /* MomentsViewController.swift */; };
 		491CFFDD28FED8960066B9F8 /* CardNumberViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 491CFFDC28FED8960066B9F8 /* CardNumberViewController.swift */; };
 		491CFFE028FED8F80066B9F8 /* BaseViewCodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 491CFFDF28FED8F80066B9F8 /* BaseViewCodeViewController.swift */; };
 		491CFFE428FED9240066B9F8 /* CustomViewProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 491CFFE328FED9240066B9F8 /* CustomViewProtocol.swift */; };
@@ -43,6 +45,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		F1A0C0DE2E00000100000002 /* MomentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MomentsView.swift; sourceTree = "<group>"; };
+		F1A0C0DE2E00000100000003 /* MomentsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MomentsViewController.swift; sourceTree = "<group>"; };
 		491CFFDC28FED8960066B9F8 /* CardNumberViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardNumberViewController.swift; sourceTree = "<group>"; };
 		491CFFDF28FED8F80066B9F8 /* BaseViewCodeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseViewCodeViewController.swift; sourceTree = "<group>"; };
 		491CFFE328FED9240066B9F8 /* CustomViewProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomViewProtocol.swift; sourceTree = "<group>"; };
@@ -213,6 +217,7 @@
 				4976E75A29074D4C004FD1CD /* RequestBalance */,
 				4928DEA12908D5CF0085B156 /* CreatePayment */,
 				4985C744290A0ABE000568BF /* CapturePayment */,
+				F1A0C0DE2E00000100000001 /* Moments */,
 			);
 			path = Sections;
 			sourceTree = "<group>";
@@ -258,6 +263,15 @@
 				E895CFC62D6E33F000DD043E /* HSAViewController.swift */,
 			);
 			path = HSA;
+			sourceTree = "<group>";
+		};
+		F1A0C0DE2E00000100000001 /* Moments */ = {
+			isa = PBXGroup;
+			children = (
+				F1A0C0DE2E00000100000002 /* MomentsView.swift */,
+				F1A0C0DE2E00000100000003 /* MomentsViewController.swift */,
+			);
+			path = Moments;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -339,6 +353,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				4985C748290A0AE1000568BF /* CapturePaymentViewController.swift in Sources */,
+				F1A0C0DE2E00000100000004 /* MomentsView.swift in Sources */,
+				F1A0C0DE2E00000100000005 /* MomentsViewController.swift in Sources */,
 				5D5FC1D12B2A520E00761361 /* BaseSampleView.swift in Sources */,
 				4928DEAA2908DB230085B156 /* ServiceError.swift in Sources */,
 				E895CFC72D6E33F000DD043E /* HSAViewController.swift in Sources */,
