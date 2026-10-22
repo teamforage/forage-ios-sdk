@@ -5,7 +5,8 @@
 //  © 2025 Forage Technology Corporation. All rights reserved.
 //
 
-@testable import ForageSDK
+@_spi(Development) @testable import ForageSDK
+import WebKit
 import XCTest
 
 /// Records every log, since a moment logs more than once.
@@ -55,9 +56,12 @@ private final class TestClock {
 
 final class MomentLifecycleTests: XCTestCase {
     private let momentURL = URL(string: "https://custom-checkout.dev.joinforage.app/payment/collect-pin?paymentRef=abc")!
+    /// Where tests that load a page serve it from, so they never reach a real server
+    private let testPageURL = URL(string: "https://moment.test/payment/collect-pin?paymentRef=abc")!
     private var logger: RecordingLogger!
     private var clock: TestClock!
     private var results: [Result<MomentResult, Error>] = []
+    private var window: UIWindow?
 
     override func setUp() {
         super.setUp()
@@ -70,15 +74,18 @@ final class MomentLifecycleTests: XCTestCase {
     }
 
     override func tearDown() {
+        window?.isHidden = true
+        window = nil
+        ForageSDK.momentBaseURLOverride = nil
         ForageSDK.shared.isMomentOpen = false
         ForageSDK.logger = nil
         super.tearDown()
     }
 
-    private func makeViewController(loadDeadline: TimeInterval = 30) -> MomentViewController {
+    private func makeViewController(url: URL? = nil, loadDeadline: TimeInterval = 30) -> MomentViewController {
         let clock = clock!
         return MomentViewController(
-            url: momentURL,
+            url: url ?? momentURL,
             merchantID: "mid/123",
             sessionToken: "dev_secretToken",
             environment: .dev,
@@ -171,6 +178,159 @@ final class MomentLifecycleTests: XCTestCase {
         wait(for: [waited], timeout: 1)
 
         XCTAssertTrue(results.isEmpty)
+    }
+
+    // MARK: Web view
+
+    /// A stand-in for the moment's page. It says hello, then runs `onInitialize` with the
+    /// `config` the SDK sends back. `post(event)` sends the SDK an event.
+    private func testPage(onInitialize: String) -> String {
+        """
+        <script>
+          const post = (event) =>
+            window.webkit.messageHandlers.\(MomentProtocol.messageHandlerName).postMessage(JSON.stringify(event));
+          window.\(MomentProtocol.receiveFunctionName) = (message) => {
+            const config = JSON.parse(message).payload;
+            \(onInitialize)
+          };
+          post({ type: 'input_hello' });
+        </script>
+        """
+    }
+
+    /// Shows the view controller in a window and swaps its page for `html`, served from the
+    /// view controller's URL.
+    private func load(_ html: String, in viewController: MomentViewController) throws {
+        show(viewController)
+        let webView = try XCTUnwrap(viewController.view.subviews.lazy.compactMap { $0 as? WKWebView }.first)
+        webView.loadHTMLString(html, baseURL: testPageURL)
+    }
+
+    /// Makes `viewController` the root of a visible window.
+    private func show(_ viewController: UIViewController) {
+        let window = UIWindow(frame: UIScreen.main.bounds)
+        window.rootViewController = viewController
+        window.makeKeyAndVisible()
+        self.window = window
+    }
+
+    private func waitForResult() {
+        let settled = expectation(for: NSPredicate { [unowned self] _, _ in !results.isEmpty }, evaluatedWith: nil)
+        wait(for: [settled], timeout: 10)
+    }
+
+    func testWebView_givenThePageSaysHello_shouldSendItTheMerchantAndSessionToken() throws {
+        // the page echoes the config back in a failure, since that's an event that carries data
+        try load(testPage(onInitialize: """
+        post({
+          type: 'submit_failure',
+          payload: { code: 'echo', httpStatusCode: 400, message: config.merchantId + ' ' + config.sessionToken },
+        });
+        """), in: makeViewController(url: testPageURL))
+
+        waitForResult()
+
+        XCTAssertEqual(forageError(results.first)?.message, "mid/123 dev_secretToken")
+    }
+
+    func testWebView_givenThePageCompletes_shouldComplete() throws {
+        try load(testPage(onInitialize: """
+        post({ type: 'input_ready' });
+        post({ type: 'submit_success' });
+        """), in: makeViewController(url: testPageURL))
+
+        waitForResult()
+
+        XCTAssertEqual(try results.first?.get(), .completed)
+        XCTAssertNotNil(logger.metric("moment_ready"))
+    }
+
+    func testHello_givenThePageIsNotOnTheMomentsOrigin_shouldNotSendTheSessionToken() {
+        // the view never loaded, so there's no page on the moment's origin
+        makeViewController().handle(.hello)
+
+        XCTAssertEqual(logger.last(containing: "Didn't initialize moment")?.level, "error")
+        XCTAssertTrue(results.isEmpty)
+    }
+
+    // MARK: Presenting
+
+    // Tests run without a host app, so UIKit never finishes a dismiss transition. Tests that need
+    // a result swipe the sheet away instead, which reports right away.
+
+    /// Swipes the moment's sheet away, like the customer would.
+    private func swipeAway(_ moment: MomentViewController) throws {
+        try moment.presentationControllerDidDismiss(XCTUnwrap(moment.presentationController))
+    }
+
+    func testSettle_givenThePresentedMoment_shouldDismissItBeforeReporting() throws {
+        let presenter = UIViewController()
+        show(presenter)
+        let viewController = makeViewController(url: testPageURL)
+        presenter.present(viewController, animated: false)
+
+        viewController.handle(.closed)
+
+        // the moment is torn down, but only reports to the merchant once the dismissal finishes
+        XCTAssertNotNil(logger.metric("moment_outcome"))
+        XCTAssertTrue(results.isEmpty)
+    }
+
+    /// Waits for `presenter` to present a moment and returns it.
+    private func presentedMoment(on presenter: UIViewController) throws -> MomentViewController {
+        let presented = expectation(for: NSPredicate { _, _ in presenter.presentedViewController is MomentViewController }, evaluatedWith: nil)
+        wait(for: [presented], timeout: 10)
+        return try XCTUnwrap(presenter.presentedViewController as? MomentViewController)
+    }
+
+    func testCreateMoment_shouldPresentTheMomentAsASheet() throws {
+        ForageSDK.momentBaseURLOverride = testPageURL
+        let presenter = UIViewController()
+        show(presenter)
+
+        ForageSDK.shared.createMoment(.paymentCollectPin(paymentRef: "abc"), presentingFrom: presenter) { [unowned self] in
+            results.append($0)
+        }
+        let moment = try presentedMoment(on: presenter)
+        XCTAssertEqual(moment.modalPresentationStyle, .pageSheet)
+        XCTAssertTrue(moment.presentationController?.delegate === moment)
+
+        try swipeAway(moment)
+
+        XCTAssertEqual(try results.first?.get(), .dismissed)
+        XCTAssertFalse(ForageSDK.shared.isMomentOpen)
+    }
+
+    func testCreateMoment_givenABackgroundThread_shouldPresentOnTheMainThread() throws {
+        ForageSDK.momentBaseURLOverride = testPageURL
+        let presenter = UIViewController()
+        show(presenter)
+
+        DispatchQueue.global().async {
+            ForageSDK.shared.createMoment(.paymentCollectPin(paymentRef: "abc"), presentingFrom: presenter) { _ in }
+        }
+
+        try swipeAway(presentedMoment(on: presenter))
+    }
+
+    func testCreateMoment_givenAsync_shouldReturnTheResult() throws {
+        ForageSDK.momentBaseURLOverride = testPageURL
+        let presenter = UIViewController()
+        show(presenter)
+
+        Task {
+            let result: Result<MomentResult, Error>
+            do {
+                result = try await .success(ForageSDK.shared.createMoment(.paymentCollectPin(paymentRef: "abc"), presentingFrom: presenter))
+            } catch {
+                result = .failure(error)
+            }
+            DispatchQueue.main.async { self.results.append(result) }
+        }
+        try swipeAway(presentedMoment(on: presenter))
+        waitForResult()
+
+        XCTAssertEqual(try results.first?.get(), .dismissed)
     }
 
     // MARK: createMoment
