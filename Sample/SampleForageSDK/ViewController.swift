@@ -15,6 +15,18 @@ class ViewController: UIViewController {
     @IBOutlet private var sessionTokenTextField: UITextField!
     @IBOutlet private var merchantIdTextField: UITextField!
 
+    // MARK: Lifecycle Methods
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            title: "Moments",
+            style: .plain,
+            target: self,
+            action: #selector(didTapOnMoments)
+        )
+    }
+
     private func initializeSdk() {
         guard
             let merchantID = merchantIdTextField.text,
@@ -44,6 +56,15 @@ class ViewController: UIViewController {
         )
     }
     
+    @objc func didTapOnMoments() {
+        initializeSdk()
+
+        navigationController?.pushViewController(
+            MomentsViewController(),
+            animated: true
+        )
+    }
+
     @IBAction func didTapOnStartHSAFSAFlow(_ sender: Any) {
         initializeSdk()
         
