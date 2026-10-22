@@ -11,6 +11,8 @@ Pod::Spec.new do |spec|
   spec.readme       = "https://raw.githubusercontent.com/teamforage/forage-ios-sdk/main/README.md"
   spec.source       = { :git => "https://github.com/teamforage/forage-ios-sdk.git", :tag => "4.5.1" }
   spec.source_files = ["Sources/ForageSDK/**/*.swift", "DatadogPrivate-Objc/**/*.{h,m}"]
+  # moments are shown in a WKWebView
+  spec.frameworks   = 'WebKit'
   spec.resource_bundles = {
     'ForageIcon' => ['Sources/Resources/*']
   }
