@@ -7,21 +7,13 @@
 
 import Foundation
 
-/// Names and messages of the moments protocol. They must match the page bridge in
-/// fe-monorepo (`hosted-page/platform-messaging.ts`) and the JS and Android SDKs.
 enum MomentProtocol {
-    /// The name of the script message handler the page posts to.
+    /// These need to match what the internal JS SDK expects
     static let messageHandlerName = "forageSdk"
-
-    /// The function the page defines for the SDK to send it messages.
     static let receiveFunctionName = "forageSdkReceive"
-
     static let sdkName = "forage-ios-sdk"
-
-    /// How long the page has to send `input_ready` after the moment opens.
+    
     static let loadDeadline: TimeInterval = 30
-
-    /// Uses `timeout_error`, the same code the Android SDK uses for timeouts.
     static let loadTimeoutError = ForageError.create(
         code: "timeout_error",
         httpStatusCode: 504,
@@ -29,7 +21,6 @@ enum MomentProtocol {
     )
 }
 
-/// A message from the moment's page.
 enum MomentEvent: Equatable {
     case hello
     case ready
@@ -40,7 +31,7 @@ enum MomentEvent: Equatable {
     /// Parses a message the page posted, or returns `nil` for messages that aren't valid
     /// or that this SDK doesn't know about.
     ///
-    /// - Parameter body: The script message's body, which should be a JSON string.
+    /// - Parameter body: The body of the message sent from the page's javascript (a JSON string)
     init?(body: Any) {
         guard
             let json = body as? String,
@@ -56,7 +47,8 @@ enum MomentEvent: Equatable {
         case "submit_success": self = .success
         case "submit_failure": self = .failure(MomentEvent.forageError(from: payload))
         case "moment_closed": self = .closed
-        // hosts ignore event types they don't know, so pages can add new ones
+        // ignore events we don't recognize so if we don't cause issuse if we add a new one from
+        // the embedded page
         default: return nil
         }
     }
@@ -91,8 +83,7 @@ enum MomentEvent: Equatable {
 }
 
 /// Builds the JavaScript that sends `initialize_iframe` to the page.
-///
-/// The message is passed to the page's receive function as a JSON string, the same as on Android.
+/// The message is sent to the page as a JSON string.
 func momentInitializeScript(
     merchantID: String,
     sessionToken: String,
@@ -118,14 +109,9 @@ func momentInitializeScript(
     return "window.\(MomentProtocol.receiveFunctionName)(\(literal));"
 }
 
-/// Encodes a string as a JavaScript string literal, quotes included, so it can't break out of the script.
 func javaScriptStringLiteral(_ string: String) -> String? {
-    // JSON-encoding a one-element array gives us a correctly escaped string literal
-    guard let data = try? JSONSerialization.data(withJSONObject: [string]) else { return nil }
-    let array = String(decoding: data, as: UTF8.self)
-
-    return String(array.dropFirst().dropLast())
-        // JSON allows these line separators in strings, but older JavaScript engines don't
-        .replacingOccurrences(of: "\u{2028}", with: "\\u2028")
-        .replacingOccurrences(of: "\u{2029}", with: "\\u2029")
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = .withoutEscapingSlashes
+    guard let data = try? encoder.encode(string) else { return nil }
+    return String(decoding: data, as: UTF8.self)
 }

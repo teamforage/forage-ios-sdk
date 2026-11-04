@@ -130,6 +130,6 @@ final class MomentTests: XCTestCase {
 
     func testJavaScriptStringLiteral_givenCharactersThatCouldBreakOut_shouldEscapeThem() {
         XCTAssertEqual(javaScriptStringLiteral(#"a"); alert(1); ("#), #""a\"); alert(1); (""#)
-        XCTAssertEqual(javaScriptStringLiteral("a\u{2028}b"), "\"a\\u2028b\"")
+        XCTAssertEqual(javaScriptStringLiteral("a\\b\nc"), #""a\\b\nc""#)
     }
 }

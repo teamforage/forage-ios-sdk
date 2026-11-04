@@ -7,26 +7,18 @@
 
 import Foundation
 
-/// The checks that keep anything other than the moment's own page from using the bridge.
-///
-/// The page doesn't check where messages come from, so these are what protect the moment.
-/// On iOS 13 the script message handler is exposed to every frame on every origin, including
-/// the PIN field's cross-origin vault iframe, so the message check is the only thing stopping
-/// another frame from faking an event.
+/// Verifies the messages being received are from the known moment URL
 enum MomentSecurity {
-    /// Whether an origin's parts match the moment URL's origin.
-    static func isMomentOrigin(scheme: String?, host: String?, port: Int?, momentURL: URL) -> Bool {
+    private static func isMomentOrigin(scheme: String?, host: String?, port: Int?, momentURL: URL) -> Bool {
         // WKSecurityOrigin reports default ports as 0, and URL reports them as nil
         scheme == momentURL.scheme && host == momentURL.host && (port ?? 0) == (momentURL.port ?? 0)
     }
 
     /// Whether `url` is on the moment URL's origin.
-    static func isMomentOrigin(_ url: URL?, momentURL: URL) -> Bool {
+    private static func isMomentOrigin(_ url: URL?, momentURL: URL) -> Bool {
         isMomentOrigin(scheme: url?.scheme, host: url?.host, port: url?.port, momentURL: momentURL)
     }
 
-    /// Whether to accept a message from the page. Only the moment's main frame on its own origin
-    /// can talk to us, not the iframes it embeds.
     static func shouldAcceptMessage(
         isMainFrame: Bool,
         scheme: String?,
@@ -34,6 +26,8 @@ enum MomentSecurity {
         port: Int?,
         momentURL: URL
     ) -> Bool {
+        // check isMainFrame to ensure we only get moment events and don't get events from
+        // other things embedded within the moment (like input-iframes)
         isMainFrame && isMomentOrigin(scheme: scheme, host: host, port: port, momentURL: momentURL)
     }
 
