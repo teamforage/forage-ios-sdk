@@ -14,7 +14,6 @@ public class ForageSDK {
     var merchantID: String = config?.merchantID ?? ""
     var sessionToken: String = config?.sessionToken ?? ""
     var traceId: String = ""
-    /// Whether a moment is open, since only one can be open at a time
     var isMomentOpen = false
 
     public var environment: Environment = .sandbox

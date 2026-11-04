@@ -2,17 +2,12 @@
 //  MomentTelemetry.swift
 //  ForageSDK
 //
-//  © 2025 Forage Technology Corporation. All rights reserved.
+//  © 2026 Forage Technology Corporation. All rights reserved.
 //
 
 import Foundation
 
-/// Logs how a moment went, so we can see how long moments take to load and how they end.
-///
-/// Each step has a readable log and a metric. The Android SDK sends the same `moment_ready` and
-/// `moment_outcome` metrics with the same attributes, so one dashboard covers both.
-///
-/// Never logs the session token or the moment's params.
+/// Logs how a moment went so we can see how long moments take to load and how they end.
 struct MomentTelemetry {
     /// Moment metric values. Must match the Android SDK.
     enum Metric {
@@ -20,6 +15,7 @@ struct MomentTelemetry {
         static let ready = "moment_ready"
         static let outcome = "moment_outcome"
         static let momentName = "moment_name"
+        // whether the moment had reached its ready state when it ended
         static let reachedReady = "moment_reached_ready"
         static let dismissed = "dismissed"
     }
@@ -30,7 +26,7 @@ struct MomentTelemetry {
     private let openedAt: Date
     private var readyAt: Date?
 
-    /// Starts timing the moment.
+    /// Starts the moment timer.
     ///
     /// - Parameter now: The clock, so tests can control time.
     init(momentName: String, logger: ForageLogger? = ForageSDK.logger, now: @escaping () -> Date = Date.init) {
@@ -40,7 +36,7 @@ struct MomentTelemetry {
         openedAt = now()
     }
 
-    /// Logs that the page sent `input_ready`. Only the first call logs.
+    /// Logs that the page sent the `input_ready` event.
     mutating func ready() {
         guard readyAt == nil else { return }
         readyAt = now()
@@ -69,7 +65,6 @@ struct MomentTelemetry {
         case let .failure(error):
             let forageError = error as? ForageError
             attributes[MetricsAttributeName.eventOutcome.rawValue] = EventOutcome.failure.rawValue
-            // the load timeout is `timeout_error`, so it can be told apart from the page's failures
             attributes[MetricsAttributeName.forageErrorCode.rawValue] = forageError?.code ?? UnknownErrorCode
             if let httpStatusCode = forageError?.httpStatusCode {
                 attributes[MetricsAttributeName.httpStatus.rawValue] = httpStatusCode

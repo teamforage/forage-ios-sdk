@@ -117,18 +117,18 @@ final class MomentLifecycleTests: XCTestCase {
     // MARK: Outcomes
 
     func testSuccess_shouldComplete() throws {
-        makeViewController().handle(.success)
+        makeViewController().handleEvent(.success)
         XCTAssertEqual(try results.first?.get(), .completed)
     }
 
     func testFailure_shouldFailWithThePagesError() {
         let error = ForageError.create(code: "ebt_error_55", httpStatusCode: 400, message: "Invalid PIN")
-        makeViewController().handle(.failure(error))
+        makeViewController().handleEvent(.failure(error))
         XCTAssertEqual(forageError(results.first), error)
     }
 
     func testClosed_shouldDismiss() throws {
-        makeViewController().handle(.closed)
+        makeViewController().handleEvent(.closed)
         XCTAssertEqual(try results.first?.get(), .dismissed)
     }
 
@@ -142,9 +142,9 @@ final class MomentLifecycleTests: XCTestCase {
 
     func testSettle_shouldOnlyReportTheFirstOutcome() throws {
         let viewController = makeViewController()
-        viewController.handle(.success)
-        viewController.handle(.closed)
-        viewController.handle(.failure(CommonErrors.UNKNOWN_SERVER_ERROR))
+        viewController.handleEvent(.success)
+        viewController.handleEvent(.closed)
+        viewController.handleEvent(.failure(CommonErrors.UNKNOWN_SERVER_ERROR))
         viewController.presentationControllerDidDismiss(
             UIPresentationController(presentedViewController: viewController, presenting: nil)
         )
@@ -171,7 +171,7 @@ final class MomentLifecycleTests: XCTestCase {
     func testLoadDeadline_givenThePageGetsReady_shouldNotFail() {
         let viewController = makeViewController(loadDeadline: 0.05)
         viewController.startLoadDeadline()
-        viewController.handle(.ready)
+        viewController.handleEvent(.ready)
 
         let waited = expectation(description: "waited past the deadline")
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { waited.fulfill() }
@@ -247,7 +247,7 @@ final class MomentLifecycleTests: XCTestCase {
 
     func testHello_givenThePageIsNotOnTheMomentsOrigin_shouldNotSendTheSessionToken() {
         // the view never loaded, so there's no page on the moment's origin
-        makeViewController().handle(.hello)
+        makeViewController().handleEvent(.hello)
 
         XCTAssertEqual(logger.last(containing: "Didn't initialize moment")?.level, "error")
         XCTAssertTrue(results.isEmpty)
@@ -269,7 +269,7 @@ final class MomentLifecycleTests: XCTestCase {
         let viewController = makeViewController(url: testPageURL)
         presenter.present(viewController, animated: false)
 
-        viewController.handle(.closed)
+        viewController.handleEvent(.closed)
 
         // the moment is torn down, but only reports to the merchant once the dismissal finishes
         XCTAssertNotNil(logger.metric("moment_outcome"))
@@ -348,7 +348,7 @@ final class MomentLifecycleTests: XCTestCase {
 
     func testOpenMoment_afterTheMomentSettles_shouldAllowAnother() throws {
         let first = try XCTUnwrap(openMoment())
-        first.handle(.closed)
+        first.handleEvent(.closed)
 
         XCTAssertFalse(ForageSDK.shared.isMomentOpen)
         XCTAssertNotNil(openMoment())
@@ -367,9 +367,9 @@ final class MomentLifecycleTests: XCTestCase {
     func testTelemetry_givenTheMomentCompletes_shouldLogTimingAndOutcome() throws {
         let viewController = makeViewController()
         clock.advance(milliseconds: 1200)
-        viewController.handle(.ready)
+        viewController.handleEvent(.ready)
         clock.advance(milliseconds: 3000)
-        viewController.handle(.success)
+        viewController.handleEvent(.success)
 
         XCTAssertEqual(logger.last(containing: "is ready")?.level, "notice")
         let ready = try XCTUnwrap(logger.metric("moment_ready"))
@@ -391,7 +391,7 @@ final class MomentLifecycleTests: XCTestCase {
     }
 
     func testTelemetry_givenTheMomentIsDismissed_shouldLogANotice() throws {
-        makeViewController().handle(.closed)
+        makeViewController().handleEvent(.closed)
 
         XCTAssertEqual(logger.last(containing: "dismissed")?.level, "notice")
         let outcome = try XCTUnwrap(logger.metric("moment_outcome"))
@@ -418,8 +418,8 @@ final class MomentLifecycleTests: XCTestCase {
 
     func testTelemetry_shouldOnlyLogTheFirstReady() {
         let viewController = makeViewController()
-        viewController.handle(.ready)
-        viewController.handle(.ready)
+        viewController.handleEvent(.ready)
+        viewController.handleEvent(.ready)
 
         XCTAssertEqual(logger.entries.filter { $0.message.contains("is ready") }.count, 1)
         XCTAssertEqual(logger.entries.filter { $0.attributes?["event_name"] as? String == "moment_ready" }.count, 1)
@@ -436,8 +436,8 @@ final class MomentLifecycleTests: XCTestCase {
 
     func testTelemetry_shouldNeverLogTheSessionTokenOrParams() throws {
         let viewController = try XCTUnwrap(openMoment(.paymentCollectPin(paymentRef: "secretPaymentRef")))
-        viewController.handle(.ready)
-        viewController.handle(.failure(CommonErrors.UNKNOWN_SERVER_ERROR))
+        viewController.handleEvent(.ready)
+        viewController.handleEvent(.failure(CommonErrors.UNKNOWN_SERVER_ERROR))
 
         XCTAssertFalse(logger.entries.isEmpty)
         for entry in logger.entries {

@@ -2,7 +2,7 @@
 //  MomentViewController.swift
 //  ForageSDK
 //
-//  © 2025 Forage Technology Corporation. All rights reserved.
+//  © 2026 Forage Technology Corporation. All rights reserved.
 //
 
 import UIKit
@@ -10,8 +10,8 @@ import WebKit
 
 /// Hosts a moment's page in a `WKWebView` and runs the moments protocol with it.
 ///
-/// It settles exactly once: on the page's first terminal event, the load deadline, or the
-/// customer swiping the sheet away. Teardown happens before `onSettle` is called.
+/// Settles on the page's first terminal event, the load deadline, or the
+/// customer swiping the sheet away.
 final class MomentViewController: UIViewController {
     private let url: URL
     private let merchantID: String
@@ -26,7 +26,7 @@ final class MomentViewController: UIViewController {
     private var telemetry: MomentTelemetry
 
     /// - Parameters:
-    ///   - loadDeadline: How long the page has to send `input_ready`. Only tests change it.
+    ///   - loadDeadline: How long the page has to send `input_ready`. Only exposed for testing.
     ///   - telemetry: Starts timing the moment when it's created.
     init(
         url: URL,
@@ -64,14 +64,11 @@ final class MomentViewController: UIViewController {
             WeakScriptMessageHandler(self),
             name: MomentProtocol.messageHandlerName
         )
-        // TODO: verify the PIN field's cross-origin vault iframe works with WKWebView's
-        // third-party storage rules (ITP), since it's embedded in the moment's page.
 
         let webView = WKWebView(frame: .zero, configuration: configuration)
         webView.navigationDelegate = self
         #if DEBUG
-        // lets Safari's Web Inspector debug the moment's page in debug builds, like the
-        // Android SDK does for debuggable apps
+        // lets Safari's Web Inspector debug the moment's page in debug builds
         if #available(iOS 16.4, *) {
             webView.isInspectable = true
         }
@@ -99,8 +96,7 @@ final class MomentViewController: UIViewController {
 
     // MARK: Protocol
 
-    /// Handles an event from the page, once it's passed the security checks.
-    func handle(_ event: MomentEvent) {
+    func handleEvent(_ event: MomentEvent) {
         switch event {
         case .hello:
             sendInitialize()
@@ -119,7 +115,6 @@ final class MomentViewController: UIViewController {
 
     private func sendInitialize() {
         guard MomentSecurity.canSendInitialize(currentURL: webView?.url, momentURL: url) else {
-            // the load deadline ends the moment if the page never gets initialized
             ForageSDK.logger?.error("Didn't initialize moment because the page isn't on the moment's origin", error: nil, attributes: nil)
             return
         }
@@ -135,13 +130,12 @@ final class MomentViewController: UIViewController {
 
         webView?.evaluateJavaScript(script) { _, error in
             if let error = error {
-                // the load deadline ends the moment if the page never gets initialized
                 ForageSDK.logger?.error("Failed to initialize moment", error: error, attributes: nil)
             }
         }
     }
 
-    /// Tears the moment down and reports how it ended. Only the first call does anything.
+    /// Tears the moment down and reports how it ended.
     ///
     /// - Parameter dismiss: Whether to dismiss the sheet. It's `false` when the customer already swiped it away.
     private func settle(_ result: Result<MomentResult, Error>, dismiss: Bool) {
@@ -167,6 +161,7 @@ final class MomentViewController: UIViewController {
 
 extension MomentViewController: WKScriptMessageHandler {
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        // Make sure we're receiving events from where we expect
         let origin = message.frameInfo.securityOrigin
         guard MomentSecurity.shouldAcceptMessage(
             isMainFrame: message.frameInfo.isMainFrame,
@@ -177,7 +172,7 @@ extension MomentViewController: WKScriptMessageHandler {
         ) else { return }
 
         guard let event = MomentEvent(body: message.body) else { return }
-        handle(event)
+        handleEvent(event)
     }
 }
 
@@ -189,6 +184,8 @@ extension MomentViewController: WKNavigationDelegate {
         decidePolicyFor navigationAction: WKNavigationAction,
         decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
     ) {
+        // Don't let people navigate away from the moment's URL
+        // (we should revisit this when/if we add links to any moment page)
         let isAllowed = MomentSecurity.shouldAllowNavigation(
             targetsMainFrame: navigationAction.targetFrame?.isMainFrame,
             to: navigationAction.request.url,
@@ -206,8 +203,10 @@ extension MomentViewController: UIAdaptivePresentationControllerDelegate {
     }
 }
 
-/// Forwards script messages without retaining the handler, since `WKUserContentController`
-/// holds its handlers strongly.
+/// `WKUserContentController` (which comes from our initialization of a `WKWebViewConfiguration` we use to
+/// show the moment page) holds onto its handlers strongly, so just registering the view controller directly would create
+/// a memory leak. We use this wrapper instead so we can hold the view controller weakly and just pass messages
+/// to it if it still exists.
 private final class WeakScriptMessageHandler: NSObject, WKScriptMessageHandler {
     private weak var handler: WKScriptMessageHandler?
 
