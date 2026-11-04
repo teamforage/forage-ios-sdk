@@ -2,7 +2,7 @@
 //  MomentsView.swift
 //  SampleForageSDK
 //
-//  © 2025 Forage Technology Corporation. All rights reserved.
+//  © 2026 Forage Technology Corporation. All rights reserved.
 //
 
 import Foundation
