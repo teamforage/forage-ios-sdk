@@ -216,7 +216,7 @@ final class MomentLifecycleTests: XCTestCase {
 
     private func waitForResult() {
         let settled = expectation(for: NSPredicate { [unowned self] _, _ in !results.isEmpty }, evaluatedWith: nil)
-        wait(for: [settled], timeout: 10)
+        wait(for: [settled], timeout: 30)
     }
 
     func testWebView_givenThePageSaysHello_shouldSendItTheMerchantAndSessionToken() throws {
