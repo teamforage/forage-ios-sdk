@@ -8,28 +8,16 @@
 import Foundation
 
 /// A Forage-hosted page that the SDK opens for the customer to complete a task.
-public enum Moment {
+public struct Moment {
+    let name: String
+    let path: String
+    let params: [String: String]
+
     /// Collects the customer's EBT Card PIN for a payment.
     ///
     /// - Parameter paymentRef: The reference of the `Payment` to collect the PIN for.
-    case paymentCollectPin(paymentRef: String)
-
-    var name: String {
-        switch self {
-        case .paymentCollectPin: return "payment_collect_pin"
-        }
-    }
-
-    var path: String {
-        switch self {
-        case .paymentCollectPin: return "/payment/collect-pin"
-        }
-    }
-
-    var params: [String: String] {
-        switch self {
-        case let .paymentCollectPin(paymentRef): return ["paymentRef": paymentRef]
-        }
+    public static func paymentCollectPin(paymentRef: String) -> Moment {
+        Moment(name: "payment_collect_pin", path: "/payment/collect-pin", params: ["paymentRef": paymentRef])
     }
 }
 
