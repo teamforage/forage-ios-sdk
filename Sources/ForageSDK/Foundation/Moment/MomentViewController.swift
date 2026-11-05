@@ -10,19 +10,19 @@ import WebKit
 
 /// Hosts a moment's page in a `WKWebView` and runs the moments protocol with it.
 ///
-/// Settles on the page's first terminal event, the load deadline, or the
-/// customer swiping the sheet away.
+/// Settles on the page's first terminal event, the load deadline, or the sheet going away,
+/// whether the customer swipes it away or it's dismissed in code.
 final class MomentViewController: UIViewController {
     private let url: URL
     private let merchantID: String
     private let sessionToken: String
     private let environment: Environment
     private let loadDeadlineInterval: TimeInterval
-    private let onSettle: (Result<MomentResult, Error>) -> Void
+    private var onSettle: ((Result<MomentResult, Error>) -> Void)?
 
     private var webView: WKWebView?
     private var loadDeadline: Timer?
-    private var isSettled = false
+    private var settledResult: Result<MomentResult, Error>?
     private var telemetry: MomentTelemetry
 
     /// - Parameters:
@@ -50,6 +50,14 @@ final class MomentViewController: UIViewController {
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    // ensures we always settle a moment no matter how it goes away
+    deinit {
+        if settledResult == nil {
+            telemetry.settled(.success(.dismissed))
+        }
+        onSettle?(settledResult ?? .success(.dismissed))
     }
 
     // MARK: Lifecycle
@@ -85,6 +93,13 @@ final class MomentViewController: UIViewController {
 
         startLoadDeadline()
         webView.load(URLRequest(url: url))
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        if isBeingDismissed || presentingViewController?.isBeingDismissed == true {
+            settle(.success(.dismissed), dismiss: false)
+        }
     }
 
     /// Fails the moment if the page doesn't send `input_ready` in time.
@@ -137,10 +152,10 @@ final class MomentViewController: UIViewController {
 
     /// Tears the moment down and reports how it ended.
     ///
-    /// - Parameter dismiss: Whether to dismiss the sheet. It's `false` when the customer already swiped it away.
+    /// - Parameter dismiss: Whether to dismiss the sheet. It's `false` when the sheet is already going away.
     private func settle(_ result: Result<MomentResult, Error>, dismiss: Bool) {
-        guard !isSettled else { return }
-        isSettled = true
+        guard settledResult == nil else { return }
+        settledResult = result
 
         loadDeadline?.invalidate()
         loadDeadline = nil
@@ -150,10 +165,17 @@ final class MomentViewController: UIViewController {
         telemetry.settled(result)
 
         if dismiss, presentingViewController != nil {
-            self.dismiss(animated: true) { [onSettle] in onSettle(result) }
+            // if the dismissal never finishes, deinit reports instead
+            self.dismiss(animated: true) { [weak self] in self?.reportMomentResult(result) }
         } else {
-            onSettle(result)
+            reportMomentResult(result)
         }
+    }
+
+    private func reportMomentResult(_ result: Result<MomentResult, Error>) {
+        let onSettle = onSettle
+        self.onSettle = nil
+        onSettle?(result)
     }
 }
 

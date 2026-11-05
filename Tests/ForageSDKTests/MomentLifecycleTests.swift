@@ -153,6 +153,34 @@ final class MomentLifecycleTests: XCTestCase {
         XCTAssertEqual(try results.first?.get(), .completed)
     }
 
+    func testReleasing_givenTheMomentHasntSettled_shouldDismiss() throws {
+        // e.g. the screen that presented the moment was dismissed, taking the moment with it
+        _ = makeViewController()
+
+        XCTAssertEqual(results.count, 1)
+        XCTAssertEqual(try results.first?.get(), .dismissed)
+        XCTAssertEqual(logger.metric("moment_outcome")?["event_outcome"] as? String, "dismissed")
+    }
+
+    func testReleasing_givenTheMomentAlreadyReported_shouldNotReportAgain() throws {
+        do {
+            let viewController = makeViewController()
+            viewController.handleEvent(.success)
+        }
+
+        XCTAssertEqual(results.count, 1)
+        XCTAssertEqual(try results.first?.get(), .completed)
+    }
+
+    func testDisappearing_givenTheSheetIsntBeingDismissed_shouldStayOpen() {
+        // e.g. the merchant presented something over the moment
+        let viewController = makeViewController()
+
+        viewController.viewDidDisappear(false)
+
+        withExtendedLifetime(viewController) { XCTAssertTrue(results.isEmpty) }
+    }
+
     // MARK: Load deadline
 
     func testLoadDeadline_givenThePageNeverGetsReady_shouldFailWithTimeoutError() {
@@ -177,7 +205,7 @@ final class MomentLifecycleTests: XCTestCase {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { waited.fulfill() }
         wait(for: [waited], timeout: 1)
 
-        XCTAssertTrue(results.isEmpty)
+        withExtendedLifetime(viewController) { XCTAssertTrue(results.isEmpty) }
     }
 
     // MARK: Web view
@@ -247,10 +275,12 @@ final class MomentLifecycleTests: XCTestCase {
 
     func testHello_givenThePageIsNotOnTheMomentsOrigin_shouldNotSendTheSessionToken() {
         // the view never loaded, so there's no page on the moment's origin
-        makeViewController().handleEvent(.hello)
+        let viewController = makeViewController()
+        viewController.handleEvent(.hello)
 
         XCTAssertEqual(logger.last(containing: "Didn't initialize moment")?.level, "error")
-        XCTAssertTrue(results.isEmpty)
+        // releasing the view controller would end the moment, so keep it until we've checked
+        withExtendedLifetime(viewController) { XCTAssertTrue(results.isEmpty) }
     }
 
     // MARK: Presenting
@@ -336,14 +366,25 @@ final class MomentLifecycleTests: XCTestCase {
     // MARK: createMoment
 
     func testOpenMoment_givenAMomentIsAlreadyOpen_shouldFailWithUserError() throws {
-        XCTAssertNotNil(openMoment())
+        let first = try XCTUnwrap(openMoment())
 
         var second: Result<MomentResult, Error>?
         XCTAssertNil(openMoment(completion: { second = $0 }))
 
         XCTAssertEqual(forageError(second)?.code, "user_error")
         XCTAssertEqual(forageError(second)?.httpStatusCode, 400)
-        XCTAssertTrue(ForageSDK.shared.isMomentOpen)
+        // releasing the first moment would end it, so keep it until we've checked
+        withExtendedLifetime(first) { XCTAssertTrue(ForageSDK.shared.isMomentOpen) }
+    }
+
+    func testOpenMoment_givenTheMomentGoesAwayWithoutSettling_shouldAllowAnother() throws {
+        // e.g. the merchant dismissed it in code, or dismissed the screen that presented it
+        _ = openMoment()
+
+        XCTAssertEqual(try results.first?.get(), .dismissed)
+        XCTAssertFalse(ForageSDK.shared.isMomentOpen)
+        let second = try XCTUnwrap(openMoment())
+        withExtendedLifetime(second) { XCTAssertTrue(ForageSDK.shared.isMomentOpen) }
     }
 
     func testOpenMoment_afterTheMomentSettles_shouldAllowAnother() throws {
