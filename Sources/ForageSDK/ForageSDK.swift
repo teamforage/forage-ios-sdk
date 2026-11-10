@@ -14,6 +14,7 @@ public class ForageSDK {
     var merchantID: String = config?.merchantID ?? ""
     var sessionToken: String = config?.sessionToken ?? ""
     var traceId: String = ""
+    var isMomentOpen = false
 
     public var environment: Environment = .sandbox
     // Don't update! Only updated when releasing.
